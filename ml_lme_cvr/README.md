@@ -6,7 +6,7 @@ This mod allows you to use your Leap Motion controller for hands and fingers vis
 * Install [latest MelonLoader](https://github.com/LavaGang/MelonLoader)
 * Get [latest release DLL](../../../releases/latest):
   * Put `ml_lme_cvr.dll` in `Mods` folder of game
-* Add code section below in `<GameFolder>\ChilloutVR_Data\StreamingAssets\Cohtml\UIResources\CVRTest\index.html` after div for `InteractionViveFaceTrackingStrength`:
+* Add code section below in `<GameFolder>\ChilloutVR_Data\StreamingAssets\Cohtml\UIResources\CVRTest\index.html` after div for `InteractionViveFaceTrackingStrength` menu item:
 ```html
 <!--Leap Motion start-->
 <h2>Leap Motion tracking</h2>
@@ -49,7 +49,7 @@ This mod allows you to use your Leap Motion controller for hands and fingers vis
 
 # Usage
 ## Settings
-Available mod's settings in `Settings - Implementation`:
+Available mod's settings in `Settings - Implementation - Leap Motion Tracking`:
 * **Enable tracking:** enable hands tracking from Leap Motion data, disabled by default.
 * **Desktop offset X/Y/Z:** offset position for body attachment, (0, -45, 30) by default.
 * **Fingers tracking only:** apply only fingers tracking, disabled by default.
