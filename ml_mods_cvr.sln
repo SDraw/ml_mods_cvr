@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.1738
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ml_lme_cvr", "ml_lme_cvr\ml_lme_cvr.csproj", "{83CC74B7-F444-40E1-BD06-67CEC995A919}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{83CC74B7-F444-40E1-BD06-67CEC995A919}.Debug|x64.ActiveCfg = Debug|x64
+		{83CC74B7-F444-40E1-BD06-67CEC995A919}.Debug|x64.Build.0 = Debug|x64
+		{83CC74B7-F444-40E1-BD06-67CEC995A919}.Release|x64.ActiveCfg = Release|x64
+		{83CC74B7-F444-40E1-BD06-67CEC995A919}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C7C6398E-220C-40C3-AE95-5690C9B2B3C3}
+	EndGlobalSection
+EndGlobal

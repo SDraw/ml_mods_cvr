@@ -1,0 +1,141 @@
+﻿using UnityEngine;
+
+namespace ml_lme_cvr
+{
+    [RequireComponent(typeof(ABI_RC.Core.Player.IndexIK))]
+    [DisallowMultipleComponent]
+    class LeapTracked : MonoBehaviour
+    {
+        bool m_enabled = true;
+        bool m_fingersOnly = false;
+        bool m_calibrated = false;
+
+        Animator m_animator = null;
+        ABI_RC.Core.Player.IndexIK m_indexIK = null;
+        LeapIK m_leapIK = null;
+        Transform m_leftHand = null;
+        Transform m_rightHand = null;
+
+        void Start()
+        {
+            m_indexIK = this.GetComponent<ABI_RC.Core.Player.IndexIK>();
+
+            if((m_indexIK != null) && (m_animator != null))
+            {
+                m_indexIK.avatarAnimator = m_animator;
+                m_indexIK.Recalibrate();
+
+                m_indexIK.activeControl = m_enabled;
+                ABI_RC.Core.Savior.CVRInputManager.Instance.individualFingerTracking = m_enabled;
+
+                m_calibrated = true;
+            }
+        }
+
+        public void SetEnabled(bool p_state)
+        {
+            m_enabled = p_state;
+            if(m_enabled)
+            {
+                if((m_animator != null) && (m_indexIK != null))
+                {
+                    m_indexIK.activeControl = true;
+                    if(!m_calibrated)
+                    {
+                        m_indexIK.avatarAnimator = m_animator;
+                        m_indexIK.Recalibrate();
+                        m_calibrated = true;
+                    }
+                    ABI_RC.Core.Savior.CVRInputManager.Instance.individualFingerTracking = true;
+                }
+            }
+            else
+            {
+                if((m_indexIK != null) && m_calibrated)
+                {
+                    m_indexIK.activeControl = false;
+                    ABI_RC.Core.Savior.CVRInputManager.Instance.individualFingerTracking = false;
+                }
+            }
+
+            if(m_leapIK != null)
+                m_leapIK.SetEnabled(m_enabled);
+        }
+
+        public void SetAnimator(Animator p_animator)
+        {
+            m_animator = p_animator;
+
+            m_leapIK = m_animator.gameObject.AddComponent<LeapIK>();
+            m_leapIK.SetEnabled(m_enabled);
+            m_leapIK.SetFingersOnly(m_fingersOnly);
+            m_leapIK.SetHands(m_leftHand, m_rightHand);
+        }
+
+        public void SetFingersOnly(bool p_state)
+        {
+            m_fingersOnly = p_state;
+
+            if(m_leapIK != null)
+                m_leapIK.SetFingersOnly(m_fingersOnly);
+        }
+
+        public void SetHands(Transform p_left, Transform p_right)
+        {
+            m_leftHand = p_left;
+            m_rightHand = p_right;
+
+            if(m_leapIK != null)
+                m_leapIK.SetHands(p_left, p_right);
+        }
+
+        public void Reset()
+        {
+            m_calibrated = false;
+            m_animator = null;
+            m_leapIK = null;
+        }
+
+        public void UpdateTracking(GestureMatcher.GesturesData p_gesturesData)
+        {
+            if(m_enabled && (m_indexIK != null))
+            {
+                if(p_gesturesData.m_handsPresenses[0])
+                {
+                    m_indexIK.leftThumbCurl = p_gesturesData.m_leftFingersBends[0];
+                    m_indexIK.leftIndexCurl = p_gesturesData.m_leftFingersBends[1];
+                    m_indexIK.leftMiddleCurl = p_gesturesData.m_leftFingersBends[2];
+                    m_indexIK.leftRingCurl = p_gesturesData.m_leftFingersBends[3];
+                    m_indexIK.leftPinkyCurl = p_gesturesData.m_leftFingersBends[4];
+
+                    if(ABI_RC.Core.Savior.CVRInputManager.Instance != null)
+                    {
+                        ABI_RC.Core.Savior.CVRInputManager.Instance.fingerCurlLeftThumb = p_gesturesData.m_leftFingersBends[0];
+                        ABI_RC.Core.Savior.CVRInputManager.Instance.fingerCurlLeftIndex = p_gesturesData.m_leftFingersBends[1];
+                        ABI_RC.Core.Savior.CVRInputManager.Instance.fingerCurlLeftMiddle = p_gesturesData.m_leftFingersBends[2];
+                        ABI_RC.Core.Savior.CVRInputManager.Instance.fingerCurlLeftRing = p_gesturesData.m_leftFingersBends[3];
+                        ABI_RC.Core.Savior.CVRInputManager.Instance.fingerCurlLeftPinky = p_gesturesData.m_leftFingersBends[4];
+                    }
+                }
+
+                if(p_gesturesData.m_handsPresenses[1])
+                {
+                    m_indexIK.rightThumbCurl = p_gesturesData.m_rightFingersBends[0];
+                    m_indexIK.rightIndexCurl = p_gesturesData.m_rightFingersBends[1];
+                    m_indexIK.rightMiddleCurl = p_gesturesData.m_rightFingersBends[2];
+                    m_indexIK.rightRingCurl = p_gesturesData.m_rightFingersBends[3];
+                    m_indexIK.rightPinkyCurl = p_gesturesData.m_rightFingersBends[4];
+
+                    if(ABI_RC.Core.Savior.CVRInputManager.Instance != null)
+                    {
+                        ABI_RC.Core.Savior.CVRInputManager.Instance.fingerCurlRightThumb = p_gesturesData.m_rightFingersBends[0];
+                        ABI_RC.Core.Savior.CVRInputManager.Instance.fingerCurlRightIndex = p_gesturesData.m_rightFingersBends[1];
+                        ABI_RC.Core.Savior.CVRInputManager.Instance.fingerCurlRightMiddle = p_gesturesData.m_rightFingersBends[2];
+                        ABI_RC.Core.Savior.CVRInputManager.Instance.fingerCurlRightRing = p_gesturesData.m_rightFingersBends[3];
+                        ABI_RC.Core.Savior.CVRInputManager.Instance.fingerCurlRightPinky = p_gesturesData.m_rightFingersBends[4];
+                    }
+                }
+            }
+        }
+    }
+}
