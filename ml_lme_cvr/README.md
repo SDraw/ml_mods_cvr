@@ -1,6 +1,8 @@
 # Leap Motion Extension
 This mod allows you to use your Leap Motion controller for hands and fingers visual tracking.
 
+[![](.github/img_01.png)](https://youtu.be/nak1C8uibgc)
+
 # Installation
 * Install [latest Ultraleap Gemini tracking software](https://developer.leapmotion.com/tracking-software-download)
 * Install [latest MelonLoader](https://github.com/LavaGang/MelonLoader)
