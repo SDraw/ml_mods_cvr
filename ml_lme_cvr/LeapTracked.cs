@@ -1,8 +1,10 @@
-﻿using UnityEngine;
+﻿using ABI_RC.Core.Player;
+using ABI_RC.Core.Savior;
+using UnityEngine;
 
 namespace ml_lme_cvr
 {
-    [RequireComponent(typeof(ABI_RC.Core.Player.IndexIK))]
+    [RequireComponent(typeof(IndexIK))]
     [DisallowMultipleComponent]
     class LeapTracked : MonoBehaviour
     {
@@ -11,7 +13,8 @@ namespace ml_lme_cvr
         bool m_calibrated = false;
 
         Animator m_animator = null;
-        ABI_RC.Core.Player.IndexIK m_indexIK = null;
+        IndexIK m_indexIK = null;
+
         LeapIK m_leapIK = null;
         Transform m_leftHand = null;
         Transform m_rightHand = null;
@@ -26,7 +29,7 @@ namespace ml_lme_cvr
                 m_indexIK.Recalibrate();
 
                 m_indexIK.activeControl = m_enabled;
-                ABI_RC.Core.Savior.CVRInputManager.Instance.individualFingerTracking = m_enabled;
+                CVRInputManager.Instance.individualFingerTracking = m_enabled;
 
                 m_calibrated = true;
             }
@@ -46,7 +49,7 @@ namespace ml_lme_cvr
                         m_indexIK.Recalibrate();
                         m_calibrated = true;
                     }
-                    ABI_RC.Core.Savior.CVRInputManager.Instance.individualFingerTracking = true;
+                    CVRInputManager.Instance.individualFingerTracking = true;
                 }
             }
             else
@@ -54,7 +57,7 @@ namespace ml_lme_cvr
                 if((m_indexIK != null) && m_calibrated)
                 {
                     m_indexIK.activeControl = false;
-                    ABI_RC.Core.Savior.CVRInputManager.Instance.individualFingerTracking = false;
+                    CVRInputManager.Instance.individualFingerTracking = false;
                 }
             }
 
@@ -89,17 +92,13 @@ namespace ml_lme_cvr
                 m_leapIK.SetHands(p_left, p_right);
         }
 
-        public void Reset()
-        {
-            m_calibrated = false;
-            m_animator = null;
-            m_leapIK = null;
-        }
-
         public void UpdateTracking(GestureMatcher.GesturesData p_gesturesData)
         {
             if(m_enabled && (m_indexIK != null))
             {
+                if(m_leapIK != null)
+                    m_leapIK.SetHandsVisibility(p_gesturesData.m_handsPresenses[0], p_gesturesData.m_handsPresenses[1]);
+
                 if(p_gesturesData.m_handsPresenses[0])
                 {
                     m_indexIK.leftThumbCurl = p_gesturesData.m_leftFingersBends[0];
@@ -108,13 +107,13 @@ namespace ml_lme_cvr
                     m_indexIK.leftRingCurl = p_gesturesData.m_leftFingersBends[3];
                     m_indexIK.leftPinkyCurl = p_gesturesData.m_leftFingersBends[4];
 
-                    if(ABI_RC.Core.Savior.CVRInputManager.Instance != null)
+                    if(CVRInputManager.Instance != null)
                     {
-                        ABI_RC.Core.Savior.CVRInputManager.Instance.fingerCurlLeftThumb = p_gesturesData.m_leftFingersBends[0];
-                        ABI_RC.Core.Savior.CVRInputManager.Instance.fingerCurlLeftIndex = p_gesturesData.m_leftFingersBends[1];
-                        ABI_RC.Core.Savior.CVRInputManager.Instance.fingerCurlLeftMiddle = p_gesturesData.m_leftFingersBends[2];
-                        ABI_RC.Core.Savior.CVRInputManager.Instance.fingerCurlLeftRing = p_gesturesData.m_leftFingersBends[3];
-                        ABI_RC.Core.Savior.CVRInputManager.Instance.fingerCurlLeftPinky = p_gesturesData.m_leftFingersBends[4];
+                        CVRInputManager.Instance.fingerCurlLeftThumb = p_gesturesData.m_leftFingersBends[0];
+                        CVRInputManager.Instance.fingerCurlLeftIndex = p_gesturesData.m_leftFingersBends[1];
+                        CVRInputManager.Instance.fingerCurlLeftMiddle = p_gesturesData.m_leftFingersBends[2];
+                        CVRInputManager.Instance.fingerCurlLeftRing = p_gesturesData.m_leftFingersBends[3];
+                        CVRInputManager.Instance.fingerCurlLeftPinky = p_gesturesData.m_leftFingersBends[4];
                     }
                 }
 
@@ -126,13 +125,13 @@ namespace ml_lme_cvr
                     m_indexIK.rightRingCurl = p_gesturesData.m_rightFingersBends[3];
                     m_indexIK.rightPinkyCurl = p_gesturesData.m_rightFingersBends[4];
 
-                    if(ABI_RC.Core.Savior.CVRInputManager.Instance != null)
+                    if(CVRInputManager.Instance != null)
                     {
-                        ABI_RC.Core.Savior.CVRInputManager.Instance.fingerCurlRightThumb = p_gesturesData.m_rightFingersBends[0];
-                        ABI_RC.Core.Savior.CVRInputManager.Instance.fingerCurlRightIndex = p_gesturesData.m_rightFingersBends[1];
-                        ABI_RC.Core.Savior.CVRInputManager.Instance.fingerCurlRightMiddle = p_gesturesData.m_rightFingersBends[2];
-                        ABI_RC.Core.Savior.CVRInputManager.Instance.fingerCurlRightRing = p_gesturesData.m_rightFingersBends[3];
-                        ABI_RC.Core.Savior.CVRInputManager.Instance.fingerCurlRightPinky = p_gesturesData.m_rightFingersBends[4];
+                        CVRInputManager.Instance.fingerCurlRightThumb = p_gesturesData.m_rightFingersBends[0];
+                        CVRInputManager.Instance.fingerCurlRightIndex = p_gesturesData.m_rightFingersBends[1];
+                        CVRInputManager.Instance.fingerCurlRightMiddle = p_gesturesData.m_rightFingersBends[2];
+                        CVRInputManager.Instance.fingerCurlRightRing = p_gesturesData.m_rightFingersBends[3];
+                        CVRInputManager.Instance.fingerCurlRightPinky = p_gesturesData.m_rightFingersBends[4];
                     }
                 }
             }

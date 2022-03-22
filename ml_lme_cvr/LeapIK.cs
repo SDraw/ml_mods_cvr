@@ -13,6 +13,12 @@ namespace ml_lme_cvr
         Transform m_leftHand = null;
         Transform m_rightHand = null;
 
+        float m_leftHandWeight = 1f;
+        float m_rightHandWeight = 1f;
+
+        bool m_leftHandVisible = false;
+        bool m_rightHandVisible = false;
+
         void Start()
         {
             m_animator = this.GetComponent<Animator>();
@@ -24,16 +30,18 @@ namespace ml_lme_cvr
             {
                 if(m_leftHand != null)
                 {
-                    m_animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, 1f);
-                    m_animator.SetIKRotationWeight(AvatarIKGoal.LeftHand, 1f);
+                    m_leftHandWeight = Mathf.Lerp(m_leftHandWeight, m_leftHandVisible ? 1f : 0f, 0.25f);
+                    m_animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, m_leftHandWeight);
+                    m_animator.SetIKRotationWeight(AvatarIKGoal.LeftHand, m_leftHandWeight);
                     m_animator.SetIKPosition(AvatarIKGoal.LeftHand, m_leftHand.position);
                     m_animator.SetIKRotation(AvatarIKGoal.LeftHand, m_leftHand.rotation);
                 }
 
                 if(m_rightHand != null)
                 {
-                    m_animator.SetIKPositionWeight(AvatarIKGoal.RightHand, 1f);
-                    m_animator.SetIKRotationWeight(AvatarIKGoal.RightHand, 1f);
+                    m_rightHandWeight = Mathf.Lerp(m_rightHandWeight, m_rightHandVisible ? 1f : 0f, 0.25f);
+                    m_animator.SetIKPositionWeight(AvatarIKGoal.RightHand, m_rightHandWeight);
+                    m_animator.SetIKRotationWeight(AvatarIKGoal.RightHand, m_rightHandWeight);
                     m_animator.SetIKPosition(AvatarIKGoal.RightHand, m_rightHand.position);
                     m_animator.SetIKRotation(AvatarIKGoal.RightHand, m_rightHand.rotation);
                 }
@@ -48,6 +56,12 @@ namespace ml_lme_cvr
         {
             m_leftHand = p_left;
             m_rightHand = p_right;
+        }
+
+        public void SetHandsVisibility(bool p_left, bool p_right)
+        {
+            m_leftHandVisible = p_left;
+            m_rightHandVisible = p_right;
         }
     }
 }

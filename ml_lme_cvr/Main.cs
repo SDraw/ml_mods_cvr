@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using ABI_RC.Core.Player;
+using UnityEngine;
 
 namespace ml_lme_cvr
 {
@@ -14,10 +15,8 @@ namespace ml_lme_cvr
 
         GameObject m_leapTrackingRoot = null;
         GameObject[] m_leapHands = null;
+        GameObject m_leapControllerModel = null;
         LeapTracked m_leapTracked = null;
-
-        Transform m_vrRig = null;
-        Transform m_desktopRig = null;
 
         public override void OnApplicationStart()
         {
@@ -29,6 +28,11 @@ namespace ml_lme_cvr
             Settings.EnabledChange += this.OnSettingsEnableChange;
             Settings.DesktopOffsetChange += this.OnSettingsDesktopOffsetChange;
             Settings.FingersOnlyChange += this.OnSettingsFingersOptionChange;
+            Settings.ModelVisibilityChange += this.OnSettingsModelVisibilityChange;
+            Settings.HmdModeChange += this.OnSettingsHmdModeChange;
+            Settings.RootAngleChange += this.OnSettingsRootAngleChange;
+            Settings.HeadAttachChange += this.OnSettingsHeadAttachChange;
+            Settings.HeadOffsetChange += this.OnSettingsHeadOffsetChange;
 
             m_leapController = new Leap.Controller();
             m_gesturesData = new GestureMatcher.GesturesData();
@@ -37,7 +41,7 @@ namespace ml_lme_cvr
 
             // Patches
             HarmonyInstance.Patch(
-                typeof(ABI_RC.Core.Player.PlayerSetup).GetMethod(nameof(ABI_RC.Core.Player.PlayerSetup.SetupAvatar)),
+                typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.SetupAvatar)),
                 null,
                 new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnAvatarSetup), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic))
             );
@@ -47,25 +51,20 @@ namespace ml_lme_cvr
 
         System.Collections.IEnumerator CreateTrackingObjects()
         {
-            while(ABI_RC.Core.Player.PlayerSetup.Instance == null)
-                yield return null;
+            AssetsHandler.Load();
 
-            while(m_vrRig == null)
-            {
-                m_vrRig = ABI_RC.Core.Player.PlayerSetup.Instance.transform.Find("[CameraRigVR]");
+            while(PlayerSetup.Instance == null)
                 yield return null;
-            }
-
-            while(m_desktopRig == null)
-            {
-                m_desktopRig = ABI_RC.Core.Player.PlayerSetup.Instance.transform.Find("[CameraRigDesktop]");
+            while(PlayerSetup.Instance.desktopCameraRig == null)
                 yield return null;
-            }
+            while(PlayerSetup.Instance.desktopCamera == null)
+                yield return null;
+            while(PlayerSetup.Instance.vrCameraRig == null)
+                yield return null;
+            while(PlayerSetup.Instance.vrCamera == null)
+                yield return null;
 
             m_leapTrackingRoot = new GameObject("[LeapRoot]");
-            m_leapTrackingRoot.transform.parent = m_desktopRig;
-            m_leapTrackingRoot.transform.localPosition = new Vector3(0f, -0.45637f, 0.35f);
-            m_leapTrackingRoot.transform.localRotation = Quaternion.identity;
 
             for(int i = 0; i < GestureMatcher.GesturesData.ms_handsCount; i++)
             {
@@ -75,7 +74,22 @@ namespace ml_lme_cvr
                 m_leapHands[i].transform.localRotation = Quaternion.identity;
             }
 
+            m_leapControllerModel = AssetsHandler.GetAsset("assets/models/leapmotion/leap_motion_1_0.obj");
+            if(m_leapControllerModel != null)
+            {
+                m_leapControllerModel.name = "LeapModel";
+                m_leapControllerModel.transform.parent = m_leapTrackingRoot.transform;
+                m_leapControllerModel.transform.localPosition = Vector3.zero;
+                m_leapControllerModel.transform.localRotation = Quaternion.identity;
+            }
+
             Settings.Reload();
+
+            OnSettingsEnableChange();
+            OnSettingsFingersOptionChange();
+            OnSettingsModelVisibilityChange();
+            OnSettingsHmdModeChange();
+            OnSettingsHeadAttachChange(); // Includes offsets and parenting
         }
 
         public override void OnUpdate()
@@ -89,28 +103,33 @@ namespace ml_lme_cvr
 
                     for(int i = 0; i < GestureMatcher.GesturesData.ms_handsCount; i++)
                     {
-                        if(m_gesturesData.m_handsPresenses[i] && (m_leapHands[i] != null))
+                        if((m_leapHands[i] != null) && m_gesturesData.m_handsPresenses[i])
                         {
                             Vector3 l_pos = m_gesturesData.m_handsPositons[i];
                             Quaternion l_rot = m_gesturesData.m_handsRotations[i];
-                            ReorientateLeapToUnity(ref l_pos, ref l_rot, false);
+                            ReorientateLeapToUnity(ref l_pos, ref l_rot, Settings.HmdMode);
                             m_leapHands[i].transform.localPosition = l_pos;
                             m_leapHands[i].transform.localRotation = l_rot;
                         }
                     }
-
-                    if(m_leapTracked != null)
-                        m_leapTracked.UpdateTracking(m_gesturesData);
                 }
+
+                if(m_leapTracked != null)
+                    m_leapTracked.UpdateTracking(m_gesturesData);
             }
         }
 
+        // Settings changes
         void OnSettingsEnableChange()
         {
             if(Settings.Enabled)
             {
                 m_leapController.StartConnection();
-                m_leapController.SetAndClearPolicy(Leap.Controller.PolicyFlag.POLICY_DEFAULT, Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_SCREENTOP | Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_HMD);
+                m_leapController.ClearPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_SCREENTOP);
+                if(Settings.HmdMode)
+                    m_leapController.SetPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_HMD);
+                else
+                    m_leapController.ClearPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_HMD);
             }
             else
                 m_leapController.StopConnection();
@@ -121,10 +140,12 @@ namespace ml_lme_cvr
 
         void OnSettingsDesktopOffsetChange()
         {
-            if((m_leapTrackingRoot != null) && (m_vrRig != null))
+            if((m_leapTrackingRoot != null) && !Settings.HeadAttach)
             {
-                m_leapTrackingRoot.transform.localPosition = new Vector3(Settings.DesktopOffsetX, Settings.DesktopOffsetY, Settings.DesktopOffsetZ) * m_vrRig.transform.localScale.x;
-                m_leapTrackingRoot.transform.localScale = m_vrRig.transform.localScale;
+                if(!PlayerSetup.Instance._inVr)
+                    m_leapTrackingRoot.transform.localPosition = Settings.DesktopOffset * PlayerSetup.Instance.vrCameraRig.transform.localScale.x;
+                else
+                    m_leapTrackingRoot.transform.localPosition = Settings.DesktopOffset;
             }
         }
 
@@ -134,14 +155,92 @@ namespace ml_lme_cvr
                 m_leapTracked.SetFingersOnly(Settings.FingersOnly);
         }
 
-        static void OnAvatarSetup(ref ABI_RC.Core.Player.PlayerSetup __instance)
+        void OnSettingsModelVisibilityChange()
         {
-            if(__instance != null && __instance == ABI_RC.Core.Player.PlayerSetup.Instance)
+            if(m_leapControllerModel != null)
+                m_leapControllerModel.SetActive(Settings.ModelVisibility);
+        }
+
+        void OnSettingsHmdModeChange()
+        {
+            if(m_leapController != null)
             {
-                ms_instance?.OnLocalPlayerAvatarSetup(__instance._animator, __instance.GetComponent<ABI_RC.Core.Player.IndexIK>());
+                m_leapController.ClearPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_SCREENTOP);
+                if(Settings.HmdMode)
+                    m_leapController.SetPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_HMD);
+                else
+                    m_leapController.ClearPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_HMD);
+            }
+
+            if(m_leapControllerModel != null)
+                m_leapControllerModel.transform.localRotation = (Settings.HmdMode ? Quaternion.Euler(270f, 180f, 0f) : Quaternion.identity);
+        }
+
+        void OnSettingsRootAngleChange()
+        {
+            if(m_leapTrackingRoot != null)
+                m_leapTrackingRoot.transform.localRotation = Quaternion.Euler(Settings.RootAngle, 0f, 0f);
+        }
+
+        void OnSettingsHeadAttachChange()
+        {
+            if(m_leapTrackingRoot != null)
+            {
+                if(Settings.HeadAttach)
+                {
+                    if(!PlayerSetup.Instance._inVr)
+                    {
+                        m_leapTrackingRoot.transform.parent = PlayerSetup.Instance.desktopCamera.transform;
+                        m_leapTrackingRoot.transform.localPosition = Settings.HeadOffset * PlayerSetup.Instance.vrCameraRig.transform.localScale.x;
+                        m_leapTrackingRoot.transform.localScale = PlayerSetup.Instance.vrCameraRig.transform.localScale;
+                    }
+                    else
+                    {
+                        m_leapTrackingRoot.transform.parent = PlayerSetup.Instance.vrCamera.transform;
+                        m_leapTrackingRoot.transform.localPosition = Settings.HeadOffset;
+                        m_leapTrackingRoot.transform.localScale = Vector3.one;
+                    }
+                }
+                else
+                {
+                    if(!PlayerSetup.Instance._inVr)
+                    {
+                        m_leapTrackingRoot.transform.parent = PlayerSetup.Instance.desktopCameraRig.transform;
+                        m_leapTrackingRoot.transform.localPosition = Settings.DesktopOffset * PlayerSetup.Instance.vrCameraRig.transform.localScale.x;
+                        m_leapTrackingRoot.transform.localScale = PlayerSetup.Instance.vrCameraRig.transform.localScale;
+                    }
+                    else
+                    {
+                        m_leapTrackingRoot.transform.parent = PlayerSetup.Instance.vrCameraRig.transform;
+                        m_leapTrackingRoot.transform.localPosition = Settings.DesktopOffset;
+                        m_leapTrackingRoot.transform.localScale = Vector3.one;
+                    }
+                }
+
+                m_leapTrackingRoot.transform.localRotation = Quaternion.Euler(Settings.RootAngle, 0f, 0f);
             }
         }
-        void OnLocalPlayerAvatarSetup(Animator p_animator, ABI_RC.Core.Player.IndexIK p_indexIK)
+
+        void OnSettingsHeadOffsetChange()
+        {
+            if((m_leapTrackingRoot != null) && Settings.HeadAttach)
+            {
+                if(!PlayerSetup.Instance._inVr)
+                    m_leapTrackingRoot.transform.localPosition = Settings.HeadOffset * PlayerSetup.Instance.vrCameraRig.transform.localScale.x;
+                else
+                    m_leapTrackingRoot.transform.localPosition = Settings.HeadOffset;
+            }
+        }
+
+        // Patches
+        static void OnAvatarSetup(ref PlayerSetup __instance)
+        {
+            if(__instance != null && __instance == PlayerSetup.Instance)
+            {
+                ms_instance?.OnLocalPlayerAvatarSetup(__instance._animator, __instance.GetComponent<IndexIK>());
+            }
+        }
+        void OnLocalPlayerAvatarSetup(Animator p_animator, IndexIK p_indexIK)
         {
             if(m_leapTracked != null)
                 Object.DestroyImmediate(m_leapTracked);
@@ -152,11 +251,7 @@ namespace ml_lme_cvr
             m_leapTracked.SetHands(m_leapHands[0].transform, m_leapHands[1].transform);
             m_leapTracked.SetFingersOnly(Settings.FingersOnly);
 
-            if((m_leapTrackingRoot != null) && (m_vrRig != null))
-            {
-                m_leapTrackingRoot.transform.localPosition = new Vector3(Settings.DesktopOffsetX, Settings.DesktopOffsetY, Settings.DesktopOffsetZ) * m_vrRig.transform.localScale.x;
-                m_leapTrackingRoot.transform.localScale = m_vrRig.transform.localScale;
-            }
+            OnSettingsHeadAttachChange();
         }
 
         static void ReorientateLeapToUnity(ref Vector3 p_pos, ref Quaternion p_rot, bool p_hmd)
