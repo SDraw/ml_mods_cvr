@@ -1,4 +1,5 @@
 ﻿using ABI_RC.Core.Player;
+using ABI_RC.Core.UI;
 using UnityEngine;
 
 namespace ml_lme_cvr
@@ -35,8 +36,13 @@ namespace ml_lme_cvr
             Settings.HeadOffsetChange += this.OnSettingsHeadOffsetChange;
 
             m_leapController = new Leap.Controller();
-            m_gesturesData = new GestureMatcher.GesturesData();
+            m_leapController.Device += this.OnLeapDeviceInitialized;
+            m_leapController.DeviceFailure += this.OnLeapDeviceFailure;
+            m_leapController.DeviceLost += this.OnLeapDeviceLost;
+            m_leapController.Connect += this.OnLeapServiceConnect;
+            m_leapController.Disconnect += this.OnLeapServiceDisconnect;
 
+            m_gesturesData = new GestureMatcher.GesturesData();
             m_leapHands = new GameObject[GestureMatcher.GesturesData.ms_handsCount];
 
             // Patches
@@ -112,6 +118,11 @@ namespace ml_lme_cvr
                             m_leapHands[i].transform.localRotation = l_rot;
                         }
                     }
+                }
+                else
+                {
+                    for(int i = 0; i < GestureMatcher.GesturesData.ms_handsCount; i++)
+                        m_gesturesData.m_handsPresenses[i] = false;
                 }
 
                 if(m_leapTracked != null)
@@ -232,13 +243,51 @@ namespace ml_lme_cvr
             }
         }
 
+        // Leap events
+        void OnLeapDeviceInitialized(object p_sender, Leap.DeviceEventArgs p_args)
+        {
+            if(Settings.Enabled && (m_leapController != null))
+            {
+                m_leapController.ClearPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_SCREENTOP);
+                if(Settings.HmdMode)
+                    m_leapController.SetPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_HMD);
+                else
+                    m_leapController.ClearPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_HMD);
+            }
+
+            if(CohtmlHud.Instance != null)
+                CohtmlHud.Instance.ViewDropText("Leap Motion Extension", "Device initialized");
+        }
+
+        void OnLeapDeviceFailure(object p_sender, Leap.DeviceFailureEventArgs p_args)
+        {
+            if(CohtmlHud.Instance != null)
+                CohtmlHud.Instance.ViewDropText("Leap Motion Extension", "Device failure, code " + p_args.ErrorCode + ": " + p_args.ErrorMessage);
+        }
+
+        void OnLeapDeviceLost(object p_sender, Leap.DeviceEventArgs p_args)
+        {
+            if(CohtmlHud.Instance != null)
+                CohtmlHud.Instance.ViewDropText("Leap Motion Extension", "Device lost");
+        }
+
+        void OnLeapServiceConnect(object p_sender, Leap.ConnectionEventArgs p_args)
+        {
+            if(CohtmlHud.Instance != null)
+                CohtmlHud.Instance.ViewDropText("Leap Motion Extension", "Service connected");
+        }
+
+        void OnLeapServiceDisconnect(object p_sender, Leap.ConnectionLostEventArgs p_args)
+        {
+            if(CohtmlHud.Instance != null)
+                CohtmlHud.Instance.ViewDropText("Leap Motion Extension", "Service disconnected");
+        }
+
         // Patches
         static void OnAvatarSetup(ref PlayerSetup __instance)
         {
-            if(__instance != null && __instance == PlayerSetup.Instance)
-            {
+            if((__instance != null) && (__instance == PlayerSetup.Instance))
                 ms_instance?.OnLocalPlayerAvatarSetup(__instance._animator, __instance.GetComponent<IndexIK>());
-            }
         }
         void OnLocalPlayerAvatarSetup(Animator p_animator, IndexIK p_indexIK)
         {

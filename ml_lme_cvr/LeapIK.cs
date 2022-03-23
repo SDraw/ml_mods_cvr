@@ -13,8 +13,8 @@ namespace ml_lme_cvr
         Transform m_leftHand = null;
         Transform m_rightHand = null;
 
-        float m_leftHandWeight = 1f;
-        float m_rightHandWeight = 1f;
+        float m_leftHandWeight = 0f;
+        float m_rightHandWeight = 0f;
 
         bool m_leftHandVisible = false;
         bool m_rightHandVisible = false;

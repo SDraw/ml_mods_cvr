@@ -29,7 +29,7 @@ namespace ml_lme_cvr
         static bool ms_hmdMode = false;
         static float ms_rootAngle = 0f;
         static bool ms_headAttach = false;
-        static Vector3 ms_headOffset = new Vector3(0f, 0f, 0f);
+        static Vector3 ms_headOffset = new Vector3(0f, -0.3f, 0.15f);
 
         static bool ms_initialized = false;
 
@@ -53,7 +53,7 @@ namespace ml_lme_cvr
 
         static void BeforeSettingsLoad(ref CVRSettings __instance)
         {
-            if(!ms_initialized && __instance != null)
+            if(!ms_initialized && (__instance != null))
             {
                 var l_settings = HarmonyLib.Traverse.Create(__instance)?.Field("_settings")?.GetValue<System.Collections.Generic.List<ABI_RC.Core.Savior.CVRSettingsValue>>();
                 if(l_settings != null)
@@ -71,8 +71,6 @@ namespace ml_lme_cvr
                     l_settings.Add(new CVRSettingsInt(ms_defaultSettings[10], 0));
                     l_settings.Add(new CVRSettingsInt(ms_defaultSettings[11], 0));
                 }
-
-                // Changes events
 
                 // Enable tracking
                 __instance.settingBoolChanged.AddListener((name, value) =>

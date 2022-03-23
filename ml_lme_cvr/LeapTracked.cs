@@ -1,5 +1,6 @@
 ﻿using ABI_RC.Core.Player;
 using ABI_RC.Core.Savior;
+using System.Linq;
 using UnityEngine;
 
 namespace ml_lme_cvr
@@ -19,19 +20,30 @@ namespace ml_lme_cvr
         Transform m_leftHand = null;
         Transform m_rightHand = null;
 
+        bool m_knucklesInUse = false;
+
         void Start()
         {
-            m_indexIK = this.GetComponent<ABI_RC.Core.Player.IndexIK>();
+            m_indexIK = this.GetComponent<IndexIK>();
+            m_knucklesInUse = PlayerSetup.Instance._trackerManager.trackerNames.Contains("knuckles");
 
             if((m_indexIK != null) && (m_animator != null))
             {
-                m_indexIK.avatarAnimator = m_animator;
-                m_indexIK.Recalibrate();
-
-                m_indexIK.activeControl = m_enabled;
-                CVRInputManager.Instance.individualFingerTracking = m_enabled;
-
+                if(!PlayerSetup.Instance._inVr)
+                {
+                    // Seems that VR mode always calibrates IndexIK, so let's force it
+                    m_indexIK.avatarAnimator = m_animator;
+                    m_indexIK.Recalibrate();
+                }
                 m_calibrated = true;
+
+                m_indexIK.activeControl = (m_enabled || m_knucklesInUse);
+                CVRInputManager.Instance.individualFingerTracking = (m_enabled || m_knucklesInUse);
+
+                m_leapIK = m_animator.gameObject.AddComponent<LeapIK>();
+                m_leapIK.SetEnabled(m_enabled);
+                m_leapIK.SetFingersOnly(m_fingersOnly);
+                m_leapIK.SetHands(m_leftHand, m_rightHand);
             }
         }
 
@@ -43,7 +55,7 @@ namespace ml_lme_cvr
                 if((m_animator != null) && (m_indexIK != null))
                 {
                     m_indexIK.activeControl = true;
-                    if(!m_calibrated)
+                    if(!m_calibrated && !PlayerSetup.Instance._inVr)
                     {
                         m_indexIK.avatarAnimator = m_animator;
                         m_indexIK.Recalibrate();
@@ -56,8 +68,8 @@ namespace ml_lme_cvr
             {
                 if((m_indexIK != null) && m_calibrated)
                 {
-                    m_indexIK.activeControl = false;
-                    CVRInputManager.Instance.individualFingerTracking = false;
+                    m_indexIK.activeControl = m_knucklesInUse;
+                    CVRInputManager.Instance.individualFingerTracking = m_knucklesInUse;
                 }
             }
 
@@ -65,15 +77,7 @@ namespace ml_lme_cvr
                 m_leapIK.SetEnabled(m_enabled);
         }
 
-        public void SetAnimator(Animator p_animator)
-        {
-            m_animator = p_animator;
-
-            m_leapIK = m_animator.gameObject.AddComponent<LeapIK>();
-            m_leapIK.SetEnabled(m_enabled);
-            m_leapIK.SetFingersOnly(m_fingersOnly);
-            m_leapIK.SetHands(m_leftHand, m_rightHand);
-        }
+        public void SetAnimator(Animator p_animator) => m_animator = p_animator;
 
         public void SetFingersOnly(bool p_state)
         {
@@ -87,9 +91,6 @@ namespace ml_lme_cvr
         {
             m_leftHand = p_left;
             m_rightHand = p_right;
-
-            if(m_leapIK != null)
-                m_leapIK.SetHands(p_left, p_right);
         }
 
         public void UpdateTracking(GestureMatcher.GesturesData p_gesturesData)
