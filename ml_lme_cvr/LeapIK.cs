@@ -4,7 +4,7 @@ namespace ml_lme_cvr
 {
     [RequireComponent(typeof(Animator))]
     [DisallowMultipleComponent]
-    public class LeapIK : MonoBehaviour
+    class LeapIK : MonoBehaviour
     {
         bool m_enabled = true;
         bool m_fingersOnly = false;
