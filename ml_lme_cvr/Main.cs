@@ -12,7 +12,6 @@ namespace ml_lme_cvr
         static LeapMotionExtension ms_instance = null;
 
         Leap.Controller m_leapController = null;
-        long m_lastFrameId = 0;
         GestureMatcher.GesturesData m_gesturesData = null;
 
         GameObject m_leapTrackingRoot = null;
@@ -101,26 +100,28 @@ namespace ml_lme_cvr
 
         public override void OnUpdate()
         {
-            if(Settings.Enabled && (m_leapController != null))
+            if(Settings.Enabled)
             {
                 for(int i = 0; i < GestureMatcher.GesturesData.ms_handsCount; i++)
                     m_gesturesData.m_handsPresenses[i] = false;
 
-                Leap.Frame l_frame = m_leapController.Frame();
-                if((l_frame != null) && (m_lastFrameId != l_frame.Id))
+                if((m_leapController != null) && m_leapController.IsConnected)
                 {
-                    m_lastFrameId = l_frame.Id;
-
-                    GestureMatcher.GetGestures(l_frame, ref m_gesturesData);
-                    for(int i = 0; i < GestureMatcher.GesturesData.ms_handsCount; i++)
+                    Leap.Frame l_frame = m_leapController.Frame();
+                    if(l_frame != null)
                     {
-                        if((m_leapHands[i] != null) && m_gesturesData.m_handsPresenses[i])
+                        GestureMatcher.GetGestures(l_frame, ref m_gesturesData);
+
+                        for(int i = 0; i < GestureMatcher.GesturesData.ms_handsCount; i++)
                         {
-                            Vector3 l_pos = m_gesturesData.m_handsPositons[i];
-                            Quaternion l_rot = m_gesturesData.m_handsRotations[i];
-                            ReorientateLeapToUnity(ref l_pos, ref l_rot, Settings.HmdMode);
-                            m_leapHands[i].transform.localPosition = l_pos;
-                            m_leapHands[i].transform.localRotation = l_rot;
+                            if((m_leapHands[i] != null) && m_gesturesData.m_handsPresenses[i])
+                            {
+                                Vector3 l_pos = m_gesturesData.m_handsPositons[i];
+                                Quaternion l_rot = m_gesturesData.m_handsRotations[i];
+                                ReorientateLeapToUnity(ref l_pos, ref l_rot, Settings.HmdMode);
+                                m_leapHands[i].transform.localPosition = l_pos;
+                                m_leapHands[i].transform.localRotation = l_rot;
+                            }
                         }
                     }
                 }
