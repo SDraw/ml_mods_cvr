@@ -21,7 +21,8 @@ namespace ml_lme_cvr
 
         public override void OnApplicationStart()
         {
-            ms_instance = this;
+            if(ms_instance == null)
+                ms_instance = this;
 
             DependenciesHandler.ExtractDependencies();
 
@@ -137,11 +138,11 @@ namespace ml_lme_cvr
             if(Settings.Enabled)
             {
                 m_leapController.StartConnection();
-                m_leapController.ClearPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_SCREENTOP);
+                m_leapController.ClearPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_SCREENTOP, null);
                 if(Settings.HmdMode)
-                    m_leapController.SetPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_HMD);
+                    m_leapController.SetPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_HMD, null);
                 else
-                    m_leapController.ClearPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_HMD);
+                    m_leapController.ClearPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_HMD, null);
             }
             else
                 m_leapController.StopConnection();
@@ -177,11 +178,11 @@ namespace ml_lme_cvr
         {
             if(m_leapController != null)
             {
-                m_leapController.ClearPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_SCREENTOP);
+                m_leapController.ClearPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_SCREENTOP, null);
                 if(Settings.HmdMode)
-                    m_leapController.SetPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_HMD);
+                    m_leapController.SetPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_HMD, null);
                 else
-                    m_leapController.ClearPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_HMD);
+                    m_leapController.ClearPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_HMD, null);
             }
 
             if(m_leapControllerModel != null)
@@ -249,11 +250,11 @@ namespace ml_lme_cvr
         {
             if(Settings.Enabled && (m_leapController != null))
             {
-                m_leapController.ClearPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_SCREENTOP);
+                m_leapController.ClearPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_SCREENTOP, null);
                 if(Settings.HmdMode)
-                    m_leapController.SetPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_HMD);
+                    m_leapController.SetPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_HMD, null);
                 else
-                    m_leapController.ClearPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_HMD);
+                    m_leapController.ClearPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_HMD, null);
             }
 
             if(CohtmlHud.Instance != null)
