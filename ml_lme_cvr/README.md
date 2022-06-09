@@ -14,7 +14,7 @@ This mod allows you to use your Leap Motion controller for hands and fingers vis
 ## Settings
 Available mod's settings in `Settings - Implementation - Leap Motion Tracking`:
 * **Enable tracking:** enable hands tracking from Leap Motion data, disabled by default.
-* **HMD mode:** force Leap Motion to use head-mounted orientation mode, disabled by default.
+* **Tracking mode:** set Leap Motion tracking mode, available values: `Screentop`, `Desktop` (by default), `HMD`.
 * **Desktop offset X/Y/Z:** offset position for body attachment, (0, -45, 30) by default.
 * **Attach to head:** attach hands transformation to head instead of body, disabled by default.
 * **Head offset X/Y/Z:** offset position for head attachment (`Attach to head` is **`true`**), (0, -30, 15) by default.

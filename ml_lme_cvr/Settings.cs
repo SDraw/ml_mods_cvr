@@ -6,6 +6,13 @@ namespace ml_lme_cvr
 {
     static class Settings
     {
+        public enum LeapTrackingMode
+        {
+            Screentop = 0,
+            Desktop,
+            HMD
+        }
+
         public static readonly string[] ms_defaultSettings =
         {
             "InteractionLeapMotionTracking",
@@ -14,7 +21,7 @@ namespace ml_lme_cvr
             "InteractionLeapMotionTrackingDesktopZ",
             "InteractionLeapMotionTrackingFingersOnly",
             "InteractionLeapMotionTrackingModel",
-            "InteractionLeapMotionTrackingHmd",
+            "InteractionLeapMotionTrackingMode",
             "InteractionLeapMotionTrackingAngle",
             "InteractionLeapMotionTrackingHead",
             "InteractionLeapMotionTrackingHeadX",
@@ -26,7 +33,7 @@ namespace ml_lme_cvr
         static Vector3 ms_desktopOffset = new Vector3(0f, -0.45f, 0.3f);
         static bool ms_fingersOnly = false;
         static bool ms_modelVisibility = false;
-        static bool ms_hmdMode = false;
+        static LeapTrackingMode ms_trackingMode = LeapTrackingMode.Desktop;
         static float ms_rootAngle = 0f;
         static bool ms_headAttach = false;
         static Vector3 ms_headOffset = new Vector3(0f, -0.3f, 0.15f);
@@ -37,7 +44,7 @@ namespace ml_lme_cvr
         static public event Action DesktopOffsetChange;
         static public event Action FingersOnlyChange;
         static public event Action ModelVisibilityChange;
-        static public event Action HmdModeChange;
+        static public event Action TrackingModeChange;
         static public event Action RootAngleChange;
         static public event Action HeadAttachChange;
         static public event Action HeadOffsetChange;
@@ -64,7 +71,7 @@ namespace ml_lme_cvr
                     l_settings.Add(new CVRSettingsInt(ms_defaultSettings[3], 30));
                     l_settings.Add(new CVRSettingsBool(ms_defaultSettings[4], false));
                     l_settings.Add(new CVRSettingsBool(ms_defaultSettings[5], false));
-                    l_settings.Add(new CVRSettingsBool(ms_defaultSettings[6], false));
+                    l_settings.Add(new CVRSettingsInt(ms_defaultSettings[6], 1));
                     l_settings.Add(new CVRSettingsInt(ms_defaultSettings[7], 0));
                     l_settings.Add(new CVRSettingsBool(ms_defaultSettings[8], false));
                     l_settings.Add(new CVRSettingsInt(ms_defaultSettings[9], 0));
@@ -120,13 +127,13 @@ namespace ml_lme_cvr
                     }
                 });
 
-                // HMD mode
-                __instance.settingBoolChanged.AddListener((name, value) =>
+                // Tracking mode
+                __instance.settingIntChanged.AddListener((name, value) =>
                 {
                     if(name == ms_defaultSettings[6])
                     {
-                        ms_hmdMode = value;
-                        HmdModeChange?.Invoke();
+                        ms_trackingMode = (LeapTrackingMode)value;
+                        TrackingModeChange?.Invoke();
                     }
                 });
 
@@ -182,7 +189,7 @@ namespace ml_lme_cvr
             ) * 0.01f;
             ms_fingersOnly = MetaPort.Instance.settings.GetSettingsBool(ms_defaultSettings[4]);
             ms_modelVisibility = MetaPort.Instance.settings.GetSettingsBool(ms_defaultSettings[5]);
-            ms_hmdMode = MetaPort.Instance.settings.GetSettingsBool(ms_defaultSettings[6]);
+            ms_trackingMode = (LeapTrackingMode)MetaPort.Instance.settings.GetSettingInt(ms_defaultSettings[6]);
             ms_rootAngle = MetaPort.Instance.settings.GetSettingInt(ms_defaultSettings[7]);
             ms_headAttach = MetaPort.Instance.settings.GetSettingsBool(ms_defaultSettings[8]);
             ms_headOffset = new Vector3(
@@ -212,9 +219,9 @@ namespace ml_lme_cvr
             get => ms_modelVisibility;
         }
 
-        public static bool HmdMode
+        public static LeapTrackingMode TrackingMode
         {
-            get => ms_hmdMode;
+            get => ms_trackingMode;
         }
 
         public static float RootAngle

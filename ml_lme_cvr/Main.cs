@@ -8,6 +8,7 @@ namespace ml_lme_cvr
     public class LeapMotionExtension : MelonLoader.MelonMod
     {
         static readonly Quaternion ms_hmdRotationFix = new Quaternion(0f, 0.7071068f, 0.7071068f, 0f);
+        static readonly Quaternion ms_screentopRotationFix = new Quaternion(0f, 0f, -1f, 0f);
 
         static LeapMotionExtension ms_instance = null;
 
@@ -31,7 +32,7 @@ namespace ml_lme_cvr
             Settings.DesktopOffsetChange += this.OnSettingsDesktopOffsetChange;
             Settings.FingersOnlyChange += this.OnSettingsFingersOptionChange;
             Settings.ModelVisibilityChange += this.OnSettingsModelVisibilityChange;
-            Settings.HmdModeChange += this.OnSettingsHmdModeChange;
+            Settings.TrackingModeChange += this.OnSettingsTrackingModeChange;
             Settings.RootAngleChange += this.OnSettingsRootAngleChange;
             Settings.HeadAttachChange += this.OnSettingsHeadAttachChange;
             Settings.HeadOffsetChange += this.OnSettingsHeadOffsetChange;
@@ -95,7 +96,7 @@ namespace ml_lme_cvr
             OnSettingsEnableChange();
             OnSettingsFingersOptionChange();
             OnSettingsModelVisibilityChange();
-            OnSettingsHmdModeChange();
+            OnSettingsTrackingModeChange();
             OnSettingsHeadAttachChange(); // Includes offsets and parenting
         }
 
@@ -119,7 +120,7 @@ namespace ml_lme_cvr
                             {
                                 Vector3 l_pos = m_gesturesData.m_handsPositons[i];
                                 Quaternion l_rot = m_gesturesData.m_handsRotations[i];
-                                ReorientateLeapToUnity(ref l_pos, ref l_rot, Settings.HmdMode);
+                                ReorientateLeapToUnity(ref l_pos, ref l_rot, Settings.TrackingMode);
                                 m_leapHands[i].transform.localPosition = l_pos;
                                 m_leapHands[i].transform.localRotation = l_rot;
                             }
@@ -138,11 +139,7 @@ namespace ml_lme_cvr
             if(Settings.Enabled)
             {
                 m_leapController.StartConnection();
-                m_leapController.ClearPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_SCREENTOP, null);
-                if(Settings.HmdMode)
-                    m_leapController.SetPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_HMD, null);
-                else
-                    m_leapController.ClearPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_HMD, null);
+                UpdateDeviceTrackingMode();
             }
             else
                 m_leapController.StopConnection();
@@ -174,19 +171,26 @@ namespace ml_lme_cvr
                 m_leapControllerModel.SetActive(Settings.ModelVisibility);
         }
 
-        void OnSettingsHmdModeChange()
+        void OnSettingsTrackingModeChange()
         {
-            if(m_leapController != null)
-            {
-                m_leapController.ClearPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_SCREENTOP, null);
-                if(Settings.HmdMode)
-                    m_leapController.SetPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_HMD, null);
-                else
-                    m_leapController.ClearPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_HMD, null);
-            }
+            if(Settings.Enabled && (m_leapController != null))
+                UpdateDeviceTrackingMode();
 
             if(m_leapControllerModel != null)
-                m_leapControllerModel.transform.localRotation = (Settings.HmdMode ? Quaternion.Euler(270f, 180f, 0f) : Quaternion.identity);
+            {
+                switch(Settings.TrackingMode)
+                {
+                    case Settings.LeapTrackingMode.Screentop:
+                        m_leapControllerModel.transform.localRotation = Quaternion.Euler(0f, 0f, 180f);
+                        break;
+                    case Settings.LeapTrackingMode.Desktop:
+                        m_leapControllerModel.transform.localRotation = Quaternion.identity;
+                        break;
+                    case Settings.LeapTrackingMode.HMD:
+                        m_leapControllerModel.transform.localRotation = Quaternion.Euler(270f, 180f, 0f);
+                        break;
+                }
+            }
         }
 
         void OnSettingsRootAngleChange()
@@ -245,17 +249,28 @@ namespace ml_lme_cvr
             }
         }
 
+        // Internal utility
+        void UpdateDeviceTrackingMode()
+        {
+            m_leapController.ClearPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_SCREENTOP, null);
+            m_leapController.ClearPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_HMD, null);
+
+            switch(Settings.TrackingMode)
+            {
+                case Settings.LeapTrackingMode.Screentop:
+                    m_leapController.SetPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_SCREENTOP, null);
+                    break;
+                case Settings.LeapTrackingMode.HMD:
+                    m_leapController.SetPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_HMD, null);
+                    break;
+            }
+        }
+
         // Leap events
         void OnLeapDeviceInitialized(object p_sender, Leap.DeviceEventArgs p_args)
         {
             if(Settings.Enabled && (m_leapController != null))
-            {
-                m_leapController.ClearPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_SCREENTOP, null);
-                if(Settings.HmdMode)
-                    m_leapController.SetPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_HMD, null);
-                else
-                    m_leapController.ClearPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_HMD, null);
-            }
+                UpdateDeviceTrackingMode();
 
             if(CohtmlHud.Instance != null)
                 CohtmlHud.Instance.ViewDropText("Leap Motion Extension", "Device initialized");
@@ -305,18 +320,31 @@ namespace ml_lme_cvr
             OnSettingsHeadAttachChange();
         }
 
-        static void ReorientateLeapToUnity(ref Vector3 p_pos, ref Quaternion p_rot, bool p_hmd)
+        // Utilities
+        static void ReorientateLeapToUnity(ref Vector3 p_pos, ref Quaternion p_rot, Settings.LeapTrackingMode p_mode)
         {
             p_pos *= 0.001f;
             p_pos.z *= -1f;
             p_rot.x *= -1f;
             p_rot.y *= -1f;
 
-            if(p_hmd)
+            switch(p_mode)
             {
-                p_pos.x *= -1f;
-                Utils.Swap(ref p_pos.y, ref p_pos.z);
-                p_rot = (ms_hmdRotationFix * p_rot);
+                case Settings.LeapTrackingMode.Screentop:
+                {
+                    p_pos.x *= -1f;
+                    p_pos.y *= -1f;
+                    p_rot = (ms_screentopRotationFix * p_rot);
+                }
+                break;
+
+                case Settings.LeapTrackingMode.HMD:
+                {
+                    p_pos.x *= -1f;
+                    Utils.Swap(ref p_pos.y, ref p_pos.z);
+                    p_rot = (ms_hmdRotationFix * p_rot);
+                }
+                break;
             }
         }
     }
