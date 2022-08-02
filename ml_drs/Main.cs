@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace ml_drs
 {
-    public class DesktopRectileSwitch : MelonLoader.MelonMod
+    public class DesktopReticleSwitch : MelonLoader.MelonMod
     {
         public override void OnUpdate()
         {

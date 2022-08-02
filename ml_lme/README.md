@@ -7,7 +7,7 @@ This mod allows you to use your Leap Motion controller for hands and fingers vis
 * Install [latest Ultraleap Gemini tracking software](https://developer.leapmotion.com/tracking-software-download)
 * Install [latest MelonLoader](https://github.com/LavaGang/MelonLoader)
 * Get [latest release DLL](../../../releases/latest):
-  * Put `ml_lme_cvr.dll` in `Mods` folder of game
+  * Put `ml_lme.dll` in `Mods` folder of game
 * Add code from [this gist](https://gist.github.com/SDraw/543825b39cdabc3bc4fda358bc70247a) to `<GameFolder>\ChilloutVR_Data\StreamingAssets\Cohtml\UIResources\CVRTest\index.html` after `row-wrapper` div for `InteractionViveFaceTrackingStrength` menu item (near line 1183)
 
 # Usage
