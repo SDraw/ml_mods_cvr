@@ -2,7 +2,7 @@
 using ABI_RC.Core.UI;
 using UnityEngine;
 
-namespace ml_lme_cvr
+namespace ml_lme
 {
 
     public class LeapMotionExtension : MelonLoader.MelonMod

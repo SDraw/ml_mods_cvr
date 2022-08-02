@@ -3,7 +3,7 @@ using ABI_RC.Core.Savior;
 using System.Linq;
 using UnityEngine;
 
-namespace ml_lme_cvr
+namespace ml_lme
 {
     [RequireComponent(typeof(IndexIK))]
     [DisallowMultipleComponent]

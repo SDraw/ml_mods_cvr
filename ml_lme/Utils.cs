@@ -1,4 +1,4 @@
-﻿namespace ml_lme_cvr
+﻿namespace ml_lme
 {
     static class Utils
     {

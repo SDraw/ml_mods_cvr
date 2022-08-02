@@ -4,7 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Security.Cryptography;
 
-namespace ml_lme_cvr
+namespace ml_lme
 {
     static class DependenciesHandler
     {

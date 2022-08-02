@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace ml_lme_cvr
+namespace ml_lme
 {
     [RequireComponent(typeof(Animator))]
     [DisallowMultipleComponent]

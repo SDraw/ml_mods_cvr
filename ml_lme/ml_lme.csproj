@@ -7,8 +7,8 @@
     <ProjectGuid>{83CC74B7-F444-40E1-BD06-67CEC995A919}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ml_lme_cvr</RootNamespace>
-    <AssemblyName>ml_lme_cvr</AssemblyName>
+    <RootNamespace>ml_lme</RootNamespace>
+    <AssemblyName>ml_lme</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
