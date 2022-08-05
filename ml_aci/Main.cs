@@ -1,5 +1,5 @@
-﻿using ABI_RC.Core.UI;
-using ABI_RC.Core.EventSystem;
+﻿using ABI_RC.Core.EventSystem;
+using ABI_RC.Core.InteractionSystem;
 
 namespace ml_aci
 {
@@ -16,8 +16,8 @@ namespace ml_aci
 
         static void OnLocalAvatarLoad()
         {
-            if(CohtmlHud.Instance != null)
-                CohtmlHud.Instance.ViewDropText("Avatar changed", "Please, wait ...");
+            if(ViewManager.Instance != null)
+                ViewManager.Instance.TriggerPushNotification("Avatar changed", 1f);
         }
     }
 }

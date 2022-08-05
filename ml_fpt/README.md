@@ -10,11 +10,12 @@ This mod adds ability to use 4-point tracking.
 * Be sure that your tracker role is set to `Hips` in SteamVR
 * Adjust your avatar at forward direction
 * Press `LCtrl-T` keyboard combination to calibrate
+* Adjust your tracker in a similar way as in FBT calibration
+* Press trigger on both hands controllers
 
 # Notes
 * You have to recalibrate each time you change avatar
 
 # Planned
-* Force avatar to T-Pose for calibration
-* Show tracker in same way as for FBT calibration
 * No need for recalibration upon avatar change
+* Main menu button for calibration

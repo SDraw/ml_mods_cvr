@@ -1,5 +1,5 @@
 # Avatar Change Info
-This mod shows simple notification upon local player avatar change.
+This mod shows simple main menu popup upon local player avatar change.
 
 [](.github/img_01.png)
 

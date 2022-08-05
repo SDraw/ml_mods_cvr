@@ -51,7 +51,12 @@ namespace ml_lme
             HarmonyInstance.Patch(
                 typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.SetupAvatar)),
                 null,
-                new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnAvatarSetup), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic))
+                new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnAvatarSetup_Postfix), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic))
+            );
+            HarmonyInstance.Patch(
+                typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.ClearAvatar)),
+                null,
+                new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnAvatarClear_Postfix), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic))
             );
 
             MelonLoader.MelonCoroutines.Start(CreateTrackingObjects());
@@ -301,23 +306,38 @@ namespace ml_lme
         }
 
         // Patches
-        static void OnAvatarSetup(ref PlayerSetup __instance)
+        static void OnAvatarClear_Postfix(ref PlayerSetup __instance)
         {
             if((__instance != null) && (__instance == PlayerSetup.Instance))
-                ms_instance?.OnLocalPlayerAvatarSetup(__instance._animator, __instance.GetComponent<IndexIK>());
+                ms_instance?.OnAvatarClear();
         }
-        void OnLocalPlayerAvatarSetup(Animator p_animator, IndexIK p_indexIK)
+        void OnAvatarClear()
         {
             if(m_leapTracked != null)
+            {
                 Object.DestroyImmediate(m_leapTracked);
+                m_leapTracked = null;
+            }
+        }
 
-            m_leapTracked = p_indexIK.gameObject.AddComponent<LeapTracked>();
-            m_leapTracked.SetEnabled(Settings.Enabled);
-            m_leapTracked.SetAnimator(p_animator);
-            m_leapTracked.SetHands(m_leapHands[0].transform, m_leapHands[1].transform);
-            m_leapTracked.SetFingersOnly(Settings.FingersOnly);
 
-            OnSettingsHeadAttachChange();
+        static void OnAvatarSetup_Postfix(ref PlayerSetup __instance)
+        {
+            if((__instance != null) && (__instance == PlayerSetup.Instance))
+                ms_instance?.OnAvatarSetup(__instance._animator, __instance.GetComponent<IndexIK>());
+        }
+        void OnAvatarSetup(Animator p_animator, IndexIK p_indexIK)
+        {
+            if(m_leapTracked == null)
+            {
+                m_leapTracked = p_indexIK.gameObject.AddComponent<LeapTracked>();
+                m_leapTracked.SetEnabled(Settings.Enabled);
+                m_leapTracked.SetAnimator(p_animator);
+                m_leapTracked.SetHands(m_leapHands[0].transform, m_leapHands[1].transform);
+                m_leapTracked.SetFingersOnly(Settings.FingersOnly);
+
+                OnSettingsHeadAttachChange();
+            }
         }
 
         // Utilities
