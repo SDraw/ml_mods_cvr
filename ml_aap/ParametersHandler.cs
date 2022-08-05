@@ -46,6 +46,12 @@ namespace ml_aap
             m_parameters = new List<AdditionalParameterInfo>();
         }
 
+        void Start()
+        {
+            if(PlayerSetup.Instance._inVr)
+                PlayerSetup.Instance.avatarSetupCompleted.AddListener(this.OnAvatarSetup);
+        }
+
         void Update()
         {
             if(m_active)

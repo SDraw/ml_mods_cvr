@@ -50,7 +50,7 @@ namespace ml_aap
         static void OnLocalAvatarSetup_Postfix() => ms_instance?.OnLocalAvatarSetup();
         void OnLocalAvatarSetup()
         {
-            if(m_localHandler != null)
+            if((m_localHandler != null) && !PlayerSetup.Instance._inVr)
                 m_localHandler.OnAvatarSetup();
         }
     }

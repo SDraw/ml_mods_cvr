@@ -73,6 +73,9 @@ namespace ml_fpt
                     PlayerSetup.Instance._trackerManager.trackers[m_hipsTrackerIndex].ShowLine(false);
                     CVR_InteractableManager.enableInteractions = true;
 
+                    if(PlayerSetup.Instance._avatar.GetComponent<ABI.CCK.Components.CVRAvatar>().avatarUsesAdvancedSettings)
+                        PlayerSetup.Instance.LoadCurrentAvatarSettingsDefault();
+
                     Reset();
 
                     ShowHudNotification("Calibration completed");
@@ -141,6 +144,9 @@ namespace ml_fpt
         {
             if(m_inCalibration)
             {
+                m_indexIk.calibrated = true;
+                m_indexIk.enabled = true;
+
                 m_ikCalibrator.leftHandModel.SetActive(false);
                 m_ikCalibrator.rightHandModel.SetActive(false);
 
