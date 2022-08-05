@@ -7,7 +7,7 @@ This mod adds additional paramaters for usage in avatar's animator.
   * Put `ml_aap.dll` in `Mods` folder of game
   
 # Usage
-List of new available parameters:
+List of new parameters that can be added to your AAS animator:
 | Name | Type | Note |
 |------|------|------|
 | Upright | float | Proportion value between avatar's viewpoint height and floor, ranged in [0,1] |
