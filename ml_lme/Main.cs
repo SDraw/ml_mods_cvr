@@ -119,6 +119,7 @@ namespace ml_lme
             ViewManager.Instance.gameMenuView.Listener.FinishLoad += (_) =>
             {
                 ViewManager.Instance.gameMenuView.View.ExecuteScript(Scripts.GetEmbeddedScript("menu.js"));
+                ViewManager.Instance.RequestCurrentSettings();
             };
         }
 

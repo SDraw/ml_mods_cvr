@@ -13,20 +13,20 @@ namespace ml_lme
             HMD
         }
 
-        public static readonly string[] ms_defaultSettings =
+        enum ModSetting
         {
-            "InteractionLeapMotionTracking",
-            "InteractionLeapMotionTrackingDesktopX",
-            "InteractionLeapMotionTrackingDesktopY",
-            "InteractionLeapMotionTrackingDesktopZ",
-            "InteractionLeapMotionTrackingFingersOnly",
-            "InteractionLeapMotionTrackingModel",
-            "InteractionLeapMotionTrackingMode",
-            "InteractionLeapMotionTrackingAngle",
-            "InteractionLeapMotionTrackingHead",
-            "InteractionLeapMotionTrackingHeadX",
-            "InteractionLeapMotionTrackingHeadY",
-            "InteractionLeapMotionTrackingHeadZ"
+            InteractionLeapMotionTracking,
+            InteractionLeapMotionTrackingDesktopX,
+            InteractionLeapMotionTrackingDesktopY,
+            InteractionLeapMotionTrackingDesktopZ,
+            InteractionLeapMotionTrackingFingersOnly,
+            InteractionLeapMotionTrackingModel,
+            InteractionLeapMotionTrackingMode,
+            InteractionLeapMotionTrackingAngle,
+            InteractionLeapMotionTrackingHead,
+            InteractionLeapMotionTrackingHeadX,
+            InteractionLeapMotionTrackingHeadY,
+            InteractionLeapMotionTrackingHeadZ
         };
 
         static bool ms_enabled = false;
@@ -53,123 +53,113 @@ namespace ml_lme
         {
             p_instance.Patch(
                 typeof(CVRSettings).GetMethod(nameof(CVRSettings.LoadSerializedSettings)),
-                new HarmonyLib.HarmonyMethod(typeof(Settings).GetMethod(nameof(BeforeSettingsLoad), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)),
+                new HarmonyLib.HarmonyMethod(typeof(Settings).GetMethod(nameof(LoadSerializedSettings_Prefix), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)),
                 null
             );
         }
 
-        static void BeforeSettingsLoad(ref CVRSettings __instance)
+        static void LoadSerializedSettings_Prefix(ref CVRSettings __instance)
         {
             if(!ms_initialized && (__instance != null))
             {
                 var l_settings = HarmonyLib.Traverse.Create(__instance)?.Field("_settings")?.GetValue<System.Collections.Generic.List<ABI_RC.Core.Savior.CVRSettingsValue>>();
                 if(l_settings != null)
                 {
-                    l_settings.Add(new CVRSettingsBool(ms_defaultSettings[0], false));
-                    l_settings.Add(new CVRSettingsInt(ms_defaultSettings[1], 0));
-                    l_settings.Add(new CVRSettingsInt(ms_defaultSettings[2], -45));
-                    l_settings.Add(new CVRSettingsInt(ms_defaultSettings[3], 30));
-                    l_settings.Add(new CVRSettingsBool(ms_defaultSettings[4], false));
-                    l_settings.Add(new CVRSettingsBool(ms_defaultSettings[5], false));
-                    l_settings.Add(new CVRSettingsInt(ms_defaultSettings[6], 1));
-                    l_settings.Add(new CVRSettingsInt(ms_defaultSettings[7], 0));
-                    l_settings.Add(new CVRSettingsBool(ms_defaultSettings[8], false));
-                    l_settings.Add(new CVRSettingsInt(ms_defaultSettings[9], 0));
-                    l_settings.Add(new CVRSettingsInt(ms_defaultSettings[10], 0));
-                    l_settings.Add(new CVRSettingsInt(ms_defaultSettings[11], 0));
+                    l_settings.Add(new CVRSettingsBool(ModSetting.InteractionLeapMotionTracking.ToString(), false));
+                    l_settings.Add(new CVRSettingsInt(ModSetting.InteractionLeapMotionTrackingDesktopX.ToString(), 0));
+                    l_settings.Add(new CVRSettingsInt(ModSetting.InteractionLeapMotionTrackingDesktopY.ToString(), -45));
+                    l_settings.Add(new CVRSettingsInt(ModSetting.InteractionLeapMotionTrackingDesktopZ.ToString(), 30));
+                    l_settings.Add(new CVRSettingsBool(ModSetting.InteractionLeapMotionTrackingFingersOnly.ToString(), false));
+                    l_settings.Add(new CVRSettingsBool(ModSetting.InteractionLeapMotionTrackingModel.ToString(), false));
+                    l_settings.Add(new CVRSettingsInt(ModSetting.InteractionLeapMotionTrackingMode.ToString(), 1));
+                    l_settings.Add(new CVRSettingsInt(ModSetting.InteractionLeapMotionTrackingAngle.ToString(), 0));
+                    l_settings.Add(new CVRSettingsBool(ModSetting.InteractionLeapMotionTrackingHead.ToString(), false));
+                    l_settings.Add(new CVRSettingsInt(ModSetting.InteractionLeapMotionTrackingHeadX.ToString(), 0));
+                    l_settings.Add(new CVRSettingsInt(ModSetting.InteractionLeapMotionTrackingHeadY.ToString(), 0));
+                    l_settings.Add(new CVRSettingsInt(ModSetting.InteractionLeapMotionTrackingHeadZ.ToString(), 0));
                 }
 
-                // Enable tracking
                 __instance.settingBoolChanged.AddListener((name, value) =>
                 {
-                    if(name == ms_defaultSettings[0])
+                    if(Enum.TryParse(name, out ModSetting l_setting))
                     {
-                        ms_enabled = value;
-                        EnabledChange?.Invoke();
-                    }
-                });
-
-                // Desktop offsets
-                __instance.settingIntChanged.AddListener((name, value) =>
-                {
-                    for(int i = 1; i <= 3; i++)
-                    {
-                        if(name == ms_defaultSettings[i])
+                        switch(l_setting)
                         {
-                            ms_desktopOffset = new Vector3(
-                                MetaPort.Instance.settings.GetSettingInt(ms_defaultSettings[1]),
-                                MetaPort.Instance.settings.GetSettingInt(ms_defaultSettings[2]),
-                                MetaPort.Instance.settings.GetSettingInt(ms_defaultSettings[3])
-                            ) * 0.01f;
-                            DesktopOffsetChange?.Invoke();
+                            case ModSetting.InteractionLeapMotionTracking:
+                            {
+                                ms_enabled = value;
+                                EnabledChange?.Invoke();
+                            }
+                            break;
+
+                            case ModSetting.InteractionLeapMotionTrackingFingersOnly:
+                            {
+                                ms_fingersOnly = value;
+                                FingersOnlyChange?.Invoke();
+                            }
+                            break;
+
+                            case ModSetting.InteractionLeapMotionTrackingModel:
+                            {
+                                ms_modelVisibility = value;
+                                ModelVisibilityChange?.Invoke();
+                            }
+                            break;
+
+                            case ModSetting.InteractionLeapMotionTrackingHead:
+                            {
+                                ms_headAttach = value;
+                                HeadAttachChange?.Invoke();
+                            }
                             break;
                         }
                     }
                 });
 
-                // Fingers tracking only
-                __instance.settingBoolChanged.AddListener((name, value) =>
-                {
-                    if(name == ms_defaultSettings[4])
-                    {
-                        ms_fingersOnly = value;
-                        FingersOnlyChange?.Invoke();
-                    }
-                });
-
-                // Model visibility
-                __instance.settingBoolChanged.AddListener((name, value) =>
-                {
-                    if(name == ms_defaultSettings[5])
-                    {
-                        ms_modelVisibility = value;
-                        ModelVisibilityChange?.Invoke();
-                    }
-                });
-
-                // Tracking mode
                 __instance.settingIntChanged.AddListener((name, value) =>
                 {
-                    if(name == ms_defaultSettings[6])
+                    if(Enum.TryParse(name, out ModSetting l_setting))
                     {
-                        ms_trackingMode = (LeapTrackingMode)value;
-                        TrackingModeChange?.Invoke();
-                    }
-                });
-
-                // Root angle
-                __instance.settingIntChanged.AddListener((name, value) =>
-                {
-                    if(name == ms_defaultSettings[7])
-                    {
-                        ms_rootAngle = value;
-                        RootAngleChange?.Invoke();
-                    }
-                });
-
-                // Head attach
-                __instance.settingBoolChanged.AddListener((name, value) =>
-                {
-                    if(name == ms_defaultSettings[8])
-                    {
-                        ms_headAttach = value;
-                        HeadAttachChange?.Invoke();
-                    }
-                });
-
-                // Head offset
-                __instance.settingIntChanged.AddListener((name, value) =>
-                {
-                    for(int i = 9; i <= 11; i++)
-                    {
-                        if(name == ms_defaultSettings[i])
+                        switch(l_setting)
                         {
-                            ms_headOffset = new Vector3(
-                                MetaPort.Instance.settings.GetSettingInt(ms_defaultSettings[9]),
-                                MetaPort.Instance.settings.GetSettingInt(ms_defaultSettings[10]),
-                                MetaPort.Instance.settings.GetSettingInt(ms_defaultSettings[11])
-                            ) * 0.01f;
-                            HeadOffsetChange?.Invoke();
+                            case ModSetting.InteractionLeapMotionTrackingDesktopX:
+                            case ModSetting.InteractionLeapMotionTrackingDesktopY:
+                            case ModSetting.InteractionLeapMotionTrackingDesktopZ:
+                            {
+                                ms_desktopOffset = new Vector3(
+                                    MetaPort.Instance.settings.GetSettingInt(ModSetting.InteractionLeapMotionTrackingDesktopX.ToString()),
+                                    MetaPort.Instance.settings.GetSettingInt(ModSetting.InteractionLeapMotionTrackingDesktopY.ToString()),
+                                    MetaPort.Instance.settings.GetSettingInt(ModSetting.InteractionLeapMotionTrackingDesktopZ.ToString())
+                                ) * 0.01f;
+                                DesktopOffsetChange?.Invoke();
+                            }
+                            break;
+
+                            case ModSetting.InteractionLeapMotionTrackingMode:
+                            {
+                                ms_trackingMode = (LeapTrackingMode)value;
+                                TrackingModeChange?.Invoke();
+                            }
+                            break;
+
+                            case ModSetting.InteractionLeapMotionTrackingAngle:
+                            {
+                                ms_rootAngle = value;
+                                RootAngleChange?.Invoke();
+                            }
+                            break;
+
+                            case ModSetting.InteractionLeapMotionTrackingHeadX:
+                            case ModSetting.InteractionLeapMotionTrackingHeadY:
+                            case ModSetting.InteractionLeapMotionTrackingHeadZ:
+                            {
+                                ms_headOffset = new Vector3(
+                                    MetaPort.Instance.settings.GetSettingInt(ModSetting.InteractionLeapMotionTrackingHeadX.ToString()),
+                                    MetaPort.Instance.settings.GetSettingInt(ModSetting.InteractionLeapMotionTrackingHeadY.ToString()),
+                                    MetaPort.Instance.settings.GetSettingInt(ModSetting.InteractionLeapMotionTrackingHeadZ.ToString())
+                                ) * 0.01f;
+                                HeadOffsetChange?.Invoke();
+                            }
                             break;
                         }
                     }
@@ -181,21 +171,21 @@ namespace ml_lme
 
         static public void Reload()
         {
-            ms_enabled = MetaPort.Instance.settings.GetSettingsBool(ms_defaultSettings[0]);
+            ms_enabled = MetaPort.Instance.settings.GetSettingsBool(ModSetting.InteractionLeapMotionTracking.ToString());
             ms_desktopOffset = new Vector3(
-                MetaPort.Instance.settings.GetSettingInt(ms_defaultSettings[1]),
-                MetaPort.Instance.settings.GetSettingInt(ms_defaultSettings[2]),
-                MetaPort.Instance.settings.GetSettingInt(ms_defaultSettings[3])
+                MetaPort.Instance.settings.GetSettingInt(ModSetting.InteractionLeapMotionTrackingDesktopX.ToString()),
+                MetaPort.Instance.settings.GetSettingInt(ModSetting.InteractionLeapMotionTrackingDesktopY.ToString()),
+                MetaPort.Instance.settings.GetSettingInt(ModSetting.InteractionLeapMotionTrackingDesktopZ.ToString())
             ) * 0.01f;
-            ms_fingersOnly = MetaPort.Instance.settings.GetSettingsBool(ms_defaultSettings[4]);
-            ms_modelVisibility = MetaPort.Instance.settings.GetSettingsBool(ms_defaultSettings[5]);
-            ms_trackingMode = (LeapTrackingMode)MetaPort.Instance.settings.GetSettingInt(ms_defaultSettings[6]);
-            ms_rootAngle = MetaPort.Instance.settings.GetSettingInt(ms_defaultSettings[7]);
-            ms_headAttach = MetaPort.Instance.settings.GetSettingsBool(ms_defaultSettings[8]);
+            ms_fingersOnly = MetaPort.Instance.settings.GetSettingsBool(ModSetting.InteractionLeapMotionTrackingFingersOnly.ToString());
+            ms_modelVisibility = MetaPort.Instance.settings.GetSettingsBool(ModSetting.InteractionLeapMotionTrackingModel.ToString());
+            ms_trackingMode = (LeapTrackingMode)MetaPort.Instance.settings.GetSettingInt(ModSetting.InteractionLeapMotionTrackingMode.ToString());
+            ms_rootAngle = MetaPort.Instance.settings.GetSettingInt(ModSetting.InteractionLeapMotionTrackingAngle.ToString());
+            ms_headAttach = MetaPort.Instance.settings.GetSettingsBool(ModSetting.InteractionLeapMotionTrackingHead.ToString());
             ms_headOffset = new Vector3(
-                MetaPort.Instance.settings.GetSettingInt(ms_defaultSettings[9]),
-                MetaPort.Instance.settings.GetSettingInt(ms_defaultSettings[10]),
-                MetaPort.Instance.settings.GetSettingInt(ms_defaultSettings[11])
+                MetaPort.Instance.settings.GetSettingInt(ModSetting.InteractionLeapMotionTrackingHeadX.ToString()),
+                MetaPort.Instance.settings.GetSettingInt(ModSetting.InteractionLeapMotionTrackingHeadY.ToString()),
+                MetaPort.Instance.settings.GetSettingInt(ModSetting.InteractionLeapMotionTrackingHeadZ.ToString())
             ) * 0.01f;
         }
 
