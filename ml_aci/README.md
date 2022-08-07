@@ -1,7 +1,7 @@
 # Avatar Change Info
 This mod shows simple main menu popup upon local player avatar change.
 
-[](.github/img_01.png)
+![](.github/img_01.png)
 
 # Installation
 * Install [latest MelonLoader](https://github.com/LavaGang/MelonLoader)
