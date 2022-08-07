@@ -31,14 +31,12 @@ namespace ml_fpt
                 new HarmonyLib.HarmonyMethod(typeof(FourPointTracking).GetMethod(nameof(OnAvatarClear_Postfix), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static))
             );
 
+            MelonLoader.MelonCoroutines.Start(WaitForMainMenuView());
             MelonLoader.MelonCoroutines.Start(WaitForLocalPlayer());
         }
 
         public override void OnUpdate()
         {
-            if(Input.GetKeyDown(KeyCode.T) && Input.GetKey(KeyCode.LeftControl) && !m_inCalibration)
-                PrepareCalibration();
-
             if(m_playerReady && m_inCalibration && (m_hipsTrackerIndex != -1))
             {
                 if(m_origVrIk != null)
@@ -83,6 +81,26 @@ namespace ml_fpt
             }
         }
 
+        System.Collections.IEnumerator WaitForMainMenuView()
+        {
+            while(ViewManager.Instance == null)
+                yield return null;
+            while(ViewManager.Instance.gameMenuView == null)
+                yield return null;
+            while(ViewManager.Instance.gameMenuView.Listener == null)
+                yield return null;
+
+            ViewManager.Instance.gameMenuView.Listener.ReadyForBindings += () =>
+            {
+                ViewManager.Instance.gameMenuView.View.RegisterForEvent("MelonMod_Action_FPT_Calibrate", new System.Action(this.StartCalibration));
+            };
+
+            ViewManager.Instance.gameMenuView.Listener.FinishLoad += (_) =>
+            {
+                ViewManager.Instance.gameMenuView.View.ExecuteScript(Scripts.GetEmbeddedScript("menu.js"));
+            };
+        }
+
         System.Collections.IEnumerator WaitForLocalPlayer()
         {
             while(PlayerSetup.Instance == null)
@@ -94,7 +112,7 @@ namespace ml_fpt
             m_playerReady = true;
         }
 
-        void PrepareCalibration()
+        void StartCalibration()
         {
             if(m_playerReady && !m_inCalibration && PlayerSetup.Instance._inVr && !PlayerSetup.Instance.fullBodyActive && PlayerSetup.Instance._animator.isHuman && !m_ikCalibrator.inFullbodyCalibration && m_indexIk.calibrated)
             {

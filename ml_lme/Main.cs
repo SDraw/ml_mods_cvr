@@ -1,4 +1,5 @@
-﻿using ABI_RC.Core.Player;
+﻿using ABI_RC.Core.InteractionSystem;
+using ABI_RC.Core.Player;
 using ABI_RC.Core.UI;
 using UnityEngine;
 
@@ -59,6 +60,7 @@ namespace ml_lme
                 new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnAvatarClear_Postfix), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic))
             );
 
+            MelonLoader.MelonCoroutines.Start(WaitForMainMenuView());
             MelonLoader.MelonCoroutines.Start(CreateTrackingObjects());
         }
 
@@ -103,6 +105,21 @@ namespace ml_lme
             OnSettingsModelVisibilityChange();
             OnSettingsTrackingModeChange();
             OnSettingsHeadAttachChange(); // Includes offsets and parenting
+        }
+
+        System.Collections.IEnumerator WaitForMainMenuView()
+        {
+            while(ViewManager.Instance == null)
+                yield return null;
+            while(ViewManager.Instance.gameMenuView == null)
+                yield return null;
+            while(ViewManager.Instance.gameMenuView.Listener == null)
+                yield return null;
+
+            ViewManager.Instance.gameMenuView.Listener.FinishLoad += (_) =>
+            {
+                ViewManager.Instance.gameMenuView.View.ExecuteScript(Scripts.GetEmbeddedScript("menu.js"));
+            };
         }
 
         public override void OnUpdate()
