@@ -28,7 +28,7 @@ namespace ml_lme
 
             DependenciesHandler.ExtractDependencies();
 
-            Settings.Init(HarmonyInstance);
+            Settings.Init();
             Settings.EnabledChange += this.OnSettingsEnableChange;
             Settings.DesktopOffsetChange += this.OnSettingsDesktopOffsetChange;
             Settings.FingersOnlyChange += this.OnSettingsFingersOptionChange;
@@ -60,7 +60,6 @@ namespace ml_lme
                 new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnAvatarClear_Postfix), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic))
             );
 
-            MelonLoader.MelonCoroutines.Start(WaitForMainMenuView());
             MelonLoader.MelonCoroutines.Start(CreateTrackingObjects());
         }
 
@@ -98,29 +97,11 @@ namespace ml_lme
                 m_leapControllerModel.transform.localRotation = Quaternion.identity;
             }
 
-            Settings.Reload();
-
-            OnSettingsEnableChange();
-            OnSettingsFingersOptionChange();
-            OnSettingsModelVisibilityChange();
-            OnSettingsTrackingModeChange();
-            OnSettingsHeadAttachChange(); // Includes offsets and parenting
-        }
-
-        System.Collections.IEnumerator WaitForMainMenuView()
-        {
-            while(ViewManager.Instance == null)
-                yield return null;
-            while(ViewManager.Instance.gameMenuView == null)
-                yield return null;
-            while(ViewManager.Instance.gameMenuView.Listener == null)
-                yield return null;
-
-            ViewManager.Instance.gameMenuView.Listener.FinishLoad += (_) =>
-            {
-                ViewManager.Instance.gameMenuView.View.ExecuteScript(Scripts.GetEmbeddedScript("menu.js"));
-                ViewManager.Instance.RequestCurrentSettings();
-            };
+            OnSettingsEnableChange(Settings.Enabled);
+            OnSettingsFingersOptionChange(Settings.FingersOnly);
+            OnSettingsModelVisibilityChange(Settings.ModelVisibility);
+            OnSettingsTrackingModeChange(Settings.TrackingMode);
+            OnSettingsHeadAttachChange(Settings.HeadAttach); // Includes offsets and parenting
         }
 
         public override void OnUpdate()
@@ -157,9 +138,9 @@ namespace ml_lme
         }
 
         // Settings changes
-        void OnSettingsEnableChange()
+        void OnSettingsEnableChange(bool p_state)
         {
-            if(Settings.Enabled)
+            if(p_state)
             {
                 m_leapController.StartConnection();
                 UpdateDeviceTrackingMode();
@@ -168,40 +149,40 @@ namespace ml_lme
                 m_leapController.StopConnection();
 
             if(m_leapTracked != null)
-                m_leapTracked.SetEnabled(Settings.Enabled);
+                m_leapTracked.SetEnabled(p_state);
         }
 
-        void OnSettingsDesktopOffsetChange()
+        void OnSettingsDesktopOffsetChange(Vector3 p_offset)
         {
             if((m_leapTrackingRoot != null) && !Settings.HeadAttach)
             {
                 if(!PlayerSetup.Instance._inVr)
-                    m_leapTrackingRoot.transform.localPosition = Settings.DesktopOffset * PlayerSetup.Instance.vrCameraRig.transform.localScale.x;
+                    m_leapTrackingRoot.transform.localPosition = p_offset * PlayerSetup.Instance.vrCameraRig.transform.localScale.x;
                 else
-                    m_leapTrackingRoot.transform.localPosition = Settings.DesktopOffset;
+                    m_leapTrackingRoot.transform.localPosition = p_offset;
             }
         }
 
-        void OnSettingsFingersOptionChange()
+        void OnSettingsFingersOptionChange(bool p_state)
         {
             if(m_leapTracked != null)
-                m_leapTracked.SetFingersOnly(Settings.FingersOnly);
+                m_leapTracked.SetFingersOnly(p_state);
         }
 
-        void OnSettingsModelVisibilityChange()
+        void OnSettingsModelVisibilityChange(bool p_state)
         {
             if(m_leapControllerModel != null)
-                m_leapControllerModel.SetActive(Settings.ModelVisibility);
+                m_leapControllerModel.SetActive(p_state);
         }
 
-        void OnSettingsTrackingModeChange()
+        void OnSettingsTrackingModeChange(Settings.LeapTrackingMode p_mode)
         {
             if(Settings.Enabled && (m_leapController != null))
                 UpdateDeviceTrackingMode();
 
             if(m_leapControllerModel != null)
             {
-                switch(Settings.TrackingMode)
+                switch(p_mode)
                 {
                     case Settings.LeapTrackingMode.Screentop:
                         m_leapControllerModel.transform.localRotation = Quaternion.Euler(0f, 0f, 180f);
@@ -216,17 +197,17 @@ namespace ml_lme
             }
         }
 
-        void OnSettingsRootAngleChange()
+        void OnSettingsRootAngleChange(float p_angle)
         {
             if(m_leapTrackingRoot != null)
-                m_leapTrackingRoot.transform.localRotation = Quaternion.Euler(Settings.RootAngle, 0f, 0f);
+                m_leapTrackingRoot.transform.localRotation = Quaternion.Euler(p_angle, 0f, 0f);
         }
 
-        void OnSettingsHeadAttachChange()
+        void OnSettingsHeadAttachChange(bool p_state)
         {
             if(m_leapTrackingRoot != null)
             {
-                if(Settings.HeadAttach)
+                if(p_state)
                 {
                     if(!PlayerSetup.Instance._inVr)
                     {
@@ -261,14 +242,14 @@ namespace ml_lme
             }
         }
 
-        void OnSettingsHeadOffsetChange()
+        void OnSettingsHeadOffsetChange(Vector3 p_offset)
         {
             if((m_leapTrackingRoot != null) && Settings.HeadAttach)
             {
                 if(!PlayerSetup.Instance._inVr)
-                    m_leapTrackingRoot.transform.localPosition = Settings.HeadOffset * PlayerSetup.Instance.vrCameraRig.transform.localScale.x;
+                    m_leapTrackingRoot.transform.localPosition = p_offset * PlayerSetup.Instance.vrCameraRig.transform.localScale.x;
                 else
-                    m_leapTrackingRoot.transform.localPosition = Settings.HeadOffset;
+                    m_leapTrackingRoot.transform.localPosition = p_offset;
             }
         }
 
@@ -338,7 +319,6 @@ namespace ml_lme
             }
         }
 
-
         static void OnAvatarSetup_Postfix(ref PlayerSetup __instance)
         {
             if((__instance != null) && (__instance == PlayerSetup.Instance))
@@ -354,7 +334,7 @@ namespace ml_lme
                 m_leapTracked.SetHands(m_leapHands[0].transform, m_leapHands[1].transform);
                 m_leapTracked.SetFingersOnly(Settings.FingersOnly);
 
-                OnSettingsHeadAttachChange();
+                OnSettingsHeadAttachChange(Settings.HeadAttach);
             }
         }
 

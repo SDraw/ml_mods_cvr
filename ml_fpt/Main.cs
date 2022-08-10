@@ -71,9 +71,6 @@ namespace ml_fpt
                     PlayerSetup.Instance._trackerManager.trackers[m_hipsTrackerIndex].ShowLine(false);
                     CVR_InteractableManager.enableInteractions = true;
 
-                    if(PlayerSetup.Instance._avatar.GetComponent<ABI.CCK.Components.CVRAvatar>().avatarUsesAdvancedSettings)
-                        PlayerSetup.Instance.LoadCurrentAvatarSettingsDefault();
-
                     Reset();
 
                     ShowHudNotification("Calibration completed");
@@ -92,7 +89,7 @@ namespace ml_fpt
 
             ViewManager.Instance.gameMenuView.Listener.ReadyForBindings += () =>
             {
-                ViewManager.Instance.gameMenuView.View.RegisterForEvent("MelonMod_Action_FPT_Calibrate", new System.Action(this.StartCalibration));
+                ViewManager.Instance.gameMenuView.View.RegisterForEvent("MelonMod_FPT_Action_Calibrate", new System.Action(this.StartCalibration));
             };
 
             ViewManager.Instance.gameMenuView.Listener.FinishLoad += (_) =>

@@ -1,5 +1,7 @@
-﻿using ABI_RC.Core.Savior;
+﻿using ABI_RC.Core.InteractionSystem;
+using cohtml;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace ml_lme
@@ -15,18 +17,18 @@ namespace ml_lme
 
         enum ModSetting
         {
-            InteractionLeapMotionTracking,
-            InteractionLeapMotionTrackingDesktopX,
-            InteractionLeapMotionTrackingDesktopY,
-            InteractionLeapMotionTrackingDesktopZ,
-            InteractionLeapMotionTrackingFingersOnly,
-            InteractionLeapMotionTrackingModel,
-            InteractionLeapMotionTrackingMode,
-            InteractionLeapMotionTrackingAngle,
-            InteractionLeapMotionTrackingHead,
-            InteractionLeapMotionTrackingHeadX,
-            InteractionLeapMotionTrackingHeadY,
-            InteractionLeapMotionTrackingHeadZ
+            Enabled,
+            DesktopX,
+            DesktopY,
+            DesktopZ,
+            FingersOnly,
+            Model,
+            Mode,
+            Angle,
+            Head,
+            HeadX,
+            HeadY,
+            HeadZ
         };
 
         static bool ms_enabled = false;
@@ -38,155 +40,195 @@ namespace ml_lme
         static bool ms_headAttach = false;
         static Vector3 ms_headOffset = new Vector3(0f, -0.3f, 0.15f);
 
-        static bool ms_initialized = false;
+        static MelonLoader.MelonPreferences_Category ms_category = null;
+        static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
 
-        static public event Action EnabledChange;
-        static public event Action DesktopOffsetChange;
-        static public event Action FingersOnlyChange;
-        static public event Action ModelVisibilityChange;
-        static public event Action TrackingModeChange;
-        static public event Action RootAngleChange;
-        static public event Action HeadAttachChange;
-        static public event Action HeadOffsetChange;
+        static public event Action<bool> EnabledChange;
+        static public event Action<Vector3> DesktopOffsetChange;
+        static public event Action<bool> FingersOnlyChange;
+        static public event Action<bool> ModelVisibilityChange;
+        static public event Action<LeapTrackingMode> TrackingModeChange;
+        static public event Action<float> RootAngleChange;
+        static public event Action<bool> HeadAttachChange;
+        static public event Action<Vector3> HeadOffsetChange;
 
-        public static void Init(HarmonyLib.Harmony p_instance)
+        public static void Init()
         {
-            p_instance.Patch(
-                typeof(CVRSettings).GetMethod(nameof(CVRSettings.LoadSerializedSettings)),
-                new HarmonyLib.HarmonyMethod(typeof(Settings).GetMethod(nameof(LoadSerializedSettings_Prefix), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)),
-                null
-            );
+            ms_category = MelonLoader.MelonPreferences.CreateCategory("LME");
+
+            ms_entries = new List<MelonLoader.MelonPreferences_Entry>();
+            ms_entries.Add(ms_category.CreateEntry(ModSetting.Enabled.ToString(), ms_enabled));
+            ms_entries.Add(ms_category.CreateEntry(ModSetting.DesktopX.ToString(), 0));
+            ms_entries.Add(ms_category.CreateEntry(ModSetting.DesktopY.ToString(), -45));
+            ms_entries.Add(ms_category.CreateEntry(ModSetting.DesktopZ.ToString(), 30));
+            ms_entries.Add(ms_category.CreateEntry(ModSetting.FingersOnly.ToString(), ms_modelVisibility));
+            ms_entries.Add(ms_category.CreateEntry(ModSetting.Model.ToString(), ms_modelVisibility));
+            ms_entries.Add(ms_category.CreateEntry(ModSetting.Mode.ToString(), (int)ms_trackingMode));
+            ms_entries.Add(ms_category.CreateEntry(ModSetting.Angle.ToString(), 0));
+            ms_entries.Add(ms_category.CreateEntry(ModSetting.Head.ToString(), ms_headAttach));
+            ms_entries.Add(ms_category.CreateEntry(ModSetting.HeadX.ToString(), 0));
+            ms_entries.Add(ms_category.CreateEntry(ModSetting.HeadY.ToString(), -30));
+            ms_entries.Add(ms_category.CreateEntry(ModSetting.HeadZ.ToString(), 15));
+
+            Load();
+
+            MelonLoader.MelonCoroutines.Start(WaitMainMenuUi());
         }
 
-        static void LoadSerializedSettings_Prefix(ref CVRSettings __instance)
+        static System.Collections.IEnumerator WaitMainMenuUi()
         {
-            if(!ms_initialized && (__instance != null))
+            while(ViewManager.Instance == null)
+                yield return null;
+            while(ViewManager.Instance.gameMenuView == null)
+                yield return null;
+            while(ViewManager.Instance.gameMenuView.Listener == null)
+                yield return null;
+
+            ViewManager.Instance.gameMenuView.Listener.ReadyForBindings += () =>
             {
-                var l_settings = HarmonyLib.Traverse.Create(__instance)?.Field("_settings")?.GetValue<System.Collections.Generic.List<ABI_RC.Core.Savior.CVRSettingsValue>>();
-                if(l_settings != null)
+                ViewManager.Instance.gameMenuView.View.BindCall("MelonMod_LME_Call_InpToggle", new Action<string, string>(OnToggleUpdate));
+                ViewManager.Instance.gameMenuView.View.BindCall("MelonMod_LME_Call_InpSlider", new Action<string, string>(OnSliderUpdate));
+                ViewManager.Instance.gameMenuView.View.BindCall("MelonMod_LME_Call_InpDropdown", new Action<string, string>(OnDropdownUpdate));
+            };
+            ViewManager.Instance.gameMenuView.Listener.FinishLoad += (_) =>
+            {
+                ViewManager.Instance.gameMenuView.View.ExecuteScript(Scripts.GetEmbeddedScript("menu.js"));
+                foreach(var l_entry in ms_entries)
+                    ViewManager.Instance.gameMenuView.View.TriggerEvent("updateModSetting", l_entry.DisplayName, l_entry.GetValueAsString());
+            };
+        }
+
+        static void Load()
+        {
+            ms_enabled = (bool)ms_entries[(int)ModSetting.Enabled].BoxedValue;
+            ms_desktopOffset = new Vector3(
+                (int)ms_entries[(int)ModSetting.DesktopX].BoxedValue,
+                (int)ms_entries[(int)ModSetting.DesktopY].BoxedValue,
+                (int)ms_entries[(int)ModSetting.DesktopZ].BoxedValue
+            ) * 0.01f;
+            ms_fingersOnly = (bool)ms_entries[(int)ModSetting.FingersOnly].BoxedValue;
+            ms_modelVisibility = (bool)ms_entries[(int)ModSetting.Model].BoxedValue;
+            ms_trackingMode = (LeapTrackingMode)(int)ms_entries[(int)ModSetting.Mode].BoxedValue;
+            ms_rootAngle = (int)ms_entries[(int)ModSetting.Angle].BoxedValue;
+            ms_headAttach = (bool)ms_entries[(int)ModSetting.Head].BoxedValue;
+            ms_headOffset = new Vector3(
+                (int)ms_entries[(int)ModSetting.HeadX].BoxedValue,
+                (int)ms_entries[(int)ModSetting.HeadY].BoxedValue,
+                (int)ms_entries[(int)ModSetting.HeadZ].BoxedValue
+            ) * 0.01f;
+        }
+
+        static void OnToggleUpdate(string p_name, string p_value)
+        {
+            if(Enum.TryParse(p_name, out ModSetting l_setting))
+            {
+                switch(l_setting)
                 {
-                    l_settings.Add(new CVRSettingsBool(ModSetting.InteractionLeapMotionTracking.ToString(), false));
-                    l_settings.Add(new CVRSettingsInt(ModSetting.InteractionLeapMotionTrackingDesktopX.ToString(), 0));
-                    l_settings.Add(new CVRSettingsInt(ModSetting.InteractionLeapMotionTrackingDesktopY.ToString(), -45));
-                    l_settings.Add(new CVRSettingsInt(ModSetting.InteractionLeapMotionTrackingDesktopZ.ToString(), 30));
-                    l_settings.Add(new CVRSettingsBool(ModSetting.InteractionLeapMotionTrackingFingersOnly.ToString(), false));
-                    l_settings.Add(new CVRSettingsBool(ModSetting.InteractionLeapMotionTrackingModel.ToString(), false));
-                    l_settings.Add(new CVRSettingsInt(ModSetting.InteractionLeapMotionTrackingMode.ToString(), 1));
-                    l_settings.Add(new CVRSettingsInt(ModSetting.InteractionLeapMotionTrackingAngle.ToString(), 0));
-                    l_settings.Add(new CVRSettingsBool(ModSetting.InteractionLeapMotionTrackingHead.ToString(), false));
-                    l_settings.Add(new CVRSettingsInt(ModSetting.InteractionLeapMotionTrackingHeadX.ToString(), 0));
-                    l_settings.Add(new CVRSettingsInt(ModSetting.InteractionLeapMotionTrackingHeadY.ToString(), 0));
-                    l_settings.Add(new CVRSettingsInt(ModSetting.InteractionLeapMotionTrackingHeadZ.ToString(), 0));
+                    case ModSetting.Enabled:
+                    {
+                        ms_enabled = bool.Parse(p_value);
+                        EnabledChange?.Invoke(ms_enabled);
+                    }
+                    break;
+
+                    case ModSetting.FingersOnly:
+                    {
+                        ms_fingersOnly = bool.Parse(p_value);
+                        FingersOnlyChange?.Invoke(ms_fingersOnly);
+                    }
+                    break;
+
+                    case ModSetting.Model:
+                    {
+                        ms_modelVisibility = bool.Parse(p_value);
+                        ModelVisibilityChange?.Invoke(ms_modelVisibility);
+                    }
+                    break;
+
+                    case ModSetting.Head:
+                    {
+                        ms_headAttach = bool.Parse(p_value);
+                        HeadAttachChange?.Invoke(ms_headAttach);
+                    }
+                    break;
                 }
 
-                __instance.settingBoolChanged.AddListener((name, value) =>
-                {
-                    if(Enum.TryParse(name, out ModSetting l_setting))
-                    {
-                        switch(l_setting)
-                        {
-                            case ModSetting.InteractionLeapMotionTracking:
-                            {
-                                ms_enabled = value;
-                                EnabledChange?.Invoke();
-                            }
-                            break;
-
-                            case ModSetting.InteractionLeapMotionTrackingFingersOnly:
-                            {
-                                ms_fingersOnly = value;
-                                FingersOnlyChange?.Invoke();
-                            }
-                            break;
-
-                            case ModSetting.InteractionLeapMotionTrackingModel:
-                            {
-                                ms_modelVisibility = value;
-                                ModelVisibilityChange?.Invoke();
-                            }
-                            break;
-
-                            case ModSetting.InteractionLeapMotionTrackingHead:
-                            {
-                                ms_headAttach = value;
-                                HeadAttachChange?.Invoke();
-                            }
-                            break;
-                        }
-                    }
-                });
-
-                __instance.settingIntChanged.AddListener((name, value) =>
-                {
-                    if(Enum.TryParse(name, out ModSetting l_setting))
-                    {
-                        switch(l_setting)
-                        {
-                            case ModSetting.InteractionLeapMotionTrackingDesktopX:
-                            case ModSetting.InteractionLeapMotionTrackingDesktopY:
-                            case ModSetting.InteractionLeapMotionTrackingDesktopZ:
-                            {
-                                ms_desktopOffset = new Vector3(
-                                    MetaPort.Instance.settings.GetSettingInt(ModSetting.InteractionLeapMotionTrackingDesktopX.ToString()),
-                                    MetaPort.Instance.settings.GetSettingInt(ModSetting.InteractionLeapMotionTrackingDesktopY.ToString()),
-                                    MetaPort.Instance.settings.GetSettingInt(ModSetting.InteractionLeapMotionTrackingDesktopZ.ToString())
-                                ) * 0.01f;
-                                DesktopOffsetChange?.Invoke();
-                            }
-                            break;
-
-                            case ModSetting.InteractionLeapMotionTrackingMode:
-                            {
-                                ms_trackingMode = (LeapTrackingMode)value;
-                                TrackingModeChange?.Invoke();
-                            }
-                            break;
-
-                            case ModSetting.InteractionLeapMotionTrackingAngle:
-                            {
-                                ms_rootAngle = value;
-                                RootAngleChange?.Invoke();
-                            }
-                            break;
-
-                            case ModSetting.InteractionLeapMotionTrackingHeadX:
-                            case ModSetting.InteractionLeapMotionTrackingHeadY:
-                            case ModSetting.InteractionLeapMotionTrackingHeadZ:
-                            {
-                                ms_headOffset = new Vector3(
-                                    MetaPort.Instance.settings.GetSettingInt(ModSetting.InteractionLeapMotionTrackingHeadX.ToString()),
-                                    MetaPort.Instance.settings.GetSettingInt(ModSetting.InteractionLeapMotionTrackingHeadY.ToString()),
-                                    MetaPort.Instance.settings.GetSettingInt(ModSetting.InteractionLeapMotionTrackingHeadZ.ToString())
-                                ) * 0.01f;
-                                HeadOffsetChange?.Invoke();
-                            }
-                            break;
-                        }
-                    }
-                });
-
-                ms_initialized = true;
+                ms_entries[(int)l_setting].BoxedValue = bool.Parse(p_value);
             }
         }
 
-        static public void Reload()
+        static void OnSliderUpdate(string p_name, string p_value)
         {
-            ms_enabled = MetaPort.Instance.settings.GetSettingsBool(ModSetting.InteractionLeapMotionTracking.ToString());
-            ms_desktopOffset = new Vector3(
-                MetaPort.Instance.settings.GetSettingInt(ModSetting.InteractionLeapMotionTrackingDesktopX.ToString()),
-                MetaPort.Instance.settings.GetSettingInt(ModSetting.InteractionLeapMotionTrackingDesktopY.ToString()),
-                MetaPort.Instance.settings.GetSettingInt(ModSetting.InteractionLeapMotionTrackingDesktopZ.ToString())
-            ) * 0.01f;
-            ms_fingersOnly = MetaPort.Instance.settings.GetSettingsBool(ModSetting.InteractionLeapMotionTrackingFingersOnly.ToString());
-            ms_modelVisibility = MetaPort.Instance.settings.GetSettingsBool(ModSetting.InteractionLeapMotionTrackingModel.ToString());
-            ms_trackingMode = (LeapTrackingMode)MetaPort.Instance.settings.GetSettingInt(ModSetting.InteractionLeapMotionTrackingMode.ToString());
-            ms_rootAngle = MetaPort.Instance.settings.GetSettingInt(ModSetting.InteractionLeapMotionTrackingAngle.ToString());
-            ms_headAttach = MetaPort.Instance.settings.GetSettingsBool(ModSetting.InteractionLeapMotionTrackingHead.ToString());
-            ms_headOffset = new Vector3(
-                MetaPort.Instance.settings.GetSettingInt(ModSetting.InteractionLeapMotionTrackingHeadX.ToString()),
-                MetaPort.Instance.settings.GetSettingInt(ModSetting.InteractionLeapMotionTrackingHeadY.ToString()),
-                MetaPort.Instance.settings.GetSettingInt(ModSetting.InteractionLeapMotionTrackingHeadZ.ToString())
-            ) * 0.01f;
+            if(Enum.TryParse(p_name, out ModSetting l_setting))
+            {
+                switch(l_setting)
+                {
+                    case ModSetting.DesktopX:
+                    {
+                        ms_desktopOffset.x = int.Parse(p_value) * 0.01f;
+                        DesktopOffsetChange?.Invoke(ms_desktopOffset);
+                    }
+                    break;
+                    case ModSetting.DesktopY:
+                    {
+                        ms_desktopOffset.y = int.Parse(p_value) * 0.01f;
+                        DesktopOffsetChange?.Invoke(ms_desktopOffset);
+                    }
+                    break;
+                    case ModSetting.DesktopZ:
+                    {
+                        ms_desktopOffset.z = int.Parse(p_value) * 0.01f;
+                        DesktopOffsetChange?.Invoke(ms_desktopOffset);
+                    }
+                    break;
+
+                    case ModSetting.Angle:
+                    {
+                        ms_rootAngle = int.Parse(p_value);
+                        RootAngleChange?.Invoke(ms_rootAngle);
+                    }
+                    break;
+
+                    case ModSetting.HeadX:
+                    {
+                        ms_headOffset.x = int.Parse(p_value) * 0.01f;
+                        HeadOffsetChange?.Invoke(ms_headOffset);
+                    }
+                    break;
+                    case ModSetting.HeadY:
+                    {
+                        ms_headOffset.y = int.Parse(p_value) * 0.01f;
+                        HeadOffsetChange?.Invoke(ms_headOffset);
+                    }
+                    break;
+                    case ModSetting.HeadZ:
+                    {
+                        ms_headOffset.z = int.Parse(p_value) * 0.01f;
+                        HeadOffsetChange?.Invoke(ms_headOffset);
+                    }
+                    break;
+                }
+
+                ms_entries[(int)l_setting].BoxedValue = int.Parse(p_value);
+            }
+        }
+
+        static void OnDropdownUpdate(string p_name, string p_value)
+        {
+            if(Enum.TryParse(p_name, out ModSetting l_setting))
+            {
+                switch(l_setting)
+                {
+                    case ModSetting.Mode:
+                    {
+                        ms_trackingMode = (LeapTrackingMode)int.Parse(p_value);
+                        TrackingModeChange?.Invoke(ms_trackingMode);
+                    }
+                    break;
+                }
+
+                ms_entries[(int)l_setting].BoxedValue = int.Parse(p_value);
+            }
         }
 
         public static bool Enabled

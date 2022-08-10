@@ -84,7 +84,7 @@
     <Compile Include="Scripts.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="menu.js" />
+    <EmbeddedResource Include="resources\menu.js" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

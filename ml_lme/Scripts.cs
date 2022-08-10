@@ -14,7 +14,7 @@ namespace ml_lme
 
             try
             {
-                Stream l_libraryStream = l_assembly.GetManifestResourceStream(l_assemblyName + "." + p_name);
+                Stream l_libraryStream = l_assembly.GetManifestResourceStream(l_assemblyName + ".resources." + p_name);
                 StreamReader l_streadReader = new StreamReader(l_libraryStream);
                 l_result = l_streadReader.ReadToEnd();
             }
