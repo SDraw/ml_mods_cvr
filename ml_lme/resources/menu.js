@@ -10,9 +10,10 @@ engine.on('updateModSetting', function (_name, _value) {
     }
 });
 
-// Modified from original `inp` types
-function inp_toggle_mod(_obj) {
+// Modified from original `inp` types, because I have no js knowledge to hook stuff
+function inp_toggle_mod(_obj, _callbackName) {
     this.obj = _obj;
+    this.callbackName = _callbackName;
     this.value = _obj.getAttribute('data-current');
     this.name = _obj.id;
     this.type = _obj.getAttribute('data-type');
@@ -30,7 +31,7 @@ function inp_toggle_mod(_obj) {
             self.obj.classList.add("checked");
         }
 
-        engine.call('MelonMod_LME_Call_InpToggle', self.name, self.value);
+        engine.call(self.callbackName, self.name, self.value);
     }
 
     _obj.addEventListener('mousedown', this.mouseDown);
@@ -57,8 +58,9 @@ function inp_toggle_mod(_obj) {
     }
 }
 
-function inp_slider_mod(_obj) {
+function inp_slider_mod(_obj, _callbackName) {
     this.obj = _obj;
+    this.callbackName = _callbackName;
     this.minValue = parseFloat(_obj.getAttribute('data-min'));
     this.maxValue = parseFloat(_obj.getAttribute('data-max'));
     this.percent = 0;
@@ -67,7 +69,6 @@ function inp_slider_mod(_obj) {
     this.name = _obj.id;
     this.type = _obj.getAttribute('data-type');
     this.caption = _obj.getAttribute('data-caption');
-    this.continuousUpdate = _obj.getAttribute('data-continuousUpdate');
 
     var self = this;
 
@@ -100,10 +101,8 @@ function inp_slider_mod(_obj) {
             self.valueBar.setAttribute('style', 'width: ' + (self.percent * 100) + '%;');
             self.valueLabel.innerHTML = self.caption + self.value;
 
-            if (_write === true || self.continuousUpdate == 'true') {
-                engine.call('MelonMod_LME_Call_InpSlider', self.name, "" + self.value);
-                self.displayImperial();
-            }
+            engine.call(self.callbackName, self.name, "" + self.value);
+            self.displayImperial();
         }
     }
 
@@ -148,8 +147,9 @@ function inp_slider_mod(_obj) {
     }
 }
 
-function inp_dropdown_mod(_obj) {
+function inp_dropdown_mod(_obj, _callbackName) {
     this.obj = _obj;
+    this.callbackName = _callbackName;
     this.value = _obj.getAttribute('data-current');
     this.options = _obj.getAttribute('data-options').split(',');
     this.name = _obj.id;
@@ -166,7 +166,7 @@ function inp_dropdown_mod(_obj) {
         self.valueElement.innerHTML = _e.target.getAttribute('data-value');
         self.globalClose();
 
-        engine.call('MelonMod_LME_Call_InpDropdown', self.name, self.value);
+        engine.call(self.callbackName, self.name, self.value);
     }
 
     this.openClick = function (_e) {
@@ -256,84 +256,84 @@ function inp_dropdown_mod(_obj) {
         <div class ="row-wrapper">
             <div class ="option-caption">Enable tracking: </div>
             <div class ="option-input">
-                <div id="Enabled" class ="inp_toggle" data-current="false" data-saveOnChange="true"></div>
+                <div id="Enabled" class ="inp_toggle" data-current="false"></div>
             </div>
         </div>
 
         <div class ="row-wrapper">
             <div class ="option-caption">Tracking mode: </div>
             <div class ="option-input">
-                <div id="Mode" class ="inp_dropdown" data-options="0:Screentop,1:Desktop,2:HMD" data-current="1" data-saveOnChange="true"></div>
+                <div id="Mode" class ="inp_dropdown" data-options="0:Screentop,1:Desktop,2:HMD" data-current="1"></div>
             </div>
         </div>
 
         <div class ="row-wrapper">
             <div class ="option-caption">Desktop offset X: </div>
             <div class ="option-input">
-                <div id="DesktopX" class ="inp_slider" data-min="-100" data-max="100" data-current="0" data-saveOnChange="true" data-continuousUpdate="true"></div>
+                <div id="DesktopX" class ="inp_slider" data-min="-100" data-max="100" data-current="0"></div>
             </div>
         </div>
 
         <div class ="row-wrapper">
             <div class ="option-caption">Desktop offset Y: </div>
             <div class ="option-input">
-                <div id="DesktopY" class ="inp_slider" data-min="-100" data-max="100" data-current="-45" data-saveOnChange="true" data-continuousUpdate="true"></div>
+                <div id="DesktopY" class ="inp_slider" data-min="-100" data-max="100" data-current="-45"></div>
             </div>
         </div>
 
         <div class ="row-wrapper">
             <div class ="option-caption">Desktop offset Z: </div>
             <div class ="option-input">
-                <div id="DesktopZ" class ="inp_slider" data-min="-100" data-max="100" data-current="30" data-saveOnChange="true" data-continuousUpdate="true"></div>
+                <div id="DesktopZ" class ="inp_slider" data-min="-100" data-max="100" data-current="30"></div>
             </div>
         </div>
 
         <div class ="row-wrapper">
             <div class ="option-caption">Attach to head: </div>
             <div class ="option-input">
-                <div id="Head" class ="inp_toggle" data-current="false" data-saveOnChange="true"></div>
+                <div id="Head" class ="inp_toggle" data-current="false"></div>
             </div>
         </div>
 
         <div class ="row-wrapper">
             <div class ="option-caption">Head offset X: </div>
             <div class ="option-input">
-                <div id="HeadX" class ="inp_slider" data-min="-100" data-max="100" data-current="0" data-saveOnChange="true" data-continuousUpdate="true"></div>
+                <div id="HeadX" class ="inp_slider" data-min="-100" data-max="100" data-current="0"></div>
             </div>
         </div>
 
         <div class ="row-wrapper">
             <div class ="option-caption">Head offset Y: </div>
             <div class ="option-input">
-                <div id="HeadY" class ="inp_slider" data-min="-100" data-max="100" data-current="-30" data-saveOnChange="true" data-continuousUpdate="true"></div>
+                <div id="HeadY" class ="inp_slider" data-min="-100" data-max="100" data-current="-30"></div>
             </div>
         </div>
 
         <div class ="row-wrapper">
             <div class ="option-caption">Head offset Z: </div>
             <div class ="option-input">
-                <div id="HeadZ" class ="inp_slider" data-min="-100" data-max="100" data-current="15" data-saveOnChange="true" data-continuousUpdate="true"></div>
+                <div id="HeadZ" class ="inp_slider" data-min="-100" data-max="100" data-current="15"></div>
             </div>
         </div>
 
         <div class ="row-wrapper">
             <div class ="option-caption">Offset angle: </div>
             <div class ="option-input">
-                <div id="Angle" class ="inp_slider" data-min="-180" data-max="180" data-current="0" data-saveOnChange="true" data-continuousUpdate="true"></div>
+                <div id="Angle" class ="inp_slider" data-min="-180" data-max="180" data-current="0"></div>
             </div>
         </div>
 
         <div class ="row-wrapper">
             <div class ="option-caption">Fingers tracking only: </div>
             <div class ="option-input">
-                <div id="FingersOnly" class ="inp_toggle" data-current="false" data-saveOnChange="true"></div>
+                <div id="FingersOnly" class ="inp_toggle" data-current="false"></div>
             </div>
         </div>
 
         <div class ="row-wrapper">
             <div class ="option-caption">Model visibility: </div>
             <div class ="option-input">
-                <div id="Model" class ="inp_toggle" data-current="false" data-saveOnChange="true"></div>
+                <div id="Model" class ="inp_toggle" data-current="false"></div>
             </div>
         </div>
     `;
@@ -342,19 +342,19 @@ function inp_dropdown_mod(_obj) {
     // Update toggles in new menu block
     var l_toggles = l_block.querySelectorAll('.inp_toggle');
     for (var i = 0; i < l_toggles.length; i++) {
-        g_modSettings[g_modSettings.length] = new inp_toggle_mod(l_toggles[i]);
-    }
-
-    //Update dropdowns in new menu block
-    var l_dropdowns = l_block.querySelectorAll('.inp_dropdown');
-    for (var i = 0; i < l_dropdowns.length; i++) {
-        g_modSettings[g_modSettings.length] = new inp_dropdown_mod(l_dropdowns[i]);
+        g_modSettings[g_modSettings.length] = new inp_toggle_mod(l_toggles[i], 'MelonMod_LME_Call_InpToggle');
     }
 
     // Update sliders in new menu block
     var l_sliders = l_block.querySelectorAll('.inp_slider');
     for (var i = 0; i < l_sliders.length; i++) {
-        g_modSettings[g_modSettings.length] = new inp_slider_mod(l_sliders[i]);
+        g_modSettings[g_modSettings.length] = new inp_slider_mod(l_sliders[i], 'MelonMod_LME_Call_InpSlider');
+    }
+
+    //Update dropdowns in new menu block
+    var l_dropdowns = l_block.querySelectorAll('.inp_dropdown');
+    for (var i = 0; i < l_dropdowns.length; i++) {
+        g_modSettings[g_modSettings.length] = new inp_dropdown_mod(l_dropdowns[i], 'MelonMod_LME_Call_InpDropdown');
     }
 }
 
