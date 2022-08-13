@@ -94,7 +94,7 @@ namespace ml_lme
             {
                 ViewManager.Instance.gameMenuView.View.ExecuteScript(Scripts.GetEmbeddedScript("menu.js"));
                 foreach(var l_entry in ms_entries)
-                    ViewManager.Instance.gameMenuView.View.TriggerEvent("updateModSetting", l_entry.DisplayName, l_entry.GetValueAsString());
+                    ViewManager.Instance.gameMenuView.View.TriggerEvent("updateModSettingLME", l_entry.DisplayName, l_entry.GetValueAsString());
             };
         }
 

@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ml_aci", "ml_aci\ml_aci.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ml_drs", "ml_drs\ml_drs.csproj", "{06CD5155-4459-48C3-8A53-E0B91136351B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ml_aap", "ml_aap\ml_aap.csproj", "{96D1D71A-23A4-4A0F-9736-25E711BA48F9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ml_amt", "ml_amt\ml_amt.csproj", "{74E13D02-A506-41A2-A2CF-C8B3D5B1E452}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,10 +35,10 @@ Global
 		{06CD5155-4459-48C3-8A53-E0B91136351B}.Debug|x64.Build.0 = Debug|x64
 		{06CD5155-4459-48C3-8A53-E0B91136351B}.Release|x64.ActiveCfg = Release|x64
 		{06CD5155-4459-48C3-8A53-E0B91136351B}.Release|x64.Build.0 = Release|x64
-		{96D1D71A-23A4-4A0F-9736-25E711BA48F9}.Debug|x64.ActiveCfg = Debug|x64
-		{96D1D71A-23A4-4A0F-9736-25E711BA48F9}.Debug|x64.Build.0 = Debug|x64
-		{96D1D71A-23A4-4A0F-9736-25E711BA48F9}.Release|x64.ActiveCfg = Release|x64
-		{96D1D71A-23A4-4A0F-9736-25E711BA48F9}.Release|x64.Build.0 = Release|x64
+		{74E13D02-A506-41A2-A2CF-C8B3D5B1E452}.Debug|x64.ActiveCfg = Debug|x64
+		{74E13D02-A506-41A2-A2CF-C8B3D5B1E452}.Debug|x64.Build.0 = Debug|x64
+		{74E13D02-A506-41A2-A2CF-C8B3D5B1E452}.Release|x64.ActiveCfg = Release|x64
+		{74E13D02-A506-41A2-A2CF-C8B3D5B1E452}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

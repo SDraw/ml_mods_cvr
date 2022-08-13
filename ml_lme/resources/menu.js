@@ -1,17 +1,17 @@
 ﻿// Add settings
-var g_modSettings = [];
+var g_modSettingsLME = [];
 
-engine.on('updateModSetting', function (_name, _value) {
-    for (var i = 0; i < g_modSettings.length; i++) {
-        if (g_modSettings[i].name == _name) {
-            g_modSettings[i].updateValue(_value);
+engine.on('updateModSettingLME', function (_name, _value) {
+    for (var i = 0; i < g_modSettingsLME.length; i++) {
+        if (g_modSettingsLME[i].name == _name) {
+            g_modSettingsLME[i].updateValue(_value);
             break;
         }
     }
 });
 
 // Modified from original `inp` types, because I have no js knowledge to hook stuff
-function inp_toggle_mod(_obj, _callbackName) {
+function inp_toggle_mod_lme(_obj, _callbackName) {
     this.obj = _obj;
     this.callbackName = _callbackName;
     this.value = _obj.getAttribute('data-current');
@@ -58,7 +58,7 @@ function inp_toggle_mod(_obj, _callbackName) {
     }
 }
 
-function inp_slider_mod(_obj, _callbackName) {
+function inp_slider_mod_lme(_obj, _callbackName) {
     this.obj = _obj;
     this.callbackName = _callbackName;
     this.minValue = parseFloat(_obj.getAttribute('data-min'));
@@ -147,7 +147,7 @@ function inp_slider_mod(_obj, _callbackName) {
     }
 }
 
-function inp_dropdown_mod(_obj, _callbackName) {
+function inp_dropdown_mod_lme(_obj, _callbackName) {
     this.obj = _obj;
     this.callbackName = _callbackName;
     this.value = _obj.getAttribute('data-current');
@@ -342,19 +342,19 @@ function inp_dropdown_mod(_obj, _callbackName) {
     // Update toggles in new menu block
     var l_toggles = l_block.querySelectorAll('.inp_toggle');
     for (var i = 0; i < l_toggles.length; i++) {
-        g_modSettings[g_modSettings.length] = new inp_toggle_mod(l_toggles[i], 'MelonMod_LME_Call_InpToggle');
+        g_modSettingsLME[g_modSettingsLME.length] = new inp_toggle_mod_lme(l_toggles[i], 'MelonMod_LME_Call_InpToggle');
     }
 
     // Update sliders in new menu block
     var l_sliders = l_block.querySelectorAll('.inp_slider');
     for (var i = 0; i < l_sliders.length; i++) {
-        g_modSettings[g_modSettings.length] = new inp_slider_mod(l_sliders[i], 'MelonMod_LME_Call_InpSlider');
+        g_modSettingsLME[g_modSettingsLME.length] = new inp_slider_mod_lme(l_sliders[i], 'MelonMod_LME_Call_InpSlider');
     }
 
     //Update dropdowns in new menu block
     var l_dropdowns = l_block.querySelectorAll('.inp_dropdown');
     for (var i = 0; i < l_dropdowns.length; i++) {
-        g_modSettings[g_modSettings.length] = new inp_dropdown_mod(l_dropdowns[i], 'MelonMod_LME_Call_InpDropdown');
+        g_modSettingsLME[g_modSettingsLME.length] = new inp_dropdown_mod_lme(l_dropdowns[i], 'MelonMod_LME_Call_InpDropdown');
     }
 }
 
