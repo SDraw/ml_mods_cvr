@@ -36,3 +36,4 @@ Available additional parameters for AAS animator:
   
 # Notes
 * Sometimes after restoring legs autostep avatar's torso shakes, currently investigating solution.
+* Usage of `Upright` parameter for transition between poses (standing/crouching/proning) in desktop mode is useless, because in this case your animations are updating value of `Upright` parameter, not the other way around.
