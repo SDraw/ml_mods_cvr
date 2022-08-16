@@ -8,4 +8,4 @@ Merged set of MelonLoader mods for ChilloutVR.
 | Desktop Reticle Switch | ml_drs | 1.0.0 | Yes | Working |
 | Four Point Tracking | ml_fpt | 1.0.1 | Yes | Working |
 | Leap Motion Extension | ml_lme | 1.1.4 | Pending approval | Working |
-| Server Connection Info | ml_sci | 1.0.0 | Pending approval | Working |
+| Server Connection Info | ml_sci | 1.0.1 | Pending approval | Working |
