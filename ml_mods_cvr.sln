@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ml_drs", "ml_drs\ml_drs.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ml_amt", "ml_amt\ml_amt.csproj", "{74E13D02-A506-41A2-A2CF-C8B3D5B1E452}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ml_sci", "ml_sci\ml_sci.csproj", "{E5481D41-196C-4241-AF26-6595EF1863C1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -39,6 +41,10 @@ Global
 		{74E13D02-A506-41A2-A2CF-C8B3D5B1E452}.Debug|x64.Build.0 = Debug|x64
 		{74E13D02-A506-41A2-A2CF-C8B3D5B1E452}.Release|x64.ActiveCfg = Release|x64
 		{74E13D02-A506-41A2-A2CF-C8B3D5B1E452}.Release|x64.Build.0 = Release|x64
+		{E5481D41-196C-4241-AF26-6595EF1863C1}.Debug|x64.ActiveCfg = Debug|x64
+		{E5481D41-196C-4241-AF26-6595EF1863C1}.Debug|x64.Build.0 = Debug|x64
+		{E5481D41-196C-4241-AF26-6595EF1863C1}.Release|x64.ActiveCfg = Release|x64
+		{E5481D41-196C-4241-AF26-6595EF1863C1}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

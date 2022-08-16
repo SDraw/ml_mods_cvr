@@ -28,6 +28,8 @@ namespace ml_amt
 
         RootMotion.FinalIK.VRIK m_vrIk = null;
 
+        bool m_ready = false;
+
         bool m_standing = true;
         float m_currentUpright = 1f;
         float m_locomotionWeight = 1f;
@@ -49,38 +51,41 @@ namespace ml_amt
 
         void Update()
         {
-            // Update upright
-            Matrix4x4 l_hmdMatrix = PlayerSetup.Instance.transform.GetMatrix().inverse * (PlayerSetup.Instance._inVr ? PlayerSetup.Instance.vrHeadTracker.transform.GetMatrix() : PlayerSetup.Instance.desktopCameraRig.transform.GetMatrix());
-            float l_currentHeight = Mathf.Clamp((l_hmdMatrix * ms_pointVector).y, 0f, float.MaxValue);
-            float l_avatarViewHeight = Mathf.Clamp(PlayerSetup.Instance.GetViewPointHeight() * PlayerSetup.Instance._avatar.transform.localScale.y, 0f, float.MaxValue);
-            m_currentUpright = Mathf.Clamp((((l_currentHeight > 0f) && (l_avatarViewHeight > 0f)) ? (l_currentHeight / l_avatarViewHeight) : 0f), 0f, 1f);
-            m_standing = (m_currentUpright > m_crouchLimit);
-
-            if((m_vrIk != null) && m_vrIk.enabled && !PlayerSetup.Instance._movementSystem.sitting && (PlayerSetup.Instance._movementSystem.movementVector.magnitude <= Mathf.Epsilon) && !PlayerSetup.Instance.fullBodyActive)
+            if(m_ready)
             {
-                m_locomotionWeight = Mathf.Lerp(m_locomotionWeight, m_standing ? 1f : 0f, 0.5f);
-                m_vrIk.solver.locomotion.weight = m_locomotionWeight;
-            }
+                // Update upright
+                Matrix4x4 l_hmdMatrix = PlayerSetup.Instance.transform.GetMatrix().inverse * (PlayerSetup.Instance._inVr ? PlayerSetup.Instance.vrHeadTracker.transform.GetMatrix() : PlayerSetup.Instance.desktopCameraRig.transform.GetMatrix());
+                float l_currentHeight = Mathf.Clamp((l_hmdMatrix * ms_pointVector).y, 0f, float.MaxValue);
+                float l_avatarViewHeight = Mathf.Clamp(PlayerSetup.Instance.GetViewPointHeight() * PlayerSetup.Instance._avatar.transform.localScale.y, 0f, float.MaxValue);
+                m_currentUpright = Mathf.Clamp((((l_currentHeight > 0f) && (l_avatarViewHeight > 0f)) ? (l_currentHeight / l_avatarViewHeight) : 0f), 0f, 1f);
+                m_standing = (m_currentUpright > m_crouchLimit);
 
-            if(m_parameters.Count > 0)
-            {
-                foreach(AdditionalParameterInfo l_param in m_parameters)
+                if((m_vrIk != null) && m_vrIk.enabled && !PlayerSetup.Instance._movementSystem.sitting && (PlayerSetup.Instance._movementSystem.movementVector.magnitude <= Mathf.Epsilon) && !PlayerSetup.Instance.fullBodyActive)
                 {
-                    switch(l_param.m_type)
+                    m_locomotionWeight = Mathf.Lerp(m_locomotionWeight, m_standing ? 1f : 0f, 0.5f);
+                    m_vrIk.solver.locomotion.weight = m_locomotionWeight;
+                }
+
+                if(m_parameters.Count > 0)
+                {
+                    foreach(AdditionalParameterInfo l_param in m_parameters)
                     {
-                        case ParameterType.Upright:
+                        switch(l_param.m_type)
                         {
-                            switch(l_param.m_sync)
+                            case ParameterType.Upright:
                             {
-                                case ParameterSyncType.Local:
-                                    PlayerSetup.Instance._animator.SetFloat(l_param.m_hash, m_currentUpright);
-                                    break;
-                                case ParameterSyncType.Synced:
-                                    PlayerSetup.Instance.changeAnimatorParam(l_param.m_name, m_currentUpright);
-                                    break;
+                                switch(l_param.m_sync)
+                                {
+                                    case ParameterSyncType.Local:
+                                        PlayerSetup.Instance._animator.SetFloat(l_param.m_hash, m_currentUpright);
+                                        break;
+                                    case ParameterSyncType.Synced:
+                                        PlayerSetup.Instance.changeAnimatorParam(l_param.m_name, m_currentUpright);
+                                        break;
+                                }
                             }
+                            break;
                         }
-                        break;
                     }
                 }
             }
@@ -89,6 +94,7 @@ namespace ml_amt
         public void OnAvatarClear()
         {
             m_vrIk = null;
+            m_ready = false;
             m_standing = true;
             m_parameters.Clear();
             m_locomotionWeight = 1f;
@@ -128,6 +134,8 @@ namespace ml_amt
             Transform l_customLimit = PlayerSetup.Instance._avatar.transform.Find("CrouchLimit");
             m_customCrouchLimit = (l_customLimit != null);
             m_crouchLimit = m_customCrouchLimit ? Mathf.Clamp(l_customLimit.localPosition.y, 0f, 1f) : Settings.CrouchLimit;
+
+            m_ready = true;
         }
 
         public void SetCrouchLimit(float p_value)

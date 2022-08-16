@@ -250,7 +250,7 @@ function inp_dropdown_mod_lme(_obj, _callbackName) {
 
 // Add own menu
 {
-    var l_block = document.createElement('div');
+    let l_block = document.createElement('div');
     l_block.innerHTML = `
         <h2>Leap Motion tracking</h2>
         <div class ="row-wrapper">
@@ -340,21 +340,20 @@ function inp_dropdown_mod_lme(_obj, _callbackName) {
     document.getElementById('settings-implementation').appendChild(l_block);
 
     // Update toggles in new menu block
-    var l_toggles = l_block.querySelectorAll('.inp_toggle');
+    let l_toggles = l_block.querySelectorAll('.inp_toggle');
     for (var i = 0; i < l_toggles.length; i++) {
         g_modSettingsLME[g_modSettingsLME.length] = new inp_toggle_mod_lme(l_toggles[i], 'MelonMod_LME_Call_InpToggle');
     }
 
     // Update sliders in new menu block
-    var l_sliders = l_block.querySelectorAll('.inp_slider');
+    let l_sliders = l_block.querySelectorAll('.inp_slider');
     for (var i = 0; i < l_sliders.length; i++) {
         g_modSettingsLME[g_modSettingsLME.length] = new inp_slider_mod_lme(l_sliders[i], 'MelonMod_LME_Call_InpSlider');
     }
 
     //Update dropdowns in new menu block
-    var l_dropdowns = l_block.querySelectorAll('.inp_dropdown');
+    let l_dropdowns = l_block.querySelectorAll('.inp_dropdown');
     for (var i = 0; i < l_dropdowns.length; i++) {
         g_modSettingsLME[g_modSettingsLME.length] = new inp_dropdown_mod_lme(l_dropdowns[i], 'MelonMod_LME_Call_InpDropdown');
     }
 }
-
