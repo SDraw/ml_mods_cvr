@@ -21,19 +21,31 @@ function inp_slider_mod_amt(_obj, _callbackName) {
     this.dragActive = false;
     this.name = _obj.id;
     this.type = _obj.getAttribute('data-type');
-    this.caption = _obj.getAttribute('data-caption');
+    this.stepSize = _obj.getAttribute('data-stepSize') || 0;
+    this.format = _obj.getAttribute('data-format') || '{value}';
 
     var self = this;
+
+    if (this.stepSize != 0)
+        this.value = Math.round(this.value / this.stepSize) * this.stepSize;
+    else
+        this.value = Math.round(this.value);
+
+    this.valueLabelBackground = document.createElement('div');
+    this.valueLabelBackground.className = 'valueLabel background';
+    this.valueLabelBackground.innerHTML = this.format.replace('{value}', this.value);
+    this.obj.appendChild(this.valueLabelBackground);
 
     this.valueBar = document.createElement('div');
     this.valueBar.className = 'valueBar';
     this.valueBar.setAttribute('style', 'width: ' + (((this.value - this.minValue) / (this.maxValue - this.minValue)) * 100) + '%;');
     this.obj.appendChild(this.valueBar);
 
-    this.valueLabel = document.createElement('div');
-    this.valueLabel.className = 'valueLabel';
-    this.valueLabel.innerHTML = this.caption + Math.round(this.value);
-    this.obj.appendChild(this.valueLabel);
+    this.valueLabelForeground = document.createElement('div');
+    this.valueLabelForeground.className = 'valueLabel foreground';
+    this.valueLabelForeground.innerHTML = this.format.replace('{value}', this.value);
+    this.valueLabelForeground.setAttribute('style', 'width: ' + (1.0 / ((this.value - this.minValue) / (this.maxValue - this.minValue)) * 100) + '%;');
+    this.valueBar.appendChild(this.valueLabelForeground);
 
     this.mouseDown = function (_e) {
         self.dragActive = true;
@@ -49,10 +61,17 @@ function inp_slider_mod_amt(_obj, _callbackName) {
             var value = self.percent;
             value *= (self.maxValue - self.minValue);
             value += self.minValue;
-            self.value = Math.round(value);
+            if (self.stepSize != 0) {
+                value = Math.round(value / self.stepSize);
+                self.value = value * self.stepSize;
+                self.percent = (self.value - self.minValue) / (self.maxValue - self.minValue);
+            }
+            else
+                self.value = Math.round(value);
 
             self.valueBar.setAttribute('style', 'width: ' + (self.percent * 100) + '%;');
-            self.valueLabel.innerHTML = self.caption + self.value;
+            self.valueLabelForeground.setAttribute('style', 'width: ' + (1.0 / self.percent * 100) + '%;');
+            self.valueLabelBackground.innerHTML = self.valueLabelForeground.innerHTML = self.format.replace('{value}', self.value);
 
             engine.call(self.callbackName, self.name, "" + self.value);
             self.displayImperial();
@@ -73,10 +92,14 @@ function inp_slider_mod_amt(_obj, _callbackName) {
     }
 
     this.updateValue = function (value) {
-        self.value = Math.round(value);
+        if (self.stepSize != 0)
+            self.value = Math.round(value * self.stepSize) / self.stepSize;
+        else
+            self.value = Math.round(value);
         self.percent = (self.value - self.minValue) / (self.maxValue - self.minValue);
         self.valueBar.setAttribute('style', 'width: ' + (self.percent * 100) + '%;');
-        self.valueLabel.innerHTML = self.caption + self.value;
+        self.valueLabelForeground.setAttribute('style', 'width: ' + (1.0 / self.percent * 100) + '%;');
+        self.valueLabelBackground.innerHTML = self.valueLabelForeground.innerHTML = self.format.replace('{value}', self.value);
         self.displayImperial();
     }
 
@@ -104,11 +127,15 @@ function inp_slider_mod_amt(_obj, _callbackName) {
 {
     let l_block = document.createElement('div');
     l_block.innerHTML = `
-        <h2>Avatar Motion Tweaker</h2>
+        <div class ="settings-subcategory">
+            <div class ="subcategory-name">Avatar Motion Tweaker</div>
+            <div class ="subcategory-description"></div>
+        </div>
+
         <div class ="row-wrapper">
             <div class ="option-caption">Legs locomotion upright limit: </div>
             <div class ="option-input">
-                <div id="CrouchLimit" class ="inp_slider" data-min="0" data-max="100" data-current="65"></div>
+                <div id="CrouchLimit" class ="inp_slider no-scroll" data-min="0" data-max="100" data-current="65"></div>
             </div>
         </div>
     `;

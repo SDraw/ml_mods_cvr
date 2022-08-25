@@ -71,6 +71,9 @@ namespace ml_fpt
                     PlayerSetup.Instance._trackerManager.trackers[m_hipsTrackerIndex].ShowLine(false);
                     CVR_InteractableManager.enableInteractions = true;
 
+                    if(PlayerSetup.Instance._avatar.GetComponent<ABI.CCK.Components.CVRAvatar>().avatarUsesAdvancedSettings)
+                        PlayerSetup.Instance.LoadCurrentAvatarSettingsDefault();
+
                     Reset();
 
                     ShowHudNotification("Calibration completed");

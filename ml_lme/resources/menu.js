@@ -68,19 +68,31 @@ function inp_slider_mod_lme(_obj, _callbackName) {
     this.dragActive = false;
     this.name = _obj.id;
     this.type = _obj.getAttribute('data-type');
-    this.caption = _obj.getAttribute('data-caption');
+    this.stepSize = _obj.getAttribute('data-stepSize') || 0;
+    this.format = _obj.getAttribute('data-format') || '{value}';
 
     var self = this;
+
+    if (this.stepSize != 0)
+        this.value = Math.round(this.value / this.stepSize) * this.stepSize;
+    else
+        this.value = Math.round(this.value);
+
+    this.valueLabelBackground = document.createElement('div');
+    this.valueLabelBackground.className = 'valueLabel background';
+    this.valueLabelBackground.innerHTML = this.format.replace('{value}', this.value);
+    this.obj.appendChild(this.valueLabelBackground);
 
     this.valueBar = document.createElement('div');
     this.valueBar.className = 'valueBar';
     this.valueBar.setAttribute('style', 'width: ' + (((this.value - this.minValue) / (this.maxValue - this.minValue)) * 100) + '%;');
     this.obj.appendChild(this.valueBar);
 
-    this.valueLabel = document.createElement('div');
-    this.valueLabel.className = 'valueLabel';
-    this.valueLabel.innerHTML = this.caption + Math.round(this.value);
-    this.obj.appendChild(this.valueLabel);
+    this.valueLabelForeground = document.createElement('div');
+    this.valueLabelForeground.className = 'valueLabel foreground';
+    this.valueLabelForeground.innerHTML = this.format.replace('{value}', this.value);
+    this.valueLabelForeground.setAttribute('style', 'width: ' + (1.0 / ((this.value - this.minValue) / (this.maxValue - this.minValue)) * 100) + '%;');
+    this.valueBar.appendChild(this.valueLabelForeground);
 
     this.mouseDown = function (_e) {
         self.dragActive = true;
@@ -96,10 +108,17 @@ function inp_slider_mod_lme(_obj, _callbackName) {
             var value = self.percent;
             value *= (self.maxValue - self.minValue);
             value += self.minValue;
-            self.value = Math.round(value);
+            if (self.stepSize != 0) {
+                value = Math.round(value / self.stepSize);
+                self.value = value * self.stepSize;
+                self.percent = (self.value - self.minValue) / (self.maxValue - self.minValue);
+            }
+            else
+                self.value = Math.round(value);
 
             self.valueBar.setAttribute('style', 'width: ' + (self.percent * 100) + '%;');
-            self.valueLabel.innerHTML = self.caption + self.value;
+            self.valueLabelForeground.setAttribute('style', 'width: ' + (1.0 / self.percent * 100) + '%;');
+            self.valueLabelBackground.innerHTML = self.valueLabelForeground.innerHTML = self.format.replace('{value}', self.value);
 
             engine.call(self.callbackName, self.name, "" + self.value);
             self.displayImperial();
@@ -120,10 +139,14 @@ function inp_slider_mod_lme(_obj, _callbackName) {
     }
 
     this.updateValue = function (value) {
-        self.value = Math.round(value);
+        if (self.stepSize != 0)
+            self.value = Math.round(value * self.stepSize) / self.stepSize;
+        else
+            self.value = Math.round(value);
         self.percent = (self.value - self.minValue) / (self.maxValue - self.minValue);
         self.valueBar.setAttribute('style', 'width: ' + (self.percent * 100) + '%;');
-        self.valueLabel.innerHTML = self.caption + self.value;
+        self.valueLabelForeground.setAttribute('style', 'width: ' + (1.0 / self.percent * 100) + '%;');
+        self.valueLabelBackground.innerHTML = self.valueLabelForeground.innerHTML = self.format.replace('{value}', self.value);
         self.displayImperial();
     }
 
@@ -252,88 +275,92 @@ function inp_dropdown_mod_lme(_obj, _callbackName) {
 {
     let l_block = document.createElement('div');
     l_block.innerHTML = `
-        <h2>Leap Motion tracking</h2>
+        <div class ="settings-subcategory">
+            <div class ="subcategory-name">Leap Motion tracking</div>
+            <div class ="subcategory-description"></div>
+        </div>
+
         <div class ="row-wrapper">
             <div class ="option-caption">Enable tracking: </div>
             <div class ="option-input">
-                <div id="Enabled" class ="inp_toggle" data-current="false"></div>
+                <div id="Enabled" class ="inp_toggle no-scroll" data-current="false"></div>
             </div>
         </div>
 
         <div class ="row-wrapper">
             <div class ="option-caption">Tracking mode: </div>
             <div class ="option-input">
-                <div id="Mode" class ="inp_dropdown" data-options="0:Screentop,1:Desktop,2:HMD" data-current="1"></div>
+                <div id="Mode" class ="inp_dropdown no-scroll" data-options="0:Screentop,1:Desktop,2:HMD" data-current="1"></div>
             </div>
         </div>
 
         <div class ="row-wrapper">
             <div class ="option-caption">Desktop offset X: </div>
             <div class ="option-input">
-                <div id="DesktopX" class ="inp_slider" data-min="-100" data-max="100" data-current="0"></div>
+                <div id="DesktopX" class ="inp_slider no-scroll" data-min="-100" data-max="100" data-current="0"></div>
             </div>
         </div>
 
         <div class ="row-wrapper">
             <div class ="option-caption">Desktop offset Y: </div>
             <div class ="option-input">
-                <div id="DesktopY" class ="inp_slider" data-min="-100" data-max="100" data-current="-45"></div>
+                <div id="DesktopY" class ="inp_slider no-scroll" data-min="-100" data-max="100" data-current="-45"></div>
             </div>
         </div>
 
         <div class ="row-wrapper">
             <div class ="option-caption">Desktop offset Z: </div>
             <div class ="option-input">
-                <div id="DesktopZ" class ="inp_slider" data-min="-100" data-max="100" data-current="30"></div>
+                <div id="DesktopZ" class ="inp_slider no-scroll" data-min="-100" data-max="100" data-current="30"></div>
             </div>
         </div>
 
         <div class ="row-wrapper">
             <div class ="option-caption">Attach to head: </div>
             <div class ="option-input">
-                <div id="Head" class ="inp_toggle" data-current="false"></div>
+                <div id="Head" class ="inp_toggle no-scroll" data-current="false"></div>
             </div>
         </div>
 
         <div class ="row-wrapper">
             <div class ="option-caption">Head offset X: </div>
             <div class ="option-input">
-                <div id="HeadX" class ="inp_slider" data-min="-100" data-max="100" data-current="0"></div>
+                <div id="HeadX" class ="inp_slider no-scroll" data-min="-100" data-max="100" data-current="0"></div>
             </div>
         </div>
 
         <div class ="row-wrapper">
             <div class ="option-caption">Head offset Y: </div>
             <div class ="option-input">
-                <div id="HeadY" class ="inp_slider" data-min="-100" data-max="100" data-current="-30"></div>
+                <div id="HeadY" class ="inp_slider no-scroll" data-min="-100" data-max="100" data-current="-30"></div>
             </div>
         </div>
 
         <div class ="row-wrapper">
             <div class ="option-caption">Head offset Z: </div>
             <div class ="option-input">
-                <div id="HeadZ" class ="inp_slider" data-min="-100" data-max="100" data-current="15"></div>
+                <div id="HeadZ" class ="inp_slider no-scroll" data-min="-100" data-max="100" data-current="15"></div>
             </div>
         </div>
 
         <div class ="row-wrapper">
             <div class ="option-caption">Offset angle: </div>
             <div class ="option-input">
-                <div id="Angle" class ="inp_slider" data-min="-180" data-max="180" data-current="0"></div>
+                <div id="Angle" class ="inp_slider no-scroll" data-min="-180" data-max="180" data-current="0"></div>
             </div>
         </div>
 
         <div class ="row-wrapper">
             <div class ="option-caption">Fingers tracking only: </div>
             <div class ="option-input">
-                <div id="FingersOnly" class ="inp_toggle" data-current="false"></div>
+                <div id="FingersOnly" class ="inp_toggle no-scroll" data-current="false"></div>
             </div>
         </div>
 
         <div class ="row-wrapper">
             <div class ="option-caption">Model visibility: </div>
             <div class ="option-input">
-                <div id="Model" class ="inp_toggle" data-current="false"></div>
+                <div id="Model" class ="inp_toggle no-scroll" data-current="false"></div>
             </div>
         </div>
     `;
