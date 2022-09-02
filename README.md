@@ -4,8 +4,8 @@ Merged set of MelonLoader mods for ChilloutVR.
 | Full name | Short name | Latest version | Available in [CVRMA](https://github.com/knah/CVRMelonAssistant) | Current Status | Notes |
 |-----------|------------|----------------|-----------------------------------------------------------------|----------------|-------|
 | Avatar Change Info | ml_aci | 1.0.1 | Yes | Working |
-| Avatar Motion Tweaker | ml_amt | 1.0.3 | Yes | Working |
+| Avatar Motion Tweaker | ml_amt | 1.0.5 | Yes, 1.0.3 | Working | FBT autostep problem |
 | Desktop Reticle Switch | ml_drs | 1.0.0 | Yes | Working |
 | Four Point Tracking | ml_fpt | 1.0.2 | Yes | Working |
-| Leap Motion Extension | ml_lme | 1.1.5 | Yes | Working |
+| Leap Motion Extension | ml_lme | 1.1.7 | Pending | Working |
 | Server Connection Info | ml_sci | 1.0.1 | Yes | Working |

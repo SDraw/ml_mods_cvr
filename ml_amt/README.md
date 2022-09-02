@@ -16,6 +16,9 @@ Available mod's settings in `Settings - Implementation - Avatar Motion Tweaker`:
 Available additional parameters for AAS animator:
 * **`Upright`:** defines linear coefficient between current viewpoint height and avatar's viewpoint height. Range - [0.0,1.0] (0.0 - floor, 1.0 - full standing).
   * Note: can be set as local-only (not synced) if starts with `#` character.
+
+Additional avatars tweaks:
+* If avatar has child object with name `LocomotionOffset` its local position will be used for offsetting VRIK locomotion center.
   
 ## Example of usage in AAS animator for mixed desktop and VR
 * To differentiate between desktop and VR players use `CVR Parameter Stream` component on avatar's root gameobject. As example, `InVR` and `InFBT` are boolean typed animator parameters:  

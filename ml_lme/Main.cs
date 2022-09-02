@@ -144,12 +144,6 @@ namespace ml_lme
             }
         }
 
-        public override void OnLateUpdate()
-        {
-            if(ms_vrState && Settings.Enabled && (m_leapTracked != null))
-                m_leapTracked.UpdateTrackingLate(m_gesturesData);
-        }
-
         // Settings changes
         void OnSettingsEnableChange(bool p_state)
         {

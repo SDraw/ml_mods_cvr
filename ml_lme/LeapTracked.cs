@@ -1,6 +1,5 @@
 ﻿using ABI_RC.Core.Player;
 using ABI_RC.Core.Savior;
-using RootMotion.FinalIK;
 using UnityEngine;
 
 namespace ml_lme
@@ -8,11 +7,10 @@ namespace ml_lme
     [DisallowMultipleComponent]
     class LeapTracked : MonoBehaviour
     {
+        IndexIK m_indexIK = null;
+
         bool m_enabled = true;
         bool m_fingersOnly = false;
-
-        IndexIK m_indexIK = null;
-        VRIK m_vrIK = null;
 
         LeapIK m_leapIK = null;
         Transform m_leftHand = null;
@@ -49,9 +47,6 @@ namespace ml_lme
         {
             m_leftHand = p_left;
             m_rightHand = p_right;
-
-            if(m_leapIK != null)
-                m_leapIK.SetHands(m_leftHand, m_rightHand);
         }
 
         public void UpdateTracking(GestureMatcher.GesturesData p_gesturesData)
@@ -99,62 +94,25 @@ namespace ml_lme
             }
         }
 
-        public void UpdateTrackingLate(GestureMatcher.GesturesData p_gesturesData)
-        {
-            if(m_enabled && !m_fingersOnly && (m_vrIK != null) && m_vrIK.enabled)
-            {
-                if(p_gesturesData.m_handsPresenses[0])
-                {
-                    IKSolverVR.Arm l_arm = m_vrIK.solver?.leftArm;
-                    if(l_arm?.target != null)
-                    {
-                        if(l_arm.positionWeight < 1f)
-                            l_arm.positionWeight = 1f;
-                        l_arm.target.position = p_gesturesData.m_handsPositons[0];
-
-                        if(l_arm.rotationWeight < 1f)
-                            l_arm.rotationWeight = 1f;
-                        l_arm.target.rotation = p_gesturesData.m_handsRotations[0];
-                    }
-                }
-
-                if(p_gesturesData.m_handsPresenses[1])
-                {
-                    IKSolverVR.Arm l_arm = m_vrIK.solver?.rightArm;
-                    if(l_arm?.target != null)
-                    {
-                        if(l_arm.positionWeight < 1f)
-                            l_arm.positionWeight = 1f;
-                        l_arm.target.position = p_gesturesData.m_handsPositons[1];
-
-                        if(l_arm.rotationWeight < 1f)
-                            l_arm.rotationWeight = 1f;
-                        l_arm.target.rotation = p_gesturesData.m_handsRotations[1];
-                    }
-                }
-            }
-        }
-
         public void OnAvatarClear()
         {
             m_leapIK = null;
-            m_vrIK = null;
         }
 
         public void OnSetupAvatarGeneral()
         {
             if(m_indexIK != null)
+            {
                 m_indexIK.activeControl = (m_enabled || Utils.AreKnucklesInUse());
-            CVRInputManager.Instance.individualFingerTracking = (m_enabled || Utils.AreKnucklesInUse());
-
-            m_vrIK = PlayerSetup.Instance._animator.GetComponent<VRIK>();
+                CVRInputManager.Instance.individualFingerTracking = (m_enabled || Utils.AreKnucklesInUse());
+            }
 
             if(!PlayerSetup.Instance._inVr)
             {
                 m_leapIK = PlayerSetup.Instance._animator.gameObject.AddComponent<LeapIK>();
+                m_leapIK.SetHands(m_leftHand, m_rightHand);
                 m_leapIK.SetEnabled(m_enabled);
                 m_leapIK.SetFingersOnly(m_fingersOnly);
-                m_leapIK.SetHands(m_leftHand, m_rightHand);
             }
         }
     }
