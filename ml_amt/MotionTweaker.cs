@@ -36,6 +36,9 @@ namespace ml_amt
         float m_crouchLimit = 0.65f;
         bool m_customCrouchLimit = false;
 
+        bool m_customLocomotionOffset = false;
+        Vector3 m_locomotionOffset = Vector3.zero;
+
         readonly List<AdditionalParameterInfo> m_parameters = null;
 
         public MotionTweaker()
@@ -100,6 +103,8 @@ namespace ml_amt
             m_locomotionWeight = 1f;
             m_crouchLimit = 0.65f;
             m_customCrouchLimit = false;
+            m_customLocomotionOffset = false;
+            m_locomotionOffset = Vector3.zero;
         }
 
         public void OnAvatarSetup()
@@ -131,9 +136,20 @@ namespace ml_amt
                 }
             }
 
-            Transform l_customLimit = PlayerSetup.Instance._avatar.transform.Find("CrouchLimit");
-            m_customCrouchLimit = (l_customLimit != null);
-            m_crouchLimit = m_customCrouchLimit ? Mathf.Clamp(l_customLimit.localPosition.y, 0f, 1f) : Settings.CrouchLimit;
+            Transform l_customTransform = PlayerSetup.Instance._avatar.transform.Find("CrouchLimit");
+            m_customCrouchLimit = (l_customTransform != null);
+            m_crouchLimit = m_customCrouchLimit ? Mathf.Clamp(l_customTransform.localPosition.y, 0f, 1f) : Settings.CrouchLimit;
+
+            l_customTransform = PlayerSetup.Instance._avatar.transform.Find("LocomotionOffset");
+            m_customLocomotionOffset = (l_customTransform != null);
+            m_locomotionOffset = m_customLocomotionOffset ? Vector3.zero : l_customTransform.localPosition;
+
+            // Apply VRIK tweaks
+            if(m_vrIk != null)
+            {
+                if(m_customLocomotionOffset && (m_vrIk.solver?.locomotion != null))
+                    m_vrIk.solver.locomotion.offset = m_locomotionOffset;
+            }
 
             m_ready = true;
         }
