@@ -20,11 +20,10 @@ namespace ml_amt
                 null,
                 new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnAvatarClear_Postfix), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static))
             );
-
             HarmonyInstance.Patch(
-                typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.SetupAvatar)),
+                typeof(PlayerSetup).GetMethod("SetupAvatarGeneral", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic),
                 null,
-                new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnLocalAvatarSetup_Postfix), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static))
+                new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnSetupAvatarGeneral_Postfix), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic))
             );
 
             MelonLoader.MelonCoroutines.Start(WaitForLocalPlayer());
@@ -44,18 +43,18 @@ namespace ml_amt
                 m_localTweaker.SetCrouchLimit(p_value);
         }
 
-        static void OnLocalAvatarSetup_Postfix() => ms_instance?.OnLocalAvatarSetup();
-        void OnLocalAvatarSetup()
-        {
-            if((m_localTweaker != null) && !PlayerSetup.Instance._inVr)
-                m_localTweaker.OnAvatarSetup();
-        }
-
         static void OnAvatarClear_Postfix() => ms_instance?.OnAvatarClear();
         void OnAvatarClear()
         {
             if(m_localTweaker != null)
                 m_localTweaker.OnAvatarClear();
+        }
+
+        static void OnSetupAvatarGeneral_Postfix() => ms_instance?.OnSetupAvatarGeneral();
+        void OnSetupAvatarGeneral()
+        {
+            if(m_localTweaker != null)
+                m_localTweaker.OnSetupAvatarGeneral();
         }
     }
 }

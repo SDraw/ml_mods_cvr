@@ -1,7 +1,6 @@
 ﻿using ABI_RC.Core.Player;
 using ABI_RC.Core.Savior;
 using RootMotion.FinalIK;
-using System.Linq;
 using UnityEngine;
 
 namespace ml_lme
@@ -19,15 +18,9 @@ namespace ml_lme
         Transform m_leftHand = null;
         Transform m_rightHand = null;
 
-        bool m_knucklesInUse = false;
-
         void Start()
         {
             m_indexIK = this.GetComponent<IndexIK>();
-            m_knucklesInUse = PlayerSetup.Instance._trackerManager.trackerNames.Contains("knuckles");
-
-            if(PlayerSetup.Instance._inVr)
-                PlayerSetup.Instance.avatarSetupCompleted.AddListener(this.OnAvatarSetup);
         }
 
         public void SetEnabled(bool p_state)
@@ -36,8 +29,8 @@ namespace ml_lme
 
             if(m_indexIK != null)
             {
-                m_indexIK.activeControl = (m_enabled || m_knucklesInUse);
-                CVRInputManager.Instance.individualFingerTracking = (m_enabled || m_knucklesInUse);
+                m_indexIK.activeControl = (m_enabled || Utils.AreKnucklesInUse());
+                CVRInputManager.Instance.individualFingerTracking = (m_enabled || Utils.AreKnucklesInUse());
             }
 
             if(m_leapIK != null)
@@ -56,6 +49,9 @@ namespace ml_lme
         {
             m_leftHand = p_left;
             m_rightHand = p_right;
+
+            if(m_leapIK != null)
+                m_leapIK.SetHands(m_leftHand, m_rightHand);
         }
 
         public void UpdateTracking(GestureMatcher.GesturesData p_gesturesData)
@@ -145,13 +141,13 @@ namespace ml_lme
             m_vrIK = null;
         }
 
-        public void OnAvatarSetup()
+        public void OnSetupAvatarGeneral()
         {
-            m_knucklesInUse = PlayerSetup.Instance._trackerManager.trackerNames.Contains("knuckles");
-
             if(m_indexIK != null)
-                m_indexIK.activeControl = (m_enabled || m_knucklesInUse);
-            CVRInputManager.Instance.individualFingerTracking = (m_enabled || m_knucklesInUse);
+                m_indexIK.activeControl = (m_enabled || Utils.AreKnucklesInUse());
+            CVRInputManager.Instance.individualFingerTracking = (m_enabled || Utils.AreKnucklesInUse());
+
+            m_vrIK = PlayerSetup.Instance._animator.GetComponent<VRIK>();
 
             if(!PlayerSetup.Instance._inVr)
             {
@@ -160,8 +156,6 @@ namespace ml_lme
                 m_leapIK.SetFingersOnly(m_fingersOnly);
                 m_leapIK.SetHands(m_leftHand, m_rightHand);
             }
-            else
-                m_vrIK = PlayerSetup.Instance._animator.GetComponent<VRIK>();
         }
     }
 }

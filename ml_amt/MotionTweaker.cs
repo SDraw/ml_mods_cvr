@@ -46,12 +46,6 @@ namespace ml_amt
             m_parameters = new List<AdditionalParameterInfo>();
         }
 
-        void Start()
-        {
-            if(PlayerSetup.Instance._inVr)
-                PlayerSetup.Instance.avatarSetupCompleted.AddListener(this.OnAvatarSetup);
-        }
-
         void Update()
         {
             if(m_ready)
@@ -96,8 +90,8 @@ namespace ml_amt
 
         public void OnAvatarClear()
         {
-            m_vrIk = null;
             m_ready = false;
+            m_vrIk = null;
             m_standing = true;
             m_parameters.Clear();
             m_locomotionWeight = 1f;
@@ -107,7 +101,7 @@ namespace ml_amt
             m_locomotionOffset = Vector3.zero;
         }
 
-        public void OnAvatarSetup()
+        public void OnSetupAvatarGeneral()
         {
             m_vrIk = PlayerSetup.Instance._avatar.GetComponent<RootMotion.FinalIK.VRIK>();
 
@@ -142,7 +136,7 @@ namespace ml_amt
 
             l_customTransform = PlayerSetup.Instance._avatar.transform.Find("LocomotionOffset");
             m_customLocomotionOffset = (l_customTransform != null);
-            m_locomotionOffset = m_customLocomotionOffset ? Vector3.zero : l_customTransform.localPosition;
+            m_locomotionOffset = m_customLocomotionOffset ? l_customTransform.localPosition : Vector3.zero;
 
             // Apply VRIK tweaks
             if(m_vrIk != null)

@@ -51,11 +51,6 @@ namespace ml_lme
 
             // Patches
             HarmonyInstance.Patch(
-                typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.SetupAvatar)),
-                null,
-                new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnAvatarSetup_Postfix), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic))
-            );
-            HarmonyInstance.Patch(
                 typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.ClearAvatar)),
                 null,
                 new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnAvatarClear_Postfix), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic))
@@ -65,6 +60,7 @@ namespace ml_lme
                 new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnSetupAvatarGeneral_Prefix), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)),
                 new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnSetupAvatarGeneral_Postfix), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic))
             );
+
 
             MelonLoader.MelonCoroutines.Start(CreateTrackingObjects());
         }
@@ -334,15 +330,6 @@ namespace ml_lme
                 m_leapTracked.OnAvatarClear();
         }
 
-        static void OnAvatarSetup_Postfix() => ms_instance?.OnAvatarSetup();
-        void OnAvatarSetup()
-        {
-            if(!PlayerSetup.Instance._inVr && (m_leapTracked != null))
-                m_leapTracked.OnAvatarSetup();
-
-            OnSettingsHeadAttachChange(Settings.HeadAttach);
-        }
-
         // Sneaky forced IndexIK calibration
         static void OnSetupAvatarGeneral_Prefix(ref PlayerSetup __instance)
         {
@@ -353,6 +340,15 @@ namespace ml_lme
         {
             if(__instance != null)
                 __instance._inVr = ms_vrState;
+
+            ms_instance?.OnSetupAvatarGeneral();
+        }
+        void OnSetupAvatarGeneral()
+        {
+            if(m_leapTracked != null)
+                m_leapTracked.OnSetupAvatarGeneral();
+
+            OnSettingsHeadAttachChange(Settings.HeadAttach);
         }
 
         // Utilities
