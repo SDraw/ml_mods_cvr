@@ -1,5 +1,4 @@
-﻿using ABI_RC.Core.InteractionSystem;
-using ABI_RC.Core.Player;
+﻿using ABI_RC.Core.Player;
 using ABI_RC.Core.UI;
 using UnityEngine;
 
@@ -20,6 +19,8 @@ namespace ml_lme
         GameObject[] m_leapHands = null;
         GameObject m_leapControllerModel = null;
         LeapTracked m_leapTracked = null;
+
+        static bool ms_vrState = false;
 
         public override void OnApplicationStart()
         {
@@ -59,6 +60,11 @@ namespace ml_lme
                 null,
                 new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnAvatarClear_Postfix), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic))
             );
+            HarmonyInstance.Patch(
+                typeof(PlayerSetup).GetMethod("SetupAvatarGeneral", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic),
+                new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnSetupAvatarGeneral_Prefix), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)),
+                new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnSetupAvatarGeneral_Postfix), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic))
+            );
 
             MelonLoader.MelonCoroutines.Start(CreateTrackingObjects());
         }
@@ -96,6 +102,11 @@ namespace ml_lme
                 m_leapControllerModel.transform.localPosition = Vector3.zero;
                 m_leapControllerModel.transform.localRotation = Quaternion.identity;
             }
+
+            // Player setup
+            ms_vrState = PlayerSetup.Instance._inVr;
+            m_leapTracked = PlayerSetup.Instance.gameObject.AddComponent<LeapTracked>();
+            m_leapTracked.SetHands(m_leapHands[0].transform, m_leapHands[1].transform);
 
             OnSettingsEnableChange(Settings.Enabled);
             OnSettingsFingersOptionChange(Settings.FingersOnly);
@@ -137,16 +148,22 @@ namespace ml_lme
             }
         }
 
+        public override void OnLateUpdate()
+        {
+            if(ms_vrState && Settings.Enabled && (m_leapTracked != null))
+                m_leapTracked.UpdateTrackingLate(m_gesturesData);
+        }
+
         // Settings changes
         void OnSettingsEnableChange(bool p_state)
         {
             if(p_state)
             {
-                m_leapController.StartConnection();
+                m_leapController?.StartConnection();
                 UpdateDeviceTrackingMode();
             }
             else
-                m_leapController.StopConnection();
+                m_leapController?.StopConnection();
 
             if(m_leapTracked != null)
                 m_leapTracked.SetEnabled(p_state);
@@ -177,7 +194,7 @@ namespace ml_lme
 
         void OnSettingsTrackingModeChange(Settings.LeapTrackingMode p_mode)
         {
-            if(Settings.Enabled && (m_leapController != null))
+            if(Settings.Enabled)
                 UpdateDeviceTrackingMode();
 
             if(m_leapControllerModel != null)
@@ -256,16 +273,16 @@ namespace ml_lme
         // Internal utility
         void UpdateDeviceTrackingMode()
         {
-            m_leapController.ClearPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_SCREENTOP, null);
-            m_leapController.ClearPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_HMD, null);
+            m_leapController?.ClearPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_SCREENTOP, null);
+            m_leapController?.ClearPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_HMD, null);
 
             switch(Settings.TrackingMode)
             {
                 case Settings.LeapTrackingMode.Screentop:
-                    m_leapController.SetPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_SCREENTOP, null);
+                    m_leapController?.SetPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_SCREENTOP, null);
                     break;
                 case Settings.LeapTrackingMode.HMD:
-                    m_leapController.SetPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_HMD, null);
+                    m_leapController?.SetPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_HMD, null);
                     break;
             }
         }
@@ -273,8 +290,11 @@ namespace ml_lme
         // Leap events
         void OnLeapDeviceInitialized(object p_sender, Leap.DeviceEventArgs p_args)
         {
-            if(Settings.Enabled && (m_leapController != null))
+            if(Settings.Enabled)
+            {
+                m_leapController?.SubscribeToDeviceEvents(p_args.Device);
                 UpdateDeviceTrackingMode();
+            }
 
             if(CohtmlHud.Instance != null)
                 CohtmlHud.Instance.ViewDropText("Leap Motion Extension", "Device initialized");
@@ -288,6 +308,8 @@ namespace ml_lme
 
         void OnLeapDeviceLost(object p_sender, Leap.DeviceEventArgs p_args)
         {
+            m_leapController?.UnsubscribeFromDeviceEvents(p_args.Device);
+
             if(CohtmlHud.Instance != null)
                 CohtmlHud.Instance.ViewDropText("Leap Motion Extension", "Device lost");
         }
@@ -305,37 +327,32 @@ namespace ml_lme
         }
 
         // Patches
-        static void OnAvatarClear_Postfix(ref PlayerSetup __instance)
-        {
-            if((__instance != null) && (__instance == PlayerSetup.Instance))
-                ms_instance?.OnAvatarClear();
-        }
+        static void OnAvatarClear_Postfix() => ms_instance?.OnAvatarClear();
         void OnAvatarClear()
         {
             if(m_leapTracked != null)
-            {
-                Object.DestroyImmediate(m_leapTracked);
-                m_leapTracked = null;
-            }
+                m_leapTracked.OnAvatarClear();
         }
 
-        static void OnAvatarSetup_Postfix(ref PlayerSetup __instance)
+        static void OnAvatarSetup_Postfix() => ms_instance?.OnAvatarSetup();
+        void OnAvatarSetup()
         {
-            if((__instance != null) && (__instance == PlayerSetup.Instance))
-                ms_instance?.OnAvatarSetup(__instance._animator, __instance.GetComponent<IndexIK>());
-        }
-        void OnAvatarSetup(Animator p_animator, IndexIK p_indexIK)
-        {
-            if(m_leapTracked == null)
-            {
-                m_leapTracked = p_indexIK.gameObject.AddComponent<LeapTracked>();
-                m_leapTracked.SetEnabled(Settings.Enabled);
-                m_leapTracked.SetAnimator(p_animator);
-                m_leapTracked.SetHands(m_leapHands[0].transform, m_leapHands[1].transform);
-                m_leapTracked.SetFingersOnly(Settings.FingersOnly);
+            if(!PlayerSetup.Instance._inVr && (m_leapTracked != null))
+                m_leapTracked.OnAvatarSetup();
 
-                OnSettingsHeadAttachChange(Settings.HeadAttach);
-            }
+            OnSettingsHeadAttachChange(Settings.HeadAttach);
+        }
+
+        // Sneaky forced IndexIK calibration
+        static void OnSetupAvatarGeneral_Prefix(ref PlayerSetup __instance)
+        {
+            if(__instance != null)
+                __instance._inVr = true;
+        }
+        static void OnSetupAvatarGeneral_Postfix(ref PlayerSetup __instance)
+        {
+            if(__instance != null)
+                __instance._inVr = ms_vrState;
         }
 
         // Utilities

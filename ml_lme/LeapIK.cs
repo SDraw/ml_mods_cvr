@@ -2,7 +2,6 @@
 
 namespace ml_lme
 {
-    [RequireComponent(typeof(Animator))]
     [DisallowMultipleComponent]
     class LeapIK : MonoBehaviour
     {

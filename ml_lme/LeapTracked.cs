@@ -1,20 +1,19 @@
 ﻿using ABI_RC.Core.Player;
 using ABI_RC.Core.Savior;
+using RootMotion.FinalIK;
 using System.Linq;
 using UnityEngine;
 
 namespace ml_lme
 {
-    [RequireComponent(typeof(IndexIK))]
     [DisallowMultipleComponent]
     class LeapTracked : MonoBehaviour
     {
         bool m_enabled = true;
         bool m_fingersOnly = false;
-        bool m_calibrated = false;
 
-        Animator m_animator = null;
         IndexIK m_indexIK = null;
+        VRIK m_vrIK = null;
 
         LeapIK m_leapIK = null;
         Transform m_leftHand = null;
@@ -27,57 +26,23 @@ namespace ml_lme
             m_indexIK = this.GetComponent<IndexIK>();
             m_knucklesInUse = PlayerSetup.Instance._trackerManager.trackerNames.Contains("knuckles");
 
-            if((m_indexIK != null) && (m_animator != null))
-            {
-                if(!PlayerSetup.Instance._inVr)
-                {
-                    // Seems that VR mode always calibrates IndexIK, so let's force it
-                    m_indexIK.avatarAnimator = m_animator;
-                    m_indexIK.Recalibrate();
-                }
-                m_calibrated = true;
-
-                m_indexIK.activeControl = (m_enabled || m_knucklesInUse);
-                CVRInputManager.Instance.individualFingerTracking = (m_enabled || m_knucklesInUse);
-
-                m_leapIK = m_animator.gameObject.AddComponent<LeapIK>();
-                m_leapIK.SetEnabled(m_enabled);
-                m_leapIK.SetFingersOnly(m_fingersOnly);
-                m_leapIK.SetHands(m_leftHand, m_rightHand);
-            }
+            if(PlayerSetup.Instance._inVr)
+                PlayerSetup.Instance.avatarSetupCompleted.AddListener(this.OnAvatarSetup);
         }
 
         public void SetEnabled(bool p_state)
         {
             m_enabled = p_state;
-            if(m_enabled)
+
+            if(m_indexIK != null)
             {
-                if((m_animator != null) && (m_indexIK != null))
-                {
-                    m_indexIK.activeControl = true;
-                    if(!m_calibrated && !PlayerSetup.Instance._inVr)
-                    {
-                        m_indexIK.avatarAnimator = m_animator;
-                        m_indexIK.Recalibrate();
-                        m_calibrated = true;
-                    }
-                    CVRInputManager.Instance.individualFingerTracking = true;
-                }
-            }
-            else
-            {
-                if((m_indexIK != null) && m_calibrated)
-                {
-                    m_indexIK.activeControl = m_knucklesInUse;
-                    CVRInputManager.Instance.individualFingerTracking = m_knucklesInUse;
-                }
+                m_indexIK.activeControl = (m_enabled || m_knucklesInUse);
+                CVRInputManager.Instance.individualFingerTracking = (m_enabled || m_knucklesInUse);
             }
 
             if(m_leapIK != null)
                 m_leapIK.SetEnabled(m_enabled);
         }
-
-        public void SetAnimator(Animator p_animator) => m_animator = p_animator;
 
         public void SetFingersOnly(bool p_state)
         {
@@ -136,6 +101,67 @@ namespace ml_lme
                     }
                 }
             }
+        }
+
+        public void UpdateTrackingLate(GestureMatcher.GesturesData p_gesturesData)
+        {
+            if(m_enabled && !m_fingersOnly && (m_vrIK != null) && m_vrIK.enabled)
+            {
+                if(p_gesturesData.m_handsPresenses[0])
+                {
+                    IKSolverVR.Arm l_arm = m_vrIK.solver?.leftArm;
+                    if(l_arm?.target != null)
+                    {
+                        if(l_arm.positionWeight < 1f)
+                            l_arm.positionWeight = 1f;
+                        l_arm.target.position = p_gesturesData.m_handsPositons[0];
+
+                        if(l_arm.rotationWeight < 1f)
+                            l_arm.rotationWeight = 1f;
+                        l_arm.target.rotation = p_gesturesData.m_handsRotations[0];
+                    }
+                }
+
+                if(p_gesturesData.m_handsPresenses[1])
+                {
+                    IKSolverVR.Arm l_arm = m_vrIK.solver?.rightArm;
+                    if(l_arm?.target != null)
+                    {
+                        if(l_arm.positionWeight < 1f)
+                            l_arm.positionWeight = 1f;
+                        l_arm.target.position = p_gesturesData.m_handsPositons[1];
+
+                        if(l_arm.rotationWeight < 1f)
+                            l_arm.rotationWeight = 1f;
+                        l_arm.target.rotation = p_gesturesData.m_handsRotations[1];
+                    }
+                }
+            }
+        }
+
+        public void OnAvatarClear()
+        {
+            m_leapIK = null;
+            m_vrIK = null;
+        }
+
+        public void OnAvatarSetup()
+        {
+            m_knucklesInUse = PlayerSetup.Instance._trackerManager.trackerNames.Contains("knuckles");
+
+            if(m_indexIK != null)
+                m_indexIK.activeControl = (m_enabled || m_knucklesInUse);
+            CVRInputManager.Instance.individualFingerTracking = (m_enabled || m_knucklesInUse);
+
+            if(!PlayerSetup.Instance._inVr)
+            {
+                m_leapIK = PlayerSetup.Instance._animator.gameObject.AddComponent<LeapIK>();
+                m_leapIK.SetEnabled(m_enabled);
+                m_leapIK.SetFingersOnly(m_fingersOnly);
+                m_leapIK.SetHands(m_leftHand, m_rightHand);
+            }
+            else
+                m_vrIK = PlayerSetup.Instance._animator.GetComponent<VRIK>();
         }
     }
 }
