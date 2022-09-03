@@ -114,7 +114,7 @@ namespace ml_fpt
 
         void StartCalibration()
         {
-            if(m_playerReady && !m_inCalibration && PlayerSetup.Instance._inVr && !PlayerSetup.Instance.fullBodyActive && PlayerSetup.Instance._animator.isHuman && !m_ikCalibrator.inFullbodyCalibration && m_indexIk.calibrated)
+            if(m_playerReady && !m_inCalibration && PlayerSetup.Instance._inVr && !PlayerSetup.Instance.avatarIsLoading && PlayerSetup.Instance._animator.isHuman && !m_ikCalibrator.inFullbodyCalibration && !m_ikCalibrator.avatarCalibratedAsFullBody && m_indexIk.calibrated)
             {
                 for(int i = 0; i < PlayerSetup.Instance._trackerManager.trackerNames.Length; i++)
                 {

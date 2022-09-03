@@ -1,4 +1,5 @@
 ﻿using ABI_RC.Core.Player;
+using RootMotion.FinalIK;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,6 +7,8 @@ namespace ml_amt
 {
     class MotionTweaker : MonoBehaviour
     {
+        static System.Reflection.FieldInfo ms_rootVelocity = typeof(IKSolverVR).GetField("rootVelocity", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
         enum ParameterType
         {
             Upright
@@ -26,7 +29,8 @@ namespace ml_amt
 
         static readonly Vector4 ms_pointVector = new Vector4(0f, 0f, 0f, 1f);
 
-        RootMotion.FinalIK.VRIK m_vrIk = null;
+        CVR_IK_Calibrator m_ikCalibrator = null;
+        VRIK m_vrIk = null;
 
         bool m_ready = false;
 
@@ -46,6 +50,11 @@ namespace ml_amt
             m_parameters = new List<AdditionalParameterInfo>();
         }
 
+        void Start()
+        {
+            m_ikCalibrator = this.GetComponent<CVR_IK_Calibrator>();
+        }
+
         void Update()
         {
             if(m_ready)
@@ -55,13 +64,18 @@ namespace ml_amt
                 float l_currentHeight = Mathf.Clamp((l_hmdMatrix * ms_pointVector).y, 0f, float.MaxValue);
                 float l_avatarViewHeight = Mathf.Clamp(PlayerSetup.Instance.GetViewPointHeight() * PlayerSetup.Instance._avatar.transform.localScale.y, 0f, float.MaxValue);
                 m_currentUpright = Mathf.Clamp((((l_currentHeight > 0f) && (l_avatarViewHeight > 0f)) ? (l_currentHeight / l_avatarViewHeight) : 0f), 0f, 1f);
-                m_standing = (m_currentUpright > m_crouchLimit);
+                bool l_standing = (m_currentUpright > m_crouchLimit);
 
-                if((m_vrIk != null) && m_vrIk.enabled && !PlayerSetup.Instance._movementSystem.sitting && (PlayerSetup.Instance._movementSystem.movementVector.magnitude <= Mathf.Epsilon) && !PlayerSetup.Instance.fullBodyActive)
+                if(!m_ikCalibrator.avatarCalibratedAsFullBody && (m_vrIk != null) && m_vrIk.enabled && !PlayerSetup.Instance._movementSystem.sitting && (PlayerSetup.Instance._movementSystem.movementVector.magnitude <= Mathf.Epsilon))
                 {
-                    m_locomotionWeight = Mathf.Lerp(m_locomotionWeight, m_standing ? 1f : 0f, 0.5f);
+                    m_locomotionWeight = Mathf.Lerp(m_locomotionWeight, l_standing ? 1f : 0f, 0.5f);
                     m_vrIk.solver.locomotion.weight = m_locomotionWeight;
+
+                    if(l_standing && (m_standing != l_standing))
+                        ms_rootVelocity.SetValue(m_vrIk.solver, Vector3.zero);
                 }
+
+                m_standing = l_standing;
 
                 if(m_parameters.Count > 0)
                 {
@@ -103,7 +117,7 @@ namespace ml_amt
 
         public void OnSetupAvatarGeneral()
         {
-            m_vrIk = PlayerSetup.Instance._avatar.GetComponent<RootMotion.FinalIK.VRIK>();
+            m_vrIk = PlayerSetup.Instance._avatar.GetComponent<VRIK>();
 
             // Parse animator parameters
             AnimatorControllerParameter[] l_params = PlayerSetup.Instance._animator.parameters;
