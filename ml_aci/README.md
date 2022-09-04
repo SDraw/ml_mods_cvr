@@ -1,5 +1,5 @@
 # Avatar Change Info
-This mod shows simple main menu popup upon local player avatar change.
+This mod shows simple main menu popup upon local player avatar change and prop spawn.
 
 ![](.github/img_01.png)
 
