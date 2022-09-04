@@ -20,8 +20,6 @@ namespace ml_lme
         GameObject m_leapControllerModel = null;
         LeapTracked m_leapTracked = null;
 
-        static bool ms_vrState = false;
-
         public override void OnApplicationStart()
         {
             if(ms_instance == null)
@@ -57,7 +55,7 @@ namespace ml_lme
             );
             HarmonyInstance.Patch(
                 typeof(PlayerSetup).GetMethod("SetupAvatarGeneral", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic),
-                new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnSetupAvatarGeneral_Prefix), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)),
+                null,
                 new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnSetupAvatarGeneral_Postfix), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic))
             );
 
@@ -100,7 +98,6 @@ namespace ml_lme
             }
 
             // Player setup
-            ms_vrState = PlayerSetup.Instance._inVr;
             m_leapTracked = PlayerSetup.Instance.gameObject.AddComponent<LeapTracked>();
             m_leapTracked.SetHands(m_leapHands[0].transform, m_leapHands[1].transform);
 
@@ -325,18 +322,7 @@ namespace ml_lme
         }
 
         // Sneaky forced IndexIK calibration
-        static void OnSetupAvatarGeneral_Prefix(ref PlayerSetup __instance)
-        {
-            if(__instance != null)
-                __instance._inVr = true;
-        }
-        static void OnSetupAvatarGeneral_Postfix(ref PlayerSetup __instance)
-        {
-            if(__instance != null)
-                __instance._inVr = ms_vrState;
-
-            ms_instance?.OnSetupAvatarGeneral();
-        }
+        static void OnSetupAvatarGeneral_Postfix() => ms_instance?.OnSetupAvatarGeneral();
         void OnSetupAvatarGeneral()
         {
             if(m_leapTracked != null)

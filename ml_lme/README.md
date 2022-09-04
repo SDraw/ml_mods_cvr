@@ -20,6 +20,3 @@ Available mod's settings in `Settings - Implementation - Leap Motion Tracking`:
 * **Offset angle:** rotation around X axis, useful for neck mounts, 0 by default.
 * **Fingers tracking only:** apply only fingers tracking, disabled by default.
 * **Model visibility:** show Leap Motion controller model, useful for tracking visualizing, disabled by default.
-
-# Notes
-* Only fingers tracking in VR mode.

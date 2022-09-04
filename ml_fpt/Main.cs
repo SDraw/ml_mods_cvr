@@ -41,8 +41,7 @@ namespace ml_fpt
             {
                 if(m_origVrIk != null)
                     m_origVrIk.enabled = false;
-
-                m_indexIk.calibrated = false;
+                m_ikCalibrator.enabled = false;
                 m_indexIk.enabled = false;
 
                 Transform l_hips = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.Hips);
@@ -58,10 +57,13 @@ namespace ml_fpt
                         m_origVrIk.solver.spine.pelvisTarget = PlayerSetup.Instance._trackerManager.trackers[m_hipsTrackerIndex].target;
                         m_origVrIk.solver.spine.pelvisPositionWeight = 1f;
                         m_origVrIk.solver.spine.pelvisRotationWeight = 1f;
+                        m_origVrIk.solver.OnPreUpdate -= this.OverrideIKWeight;
+                        m_origVrIk.solver.IKPositionWeight = 1f;
+                        m_origVrIk.enabled = true;
                     }
 
-                    m_indexIk.calibrated = true;
                     m_indexIk.enabled = true;
+                    m_ikCalibrator.enabled = true;
 
                     PlayerSetup.Instance._animator.runtimeAnimatorController = m_oldRuntimeAnimator;
 
@@ -114,7 +116,7 @@ namespace ml_fpt
 
         void StartCalibration()
         {
-            if(m_playerReady && !m_inCalibration && PlayerSetup.Instance._inVr && !PlayerSetup.Instance.avatarIsLoading && PlayerSetup.Instance._animator.isHuman && !m_ikCalibrator.inFullbodyCalibration && !m_ikCalibrator.avatarCalibratedAsFullBody && m_indexIk.calibrated)
+            if(m_playerReady && !m_inCalibration && PlayerSetup.Instance._inVr && !PlayerSetup.Instance.avatarIsLoading && PlayerSetup.Instance._animator.isHuman && !m_ikCalibrator.inFullbodyCalibration && !m_ikCalibrator.avatarCalibratedAsFullBody)
             {
                 for(int i = 0; i < PlayerSetup.Instance._trackerManager.trackerNames.Length; i++)
                 {
@@ -131,6 +133,8 @@ namespace ml_fpt
                     PlayerSetup.Instance._animator.runtimeAnimatorController = PlayerSetup.Instance.tPoseAnimatorController;
 
                     m_origVrIk = PlayerSetup.Instance._animator.GetComponent<RootMotion.FinalIK.VRIK>();
+                    if(m_origVrIk != null)
+                        m_origVrIk.solver.OnPreUpdate += this.OverrideIKWeight;
 
                     m_ikCalibrator.leftHandModel.SetActive(true);
                     m_ikCalibrator.rightHandModel.SetActive(true);
@@ -157,13 +161,19 @@ namespace ml_fpt
             m_origVrIk = null;
         }
 
+        void OverrideIKWeight()
+        {
+            if(m_inCalibration && (m_origVrIk != null))
+                m_origVrIk.solver.IKPositionWeight = 0f;
+        }
+
         static void OnAvatarClear_Postfix() => ms_instance?.OnAvatarClear();
         void OnAvatarClear()
         {
             if(m_inCalibration)
             {
-                m_indexIk.calibrated = true;
                 m_indexIk.enabled = true;
+                m_ikCalibrator.enabled = true;
 
                 m_ikCalibrator.leftHandModel.SetActive(false);
                 m_ikCalibrator.rightHandModel.SetActive(false);

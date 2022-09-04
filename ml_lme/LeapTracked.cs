@@ -1,5 +1,6 @@
 ﻿using ABI_RC.Core.Player;
 using ABI_RC.Core.Savior;
+using RootMotion.FinalIK;
 using UnityEngine;
 
 namespace ml_lme
@@ -7,7 +8,12 @@ namespace ml_lme
     [DisallowMultipleComponent]
     class LeapTracked : MonoBehaviour
     {
+        static readonly Quaternion ms_offsetLeft = Quaternion.Euler(0f, 90f, 330f);
+        static readonly Quaternion ms_offsetRight = Quaternion.Euler(0f, 270f, 30f);
+
         IndexIK m_indexIK = null;
+        CVR_IK_Calibrator m_ikCalibrator = null;
+        VRIK m_vrIK = null;
 
         bool m_enabled = true;
         bool m_fingersOnly = false;
@@ -15,10 +21,30 @@ namespace ml_lme
         LeapIK m_leapIK = null;
         Transform m_leftHand = null;
         Transform m_rightHand = null;
+        Transform m_leftHandTarget = null;
+        Transform m_rightHandTarget = null;
+        bool m_leftTargetActive = false;
+        bool m_rightTargetActive = false;
 
         void Start()
         {
             m_indexIK = this.GetComponent<IndexIK>();
+            m_ikCalibrator = this.GetComponent<CVR_IK_Calibrator>();
+
+            if(m_leftHand != null)
+            {
+                m_leftHandTarget = new GameObject("RotationTarget").transform;
+                m_leftHandTarget.parent = m_leftHand;
+                m_leftHandTarget.localPosition = Vector3.zero;
+                m_leftHandTarget.localRotation = Quaternion.identity;
+            }
+            if(m_rightHand != null)
+            {
+                m_rightHandTarget = new GameObject("RotationTarget").transform;
+                m_rightHandTarget.parent = m_rightHand;
+                m_rightHandTarget.localPosition = Vector3.zero;
+                m_rightHandTarget.localRotation = Quaternion.identity;
+            }
         }
 
         public void SetEnabled(bool p_state)
@@ -33,6 +59,9 @@ namespace ml_lme
 
             if(m_leapIK != null)
                 m_leapIK.SetEnabled(m_enabled);
+
+            if(!m_enabled || m_fingersOnly)
+                RestoreIK();
         }
 
         public void SetFingersOnly(bool p_state)
@@ -41,6 +70,9 @@ namespace ml_lme
 
             if(m_leapIK != null)
                 m_leapIK.SetFingersOnly(m_fingersOnly);
+
+            if(!m_enabled || m_fingersOnly)
+                RestoreIK();
         }
 
         public void SetHands(Transform p_left, Transform p_right)
@@ -91,18 +123,49 @@ namespace ml_lme
                         CVRInputManager.Instance.fingerCurlRightPinky = p_gesturesData.m_rightFingersBends[4];
                     }
                 }
+
+                if((m_vrIK != null) && !m_fingersOnly)
+                {
+                    if(p_gesturesData.m_handsPresenses[0] && !m_leftTargetActive)
+                    {
+                        m_vrIK.solver.leftArm.target = m_leftHandTarget;
+                        m_leftTargetActive = true;
+                    }
+                    if(!p_gesturesData.m_handsPresenses[0] && m_leftTargetActive)
+                    {
+                        m_vrIK.solver.leftArm.target = m_ikCalibrator.leftHandAnchor;
+                        m_leftTargetActive = false;
+                    }
+
+                    if(p_gesturesData.m_handsPresenses[1] && !m_rightTargetActive)
+                    {
+                        m_vrIK.solver.rightArm.target = m_rightHandTarget;
+                        m_rightTargetActive = true;
+                    }
+                    if(!p_gesturesData.m_handsPresenses[1] && m_rightTargetActive)
+                    {
+                        m_vrIK.solver.rightArm.target = m_ikCalibrator.rightHandAnchor;
+                        m_rightTargetActive = false;
+                    }
+                }
             }
         }
 
         public void OnAvatarClear()
         {
             m_leapIK = null;
+            m_vrIK = null;
+            m_leftTargetActive = false;
+            m_rightTargetActive = false;
         }
 
         public void OnSetupAvatarGeneral()
         {
+            m_vrIK = PlayerSetup.Instance._animator.GetComponent<VRIK>();
+
             if(m_indexIK != null)
             {
+                m_indexIK.avatarAnimator = PlayerSetup.Instance._animator;
                 m_indexIK.activeControl = (m_enabled || Utils.AreKnucklesInUse());
                 CVRInputManager.Instance.individualFingerTracking = (m_enabled || Utils.AreKnucklesInUse());
             }
@@ -113,6 +176,59 @@ namespace ml_lme
                 m_leapIK.SetHands(m_leftHand, m_rightHand);
                 m_leapIK.SetEnabled(m_enabled);
                 m_leapIK.SetFingersOnly(m_fingersOnly);
+            }
+
+            if((m_vrIK != null) && PlayerSetup.Instance._animator.isHuman)
+            {
+                // Here we fokin' go!
+                m_leftHand.position = Vector3.zero;
+                m_leftHand.rotation = Quaternion.identity;
+                Transform l_lowerArm = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftLowerArm);
+                Transform l_hand = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftHand);
+                if((l_lowerArm != null) && (l_hand != null))
+                {
+                    m_leftHandTarget.SetParent(l_lowerArm);
+                    m_leftHandTarget.localPosition = l_hand.localPosition;
+                    m_leftHandTarget.localRotation = l_hand.localRotation;
+                    m_leftHandTarget.SetParent(m_leftHand, true);
+                    m_leftHandTarget.localPosition = Vector3.zero;
+
+                    Quaternion l_rot = m_leftHandTarget.localRotation;
+                    m_leftHandTarget.localRotation = ms_offsetLeft * l_rot;
+                }
+
+                m_rightHand.position = Vector3.zero;
+                m_rightHand.rotation = Quaternion.identity;
+                l_lowerArm = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightLowerArm);
+                l_hand = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightHand);
+                if((l_lowerArm != null) && (l_hand != null))
+                {
+                    m_rightHandTarget.SetParent(l_lowerArm);
+                    m_rightHandTarget.localPosition = l_hand.localPosition;
+                    m_rightHandTarget.localRotation = l_hand.localRotation;
+                    m_rightHandTarget.SetParent(m_rightHand, true);
+                    m_rightHandTarget.localPosition = Vector3.zero;
+
+                    Quaternion l_rot = m_rightHandTarget.localRotation;
+                    m_rightHandTarget.localRotation = ms_offsetRight * l_rot;
+                }
+            }
+        }
+
+        void RestoreIK()
+        {
+            if((m_ikCalibrator != null) && (m_vrIK != null))
+            {
+                if(m_leftTargetActive)
+                {
+                    m_vrIK.solver.leftArm.target = m_ikCalibrator.leftHandAnchor;
+                    m_leftTargetActive = false;
+                }
+                if(m_rightTargetActive)
+                {
+                    m_vrIK.solver.rightArm.target = m_ikCalibrator.rightHandAnchor;
+                    m_rightTargetActive = false;
+                }
             }
         }
     }
