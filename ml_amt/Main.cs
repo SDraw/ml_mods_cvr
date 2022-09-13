@@ -13,6 +13,7 @@ namespace ml_amt
             ms_instance = this;
 
             Settings.Init();
+            Settings.IKOverrideChange += this.OnIKOverrideChange;
             Settings.CrouchLimitChange += this.OnCrouchLimitChange;
 
             HarmonyInstance.Patch(
@@ -35,8 +36,16 @@ namespace ml_amt
                 yield return null;
 
             m_localTweaker = PlayerSetup.Instance.gameObject.AddComponent<MotionTweaker>();
+            m_localTweaker.SetIKOverride(Settings.IKOverride);
+            m_localTweaker.SetCrouchLimit(Settings.CrouchLimit);
         }
 
+
+        void OnIKOverrideChange(bool p_state)
+        {
+            if(m_localTweaker != null)
+                m_localTweaker.SetIKOverride(p_state);
+        }
         void OnCrouchLimitChange(float p_value)
         {
             if(m_localTweaker != null)

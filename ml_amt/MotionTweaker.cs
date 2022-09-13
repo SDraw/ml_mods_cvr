@@ -27,18 +27,27 @@ namespace ml_amt
             public int m_hash; // For local only
         }
 
+        enum PoseState
+        {
+            Standing = 0,
+            Crouching,
+            Proning
+        }
+
         static readonly Vector4 ms_pointVector = new Vector4(0f, 0f, 0f, 1f);
 
-        CVR_IK_Calibrator m_ikCalibrator = null;
         VRIK m_vrIk = null;
+        float m_locomotionWeight = 1f; // Original weight
 
-        bool m_ready = false;
+        bool m_avatarReady = false;
 
-        bool m_standing = true;
+        bool m_ikOverride = true;
         float m_currentUpright = 1f;
-        float m_locomotionWeight = 1f;
+        PoseState m_poseState = PoseState.Standing;
+
         float m_crouchLimit = 0.65f;
         bool m_customCrouchLimit = false;
+        float m_proneLimit = 0.3f; // Unused
 
         bool m_customLocomotionOffset = false;
         Vector3 m_locomotionOffset = Vector3.zero;
@@ -50,32 +59,24 @@ namespace ml_amt
             m_parameters = new List<AdditionalParameterInfo>();
         }
 
-        void Start()
-        {
-            m_ikCalibrator = this.GetComponent<CVR_IK_Calibrator>();
-        }
-
         void Update()
         {
-            if(m_ready)
+            if(m_avatarReady)
             {
                 // Update upright
                 Matrix4x4 l_hmdMatrix = PlayerSetup.Instance.transform.GetMatrix().inverse * (PlayerSetup.Instance._inVr ? PlayerSetup.Instance.vrHeadTracker.transform.GetMatrix() : PlayerSetup.Instance.desktopCameraRig.transform.GetMatrix());
                 float l_currentHeight = Mathf.Clamp((l_hmdMatrix * ms_pointVector).y, 0f, float.MaxValue);
                 float l_avatarViewHeight = Mathf.Clamp(PlayerSetup.Instance.GetViewPointHeight() * PlayerSetup.Instance._avatar.transform.localScale.y, 0f, float.MaxValue);
                 m_currentUpright = Mathf.Clamp((((l_currentHeight > 0f) && (l_avatarViewHeight > 0f)) ? (l_currentHeight / l_avatarViewHeight) : 0f), 0f, 1f);
-                bool l_standing = (m_currentUpright > m_crouchLimit);
+                PoseState l_poseState = (m_currentUpright <= m_proneLimit) ? PoseState.Proning : ((m_currentUpright <= m_crouchLimit) ? PoseState.Crouching : PoseState.Standing);
 
-                if(!m_ikCalibrator.avatarCalibratedAsFullBody && (m_vrIk != null) && m_vrIk.enabled && !PlayerSetup.Instance._movementSystem.sitting && (PlayerSetup.Instance._movementSystem.movementVector.magnitude <= Mathf.Epsilon))
+                if(m_ikOverride && (m_vrIk != null) && m_vrIk.enabled)
                 {
-                    m_locomotionWeight = Mathf.Lerp(m_locomotionWeight, l_standing ? 1f : 0f, 0.5f);
-                    m_vrIk.solver.locomotion.weight = m_locomotionWeight;
-
-                    if(l_standing && (m_standing != l_standing))
+                    if((m_poseState != l_poseState) && (l_poseState == PoseState.Standing))
                         ms_rootVelocity.SetValue(m_vrIk.solver, Vector3.zero);
                 }
 
-                m_standing = l_standing;
+                m_poseState = l_poseState;
 
                 if(m_parameters.Count > 0)
                 {
@@ -104,12 +105,10 @@ namespace ml_amt
 
         public void OnAvatarClear()
         {
-            m_ready = false;
+            m_avatarReady = false;
             m_vrIk = null;
-            m_standing = true;
+            m_poseState = PoseState.Standing;
             m_parameters.Clear();
-            m_locomotionWeight = 1f;
-            m_crouchLimit = 0.65f;
             m_customCrouchLimit = false;
             m_customLocomotionOffset = false;
             m_locomotionOffset = Vector3.zero;
@@ -155,17 +154,47 @@ namespace ml_amt
             // Apply VRIK tweaks
             if(m_vrIk != null)
             {
-                if(m_customLocomotionOffset && (m_vrIk.solver?.locomotion != null))
+                if(m_customLocomotionOffset)
                     m_vrIk.solver.locomotion.offset = m_locomotionOffset;
+
+                m_vrIk.solver.OnPreUpdate += this.OnIKPreUpdate;
+                m_vrIk.solver.OnPostUpdate += this.OnIKPostUpdate;
             }
 
-            m_ready = true;
+            m_avatarReady = true;
+        }
+
+
+        public void SetIKOverride(bool p_state)
+        {
+            m_ikOverride = p_state;
         }
 
         public void SetCrouchLimit(float p_value)
         {
             if(!m_customCrouchLimit)
                 m_crouchLimit = Mathf.Clamp(p_value, 0f, 1f);
+        }
+
+        public void SetProneLimit(float p_value)
+        {
+            m_proneLimit = Mathf.Clamp(p_value, 0f, 1f);
+        }
+
+        void OnIKPreUpdate()
+        {
+            if(m_ikOverride)
+            {
+                m_locomotionWeight = m_vrIk.solver.locomotion.weight;
+                if(m_poseState != PoseState.Standing)
+                    m_vrIk.solver.locomotion.weight = 0f;
+            }
+        }
+
+        void OnIKPostUpdate()
+        {
+            if(m_ikOverride)
+                m_vrIk.solver.locomotion.weight = m_locomotionWeight;
         }
     }
 }

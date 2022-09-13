@@ -123,6 +123,54 @@ function inp_slider_mod_amt(_obj, _callbackName) {
     }
 }
 
+// Modified from original `inp` types, because I have no js knowledge to hook stuff
+function inp_toggle_mod_amt(_obj, _callbackName) {
+    this.obj = _obj;
+    this.callbackName = _callbackName;
+    this.value = _obj.getAttribute('data-current');
+    this.name = _obj.id;
+    this.type = _obj.getAttribute('data-type');
+
+    var self = this;
+
+    this.mouseDown = function (_e) {
+        self.value = self.value == "True" ? "False" : "True";
+        self.updateState();
+    }
+
+    this.updateState = function () {
+        self.obj.classList.remove("checked");
+        if (self.value == "True") {
+            self.obj.classList.add("checked");
+        }
+
+        engine.call(self.callbackName, self.name, self.value);
+    }
+
+    _obj.addEventListener('mousedown', this.mouseDown);
+
+    this.getValue = function () {
+        return self.value;
+    }
+
+    this.updateValue = function (value) {
+        self.value = value;
+
+        self.obj.classList.remove("checked");
+        if (self.value == "True") {
+            self.obj.classList.add("checked");
+        }
+    }
+
+    this.updateValue(this.value);
+
+    return {
+        name: this.name,
+        value: this.getValue,
+        updateValue: this.updateValue
+    }
+}
+
 // Add own menu
 {
     let l_block = document.createElement('div');
@@ -130,6 +178,13 @@ function inp_slider_mod_amt(_obj, _callbackName) {
         <div class ="settings-subcategory">
             <div class ="subcategory-name">Avatar Motion Tweaker</div>
             <div class ="subcategory-description"></div>
+        </div>
+
+        <div class ="row-wrapper">
+            <div class ="option-caption">IK override: </div>
+            <div class ="option-input">
+                <div id="IKOverride" class ="inp_toggle no-scroll" data-current="true"></div>
+            </div>
         </div>
 
         <div class ="row-wrapper">
@@ -145,5 +200,11 @@ function inp_slider_mod_amt(_obj, _callbackName) {
     let l_sliders = l_block.querySelectorAll('.inp_slider');
     for (var i = 0; i < l_sliders.length; i++) {
         g_modSettingsAMT[g_modSettingsAMT.length] = new inp_slider_mod_amt(l_sliders[i], 'MelonMod_AMT_Call_InpSlider');
+    }
+
+    // Update toggles in new menu block
+    let l_toggles = l_block.querySelectorAll('.inp_toggle');
+    for (var i = 0; i < l_toggles.length; i++) {
+        g_modSettingsAMT[g_modSettingsAMT.length] = new inp_toggle_mod_amt(l_toggles[i], 'MelonMod_AMT_Call_InpToggle');
     }
 }
