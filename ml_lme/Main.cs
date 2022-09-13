@@ -317,18 +317,32 @@ namespace ml_lme
         static void OnAvatarClear_Postfix() => ms_instance?.OnAvatarClear();
         void OnAvatarClear()
         {
-            if(m_leapTracked != null)
-                m_leapTracked.OnAvatarClear();
+            try
+            {
+                if(m_leapTracked != null)
+                    m_leapTracked.OnAvatarClear();
+            }
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
         }
 
         // Sneaky forced IndexIK calibration
         static void OnSetupAvatarGeneral_Postfix() => ms_instance?.OnSetupAvatarGeneral();
         void OnSetupAvatarGeneral()
         {
-            if(m_leapTracked != null)
-                m_leapTracked.OnSetupAvatarGeneral();
+            try
+            {
+                if(m_leapTracked != null)
+                    m_leapTracked.OnSetupAvatarGeneral();
 
-            OnSettingsHeadAttachChange(Settings.HeadAttach);
+                OnSettingsHeadAttachChange(Settings.HeadAttach);
+            }
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
         }
 
         // Utilities

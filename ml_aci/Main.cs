@@ -25,18 +25,32 @@ namespace ml_aci
 
         static void OnLocalAvatarLoad()
         {
-            if(ViewManager.Instance != null)
-                ViewManager.Instance.TriggerPushNotification("Avatar changed", 1f);
+            try
+            {
+                if(ViewManager.Instance != null)
+                    ViewManager.Instance.TriggerPushNotification("Avatar changed", 1f);
+            }
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
         }
 
         static void OnPropSpawned()
         {
-            if(ViewManager.Instance != null)
+            try
             {
-                if((NetworkManager.Instance != null) && (NetworkManager.Instance.GameNetwork.ConnectionState == ConnectionState.Connected))
-                    ViewManager.Instance.TriggerPushNotification("Prop spawned", 1f);
-                else
-                    ViewManager.Instance.TriggerAlert("Prop Error", "Not connected to live instance", -1, true);
+                if(ViewManager.Instance != null)
+                {
+                    if((NetworkManager.Instance != null) && (NetworkManager.Instance.GameNetwork.ConnectionState == ConnectionState.Connected))
+                        ViewManager.Instance.TriggerPushNotification("Prop spawned", 1f);
+                    else
+                        ViewManager.Instance.TriggerAlert("Prop Error", "Not connected to live instance", -1, true);
+                }
+            }
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
             }
         }
     }

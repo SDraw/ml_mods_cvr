@@ -46,15 +46,29 @@ namespace ml_amt
         static void OnAvatarClear_Postfix() => ms_instance?.OnAvatarClear();
         void OnAvatarClear()
         {
-            if(m_localTweaker != null)
-                m_localTweaker.OnAvatarClear();
+            try
+            {
+                if(m_localTweaker != null)
+                    m_localTweaker.OnAvatarClear();
+            }
+            catch(System.Exception l_exception)
+            {
+                MelonLoader.MelonLogger.Error(l_exception);
+            }
         }
 
         static void OnSetupAvatarGeneral_Postfix() => ms_instance?.OnSetupAvatarGeneral();
         void OnSetupAvatarGeneral()
         {
-            if(m_localTweaker != null)
-                m_localTweaker.OnSetupAvatarGeneral();
+            try
+            {
+                if(m_localTweaker != null)
+                    m_localTweaker.OnSetupAvatarGeneral();
+            }
+            catch(System.Exception l_exception)
+            {
+                MelonLoader.MelonLogger.Error(l_exception);
+            }
         }
     }
 }

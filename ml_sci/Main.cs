@@ -16,8 +16,15 @@ namespace ml_sci
 
         static void OnGameNetworkConnectionClosed(object __0, DisconnectedEventArgs __1)
         {
-            if((CohtmlHud.Instance != null) && (__1 != null) && (!__1.LocalDisconnect))
-                CohtmlHud.Instance.ViewDropTextImmediate("(Local) Client", "Connection lost", (__1.Error != System.Net.Sockets.SocketError.Success) ? ("Reason: " + __1.Error.ToString()) : "");
+            try
+            {
+                if((CohtmlHud.Instance != null) && (__1 != null) && (!__1.LocalDisconnect))
+                    CohtmlHud.Instance.ViewDropTextImmediate("(Local) Client", "Connection lost", (__1.Error != System.Net.Sockets.SocketError.Success) ? ("Reason: " + __1.Error.ToString()) : "");
+            }
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
         }
     }
 }

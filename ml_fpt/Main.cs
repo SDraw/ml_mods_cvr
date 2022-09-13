@@ -170,24 +170,31 @@ namespace ml_fpt
         static void OnAvatarClear_Postfix() => ms_instance?.OnAvatarClear();
         void OnAvatarClear()
         {
-            if(m_inCalibration)
+            try
             {
-                m_indexIk.enabled = true;
-                m_ikCalibrator.enabled = true;
-
-                m_ikCalibrator.leftHandModel.SetActive(false);
-                m_ikCalibrator.rightHandModel.SetActive(false);
-
-                if(m_hipsTrackerIndex != -1)
+                if(m_inCalibration)
                 {
-                    PlayerSetup.Instance._trackerManager.trackers[m_hipsTrackerIndex].ShowTracker(false);
-                    PlayerSetup.Instance._trackerManager.trackers[m_hipsTrackerIndex].ShowLine(false);
+                    m_indexIk.enabled = true;
+                    m_ikCalibrator.enabled = true;
+
+                    m_ikCalibrator.leftHandModel.SetActive(false);
+                    m_ikCalibrator.rightHandModel.SetActive(false);
+
+                    if(m_hipsTrackerIndex != -1)
+                    {
+                        PlayerSetup.Instance._trackerManager.trackers[m_hipsTrackerIndex].ShowTracker(false);
+                        PlayerSetup.Instance._trackerManager.trackers[m_hipsTrackerIndex].ShowLine(false);
+                    }
+                    CVR_InteractableManager.enableInteractions = true;
+
+                    Reset();
+
+                    ShowHudNotification("Calibration canceled");
                 }
-                CVR_InteractableManager.enableInteractions = true;
-
-                Reset();
-
-                ShowHudNotification("Calibration canceled");
+            }
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
             }
         }
 
