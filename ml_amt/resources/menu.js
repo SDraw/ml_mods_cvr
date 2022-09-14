@@ -181,16 +181,30 @@ function inp_toggle_mod_amt(_obj, _callbackName) {
         </div>
 
         <div class ="row-wrapper">
-            <div class ="option-caption">IK override: </div>
+            <div class ="option-caption">IK locomotion override: </div>
             <div class ="option-input">
                 <div id="IKOverride" class ="inp_toggle no-scroll" data-current="true"></div>
             </div>
         </div>
 
         <div class ="row-wrapper">
-            <div class ="option-caption">Legs locomotion upright limit: </div>
+            <div class ="option-caption">Crouch limit: </div>
             <div class ="option-input">
                 <div id="CrouchLimit" class ="inp_slider no-scroll" data-min="0" data-max="100" data-current="65"></div>
+            </div>
+        </div>
+        
+        <div class ="row-wrapper">
+            <div class ="option-caption">Detect pose (regular avatars): </div>
+            <div class ="option-input">
+                <div id="DetectPose" class ="inp_toggle no-scroll" data-current="true"></div>
+            </div>
+        </div>
+        
+        <div class ="row-wrapper">
+            <div class ="option-caption">Prone limit (regular avatars): </div>
+            <div class ="option-input">
+                <div id="ProneLimit" class ="inp_slider no-scroll" data-min="0" data-max="100" data-current="30"></div>
             </div>
         </div>
     `;

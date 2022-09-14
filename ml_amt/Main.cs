@@ -15,6 +15,8 @@ namespace ml_amt
             Settings.Init();
             Settings.IKOverrideChange += this.OnIKOverrideChange;
             Settings.CrouchLimitChange += this.OnCrouchLimitChange;
+            Settings.DetectPoseChange += this.OnDetectPoseChange;
+            Settings.ProneLimitChange += this.OnProneLimitChange;
 
             HarmonyInstance.Patch(
                 typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.ClearAvatar)),
@@ -38,6 +40,8 @@ namespace ml_amt
             m_localTweaker = PlayerSetup.Instance.gameObject.AddComponent<MotionTweaker>();
             m_localTweaker.SetIKOverride(Settings.IKOverride);
             m_localTweaker.SetCrouchLimit(Settings.CrouchLimit);
+            m_localTweaker.SetDetectPose(Settings.DetectPose);
+            m_localTweaker.SetProneLimit(Settings.ProneLimit);
         }
 
 
@@ -50,6 +54,16 @@ namespace ml_amt
         {
             if(m_localTweaker != null)
                 m_localTweaker.SetCrouchLimit(p_value);
+        }
+        void OnDetectPoseChange(bool p_state)
+        {
+            if(m_localTweaker != null)
+                m_localTweaker.SetDetectPose(p_state);
+        }
+        void OnProneLimitChange(float p_value)
+        {
+            if(m_localTweaker != null)
+                m_localTweaker.SetProneLimit(p_value);
         }
 
         static void OnAvatarClear_Postfix() => ms_instance?.OnAvatarClear();
