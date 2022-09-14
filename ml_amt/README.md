@@ -46,3 +46,4 @@ Additional avatars tweaks:
   
 # Notes
 * Usage of `Upright` parameter for transition between poses (standing/crouching/proning) in desktop mode is useless, because in this case your animations are updating value of `Upright` parameter, not the other way around.
+* Please, keep your avatar root object at identity scale. Thank you.
