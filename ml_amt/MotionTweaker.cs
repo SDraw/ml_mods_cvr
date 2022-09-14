@@ -237,14 +237,15 @@ namespace ml_amt
             if(!m_detectPose && m_avatarReady && !m_compatibleAvatar && PlayerSetup.Instance._inVr)
             {
                 PlayerSetup.Instance._movementSystem.ChangeCrouch(false);
-                PlayerSetup.Instance.animatorManager.SetAnimatorParameterBool("Crouching", false);
                 PlayerSetup.Instance._movementSystem.ChangeProne(false);
+                PlayerSetup.Instance.animatorManager.SetAnimatorParameterBool("Crouching", false);
                 PlayerSetup.Instance.animatorManager.SetAnimatorParameterBool("Prone", false);
             }
         }
         public void SetProneLimit(float p_value)
         {
-            m_proneLimit = Mathf.Clamp(p_value, 0f, 1f);
+            if(!m_customProneLimit)
+                m_proneLimit = Mathf.Clamp(p_value, 0f, 1f);
         }
     }
 }
