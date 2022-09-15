@@ -1,4 +1,5 @@
 ﻿using ABI_RC.Core.Player;
+using ABI_RC.Systems.MovementSystem;
 using RootMotion.FinalIK;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,11 +9,14 @@ namespace ml_amt
     class MotionTweaker : MonoBehaviour
     {
         static System.Reflection.FieldInfo ms_rootVelocity = typeof(IKSolverVR).GetField("rootVelocity", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        static System.Reflection.FieldInfo ms_groundedRaw = typeof(MovementSystem).GetField("_isGroundedRaw", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
         enum ParameterType
         {
-            Upright
+            Upright,
+            GroundedRaw
         }
+
         enum ParameterSyncType
         {
             Local,
@@ -41,17 +45,20 @@ namespace ml_amt
 
         bool m_avatarReady = false;
         bool m_compatibleAvatar = false;
-
-        bool m_ikOverride = true;
-        float m_currentUpright = 1f;
+        float m_upright = 1f;
         PoseState m_poseState = PoseState.Standing;
 
+        bool m_ikOverrideCrouch = true;
         float m_crouchLimit = 0.65f;
         bool m_customCrouchLimit = false;
 
-        bool m_detectPose = true;
+        bool m_ikOverrideProne = true;
         float m_proneLimit = 0.3f;
         bool m_customProneLimit = false;
+
+        bool m_poseTransitions = true;
+        bool m_adjustedMovement = true;
+        bool m_ikOverrideFly = true;
 
         bool m_customLocomotionOffset = false;
         Vector3 m_locomotionOffset = Vector3.zero;
@@ -71,36 +78,51 @@ namespace ml_amt
                 Matrix4x4 l_hmdMatrix = PlayerSetup.Instance.transform.GetMatrix().inverse * (PlayerSetup.Instance._inVr ? PlayerSetup.Instance.vrHeadTracker.transform.GetMatrix() : PlayerSetup.Instance.desktopCameraRig.transform.GetMatrix());
                 float l_currentHeight = Mathf.Clamp((l_hmdMatrix * ms_pointVector).y, 0f, float.MaxValue);
                 float l_avatarViewHeight = Mathf.Clamp(PlayerSetup.Instance.GetViewPointHeight() * PlayerSetup.Instance._avatar.transform.localScale.y, 0f, float.MaxValue);
-                m_currentUpright = Mathf.Clamp((((l_currentHeight > 0f) && (l_avatarViewHeight > 0f)) ? (l_currentHeight / l_avatarViewHeight) : 0f), 0f, 1f);
-                PoseState l_poseState = (m_currentUpright <= m_proneLimit) ? PoseState.Proning : ((m_currentUpright <= m_crouchLimit) ? PoseState.Crouching : PoseState.Standing);
+                m_upright = Mathf.Clamp((((l_currentHeight > 0f) && (l_avatarViewHeight > 0f)) ? (l_currentHeight / l_avatarViewHeight) : 0f), 0f, 1f);
+                PoseState l_poseState = (m_upright <= m_proneLimit) ? PoseState.Proning : ((m_upright <= m_crouchLimit) ? PoseState.Crouching : PoseState.Standing);
 
                 if((m_vrIk != null) && m_vrIk.enabled)
                 {
-                    if(m_ikOverride && (m_poseState != l_poseState) && (l_poseState == PoseState.Standing))
-                        ms_rootVelocity.SetValue(m_vrIk.solver, Vector3.zero);
+                    if(m_poseState != l_poseState)
+                    {
+                        // Weird fix of torso shaking
+                        if(m_ikOverrideCrouch && (l_poseState == PoseState.Standing))
+                            ms_rootVelocity.SetValue(m_vrIk.solver, Vector3.zero);
+                        if(m_ikOverrideProne && !m_ikOverrideCrouch && (l_poseState == PoseState.Crouching))
+                            ms_rootVelocity.SetValue(m_vrIk.solver, Vector3.zero);
+                    }
 
-                    if(m_detectPose && !m_compatibleAvatar && !PlayerSetup.Instance.fullBodyActive)
+                    if(m_poseTransitions && !m_compatibleAvatar && !PlayerSetup.Instance.fullBodyActive)
                     {
                         switch(l_poseState)
                         {
                             case PoseState.Standing:
                             {
-                                PlayerSetup.Instance._movementSystem.ChangeCrouch(false);
-                                PlayerSetup.Instance._movementSystem.ChangeProne(false);
-                                PlayerSetup.Instance.animatorManager.SetAnimatorParameterBool("Crouching", false); // Forced to stop transitioning to standing locomotion
-                                PlayerSetup.Instance.animatorManager.SetAnimatorParameterBool("Prone", false);  // Forced to stop transitioning to standing locomotion
+                                if(m_adjustedMovement)
+                                {
+                                    MovementSystem.Instance.ChangeCrouch(false); //
+                                    MovementSystem.Instance.ChangeProne(false); // Affects movement speed
+                                }
+                                PlayerSetup.Instance.animatorManager.SetAnimatorParameterBool("Crouching", false); //
+                                PlayerSetup.Instance.animatorManager.SetAnimatorParameterBool("Prone", false); // Force to stop transitioning to standing locomotion while moving
                             }
                             break;
 
                             case PoseState.Crouching:
-                                PlayerSetup.Instance._movementSystem.ChangeCrouch(true);
+                            {
+                                if(m_adjustedMovement)
+                                    MovementSystem.Instance.ChangeCrouch(true);
+
                                 PlayerSetup.Instance.animatorManager.SetAnimatorParameterBool("Crouching", true);
                                 PlayerSetup.Instance.animatorManager.SetAnimatorParameterBool("Prone", false);
-                                break;
+                            }
+                            break;
 
                             case PoseState.Proning:
                             {
-                                PlayerSetup.Instance._movementSystem.ChangeProne(true);
+                                if(m_adjustedMovement)
+                                    MovementSystem.Instance.ChangeProne(true);
+
                                 PlayerSetup.Instance.animatorManager.SetAnimatorParameterBool("Crouching", false);
                                 PlayerSetup.Instance.animatorManager.SetAnimatorParameterBool("Prone", true);
                             }
@@ -122,10 +144,24 @@ namespace ml_amt
                                 switch(l_param.m_sync)
                                 {
                                     case ParameterSyncType.Local:
-                                        PlayerSetup.Instance._animator.SetFloat(l_param.m_hash, m_currentUpright);
+                                        PlayerSetup.Instance._animator.SetFloat(l_param.m_hash, m_upright);
                                         break;
                                     case ParameterSyncType.Synced:
-                                        PlayerSetup.Instance.changeAnimatorParam(l_param.m_name, m_currentUpright);
+                                        PlayerSetup.Instance.changeAnimatorParam(l_param.m_name, m_upright);
+                                        break;
+                                }
+                            }
+                            break;
+
+                            case ParameterType.GroundedRaw:
+                            {
+                                switch(l_param.m_sync)
+                                {
+                                    case ParameterSyncType.Local:
+                                        PlayerSetup.Instance._animator.SetBool(l_param.m_hash, (bool)ms_groundedRaw.GetValue(MovementSystem.Instance));
+                                        break;
+                                    case ParameterSyncType.Synced:
+                                        PlayerSetup.Instance.changeAnimatorParam(l_param.m_name, (bool)ms_groundedRaw.GetValue(MovementSystem.Instance) ? 1f : 0f);
                                         break;
                                 }
                             }
@@ -207,45 +243,65 @@ namespace ml_amt
 
         void OnIKPreUpdate()
         {
-            if(m_ikOverride)
-            {
-                m_locomotionWeight = m_vrIk.solver.locomotion.weight;
-                if(m_poseState != PoseState.Standing)
-                    m_vrIk.solver.locomotion.weight = 0f;
-            }
+            m_locomotionWeight = m_vrIk.solver.locomotion.weight;
+
+            if((m_ikOverrideCrouch && (m_poseState != PoseState.Standing)) || (m_ikOverrideProne && (m_poseState == PoseState.Proning)))
+                m_vrIk.solver.locomotion.weight = 0f;
+            if(m_ikOverrideFly && MovementSystem.Instance.flying)
+                m_vrIk.solver.locomotion.weight = 0f;
         }
 
         void OnIKPostUpdate()
         {
-            if(m_ikOverride)
-                m_vrIk.solver.locomotion.weight = m_locomotionWeight;
+            m_vrIk.solver.locomotion.weight = m_locomotionWeight;
         }
 
-        public void SetIKOverride(bool p_state)
+        public void SetIKOverrideCrouch(bool p_state)
         {
-            m_ikOverride = p_state;
+            m_ikOverrideCrouch = p_state;
         }
         public void SetCrouchLimit(float p_value)
         {
             if(!m_customCrouchLimit)
                 m_crouchLimit = Mathf.Clamp(p_value, 0f, 1f);
         }
-        public void SetDetectPose(bool p_state)
+        public void SetIKOverrideProne(bool p_state)
         {
-            m_detectPose = p_state;
-
-            if(!m_detectPose && m_avatarReady && !m_compatibleAvatar && PlayerSetup.Instance._inVr)
-            {
-                PlayerSetup.Instance._movementSystem.ChangeCrouch(false);
-                PlayerSetup.Instance._movementSystem.ChangeProne(false);
-                PlayerSetup.Instance.animatorManager.SetAnimatorParameterBool("Crouching", false);
-                PlayerSetup.Instance.animatorManager.SetAnimatorParameterBool("Prone", false);
-            }
+            m_ikOverrideProne = p_state;
         }
         public void SetProneLimit(float p_value)
         {
             if(!m_customProneLimit)
                 m_proneLimit = Mathf.Clamp(p_value, 0f, 1f);
+        }
+        public void SetPoseTransitions(bool p_state)
+        {
+            m_poseTransitions = p_state;
+
+            if(!m_poseTransitions && m_avatarReady && !m_compatibleAvatar && PlayerSetup.Instance._inVr)
+            {
+                if(m_adjustedMovement)
+                {
+                    MovementSystem.Instance.ChangeCrouch(false);
+                    MovementSystem.Instance.ChangeProne(false);
+                }
+                PlayerSetup.Instance.animatorManager.SetAnimatorParameterBool("Crouching", false);
+                PlayerSetup.Instance.animatorManager.SetAnimatorParameterBool("Prone", false);
+            }
+        }
+        public void SetAdjustedMovement(bool p_state)
+        {
+            m_adjustedMovement = p_state;
+
+            if(!m_adjustedMovement && m_poseTransitions && m_avatarReady && !m_compatibleAvatar && PlayerSetup.Instance._inVr)
+            {
+                MovementSystem.Instance.ChangeCrouch(false);
+                MovementSystem.Instance.ChangeProne(false);
+            }
+        }
+        public void SetIKOverrideFly(bool p_state)
+        {
+            m_ikOverrideFly = p_state;
         }
     }
 }

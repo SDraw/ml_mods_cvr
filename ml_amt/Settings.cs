@@ -9,34 +9,46 @@ namespace ml_amt
     {
         enum ModSetting
         {
-            IKOverride = 0,
+            IKOverrideCrouch = 0,
             CrouchLimit,
-            DetectPose,
-            ProneLimit
+            IKOverrideProne,
+            ProneLimit,
+            PoseTransitions,
+            AdjustedMovement,
+            IKOverrideFly
         };
 
-        static bool ms_ikOverride = true;
+        static bool ms_ikOverrideCrouch = true;
         static float ms_crouchLimit = 0.65f;
-        static bool ms_detectPose = true;
+        static bool ms_ikOverrideProne = true;
         static float ms_proneLimit = 0.3f;
+        static bool ms_poseTransitions = true;
+        static bool ms_adjustedMovement = true;
+        static bool ms_ikOverrideFly = true;
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
 
-        static public event Action<bool> IKOverrideChange;
+        static public event Action<bool> IKOverrideCrouchChange;
         static public event Action<float> CrouchLimitChange;
-        static public event Action<bool> DetectPoseChange;
+        static public event Action<bool> IKOverrideProneChange;
         static public event Action<float> ProneLimitChange;
+        static public event Action<bool> PoseTransitionsChange;
+        static public event Action<bool> AdjustedMovementChange;
+        static public event Action<bool> IKOverrideFlyChange;
 
         public static void Init()
         {
             ms_category = MelonLoader.MelonPreferences.CreateCategory("AMT");
 
             ms_entries = new List<MelonLoader.MelonPreferences_Entry>();
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.IKOverride.ToString(), true));
+            ms_entries.Add(ms_category.CreateEntry(ModSetting.IKOverrideCrouch.ToString(), true));
             ms_entries.Add(ms_category.CreateEntry(ModSetting.CrouchLimit.ToString(), 65));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.DetectPose.ToString(), true));
+            ms_entries.Add(ms_category.CreateEntry(ModSetting.IKOverrideProne.ToString(), true));
             ms_entries.Add(ms_category.CreateEntry(ModSetting.ProneLimit.ToString(), 30));
+            ms_entries.Add(ms_category.CreateEntry(ModSetting.PoseTransitions.ToString(), true));
+            ms_entries.Add(ms_category.CreateEntry(ModSetting.AdjustedMovement.ToString(), true));
+            ms_entries.Add(ms_category.CreateEntry(ModSetting.IKOverrideFly.ToString(), true));
 
             Load();
 
@@ -67,10 +79,13 @@ namespace ml_amt
 
         static void Load()
         {
-            ms_ikOverride = (bool)ms_entries[(int)ModSetting.IKOverride].BoxedValue;
+            ms_ikOverrideCrouch = (bool)ms_entries[(int)ModSetting.IKOverrideCrouch].BoxedValue;
             ms_crouchLimit = ((int)ms_entries[(int)ModSetting.CrouchLimit].BoxedValue) * 0.01f;
-            ms_detectPose = (bool)ms_entries[(int)ModSetting.DetectPose].BoxedValue;
+            ms_ikOverrideProne = (bool)ms_entries[(int)ModSetting.IKOverrideProne].BoxedValue;
             ms_proneLimit = ((int)ms_entries[(int)ModSetting.ProneLimit].BoxedValue) * 0.01f;
+            ms_poseTransitions = (bool)ms_entries[(int)ModSetting.PoseTransitions].BoxedValue;
+            ms_adjustedMovement = (bool)ms_entries[(int)ModSetting.AdjustedMovement].BoxedValue;
+            ms_ikOverrideFly = (bool)ms_entries[(int)ModSetting.IKOverrideFly].BoxedValue;
         }
 
         static void OnSliderUpdate(string p_name, string p_value)
@@ -83,13 +98,15 @@ namespace ml_amt
                     {
                         ms_crouchLimit = int.Parse(p_value) * 0.01f;
                         CrouchLimitChange?.Invoke(ms_crouchLimit);
-                    } break;
-                
+                    }
+                    break;
+
                     case ModSetting.ProneLimit:
                     {
                         ms_proneLimit = int.Parse(p_value) * 0.01f;
                         ProneLimitChange?.Invoke(ms_proneLimit);
-                    } break;
+                    }
+                    break;
                 }
 
                 ms_entries[(int)l_setting].BoxedValue = int.Parse(p_value);
@@ -102,16 +119,38 @@ namespace ml_amt
             {
                 switch(l_setting)
                 {
-                    case ModSetting.IKOverride:
+                    case ModSetting.IKOverrideCrouch:
                     {
-                        ms_ikOverride = bool.Parse(p_value);
-                        IKOverrideChange?.Invoke(ms_ikOverride);
-                    } break;
+                        ms_ikOverrideCrouch = bool.Parse(p_value);
+                        IKOverrideCrouchChange?.Invoke(ms_ikOverrideCrouch);
+                    }
+                    break;
 
-                    case ModSetting.DetectPose:
+                    case ModSetting.IKOverrideProne:
                     {
-                        ms_detectPose = bool.Parse(p_value);
-                        DetectPoseChange?.Invoke(ms_detectPose);
+                        ms_ikOverrideProne = bool.Parse(p_value);
+                        IKOverrideProneChange?.Invoke(ms_ikOverrideProne);
+                    }
+                    break;
+
+                    case ModSetting.PoseTransitions:
+                    {
+                        ms_poseTransitions = bool.Parse(p_value);
+                        PoseTransitionsChange?.Invoke(ms_poseTransitions);
+                    }
+                    break;
+
+                    case ModSetting.AdjustedMovement:
+                    {
+                        ms_adjustedMovement = bool.Parse(p_value);
+                        AdjustedMovementChange?.Invoke(ms_adjustedMovement);
+                    }
+                    break;
+
+                    case ModSetting.IKOverrideFly:
+                    {
+                        ms_ikOverrideFly = bool.Parse(p_value);
+                        IKOverrideFlyChange?.Invoke(ms_ikOverrideFly);
                     } break;
                 }
 
@@ -119,24 +158,33 @@ namespace ml_amt
             }
         }
 
+        public static bool IKOverrideCrouch
+        {
+            get => ms_ikOverrideCrouch;
+        }
         public static float CrouchLimit
         {
             get => ms_crouchLimit;
         }
-
-        public static bool IKOverride
+        public static bool IKOverrideProne
         {
-            get => ms_ikOverride;
+            get => ms_ikOverrideProne;
         }
-        
-        public static bool DetectPose
-        {
-            get => ms_detectPose;
-        }
-        
         public static float ProneLimit
         {
             get => ms_proneLimit;
+        }
+        public static bool PoseTransitions
+        {
+            get => ms_poseTransitions;
+        }
+        public static bool AdjustedMovement
+        {
+            get => ms_adjustedMovement;
+        }
+        public static bool IKOverrideFly
+        {
+            get => ms_ikOverrideFly;
         }
     }
 }

@@ -13,10 +13,13 @@ namespace ml_amt
             ms_instance = this;
 
             Settings.Init();
-            Settings.IKOverrideChange += this.OnIKOverrideChange;
+            Settings.IKOverrideCrouchChange += this.OnIKOverrideCrouchChange;
             Settings.CrouchLimitChange += this.OnCrouchLimitChange;
-            Settings.DetectPoseChange += this.OnDetectPoseChange;
+            Settings.IKOverrideProneChange += this.OnIKOverrideProneChange;
             Settings.ProneLimitChange += this.OnProneLimitChange;
+            Settings.PoseTransitionsChange += this.OnPoseTransitonsChange;
+            Settings.AdjustedMovementChange += this.OnAdjustedMovementChange;
+            Settings.IKOverrideFlyChange += this.OnIKOverrideFlyChange;
 
             HarmonyInstance.Patch(
                 typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.ClearAvatar)),
@@ -38,32 +41,49 @@ namespace ml_amt
                 yield return null;
 
             m_localTweaker = PlayerSetup.Instance.gameObject.AddComponent<MotionTweaker>();
-            m_localTweaker.SetIKOverride(Settings.IKOverride);
+            m_localTweaker.SetIKOverrideCrouch(Settings.IKOverrideCrouch);
             m_localTweaker.SetCrouchLimit(Settings.CrouchLimit);
-            m_localTweaker.SetDetectPose(Settings.DetectPose);
+            m_localTweaker.SetIKOverrideCrouch(Settings.IKOverrideProne);
             m_localTweaker.SetProneLimit(Settings.ProneLimit);
+            m_localTweaker.SetPoseTransitions(Settings.PoseTransitions);
+            m_localTweaker.SetAdjustedMovement(Settings.AdjustedMovement);
+            m_localTweaker.SetIKOverrideFly(Settings.IKOverrideFly);
         }
-
-
-        void OnIKOverrideChange(bool p_state)
+        
+        void OnIKOverrideCrouchChange(bool p_state)
         {
             if(m_localTweaker != null)
-                m_localTweaker.SetIKOverride(p_state);
+                m_localTweaker.SetIKOverrideCrouch(p_state);
         }
         void OnCrouchLimitChange(float p_value)
         {
             if(m_localTweaker != null)
                 m_localTweaker.SetCrouchLimit(p_value);
         }
-        void OnDetectPoseChange(bool p_state)
+        void OnIKOverrideProneChange(bool p_state)
         {
             if(m_localTweaker != null)
-                m_localTweaker.SetDetectPose(p_state);
+                m_localTweaker.SetIKOverrideProne(p_state);
         }
         void OnProneLimitChange(float p_value)
         {
             if(m_localTweaker != null)
                 m_localTweaker.SetProneLimit(p_value);
+        }
+        void OnPoseTransitonsChange(bool p_state)
+        {
+            if(m_localTweaker != null)
+                m_localTweaker.SetPoseTransitions(p_state);
+        }
+        void OnAdjustedMovementChange(bool p_state)
+        {
+            if(m_localTweaker != null)
+                m_localTweaker.SetAdjustedMovement(p_state);
+        }
+        void OnIKOverrideFlyChange(bool p_state)
+        {
+            if(m_localTweaker != null)
+                m_localTweaker.SetIKOverrideFly(p_state);
         }
 
         static void OnAvatarClear_Postfix() => ms_instance?.OnAvatarClear();

@@ -9,17 +9,19 @@ namespace ml_fpt
     public class FourPointTracking : MelonLoader.MelonMod
     {
         static FourPointTracking ms_instance = null;
+        
+        bool m_ready = false;
 
         IndexIK m_indexIk = null;
         CVR_IK_Calibrator m_ikCalibrator = null;
+        RootMotion.FinalIK.VRIK m_vrIK = null;
+        RuntimeAnimatorController m_runtimeAnimator = null;
 
-        bool m_inCalibration = false;
+        bool m_calibrationActive = false;
+        object m_calibrationTask = null;
+        
         int m_hipsTrackerIndex = -1;
-
-        RuntimeAnimatorController m_oldRuntimeAnimator = null;
-        RootMotion.FinalIK.VRIK m_origVrIk = null;
-
-        bool m_playerReady = false;
+        Transform m_hips = null;
 
         public override void OnApplicationStart()
         {
@@ -33,54 +35,6 @@ namespace ml_fpt
 
             MelonLoader.MelonCoroutines.Start(WaitForMainMenuView());
             MelonLoader.MelonCoroutines.Start(WaitForLocalPlayer());
-        }
-
-        public override void OnUpdate()
-        {
-            if(m_playerReady && m_inCalibration && (m_hipsTrackerIndex != -1))
-            {
-                if(m_origVrIk != null)
-                    m_origVrIk.enabled = false;
-                m_ikCalibrator.enabled = false;
-                m_indexIk.enabled = false;
-
-                Transform l_hips = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.Hips);
-                PlayerSetup.Instance._trackerManager.trackers[m_hipsTrackerIndex].ShowLine(true, l_hips);
-
-                if((CVRInputManager.Instance.interactLeftValue > 0.9f) && (CVRInputManager.Instance.interactRightValue > 0.9f))
-                {
-                    PlayerSetup.Instance._trackerManager.trackers[m_hipsTrackerIndex].target.transform.position = l_hips.position;
-                    PlayerSetup.Instance._trackerManager.trackers[m_hipsTrackerIndex].target.transform.rotation = l_hips.rotation;
-
-                    if((m_origVrIk != null) && (m_origVrIk.solver?.spine != null))
-                    {
-                        m_origVrIk.solver.spine.pelvisTarget = PlayerSetup.Instance._trackerManager.trackers[m_hipsTrackerIndex].target;
-                        m_origVrIk.solver.spine.pelvisPositionWeight = 1f;
-                        m_origVrIk.solver.spine.pelvisRotationWeight = 1f;
-                        m_origVrIk.solver.OnPreUpdate -= this.OverrideIKWeight;
-                        m_origVrIk.solver.IKPositionWeight = 1f;
-                        m_origVrIk.enabled = true;
-                    }
-
-                    m_indexIk.enabled = true;
-                    m_ikCalibrator.enabled = true;
-
-                    PlayerSetup.Instance._animator.runtimeAnimatorController = m_oldRuntimeAnimator;
-
-                    m_ikCalibrator.leftHandModel.SetActive(false);
-                    m_ikCalibrator.rightHandModel.SetActive(false);
-                    PlayerSetup.Instance._trackerManager.trackers[m_hipsTrackerIndex].ShowTracker(false);
-                    PlayerSetup.Instance._trackerManager.trackers[m_hipsTrackerIndex].ShowLine(false);
-                    CVR_InteractableManager.enableInteractions = true;
-
-                    if(PlayerSetup.Instance._avatar.GetComponent<ABI.CCK.Components.CVRAvatar>().avatarUsesAdvancedSettings)
-                        PlayerSetup.Instance.LoadCurrentAvatarSettingsDefault();
-
-                    Reset();
-
-                    ShowHudNotification("Calibration completed");
-                }
-            }
         }
 
         System.Collections.IEnumerator WaitForMainMenuView()
@@ -111,16 +65,16 @@ namespace ml_fpt
             m_indexIk = PlayerSetup.Instance.gameObject.GetComponent<IndexIK>();
             m_ikCalibrator = PlayerSetup.Instance.gameObject.GetComponent<CVR_IK_Calibrator>();
 
-            m_playerReady = true;
+            m_ready = true;
         }
 
         void StartCalibration()
         {
-            if(m_playerReady && !m_inCalibration && PlayerSetup.Instance._inVr && !PlayerSetup.Instance.avatarIsLoading && PlayerSetup.Instance._animator.isHuman && !m_ikCalibrator.inFullbodyCalibration && !m_ikCalibrator.avatarCalibratedAsFullBody)
+            if(m_ready && !m_calibrationActive && PlayerSetup.Instance._inVr && !PlayerSetup.Instance.avatarIsLoading && PlayerSetup.Instance._animator.isHuman && !m_ikCalibrator.inFullbodyCalibration && !m_ikCalibrator.avatarCalibratedAsFullBody)
             {
                 for(int i = 0; i < PlayerSetup.Instance._trackerManager.trackerNames.Length; i++)
                 {
-                    if(PlayerSetup.Instance._trackerManager.trackerNames[i] == "vive_tracker_waist")
+                    if((PlayerSetup.Instance._trackerManager.trackerNames[i] == "vive_tracker_waist") && PlayerSetup.Instance._trackerManager.trackers[i].active)
                     {
                         m_hipsTrackerIndex = i;
                         break;
@@ -129,19 +83,22 @@ namespace ml_fpt
 
                 if(m_hipsTrackerIndex != -1)
                 {
-                    m_oldRuntimeAnimator = PlayerSetup.Instance._animator.runtimeAnimatorController;
+                    m_runtimeAnimator = PlayerSetup.Instance._animator.runtimeAnimatorController;
                     PlayerSetup.Instance._animator.runtimeAnimatorController = PlayerSetup.Instance.tPoseAnimatorController;
 
-                    m_origVrIk = PlayerSetup.Instance._animator.GetComponent<RootMotion.FinalIK.VRIK>();
-                    if(m_origVrIk != null)
-                        m_origVrIk.solver.OnPreUpdate += this.OverrideIKWeight;
+                    m_hips = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.Hips);
+                    m_vrIK = PlayerSetup.Instance._animator.GetComponent<RootMotion.FinalIK.VRIK>();
+
+                    if(m_vrIK != null)
+                        m_vrIK.solver.OnPreUpdate += this.OverrideIKWeight;
 
                     m_ikCalibrator.leftHandModel.SetActive(true);
                     m_ikCalibrator.rightHandModel.SetActive(true);
                     PlayerSetup.Instance._trackerManager.trackers[m_hipsTrackerIndex].ShowTracker(true);
                     CVR_InteractableManager.enableInteractions = false;
 
-                    m_inCalibration = true;
+                    m_calibrationActive = true;
+                    m_calibrationTask = MelonLoader.MelonCoroutines.Start(CalibrationTask());
 
                     ViewManager.Instance.ForceUiStatus(false);
                     ShowHudNotification("Calibration started");
@@ -152,19 +109,71 @@ namespace ml_fpt
             else
                 ShowMenuAlert("Calibraton requirements aren't met: be in VR, be not in FBT or avatar calibration, humanoid avatar");
         }
-
-        void Reset()
+        
+        System.Collections.IEnumerator CalibrationTask()
         {
-            m_inCalibration = false;
-            m_hipsTrackerIndex = -1;
-            m_oldRuntimeAnimator = null;
-            m_origVrIk = null;
+            while(m_calibrationActive)
+            {
+                if(m_vrIK != null)
+                    m_vrIK.enabled = false;
+                
+                m_ikCalibrator.enabled = false;
+                m_indexIk.enabled = false;
+
+                PlayerSetup.Instance._trackerManager.trackers[m_hipsTrackerIndex].ShowLine(true, m_hips);
+
+                if((CVRInputManager.Instance.interactLeftValue > 0.9f) && (CVRInputManager.Instance.interactRightValue > 0.9f))
+                {
+                    PlayerSetup.Instance._trackerManager.trackers[m_hipsTrackerIndex].target.transform.position = m_hips.position;
+                    PlayerSetup.Instance._trackerManager.trackers[m_hipsTrackerIndex].target.transform.rotation = m_hips.rotation;
+
+                    if(m_vrIK != null)
+                    {
+                        m_vrIK.solver.spine.pelvisTarget = PlayerSetup.Instance._trackerManager.trackers[m_hipsTrackerIndex].target;
+                        m_vrIK.solver.spine.pelvisPositionWeight = 1f;
+                        m_vrIK.solver.spine.pelvisRotationWeight = 1f;
+                        m_vrIK.solver.OnPreUpdate -= this.OverrideIKWeight;
+                        m_vrIK.solver.IKPositionWeight = 1f;
+                        m_vrIK.enabled = true;
+                    }
+
+                    m_indexIk.enabled = true;
+                    m_ikCalibrator.enabled = true;
+                    PlayerSetup.Instance._animator.runtimeAnimatorController = m_runtimeAnimator;
+
+                    m_ikCalibrator.leftHandModel.SetActive(false);
+                    m_ikCalibrator.rightHandModel.SetActive(false);
+                    PlayerSetup.Instance._trackerManager.trackers[m_hipsTrackerIndex].ShowTracker(false);
+                    PlayerSetup.Instance._trackerManager.trackers[m_hipsTrackerIndex].ShowLine(false);
+                    CVR_InteractableManager.enableInteractions = true;
+
+                    Reset();
+
+                    ShowHudNotification("Calibration completed");
+                }
+                
+                yield return null;
+            }
+
+            m_calibrationTask = null; // Idk if it's safe or not
         }
 
         void OverrideIKWeight()
         {
-            if(m_inCalibration && (m_origVrIk != null))
-                m_origVrIk.solver.IKPositionWeight = 0f;
+            if(m_calibrationActive)
+            {
+                m_vrIK.solver.IKPositionWeight = 0f;
+            }
+        }
+        
+        void Reset()
+        {
+            m_vrIK = null;
+            m_runtimeAnimator = null;
+            m_calibrationActive = false;
+            m_calibrationTask = null;
+            m_hipsTrackerIndex = -1;
+            m_hips = null;
         }
 
         static void OnAvatarClear_Postfix() => ms_instance?.OnAvatarClear();
@@ -172,8 +181,11 @@ namespace ml_fpt
         {
             try
             {
-                if(m_inCalibration)
+                if(m_calibrationActive)
                 {
+                    if(m_calibrationTask != null)
+                        MelonLoader.MelonCoroutines.Stop(m_calibrationTask);
+                    
                     m_indexIk.enabled = true;
                     m_ikCalibrator.enabled = true;
 

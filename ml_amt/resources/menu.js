@@ -181,9 +181,9 @@ function inp_toggle_mod_amt(_obj, _callbackName) {
         </div>
 
         <div class ="row-wrapper">
-            <div class ="option-caption">IK locomotion override: </div>
+            <div class ="option-caption">IK override while crouching: </div>
             <div class ="option-input">
-                <div id="IKOverride" class ="inp_toggle no-scroll" data-current="true"></div>
+                <div id="IKOverrideCrouch" class ="inp_toggle no-scroll" data-current="true"></div>
             </div>
         </div>
 
@@ -195,16 +195,37 @@ function inp_toggle_mod_amt(_obj, _callbackName) {
         </div>
         
         <div class ="row-wrapper">
-            <div class ="option-caption">Detect pose (regular avatars): </div>
+            <div class ="option-caption">IK override while proning: </div>
             <div class ="option-input">
-                <div id="DetectPose" class ="inp_toggle no-scroll" data-current="true"></div>
+                <div id="IKOverrideProne" class ="inp_toggle no-scroll" data-current="true"></div>
             </div>
         </div>
         
         <div class ="row-wrapper">
-            <div class ="option-caption">Prone limit (regular avatars): </div>
+            <div class ="option-caption">Prone limit: </div>
             <div class ="option-input">
                 <div id="ProneLimit" class ="inp_slider no-scroll" data-min="0" data-max="100" data-current="30"></div>
+            </div>
+        </div>
+
+        <div class ="row-wrapper">
+            <div class ="option-caption">IK override while flying: </div>
+            <div class ="option-input">
+                <div id="IKOverrideFly" class ="inp_toggle no-scroll" data-current="true"></div>
+            </div>
+        </div>
+        
+        <div class ="row-wrapper">
+            <div class ="option-caption">Pose transitions: </div>
+            <div class ="option-input">
+                <div id="PoseTransitions" class ="inp_toggle no-scroll" data-current="true"></div>
+            </div>
+        </div>
+        
+        <div class ="row-wrapper">
+            <div class ="option-caption">Adjusted pose movement speed: </div>
+            <div class ="option-input">
+                <div id="AdjustedMovement" class ="inp_toggle no-scroll" data-current="true"></div>
             </div>
         </div>
     `;
