@@ -13,7 +13,7 @@ Available mod's settings in `Settings - Implementation - Avatar Motion Tweaker`:
 * **IK override while crouching:** disables legs locomotion/autostep upon HMD reaching `Crouch limit`; default value - `true`.
 * **Crouch limit:** defines crouch limit; default value - `65`.
   * Note: Can be overrided by avatar. For this avatar has to have child gameobject with name `CrouchLimit`, its Y-axis location will be used as limit, should be in range [0.0, 1.0].
-* **IK override while crouching:** disables legs locomotion/autostep upon HMD reaching height of `Prone limit`; default value - `true`.
+* **IK override while crouching:** disables legs locomotion/autostep upon HMD reaching `Prone limit`; default value - `true`.
 * **Prone limit:** defines second limit; default value - `30`.
   * Note: Can be overrided by avatar. For this avatar has to have child gameobject with name `ProneLimit`, its Y-axis location will be used as limit, should be in range [0.0, 1.0].
 * **IK override while flying:** disables legs locomotion/autostep in fly mode; default value - `true`.
@@ -31,6 +31,3 @@ Available additional parameters for AAS animator:
 
 Additional avatars tweaks:
 * If avatar has child object with name `LocomotionOffset` its local position will be used for offsetting VRIK locomotion mass center.
-  
-# Notes
-* Usage of `Upright` parameter for transition between poses (standing/crouching/proning) in desktop mode is useless, because in this case your animations are updating value of `Upright` parameter, not the other way around.
