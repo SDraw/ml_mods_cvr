@@ -13,7 +13,5 @@ This mod adds ability to use 4-point tracking.
 * Press trigger on both controllers
 
 # Notes
-* You have to recalibrate each time you change avatar
-
-# Planned
-* No need for recalibration upon avatar change
+* Calibration is saved per avatar for game session.
+* AAS parameters are restored after calibration.
