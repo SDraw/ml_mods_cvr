@@ -21,7 +21,7 @@ Available mod's settings in `Settings - Implementation - Desktop Head Tracking`:
 * **Movement smoothing:** smoothing factor between new and old movement data; default value - `50`;
 
 # Known compatible tracking software
-* VSeeFace with [Tracking Data Parser mod](https://github.com/SDraw/ml_mods_vsf)
+* [VSeeFace](https://www.vseeface.icu) with [Tracking Data Parser mod](https://github.com/SDraw/ml_mods_vsf)
 
 # Notes
 * Blinking doesn't work for remote players to due [game's bug](https://feedback.abinteractive.net/p/overrided-blinking-state-isn-t-copied-to-movement-data-from-network).
