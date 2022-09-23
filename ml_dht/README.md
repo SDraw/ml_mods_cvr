@@ -8,6 +8,7 @@ Refer to `TrackingData.cs` for reference in case of implementing own software.
 * Head rotation
 * Eyes gaze direction
 * Blinking
+* Basic mouth shapes
 
 # Installation
 * Install [latest MelonLoader](https://github.com/LavaGang/MelonLoader)
@@ -18,7 +19,8 @@ Refer to `TrackingData.cs` for reference in case of implementing own software.
 Available mod's settings in `Settings - Implementation - Desktop Head Tracking`:
 * **Enabled:** enabled head tracking; default value - `false`.
 * **Mirrored movement:** mirrors movement and gaze along 0YZ plane; default value - `false`.
-* **Movement smoothing:** smoothing factor between new and old movement data; default value - `50`;
+* **Movement smoothing:** smoothing factor between new and old movement data; default value - `50`.
+* **Override face tracking:** Overrides and activates avatar's `VRC Face Tracking` components. List of used shapes: `Jaw_Open`, `Mouth_Pout`, `Mouth_Smile_Left`, `Mouth_Smile_Right`.
 
 # Known compatible tracking software
 * [VSeeFace](https://www.vseeface.icu) with [Tracking Data Parser mod](https://github.com/SDraw/ml_mods_vsf)

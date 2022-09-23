@@ -5,7 +5,7 @@ Merged set of MelonLoader mods for ChilloutVR.
 |-----------|------------|----------------|-----------------------------------------------------------------|----------------|-------|
 | Avatar Change Info | ml_aci | 1.0.2 | Yes | Working |
 | Avatar Motion Tweaker | ml_amt | 1.1.0 | On review | Working |
-| Desktop Head Tracking | ml_dht | 1.0.0 | On review | Working |
+| Desktop Head Tracking | ml_dht | 1.0.1 | On review | Working |
 | Desktop Reticle Switch | ml_drs | 1.0.0 | Yes | Working |
 | Four Point Tracking | ml_fpt | 1.0.6 | On review | Working |
 | Leap Motion Extension | ml_lme | 1.1.8 | Yes | Working |

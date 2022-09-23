@@ -200,6 +200,13 @@ function inp_toggle_mod_dht(_obj, _callbackName) {
                 <div id="Smoothing" class ="inp_slider no-scroll" data-min="0" data-max="99" data-current="50"></div>
             </div>
         </div>
+
+        <div class ="row-wrapper">
+            <div class ="option-caption">Override face tracking: </div>
+            <div class ="option-input">
+                <div id="FaceOverride" class ="inp_toggle no-scroll" data-current="true"></div>
+            </div>
+        </div>
     `;
     document.getElementById('settings-implementation').appendChild(l_block);
 

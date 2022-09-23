@@ -13,9 +13,9 @@ struct TrackingData
     public float m_gazeX; // Range - [0;1], 0.5 - center
     public float m_gazeY; // Range - [0;1], 0.5 - center
     public float m_blink; // Range - [0;1], 1.0 - closed
-    public float m_mouthOpen; // Range - [0;1], not used yet
-    public float m_mouthShape; // Range - [0;1], not used yet
-    public float m_brows; // Range - [0;1], not used yet
+    public float m_mouthOpen; // Range - [0;1]
+    public float m_mouthShape; // Range - [-1;1], -1 - wide, 1 - narrow
+    public float m_brows; // Range - [-1;1], -1 - up, 1 - down; not used yet
 
     static public byte[] ToBytes(TrackingData p_faceData)
     {

@@ -1,3 +1,4 @@
+using ABI.CCK.Components;
 using ABI_RC.Core.Player;
 
 namespace ml_dht
@@ -21,6 +22,7 @@ namespace ml_dht
             Settings.EnabledChange += this.OnEnabledChanged;
             Settings.MirroredChange += this.OnMirroredChanged;
             Settings.SmoothingChange += this.OnSmoothingChanged;
+            Settings.FaceOverrideChange += this.OnFaceOverrideChange;
             
             m_mapReader = new MemoryMapReader();
             m_buffer = new byte[1024];
@@ -42,6 +44,11 @@ namespace ml_dht
                 typeof(CVREyeController).GetMethod("Update", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic),
                 null,
                 new HarmonyLib.HarmonyMethod(typeof(DesktopHeadTracking).GetMethod(nameof(OnEyeControllerUpdate_Postfix), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic))
+            );
+            HarmonyInstance.Patch(
+                typeof(CVRFaceTracking).GetMethod("Update", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic),
+                null,
+                new HarmonyLib.HarmonyMethod(typeof(DesktopHeadTracking).GetMethod(nameof(OnFaceTrackingUpdate_Postfix), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic))
             );
 
             MelonLoader.MelonCoroutines.Start(WaitForPlayer());    
@@ -82,6 +89,11 @@ namespace ml_dht
         {
             if(m_localTracked != null)
                 m_localTracked.SetSmoothing(p_value);
+        }
+        void OnFaceOverrideChange(bool p_state)
+        {
+            if(m_localTracked != null)
+                m_localTracked.SetFaceOverride(p_state);
         }
         
         static void OnSetupAvatarGeneral_Postfix() => ms_instance?.OnSetupAvatarGeneral();
@@ -128,6 +140,20 @@ namespace ml_dht
         {
             if(m_localTracked != null)
                 m_localTracked.OnEyeControllerUpdate();
+        }
+
+        static void OnFaceTrackingUpdate_Postfix(ref CVRFaceTracking __instance) => ms_instance?.OnFaceTrackingUpdate(__instance);
+        void OnFaceTrackingUpdate(CVRFaceTracking p_component)
+        {
+            try
+            {
+                if(p_component.isLocal && (m_localTracked != null))
+                    m_localTracked.OnFaceTrackingUpdate(p_component);
+            }
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
         }
     }
 }

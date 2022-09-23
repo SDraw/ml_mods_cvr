@@ -11,12 +11,14 @@ namespace ml_dht
         {
             Enabled = 0,
             Mirrored,
-            Smoothing
+            Smoothing,
+            FaceOverride
         }
         
         static bool ms_enabled = false;
         static bool ms_mirrored = false;
         static float ms_smoothing = 0.5f;
+        static bool ms_faceOverride = true;
         
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
@@ -24,6 +26,7 @@ namespace ml_dht
         static public event Action<bool> EnabledChange;
         static public event Action<bool> MirroredChange;
         static public event Action<float> SmoothingChange;
+        static public event Action<bool> FaceOverrideChange;
         
         public static void Init()
         {
@@ -33,6 +36,7 @@ namespace ml_dht
             ms_entries.Add(ms_category.CreateEntry(ModSetting.Enabled.ToString(), false));
             ms_entries.Add(ms_category.CreateEntry(ModSetting.Mirrored.ToString(), false));
             ms_entries.Add(ms_category.CreateEntry(ModSetting.Smoothing.ToString(), 50));
+            ms_entries.Add(ms_category.CreateEntry(ModSetting.FaceOverride.ToString(), true));
             
             Load();
 
@@ -66,6 +70,7 @@ namespace ml_dht
             ms_enabled = (bool)ms_entries[(int)ModSetting.Enabled].BoxedValue;
             ms_mirrored = (bool)ms_entries[(int)ModSetting.Mirrored].BoxedValue;
             ms_smoothing = ((int)ms_entries[(int)ModSetting.Smoothing].BoxedValue) * 0.01f;
+            ms_faceOverride = (bool)ms_entries[(int)ModSetting.FaceOverride].BoxedValue;
         }
         
         static void OnSliderUpdate(string p_name, string p_value)
@@ -105,6 +110,12 @@ namespace ml_dht
                         MirroredChange?.Invoke(ms_mirrored);
                     }
                     break;
+
+                    case ModSetting.FaceOverride:
+                    {
+                        ms_faceOverride = bool.Parse(p_value);
+                        FaceOverrideChange?.Invoke(ms_faceOverride);
+                    } break;
                 }
 
                 ms_entries[(int)l_setting].BoxedValue = bool.Parse(p_value);
@@ -122,6 +133,10 @@ namespace ml_dht
         public static float Smoothing
         {
             get => ms_smoothing;
+        }
+        public static bool FaceOverride
+        {
+            get => ms_faceOverride;
         }
     }
 }
