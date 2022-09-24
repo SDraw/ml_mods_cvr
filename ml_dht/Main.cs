@@ -6,27 +6,27 @@ namespace ml_dht
     public class DesktopHeadTracking : MelonLoader.MelonMod
     {
         static DesktopHeadTracking ms_instance = null;
-        
+
         MemoryMapReader m_mapReader = null;
         byte[] m_buffer = null;
         TrackingData m_trackingData;
-        
+
         FaceTracked m_localTracked = null;
-        
+
         public override void OnApplicationStart()
         {
             if(ms_instance == null)
                 ms_instance = this;
-                
+
             Settings.Init();
             Settings.EnabledChange += this.OnEnabledChanged;
             Settings.MirroredChange += this.OnMirroredChanged;
             Settings.SmoothingChange += this.OnSmoothingChanged;
             Settings.FaceOverrideChange += this.OnFaceOverrideChange;
-            
+
             m_mapReader = new MemoryMapReader();
             m_buffer = new byte[1024];
-            
+
             m_mapReader.Open("head/data");
 
             // Patches
@@ -51,20 +51,20 @@ namespace ml_dht
                 new HarmonyLib.HarmonyMethod(typeof(DesktopHeadTracking).GetMethod(nameof(OnFaceTrackingUpdate_Postfix), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic))
             );
 
-            MelonLoader.MelonCoroutines.Start(WaitForPlayer());    
+            MelonLoader.MelonCoroutines.Start(WaitForPlayer());
         }
 
         System.Collections.IEnumerator WaitForPlayer()
         {
             while(PlayerSetup.Instance == null)
                 yield return null;
-                
+
             m_localTracked = PlayerSetup.Instance.gameObject.AddComponent<FaceTracked>();
             m_localTracked.SetEnabled(Settings.Enabled);
             m_localTracked.SetMirrored(Settings.Mirrored);
             m_localTracked.SetSmoothing(Settings.Smoothing);
         }
-        
+
         public override void OnUpdate()
         {
             if(Settings.Enabled && m_mapReader.Read(ref m_buffer))
@@ -74,7 +74,7 @@ namespace ml_dht
                     m_localTracked.UpdateTrackingData(ref m_trackingData);
             }
         }
-        
+
         void OnEnabledChanged(bool p_state)
         {
             if(m_localTracked != null)
@@ -95,7 +95,7 @@ namespace ml_dht
             if(m_localTracked != null)
                 m_localTracked.SetFaceOverride(p_state);
         }
-        
+
         static void OnSetupAvatarGeneral_Postfix() => ms_instance?.OnSetupAvatarGeneral();
         void OnSetupAvatarGeneral()
         {
@@ -109,7 +109,7 @@ namespace ml_dht
                 MelonLoader.MelonLogger.Error(e);
             }
         }
-        
+
         static void OnAvatarClear_Postfix() => ms_instance?.OnAvatarClear();
         void OnAvatarClear()
         {
@@ -124,22 +124,18 @@ namespace ml_dht
             }
         }
 
-        static void OnEyeControllerUpdate_Postfix(ref CVREyeController __instance)
+        static void OnEyeControllerUpdate_Postfix(ref CVREyeController __instance) => ms_instance?.OnEyeControllerUpdate(__instance);
+        void OnEyeControllerUpdate(CVREyeController p_component)
         {
             try
             {
-                if(__instance == PlayerSetup.Instance.eyeMovement)
-                    ms_instance?.OnEyeControllerUpdate();
+                if(p_component.isLocal && (m_localTracked != null))
+                    m_localTracked.OnEyeControllerUpdate(p_component);
             }
             catch(System.Exception e)
             {
                 MelonLoader.MelonLogger.Error(e);
             }
-        }
-        void OnEyeControllerUpdate()
-        {
-            if(m_localTracked != null)
-                m_localTracked.OnEyeControllerUpdate();
         }
 
         static void OnFaceTrackingUpdate_Postfix(ref CVRFaceTracking __instance) => ms_instance?.OnFaceTrackingUpdate(__instance);

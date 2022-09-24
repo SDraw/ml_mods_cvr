@@ -6,7 +6,7 @@ namespace ml_dht
 {
     class FaceTracked : MonoBehaviour
     {
-        bool m_enabled = true;
+        bool m_enabled = false;
         float m_smoothing = 0.5f;
         bool m_mirrored = false;
         bool m_faceOverride = true;
@@ -41,26 +41,26 @@ namespace ml_dht
             m_eyebrowsProgress = p_data.m_brows;
         }
 
-        public void OnEyeControllerUpdate()
-        {
-            if(m_enabled)
-            {
-                // Gaze
-                PlayerSetup.Instance.eyeMovement.manualViewTarget = true;
-                PlayerSetup.Instance.eyeMovement.targetViewPosition = m_camera.position + m_camera.rotation * new Vector3((m_gazeDirection.x - 0.5f) * -2f, (m_gazeDirection.y - 0.5f) * 2f, 1f);
-
-                // Blink
-                PlayerSetup.Instance.eyeMovement.manualBlinking = true;
-                PlayerSetup.Instance.eyeMovement.blinkProgress = m_blinkProgress;
-            }
-        }
-
         void OnLookIKPostUpdate()
         {
             if(m_enabled && (m_headBone != null))
             {
                 m_lastHeadRotation = Quaternion.Slerp(m_lastHeadRotation, m_headRotation * m_bindRotation, m_smoothing);
                 m_headBone.localRotation = m_lastHeadRotation;
+            }
+        }
+
+        public void OnEyeControllerUpdate(CVREyeController p_component)
+        {
+            if(m_enabled)
+            {
+                // Gaze
+                p_component.manualViewTarget = true;
+                p_component.targetViewPosition = m_camera.position + m_camera.rotation * new Vector3((m_gazeDirection.x - 0.5f) * -2f, (m_gazeDirection.y - 0.5f) * 2f, 1f);
+
+                // Blink
+                p_component.manualBlinking = true;
+                p_component.blinkProgress = m_blinkProgress;
             }
         }
 
