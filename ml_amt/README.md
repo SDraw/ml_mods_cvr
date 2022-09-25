@@ -13,8 +13,8 @@ Available mod's settings in `Settings - Implementation - Avatar Motion Tweaker`:
 * **IK override while crouching:** disables legs locomotion/autostep upon HMD reaching `Crouch limit`; default value - `true`.
 * **Crouch limit:** defines crouch limit; default value - `65`.
   * Note: Can be overrided by avatar. For this avatar has to have child gameobject with name `CrouchLimit`, its Y-axis location will be used as limit, should be in range [0.0, 1.0].
-* **IK override while crouching:** disables legs locomotion/autostep upon HMD reaching `Prone limit`; default value - `true`.
-* **Prone limit:** defines second limit; default value - `30`.
+* **IK override while proning:** disables legs locomotion/autostep upon HMD reaching `Prone limit`; default value - `true`.
+* **Prone limit:** defines prone limit; default value - `30`.
   * Note: Can be overrided by avatar. For this avatar has to have child gameobject with name `ProneLimit`, its Y-axis location will be used as limit, should be in range [0.0, 1.0].
 * **IK override while flying:** disables legs locomotion/autostep in fly mode; default value - `true`.
 * **Pose transitions:** allows regular avatars animator to transit in crouch/prone states; default value - `true`.
