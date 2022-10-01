@@ -36,9 +36,9 @@ namespace ml_dht
                 new HarmonyLib.HarmonyMethod(typeof(DesktopHeadTracking).GetMethod(nameof(OnAvatarClear_Postfix), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic))
             );
             HarmonyInstance.Patch(
-                typeof(PlayerSetup).GetMethod("SetupAvatarGeneral", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic),
+                typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.CalibrateAvatar)),
                 null,
-                new HarmonyLib.HarmonyMethod(typeof(DesktopHeadTracking).GetMethod(nameof(OnSetupAvatarGeneral_Postfix), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic))
+                new HarmonyLib.HarmonyMethod(typeof(DesktopHeadTracking).GetMethod(nameof(OnCalibrateAvatar_Postfix), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic))
             );
             HarmonyInstance.Patch(
                 typeof(CVREyeController).GetMethod("Update", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic),
@@ -96,13 +96,13 @@ namespace ml_dht
                 m_localTracked.SetFaceOverride(p_state);
         }
 
-        static void OnSetupAvatarGeneral_Postfix() => ms_instance?.OnSetupAvatarGeneral();
-        void OnSetupAvatarGeneral()
+        static void OnCalibrateAvatar_Postfix() => ms_instance?.OnCalibrateAvatar();
+        void OnCalibrateAvatar()
         {
             try
             {
                 if(m_localTracked != null)
-                    m_localTracked.OnSetupAvatarGeneral();
+                    m_localTracked.OnCalibrateAvatar();
             }
             catch(System.Exception e)
             {

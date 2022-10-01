@@ -93,7 +93,7 @@ namespace ml_dht
             }
         }
 
-        public void OnSetupAvatarGeneral()
+        public void OnCalibrateAvatar()
         {
             m_avatarDescriptior = PlayerSetup.Instance._avatar.GetComponent<CVRAvatar>();
             m_headBone = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.Head);

@@ -10,7 +10,8 @@ namespace ml_amt
 
         public override void OnApplicationStart()
         {
-            ms_instance = this;
+            if(ms_instance == null)
+                ms_instance = this;
 
             Settings.Init();
             Settings.IKOverrideCrouchChange += this.OnIKOverrideCrouchChange;
@@ -27,9 +28,9 @@ namespace ml_amt
                 new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnAvatarClear_Postfix), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static))
             );
             HarmonyInstance.Patch(
-                typeof(PlayerSetup).GetMethod("SetupAvatarGeneral", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic),
+                typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.CalibrateAvatar)),
                 null,
-                new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnSetupAvatarGeneral_Postfix), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic))
+                new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnCalibrateAvatar_Postfix), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic))
             );
 
             MelonLoader.MelonCoroutines.Start(WaitForLocalPlayer());
@@ -100,13 +101,13 @@ namespace ml_amt
             }
         }
 
-        static void OnSetupAvatarGeneral_Postfix() => ms_instance?.OnSetupAvatarGeneral();
-        void OnSetupAvatarGeneral()
+        static void OnCalibrateAvatar_Postfix() => ms_instance?.OnCalibrateAvatar();
+        void OnCalibrateAvatar()
         {
             try
             {
                 if(m_localTweaker != null)
-                    m_localTweaker.OnSetupAvatarGeneral();
+                    m_localTweaker.OnCalibrateAvatar();
             }
             catch(System.Exception l_exception)
             {

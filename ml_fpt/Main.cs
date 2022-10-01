@@ -3,6 +3,8 @@ using ABI_RC.Core.InteractionSystem;
 using ABI_RC.Core.Player;
 using ABI_RC.Core.Savior;
 using ABI_RC.Core.UI;
+using ABI_RC.Systems.IK;
+using ABI_RC.Systems.IK.SubSystems;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -15,7 +17,6 @@ namespace ml_fpt
         bool m_ready = false;
 
         IndexIK m_indexIk = null;
-        CVR_IK_Calibrator m_ikCalibrator = null;
         RootMotion.FinalIK.VRIK m_vrIK = null;
         RuntimeAnimatorController m_runtimeAnimator = null;
         List<CVRAdvancedSettingsFileProfileValue> m_aasParameters = null;
@@ -30,7 +31,8 @@ namespace ml_fpt
 
         public override void OnApplicationStart()
         {
-            ms_instance = this;
+            if(ms_instance == null)
+                ms_instance = this;
 
             m_avatarCalibrations = new Dictionary<string, System.Tuple<Vector3, Quaternion>>();
 
@@ -40,9 +42,9 @@ namespace ml_fpt
                 new HarmonyLib.HarmonyMethod(typeof(FourPointTracking).GetMethod(nameof(OnAvatarClear_Postfix), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static))
             );
             HarmonyInstance.Patch(
-                typeof(PlayerSetup).GetMethod("SetupAvatarGeneral", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic),
+                typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.CalibrateAvatar)),
                 null,
-                new HarmonyLib.HarmonyMethod(typeof(FourPointTracking).GetMethod(nameof(OnSetupAvatarGeneral_Postfix), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic))
+                new HarmonyLib.HarmonyMethod(typeof(FourPointTracking).GetMethod(nameof(OnCalibrateAvatar_Postfix), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic))
             );
 
             MelonLoader.MelonCoroutines.Start(WaitForMainMenuView());
@@ -75,14 +77,13 @@ namespace ml_fpt
                 yield return null;
 
             m_indexIk = PlayerSetup.Instance.gameObject.GetComponent<IndexIK>();
-            m_ikCalibrator = PlayerSetup.Instance.gameObject.GetComponent<CVR_IK_Calibrator>();
 
             m_ready = true;
         }
 
         void StartCalibration()
         {
-            if(m_ready && !m_calibrationActive && PlayerSetup.Instance._inVr && !PlayerSetup.Instance.avatarIsLoading && PlayerSetup.Instance._animator.isHuman && !m_ikCalibrator.inFullbodyCalibration && !m_ikCalibrator.avatarCalibratedAsFullBody)
+            if(m_ready && !m_calibrationActive && PlayerSetup.Instance._inVr && !PlayerSetup.Instance.avatarIsLoading && PlayerSetup.Instance._animator.isHuman && !BodySystem.isCalibrating && !BodySystem.isCalibratedAsFullBody)
             {
                 m_hipsTrackerIndex = GetHipsTracker();
                 if(m_hipsTrackerIndex != -1)
@@ -100,8 +101,8 @@ namespace ml_fpt
                     if(m_vrIK != null)
                         m_vrIK.solver.OnPreUpdate += this.OverrideIKWeight;
 
-                    m_ikCalibrator.leftHandModel.SetActive(true);
-                    m_ikCalibrator.rightHandModel.SetActive(true);
+                    IKSystem.Instance.leftHandModel.SetActive(true);
+                    IKSystem.Instance.rightHandModel.SetActive(true);
                     PlayerSetup.Instance._trackerManager.trackers[m_hipsTrackerIndex].ShowTracker(true);
                     CVR_InteractableManager.enableInteractions = false;
 
@@ -125,7 +126,6 @@ namespace ml_fpt
                 if(m_vrIK != null)
                     m_vrIK.enabled = false;
 
-                m_ikCalibrator.enabled = false;
                 m_indexIk.enabled = false;
 
                 PlayerSetup.Instance._trackerManager.trackers[m_hipsTrackerIndex].ShowLine(true, m_hips);
@@ -154,7 +154,6 @@ namespace ml_fpt
                     }
 
                     m_indexIk.enabled = true;
-                    m_ikCalibrator.enabled = true;
 
                     PlayerSetup.Instance._animator.runtimeAnimatorController = m_runtimeAnimator;
                     PlayerSetup.Instance.animatorManager.SetAnimator(PlayerSetup.Instance._animator, m_runtimeAnimator);
@@ -166,8 +165,8 @@ namespace ml_fpt
                         }
                     }
 
-                    m_ikCalibrator.leftHandModel.SetActive(false);
-                    m_ikCalibrator.rightHandModel.SetActive(false);
+                    IKSystem.Instance.leftHandModel.SetActive(false);
+                    IKSystem.Instance.rightHandModel.SetActive(false);
                     PlayerSetup.Instance._trackerManager.trackers[m_hipsTrackerIndex].ShowTracker(false);
                     PlayerSetup.Instance._trackerManager.trackers[m_hipsTrackerIndex].ShowLine(false);
                     CVR_InteractableManager.enableInteractions = true;
@@ -213,10 +212,9 @@ namespace ml_fpt
                         MelonLoader.MelonCoroutines.Stop(m_calibrationTask);
 
                     m_indexIk.enabled = true;
-                    m_ikCalibrator.enabled = true;
 
-                    m_ikCalibrator.leftHandModel.SetActive(false);
-                    m_ikCalibrator.rightHandModel.SetActive(false);
+                    IKSystem.Instance.leftHandModel.SetActive(false);
+                    IKSystem.Instance.rightHandModel.SetActive(false);
 
                     if(m_hipsTrackerIndex != -1)
                     {
@@ -236,12 +234,12 @@ namespace ml_fpt
             }
         }
 
-        static void OnSetupAvatarGeneral_Postfix() => ms_instance?.OnSetupAvatarGeneral();
-        void OnSetupAvatarGeneral()
+        static void OnCalibrateAvatar_Postfix() => ms_instance?.OnCalibrateAvatar();
+        void OnCalibrateAvatar()
         {
             try
             {
-                if(m_ready && PlayerSetup.Instance._inVr && PlayerSetup.Instance._animator.isHuman && !m_ikCalibrator.avatarCalibratedAsFullBody)
+                if(m_ready && PlayerSetup.Instance._inVr && PlayerSetup.Instance._animator.isHuman && !VRTrackerManager.Instance.CheckFullBody())
                 {
                     int l_hipsTracker = GetHipsTracker();
                     if((l_hipsTracker != -1) && m_avatarCalibrations.TryGetValue(MetaPort.Instance.currentAvatarGuid, out var l_stored))

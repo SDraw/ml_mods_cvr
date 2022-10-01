@@ -168,7 +168,7 @@ namespace ml_amt
             m_parameters.Clear();
         }
 
-        public void OnSetupAvatarGeneral()
+        public void OnCalibrateAvatar()
         {
             m_vrIk = PlayerSetup.Instance._avatar.GetComponent<VRIK>();
 

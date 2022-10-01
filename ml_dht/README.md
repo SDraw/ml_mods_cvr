@@ -24,6 +24,3 @@ Available mod's settings in `Settings - Implementation - Desktop Head Tracking`:
 
 # Known compatible tracking software
 * [VSeeFace](https://www.vseeface.icu) with [Tracking Data Parser mod](https://github.com/SDraw/ml_mods_vsf)
-
-# Notes
-* Blinking doesn't work for remote players due to [game's bug](https://feedback.abinteractive.net/p/overrided-blinking-state-isn-t-copied-to-movement-data-from-network).
