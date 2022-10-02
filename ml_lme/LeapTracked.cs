@@ -1,5 +1,6 @@
 ﻿using ABI_RC.Core.Player;
 using ABI_RC.Core.Savior;
+using ABI_RC.Systems.IK;
 using RootMotion.FinalIK;
 using UnityEngine;
 
@@ -8,11 +9,10 @@ namespace ml_lme
     [DisallowMultipleComponent]
     class LeapTracked : MonoBehaviour
     {
-        static readonly Quaternion ms_offsetLeft = Quaternion.Euler(0f, 90f, 330f);
-        static readonly Quaternion ms_offsetRight = Quaternion.Euler(0f, 270f, 30f);
+        static readonly Quaternion ms_offsetLeft = Quaternion.Euler(0f, 0f, 270f);
+        static readonly Quaternion ms_offsetRight = Quaternion.Euler(0f, 0f, 90f);
 
         IndexIK m_indexIK = null;
-        CVR_IK_Calibrator m_ikCalibrator = null;
         VRIK m_vrIK = null;
 
         bool m_enabled = true;
@@ -29,7 +29,6 @@ namespace ml_lme
         void Start()
         {
             m_indexIK = this.GetComponent<IndexIK>();
-            m_ikCalibrator = this.GetComponent<CVR_IK_Calibrator>();
 
             if(m_leftHand != null)
             {
@@ -133,7 +132,7 @@ namespace ml_lme
                     }
                     if(!p_gesturesData.m_handsPresenses[0] && m_leftTargetActive)
                     {
-                        m_vrIK.solver.leftArm.target = m_ikCalibrator.leftHandAnchor;
+                        m_vrIK.solver.leftArm.target = IKSystem.Instance.leftHandAnchor;
                         m_leftTargetActive = false;
                     }
 
@@ -144,7 +143,7 @@ namespace ml_lme
                     }
                     if(!p_gesturesData.m_handsPresenses[1] && m_rightTargetActive)
                     {
-                        m_vrIK.solver.rightArm.target = m_ikCalibrator.rightHandAnchor;
+                        m_vrIK.solver.rightArm.target = IKSystem.Instance.rightHandAnchor;
                         m_rightTargetActive = false;
                     }
                 }
@@ -159,7 +158,7 @@ namespace ml_lme
             m_rightTargetActive = false;
         }
 
-        public void OnSetupAvatarGeneral()
+        public void OnCalibrateAvatar()
         {
             m_vrIK = PlayerSetup.Instance._animator.GetComponent<VRIK>();
 
@@ -217,16 +216,16 @@ namespace ml_lme
 
         void RestoreIK()
         {
-            if((m_ikCalibrator != null) && (m_vrIK != null))
+            if(m_vrIK != null)
             {
                 if(m_leftTargetActive)
                 {
-                    m_vrIK.solver.leftArm.target = m_ikCalibrator.leftHandAnchor;
+                    m_vrIK.solver.leftArm.target = IKSystem.Instance.leftHandAnchor;
                     m_leftTargetActive = false;
                 }
                 if(m_rightTargetActive)
                 {
-                    m_vrIK.solver.rightArm.target = m_ikCalibrator.rightHandAnchor;
+                    m_vrIK.solver.rightArm.target = IKSystem.Instance.rightHandAnchor;
                     m_rightTargetActive = false;
                 }
             }
