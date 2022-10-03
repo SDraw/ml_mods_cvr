@@ -82,9 +82,10 @@ namespace ml_lme
 
         static void FillHandPosition(Leap.Hand p_hand, ref Vector3 p_pos)
         {
-            p_pos.x = p_hand.PalmPosition.x;
-            p_pos.y = p_hand.PalmPosition.y;
-            p_pos.z = p_hand.PalmPosition.z;
+            // Unity's IK and FinalIK move hand bones to target, therefore - wrist
+            p_pos.x = p_hand.WristPosition.x;
+            p_pos.y = p_hand.WristPosition.y;
+            p_pos.z = p_hand.WristPosition.z;
         }
 
         static void FillHandRotation(Leap.Hand p_hand, ref Quaternion p_rot)
@@ -127,7 +128,6 @@ namespace ml_lme
 
         static void FilFingerSpreads(Leap.Hand p_hand, ref float[] p_spreads)
         {
-
             foreach(Leap.Finger l_finger in p_hand.Fingers)
             {
                 float l_angle = 0f;

@@ -180,36 +180,18 @@ namespace ml_lme
             if((m_vrIK != null) && PlayerSetup.Instance._animator.isHuman)
             {
                 // Here we fokin' go!
-                m_leftHand.position = Vector3.zero;
-                m_leftHand.rotation = Quaternion.identity;
-                Transform l_lowerArm = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftLowerArm);
                 Transform l_hand = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftHand);
-                if((l_lowerArm != null) && (l_hand != null))
+                if(l_hand != null)
                 {
-                    m_leftHandTarget.SetParent(l_lowerArm);
-                    m_leftHandTarget.localPosition = l_hand.localPosition;
-                    m_leftHandTarget.localRotation = l_hand.localRotation;
-                    m_leftHandTarget.SetParent(m_leftHand, true);
                     m_leftHandTarget.localPosition = Vector3.zero;
-
-                    Quaternion l_rot = m_leftHandTarget.localRotation;
-                    m_leftHandTarget.localRotation = ms_offsetLeft * l_rot;
+                    m_leftHandTarget.localRotation = ms_offsetLeft * (PlayerSetup.Instance._avatar.transform.GetMatrix().inverse * l_hand.GetMatrix()).rotation;
                 }
 
-                m_rightHand.position = Vector3.zero;
-                m_rightHand.rotation = Quaternion.identity;
-                l_lowerArm = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightLowerArm);
                 l_hand = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightHand);
-                if((l_lowerArm != null) && (l_hand != null))
+                if(l_hand != null)
                 {
-                    m_rightHandTarget.SetParent(l_lowerArm);
-                    m_rightHandTarget.localPosition = l_hand.localPosition;
-                    m_rightHandTarget.localRotation = l_hand.localRotation;
-                    m_rightHandTarget.SetParent(m_rightHand, true);
                     m_rightHandTarget.localPosition = Vector3.zero;
-
-                    Quaternion l_rot = m_rightHandTarget.localRotation;
-                    m_rightHandTarget.localRotation = ms_offsetRight * l_rot;
+                    m_rightHandTarget.localRotation = ms_offsetRight * (PlayerSetup.Instance._avatar.transform.GetMatrix().inverse * l_hand.GetMatrix()).rotation;
                 }
             }
         }
