@@ -4,14 +4,15 @@ using UnityEngine;
 
 namespace ml_dht
 {
-    class FaceTracked : MonoBehaviour
+    [DisallowMultipleComponent]
+    class HeadTracked : MonoBehaviour
     {
         bool m_enabled = false;
         float m_smoothing = 0.5f;
         bool m_mirrored = false;
         bool m_faceOverride = true;
 
-        CVRAvatar m_avatarDescriptior = null;
+        CVRAvatar m_avatarDescriptor = null;
         RootMotion.FinalIK.LookAtIK m_lookIK = null;
         Transform m_camera = null;
         Transform m_headBone = null;
@@ -45,8 +46,8 @@ namespace ml_dht
         {
             if(m_enabled && (m_headBone != null))
             {
-                m_lastHeadRotation = Quaternion.Slerp(m_lastHeadRotation, m_headRotation * m_bindRotation, m_smoothing);
-                m_headBone.localRotation = m_lastHeadRotation;
+                m_lastHeadRotation = Quaternion.Slerp(m_lastHeadRotation, m_avatarDescriptor.transform.rotation * (m_headRotation * m_bindRotation), m_smoothing);
+                m_headBone.rotation = m_lastHeadRotation;
             }
         }
 
@@ -68,26 +69,15 @@ namespace ml_dht
         {
             if(m_enabled && m_faceOverride)
             {
-                if(m_avatarDescriptior != null)
-                    m_avatarDescriptior.useVisemeLipsync = false;
+                if(m_avatarDescriptor != null)
+                    m_avatarDescriptor.useVisemeLipsync = false;
+                    
+                float l_weight = Mathf.Clamp(Mathf.InverseLerp(0.25f, 1f, Mathf.Abs(m_mouthShapes.y)), 0f, 1f) * 100f;
 
                 p_component.BlendShapeValues[(int)ViveSR.anipal.Lip.LipShape_v2.Jaw_Open] = m_mouthShapes.x * 100f;
-
-                if(m_mouthShapes.y < 0f)
-                {
-                    float l_weight = Mathf.Clamp(Mathf.InverseLerp(0.25f, 1f, -m_mouthShapes.y), 0f, 1f) * 100f;
-                    p_component.BlendShapeValues[(int)ViveSR.anipal.Lip.LipShape_v2.Mouth_Pout] = 0f;
-                    p_component.BlendShapeValues[(int)ViveSR.anipal.Lip.LipShape_v2.Mouth_Smile_Left] = l_weight;
-                    p_component.BlendShapeValues[(int)ViveSR.anipal.Lip.LipShape_v2.Mouth_Smile_Right] = l_weight;
-                }
-                if(m_mouthShapes.y > 0f)
-                {
-                    float l_weight = Mathf.Clamp(Mathf.InverseLerp(0.25f, 1f, m_mouthShapes.y), 0f, 1f) * 100f;
-                    p_component.BlendShapeValues[(int)ViveSR.anipal.Lip.LipShape_v2.Mouth_Pout] = l_weight;
-                    p_component.BlendShapeValues[(int)ViveSR.anipal.Lip.LipShape_v2.Mouth_Smile_Left] = 0f;
-                    p_component.BlendShapeValues[(int)ViveSR.anipal.Lip.LipShape_v2.Mouth_Smile_Right] = 0f;
-                }
-
+                p_component.BlendShapeValues[(int)ViveSR.anipal.Lip.LipShape_v2.Mouth_Pout] = ((m_mouthShapes.y > 0f) ? l_weight : 0f);
+                p_component.BlendShapeValues[(int)ViveSR.anipal.Lip.LipShape_v2.Mouth_Smile_Left] = ((m_mouthShapes.y < 0f) ? l_weight : 0f);
+                p_component.BlendShapeValues[(int)ViveSR.anipal.Lip.LipShape_v2.Mouth_Smile_Right] = ((m_mouthShapes.y < 0f) ? l_weight : 0f);
                 p_component.LipSyncWasUpdated = true;
                 p_component.UpdateLipShapes();
             }
@@ -95,12 +85,12 @@ namespace ml_dht
 
         public void OnCalibrateAvatar()
         {
-            m_avatarDescriptior = PlayerSetup.Instance._avatar.GetComponent<CVRAvatar>();
+            m_avatarDescriptor = PlayerSetup.Instance._avatar.GetComponent<CVRAvatar>();
             m_headBone = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.Head);
             m_lookIK = PlayerSetup.Instance._avatar.GetComponent<RootMotion.FinalIK.LookAtIK>();
 
             if(m_headBone != null)
-                m_bindRotation = m_headBone.localRotation;
+                m_bindRotation = (m_avatarDescriptor.transform.GetMatrix().inverse * m_headBone.GetMatrix()).rotation;
 
             if(m_lookIK != null)
                 m_lookIK.solver.OnPostUpdate += this.OnLookIKPostUpdate;
@@ -108,7 +98,7 @@ namespace ml_dht
         }
         public void OnAvatarClear()
         {
-            m_avatarDescriptior = null;
+            m_avatarDescriptor = null;
             m_lookIK = null;
             m_headBone = null;
             m_lastHeadRotation = Quaternion.identity;
@@ -121,7 +111,7 @@ namespace ml_dht
             {
                 m_enabled = p_state;
                 if(m_enabled)
-                    m_lastHeadRotation = m_bindRotation;
+                    m_lastHeadRotation = ((m_headBone != null) ? m_headBone.rotation : m_bindRotation);
             }
         }
         public void SetSmoothing(float p_value)

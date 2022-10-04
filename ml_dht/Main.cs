@@ -11,7 +11,7 @@ namespace ml_dht
         byte[] m_buffer = null;
         TrackingData m_trackingData;
 
-        FaceTracked m_localTracked = null;
+        HeadTracked m_localTracked = null;
 
         public override void OnApplicationStart()
         {
@@ -59,7 +59,7 @@ namespace ml_dht
             while(PlayerSetup.Instance == null)
                 yield return null;
 
-            m_localTracked = PlayerSetup.Instance.gameObject.AddComponent<FaceTracked>();
+            m_localTracked = PlayerSetup.Instance.gameObject.AddComponent<HeadTracked>();
             m_localTracked.SetEnabled(Settings.Enabled);
             m_localTracked.SetMirrored(Settings.Mirrored);
             m_localTracked.SetSmoothing(Settings.Smoothing);

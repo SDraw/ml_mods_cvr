@@ -73,13 +73,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FaceTracked.cs" />
+    <Compile Include="HeadTracked.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="MemoryMapReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Scripts.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="TrackingData.cs" />
+    <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
