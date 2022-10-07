@@ -228,6 +228,13 @@ function inp_toggle_mod_amt(_obj, _callbackName) {
                 <div id="AdjustedMovement" class ="inp_toggle no-scroll" data-current="true"></div>
             </div>
         </div>
+        
+        <div class ="row-wrapper">
+            <div class ="option-caption">Detect animations emote tag: </div>
+            <div class ="option-input">
+                <div id="DetectEmotes" class ="inp_toggle no-scroll" data-current="true"></div>
+            </div>
+        </div>
     `;
     document.getElementById('settings-implementation').appendChild(l_block);
 

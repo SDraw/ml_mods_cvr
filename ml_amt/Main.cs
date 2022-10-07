@@ -21,6 +21,7 @@ namespace ml_amt
             Settings.PoseTransitionsChange += this.OnPoseTransitonsChange;
             Settings.AdjustedMovementChange += this.OnAdjustedMovementChange;
             Settings.IKOverrideFlyChange += this.OnIKOverrideFlyChange;
+            Settings.DetectEmotesChange += this.OnDetectEmotesChange;
 
             HarmonyInstance.Patch(
                 typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.ClearAvatar)),
@@ -49,6 +50,7 @@ namespace ml_amt
             m_localTweaker.SetPoseTransitions(Settings.PoseTransitions);
             m_localTweaker.SetAdjustedMovement(Settings.AdjustedMovement);
             m_localTweaker.SetIKOverrideFly(Settings.IKOverrideFly);
+            m_localTweaker.SetDetectEmotes(Settings.DetectEmotes);
         }
         
         void OnIKOverrideCrouchChange(bool p_state)
@@ -85,6 +87,11 @@ namespace ml_amt
         {
             if(m_localTweaker != null)
                 m_localTweaker.SetIKOverrideFly(p_state);
+        }
+        void OnDetectEmotesChange(bool p_state)
+        {
+            if(m_localTweaker != null)
+                m_localTweaker.SetDetectEmotes(p_state);
         }
 
         static void OnAvatarClear_Postfix() => ms_instance?.OnAvatarClear();

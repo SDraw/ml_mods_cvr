@@ -2,14 +2,17 @@
 using ABI_RC.Systems.MovementSystem;
 using RootMotion.FinalIK;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 
 namespace ml_amt
 {
+    [DisallowMultipleComponent]
     class MotionTweaker : MonoBehaviour
     {
-        static System.Reflection.FieldInfo ms_rootVelocity = typeof(IKSolverVR).GetField("rootVelocity", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        static System.Reflection.FieldInfo ms_groundedRaw = typeof(MovementSystem).GetField("_isGroundedRaw", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        static readonly FieldInfo ms_rootVelocity = typeof(IKSolverVR).GetField("rootVelocity", BindingFlags.NonPublic | BindingFlags.Instance);
+        static readonly FieldInfo ms_groundedRaw = typeof(MovementSystem).GetField("_isGroundedRaw", BindingFlags.NonPublic | BindingFlags.Instance);
+        static readonly int ms_emoteHash = Animator.StringToHash("Emote");
 
         enum ParameterType
         {
@@ -41,6 +44,8 @@ namespace ml_amt
         static readonly Vector4 ms_pointVector = new Vector4(0f, 0f, 0f, 1f);
 
         VRIK m_vrIk = null;
+        int m_locomotionLayer = 0;
+        float m_ikWeight = 1f; // Original weight
         float m_locomotionWeight = 1f; // Original weight
         float m_avatarScale = 1f; // Instantiated scale
 
@@ -64,6 +69,9 @@ namespace ml_amt
         bool m_customLocomotionOffset = false;
         Vector3 m_locomotionOffset = Vector3.zero;
 
+        bool m_detectEmotes = true;
+        bool m_emoteActive = false;
+
         readonly List<AdditionalParameterInfo> m_parameters = null;
 
         public MotionTweaker()
@@ -83,7 +91,7 @@ namespace ml_amt
                 m_upright = Mathf.Clamp(((l_avatarViewHeight > 0f) ? (l_currentHeight / l_avatarViewHeight) : 0f), 0f, 1f);
                 PoseState l_poseState = (m_upright <= m_proneLimit) ? PoseState.Proning : ((m_upright <= m_crouchLimit) ? PoseState.Crouching : PoseState.Standing);
 
-                if((m_vrIk != null) && m_vrIk.enabled)
+                if(PlayerSetup.Instance._inVr && (m_vrIk != null) && m_vrIk.enabled)
                 {
                     if(m_poseState != l_poseState)
                     {
@@ -115,6 +123,14 @@ namespace ml_amt
 
                 m_poseState = l_poseState;
 
+                if(m_detectEmotes && (m_locomotionLayer >= 0))
+                {
+                    AnimatorStateInfo l_animState = PlayerSetup.Instance._animator.GetCurrentAnimatorStateInfo(m_locomotionLayer);
+                    m_emoteActive = (l_animState.tagHash == ms_emoteHash);
+                }
+                else
+                    m_emoteActive = false;
+
                 if(m_parameters.Count > 0)
                 {
                     foreach(AdditionalParameterInfo l_param in m_parameters)
@@ -129,7 +145,7 @@ namespace ml_amt
                                         PlayerSetup.Instance._animator.SetFloat(l_param.m_hash, m_upright);
                                         break;
                                     case ParameterSyncType.Synced:
-                                        PlayerSetup.Instance.changeAnimatorParam(l_param.m_name, m_upright);
+                                        PlayerSetup.Instance.animatorManager.SetAnimatorParameterFloat(l_param.m_name, m_upright);
                                         break;
                                 }
                             }
@@ -143,7 +159,7 @@ namespace ml_amt
                                         PlayerSetup.Instance._animator.SetBool(l_param.m_hash, (bool)ms_groundedRaw.GetValue(MovementSystem.Instance));
                                         break;
                                     case ParameterSyncType.Synced:
-                                        PlayerSetup.Instance.changeAnimatorParam(l_param.m_name, (bool)ms_groundedRaw.GetValue(MovementSystem.Instance) ? 1f : 0f);
+                                        PlayerSetup.Instance.animatorManager.SetAnimatorParameterBool(l_param.m_name, (bool)ms_groundedRaw.GetValue(MovementSystem.Instance));
                                         break;
                                 }
                             }
@@ -157,6 +173,7 @@ namespace ml_amt
         public void OnAvatarClear()
         {
             m_vrIk = null;
+            m_locomotionLayer = -1;
             m_avatarReady = false;
             m_compatibleAvatar = false;
             m_poseState = PoseState.Standing;
@@ -165,12 +182,14 @@ namespace ml_amt
             m_customLocomotionOffset = false;
             m_locomotionOffset = Vector3.zero;
             m_avatarScale = 1f;
+            m_emoteActive = false;
             m_parameters.Clear();
         }
 
         public void OnCalibrateAvatar()
         {
             m_vrIk = PlayerSetup.Instance._avatar.GetComponent<VRIK>();
+            m_locomotionLayer = PlayerSetup.Instance._animator.GetLayerIndex("Locomotion/Emotes");
 
             // Parse animator parameters
             AnimatorControllerParameter[] l_params = PlayerSetup.Instance._animator.parameters;
@@ -227,16 +246,24 @@ namespace ml_amt
 
         void OnIKPreUpdate()
         {
+            m_ikWeight = m_vrIk.solver.IKPositionWeight;
             m_locomotionWeight = m_vrIk.solver.locomotion.weight;
 
-            if((m_ikOverrideCrouch && (m_poseState != PoseState.Standing)) || (m_ikOverrideProne && (m_poseState == PoseState.Proning)))
-                m_vrIk.solver.locomotion.weight = 0f;
-            if(m_ikOverrideFly && MovementSystem.Instance.flying)
-                m_vrIk.solver.locomotion.weight = 0f;
+            if(m_detectEmotes && m_emoteActive)
+                m_vrIk.solver.IKPositionWeight = 0f;
+
+            if(PlayerSetup.Instance._inVr)
+            {
+                if((m_ikOverrideCrouch && (m_poseState != PoseState.Standing)) || (m_ikOverrideProne && (m_poseState == PoseState.Proning)))
+                    m_vrIk.solver.locomotion.weight = 0f;
+                if(m_ikOverrideFly && MovementSystem.Instance.flying)
+                    m_vrIk.solver.locomotion.weight = 0f;
+            }
         }
 
         void OnIKPostUpdate()
         {
+            m_vrIk.solver.IKPositionWeight = m_ikWeight;
             m_vrIk.solver.locomotion.weight = m_locomotionWeight;
         }
 
@@ -281,6 +308,10 @@ namespace ml_amt
         public void SetIKOverrideFly(bool p_state)
         {
             m_ikOverrideFly = p_state;
+        }
+        public void SetDetectEmotes(bool p_state)
+        {
+            m_detectEmotes = p_state;
         }
     }
 }

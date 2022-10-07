@@ -1,5 +1,6 @@
 ﻿using ABI.CCK.Components;
 using ABI_RC.Core.Player;
+using System.Reflection;
 using UnityEngine;
 
 namespace ml_dht
@@ -7,6 +8,8 @@ namespace ml_dht
     [DisallowMultipleComponent]
     class HeadTracked : MonoBehaviour
     {
+        static FieldInfo ms_emotePlaying = typeof(PlayerSetup).GetField("_emotePlaying", BindingFlags.NonPublic | BindingFlags.Instance);
+
         bool m_enabled = false;
         float m_smoothing = 0.5f;
         bool m_mirrored = false;
@@ -47,7 +50,9 @@ namespace ml_dht
             if(m_enabled && (m_headBone != null))
             {
                 m_lastHeadRotation = Quaternion.Slerp(m_lastHeadRotation, m_avatarDescriptor.transform.rotation * (m_headRotation * m_bindRotation), m_smoothing);
-                m_headBone.rotation = m_lastHeadRotation;
+
+                if(!(bool)ms_emotePlaying.GetValue(PlayerSetup.Instance))
+                    m_headBone.rotation = m_lastHeadRotation;
             }
         }
 
@@ -71,7 +76,7 @@ namespace ml_dht
             {
                 if(m_avatarDescriptor != null)
                     m_avatarDescriptor.useVisemeLipsync = false;
-                    
+
                 float l_weight = Mathf.Clamp(Mathf.InverseLerp(0.25f, 1f, Mathf.Abs(m_mouthShapes.y)), 0f, 1f) * 100f;
 
                 p_component.BlendShapeValues[(int)ViveSR.anipal.Lip.LipShape_v2.Jaw_Open] = m_mouthShapes.x * 100f;
