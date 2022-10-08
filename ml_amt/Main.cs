@@ -1,4 +1,5 @@
 ﻿using ABI_RC.Core.Player;
+using System.Reflection;
 
 namespace ml_amt
 {
@@ -8,7 +9,7 @@ namespace ml_amt
 
         MotionTweaker m_localTweaker = null;
 
-        public override void OnApplicationStart()
+        public override void OnInitializeMelon()
         {
             if(ms_instance == null)
                 ms_instance = this;
@@ -26,12 +27,12 @@ namespace ml_amt
             HarmonyInstance.Patch(
                 typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.ClearAvatar)),
                 null,
-                new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnAvatarClear_Postfix), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static))
+                new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnAvatarClear_Postfix), BindingFlags.NonPublic | BindingFlags.Static))
             );
             HarmonyInstance.Patch(
                 typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.CalibrateAvatar)),
                 null,
-                new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnCalibrateAvatar_Postfix), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic))
+                new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnCalibrateAvatar_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
 
             MelonLoader.MelonCoroutines.Start(WaitForLocalPlayer());
@@ -52,7 +53,7 @@ namespace ml_amt
             m_localTweaker.SetIKOverrideFly(Settings.IKOverrideFly);
             m_localTweaker.SetDetectEmotes(Settings.DetectEmotes);
         }
-        
+
         void OnIKOverrideCrouchChange(bool p_state)
         {
             if(m_localTweaker != null)

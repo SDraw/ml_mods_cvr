@@ -1,16 +1,17 @@
 ﻿using ABI_RC.Core.UI;
 using DarkRift.Client;
+using System.Reflection;
 
 namespace ml_sci
 {
     public class ServerConnectionInfo : MelonLoader.MelonMod
     {
-        public override void OnApplicationStart()
+        public override void OnInitializeMelon()
         {
             HarmonyInstance.Patch(
-                typeof(ABI_RC.Core.Networking.NetworkManager).GetMethod("OnGameNetworkConnectionClosed", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance),
+                typeof(ABI_RC.Core.Networking.NetworkManager).GetMethod("OnGameNetworkConnectionClosed", BindingFlags.NonPublic | BindingFlags.Instance),
                 null,
-                new HarmonyLib.HarmonyMethod(typeof(ServerConnectionInfo).GetMethod(nameof(OnGameNetworkConnectionClosed), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static))
+                new HarmonyLib.HarmonyMethod(typeof(ServerConnectionInfo).GetMethod(nameof(OnGameNetworkConnectionClosed), BindingFlags.NonPublic | BindingFlags.Static))
             );
         }
 

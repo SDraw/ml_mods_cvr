@@ -156,8 +156,9 @@ namespace ml_amt
                     {
                         ms_ikOverrideFly = bool.Parse(p_value);
                         IKOverrideFlyChange?.Invoke(ms_ikOverrideFly);
-                    } break;
-                    
+                    }
+                    break;
+
                     case ModSetting.DetectEmotes:
                     {
                         ms_detectEmotes = bool.Parse(p_value);

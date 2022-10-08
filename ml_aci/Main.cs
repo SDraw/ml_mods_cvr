@@ -3,23 +3,24 @@ using ABI_RC.Core.InteractionSystem;
 using ABI_RC.Core.Networking;
 using ABI_RC.Core.Util;
 using DarkRift;
+using System.Reflection;
 
 namespace ml_aci
 {
     public class AvatarChangeInfo : MelonLoader.MelonMod
     {
-        public override void OnApplicationStart()
+        public override void OnInitializeMelon()
         {
             HarmonyInstance.Patch(
                 typeof(AssetManagement).GetMethod(nameof(AssetManagement.LoadLocalAvatar)),
                 null,
-                new HarmonyLib.HarmonyMethod(typeof(AvatarChangeInfo).GetMethod(nameof(OnLocalAvatarLoad), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static))
+                new HarmonyLib.HarmonyMethod(typeof(AvatarChangeInfo).GetMethod(nameof(OnLocalAvatarLoad), BindingFlags.NonPublic | BindingFlags.Static))
             );
 
             HarmonyInstance.Patch(
                 typeof(CVRSyncHelper).GetMethod(nameof(CVRSyncHelper.SpawnProp)),
                 null,
-                new HarmonyLib.HarmonyMethod(typeof(AvatarChangeInfo).GetMethod(nameof(OnPropSpawned), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static))
+                new HarmonyLib.HarmonyMethod(typeof(AvatarChangeInfo).GetMethod(nameof(OnPropSpawned), BindingFlags.NonPublic | BindingFlags.Static))
             );
         }
 

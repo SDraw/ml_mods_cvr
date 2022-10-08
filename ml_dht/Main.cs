@@ -14,7 +14,7 @@ namespace ml_dht
 
         HeadTracked m_localTracked = null;
 
-        public override void OnApplicationStart()
+        public override void OnInitializeMelon()
         {
             if(ms_instance == null)
                 ms_instance = this;

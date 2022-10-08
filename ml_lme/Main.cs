@@ -1,6 +1,7 @@
 ﻿using ABI_RC.Core.Player;
 using ABI_RC.Core.UI;
 using UnityEngine;
+using System.Reflection;
 
 namespace ml_lme
 {
@@ -20,7 +21,7 @@ namespace ml_lme
         GameObject m_leapControllerModel = null;
         LeapTracked m_leapTracked = null;
 
-        public override void OnApplicationStart()
+        public override void OnInitializeMelon()
         {
             if(ms_instance == null)
                 ms_instance = this;
@@ -51,12 +52,12 @@ namespace ml_lme
             HarmonyInstance.Patch(
                 typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.ClearAvatar)),
                 null,
-                new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnAvatarClear_Postfix), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic))
+                new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnAvatarClear_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
             HarmonyInstance.Patch(
                 typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.CalibrateAvatar)),
                 null,
-                new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnCalibrateAvatar_Postfix), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic))
+                new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnCalibrateAvatar_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
 
 

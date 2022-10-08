@@ -5,7 +5,9 @@ using ABI_RC.Core.Savior;
 using ABI_RC.Core.UI;
 using ABI_RC.Systems.IK;
 using ABI_RC.Systems.IK.SubSystems;
+using System;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 
 namespace ml_fpt
@@ -27,24 +29,24 @@ namespace ml_fpt
         int m_hipsTrackerIndex = -1;
         Transform m_hips = null;
 
-        Dictionary<string, System.Tuple<Vector3, Quaternion>> m_avatarCalibrations = null;
+        Dictionary<string, Tuple<Vector3, Quaternion>> m_avatarCalibrations = null;
 
-        public override void OnApplicationStart()
+        public override void OnInitializeMelon()
         {
             if(ms_instance == null)
                 ms_instance = this;
 
-            m_avatarCalibrations = new Dictionary<string, System.Tuple<Vector3, Quaternion>>();
+            m_avatarCalibrations = new Dictionary<string, Tuple<Vector3, Quaternion>>();
 
             HarmonyInstance.Patch(
                 typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.ClearAvatar)),
                 null,
-                new HarmonyLib.HarmonyMethod(typeof(FourPointTracking).GetMethod(nameof(OnAvatarClear_Postfix), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static))
+                new HarmonyLib.HarmonyMethod(typeof(FourPointTracking).GetMethod(nameof(OnAvatarClear_Postfix), BindingFlags.NonPublic | BindingFlags.Static))
             );
             HarmonyInstance.Patch(
                 typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.CalibrateAvatar)),
                 null,
-                new HarmonyLib.HarmonyMethod(typeof(FourPointTracking).GetMethod(nameof(OnCalibrateAvatar_Postfix), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic))
+                new HarmonyLib.HarmonyMethod(typeof(FourPointTracking).GetMethod(nameof(OnCalibrateAvatar_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
 
             MelonLoader.MelonCoroutines.Start(WaitForMainMenuView());
@@ -62,7 +64,7 @@ namespace ml_fpt
 
             ViewManager.Instance.gameMenuView.Listener.ReadyForBindings += () =>
             {
-                ViewManager.Instance.gameMenuView.View.RegisterForEvent("MelonMod_FPT_Action_Calibrate", new System.Action(this.StartCalibration));
+                ViewManager.Instance.gameMenuView.View.RegisterForEvent("MelonMod_FPT_Action_Calibrate", new Action(this.StartCalibration));
             };
 
             ViewManager.Instance.gameMenuView.Listener.FinishLoad += (_) =>
@@ -137,7 +139,7 @@ namespace ml_fpt
 
                     m_avatarCalibrations.Add(
                         MetaPort.Instance.currentAvatarGuid,
-                        new System.Tuple<Vector3, Quaternion>(
+                        new Tuple<Vector3, Quaternion>(
                             PlayerSetup.Instance._trackerManager.trackers[m_hipsTrackerIndex].target.transform.localPosition,
                             PlayerSetup.Instance._trackerManager.trackers[m_hipsTrackerIndex].target.transform.localRotation
                        )
@@ -228,7 +230,7 @@ namespace ml_fpt
                     ShowHudNotification("Calibration canceled");
                 }
             }
-            catch(System.Exception e)
+            catch(Exception e)
             {
                 MelonLoader.MelonLogger.Error(e);
             }
