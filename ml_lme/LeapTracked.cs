@@ -156,6 +156,11 @@ namespace ml_lme
             m_vrIK = null;
             m_leftTargetActive = false;
             m_rightTargetActive = false;
+
+            m_leftHandTarget.localPosition = Vector3.zero;
+            m_leftHandTarget.localRotation = Quaternion.identity;
+            m_rightHandTarget.localPosition = Vector3.zero;
+            m_rightHandTarget.localRotation = Quaternion.identity;
         }
 
         public void OnCalibrateAvatar()
@@ -169,29 +174,22 @@ namespace ml_lme
                 CVRInputManager.Instance.individualFingerTracking = (m_enabled || Utils.AreKnucklesInUse());
             }
 
-            if(!PlayerSetup.Instance._inVr)
+            if(PlayerSetup.Instance._animator.isHuman)
             {
-                m_leapIK = PlayerSetup.Instance._animator.gameObject.AddComponent<LeapIK>();
-                m_leapIK.SetHands(m_leftHand, m_rightHand);
-                m_leapIK.SetEnabled(m_enabled);
-                m_leapIK.SetFingersOnly(m_fingersOnly);
-            }
-
-            if((m_vrIK != null) && PlayerSetup.Instance._animator.isHuman)
-            {
-                // Here we fokin' go!
                 Transform l_hand = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftHand);
                 if(l_hand != null)
-                {
-                    m_leftHandTarget.localPosition = Vector3.zero;
                     m_leftHandTarget.localRotation = ms_offsetLeft * (PlayerSetup.Instance._avatar.transform.GetMatrix().inverse * l_hand.GetMatrix()).rotation;
-                }
 
                 l_hand = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightHand);
                 if(l_hand != null)
-                {
-                    m_rightHandTarget.localPosition = Vector3.zero;
                     m_rightHandTarget.localRotation = ms_offsetRight * (PlayerSetup.Instance._avatar.transform.GetMatrix().inverse * l_hand.GetMatrix()).rotation;
+
+                if(m_vrIK == null)
+                {
+                    m_leapIK = PlayerSetup.Instance._animator.gameObject.AddComponent<LeapIK>();
+                    m_leapIK.SetHands(m_leftHand, m_rightHand);
+                    m_leapIK.SetEnabled(m_enabled);
+                    m_leapIK.SetFingersOnly(m_fingersOnly);
                 }
             }
         }
