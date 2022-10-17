@@ -22,6 +22,7 @@ namespace ml_lme
             public bool[] m_handsPresenses = null;
             public Vector3[] m_handsPositons = null;
             public Quaternion[] m_handsRotations = null;
+            public Vector3[] m_elbowPositions = null;
             public float[] m_leftFingersBends = null;
             public float[] m_leftFingersSpreads = null;
             public float[] m_rightFingersBends = null;
@@ -32,6 +33,7 @@ namespace ml_lme
                 m_handsPresenses = new bool[ms_handsCount];
                 m_handsPositons = new Vector3[ms_handsCount];
                 m_handsRotations = new Quaternion[ms_handsCount];
+                m_elbowPositions = new Vector3[ms_handsCount];
                 m_leftFingersBends = new float[ms_fingersCount];
                 m_leftFingersSpreads = new float[ms_fingersCount];
                 m_rightFingersBends = new float[ms_fingersCount];
@@ -61,6 +63,7 @@ namespace ml_lme
                     p_data.m_handsPresenses[l_sideID] = true;
                     FillHandPosition(l_hand, ref p_data.m_handsPositons[l_sideID]);
                     FillHandRotation(l_hand, ref p_data.m_handsRotations[l_sideID]);
+                    FillElbowPosition(l_hand, ref p_data.m_elbowPositions[l_sideID]);
                     switch(l_sideID)
                     {
                         case 0:
@@ -94,6 +97,13 @@ namespace ml_lme
             p_rot.y = p_hand.Rotation.y;
             p_rot.z = p_hand.Rotation.z;
             p_rot.w = p_hand.Rotation.w;
+        }
+
+        static void FillElbowPosition(Leap.Hand p_hand, ref Vector3 p_pos)
+        {
+            p_pos.x = p_hand.Arm.ElbowPosition.x;
+            p_pos.y = p_hand.Arm.ElbowPosition.y;
+            p_pos.z = p_hand.Arm.ElbowPosition.z;
         }
 
         static void FillFingerBends(Leap.Hand p_hand, ref float[] p_bends)

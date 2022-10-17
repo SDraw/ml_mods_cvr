@@ -28,7 +28,8 @@ namespace ml_lme
             Head,
             HeadX,
             HeadY,
-            HeadZ
+            HeadZ,
+            TrackElbows
         };
 
         static bool ms_enabled = false;
@@ -39,6 +40,7 @@ namespace ml_lme
         static float ms_rootAngle = 0f;
         static bool ms_headAttach = false;
         static Vector3 ms_headOffset = new Vector3(0f, -0.3f, 0.15f);
+        static bool ms_trackElbows = true;
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
@@ -51,6 +53,7 @@ namespace ml_lme
         static public event Action<float> RootAngleChange;
         static public event Action<bool> HeadAttachChange;
         static public event Action<Vector3> HeadOffsetChange;
+        static public event Action<bool> TrackElbowsChange;
 
         public static void Init()
         {
@@ -69,6 +72,7 @@ namespace ml_lme
             ms_entries.Add(ms_category.CreateEntry(ModSetting.HeadX.ToString(), 0));
             ms_entries.Add(ms_category.CreateEntry(ModSetting.HeadY.ToString(), -30));
             ms_entries.Add(ms_category.CreateEntry(ModSetting.HeadZ.ToString(), 15));
+            ms_entries.Add(ms_category.CreateEntry(ModSetting.TrackElbows.ToString(), true));
 
             Load();
 
@@ -116,6 +120,7 @@ namespace ml_lme
                 (int)ms_entries[(int)ModSetting.HeadY].BoxedValue,
                 (int)ms_entries[(int)ModSetting.HeadZ].BoxedValue
             ) * 0.01f;
+            ms_trackElbows = (bool)ms_entries[(int)ModSetting.TrackElbows].BoxedValue;
         }
 
         static void OnToggleUpdate(string p_name, string p_value)
@@ -151,6 +156,12 @@ namespace ml_lme
                         HeadAttachChange?.Invoke(ms_headAttach);
                     }
                     break;
+
+                    case ModSetting.TrackElbows:
+                    {
+                        ms_trackElbows = bool.Parse(p_value);
+                        TrackElbowsChange?.Invoke(ms_trackElbows);
+                    } break;
                 }
 
                 ms_entries[(int)l_setting].BoxedValue = bool.Parse(p_value);
@@ -235,40 +246,37 @@ namespace ml_lme
         {
             get => ms_enabled;
         }
-
         public static Vector3 DesktopOffset
         {
             get => ms_desktopOffset;
         }
-
         public static bool FingersOnly
         {
             get => ms_fingersOnly;
         }
-
         public static bool ModelVisibility
         {
             get => ms_modelVisibility;
         }
-
         public static LeapTrackingMode TrackingMode
         {
             get => ms_trackingMode;
         }
-
         public static float RootAngle
         {
             get => ms_rootAngle;
         }
-
         public static bool HeadAttach
         {
             get => ms_headAttach;
         }
-
         public static Vector3 HeadOffset
         {
             get => ms_headOffset;
+        }
+        public static bool TrackElbows
+        {
+            get => ms_trackElbows;
         }
     }
 }

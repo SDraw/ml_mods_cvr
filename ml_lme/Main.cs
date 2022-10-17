@@ -1,7 +1,7 @@
 ﻿using ABI_RC.Core.Player;
 using ABI_RC.Core.UI;
-using UnityEngine;
 using System.Reflection;
+using UnityEngine;
 
 namespace ml_lme
 {
@@ -18,6 +18,7 @@ namespace ml_lme
 
         GameObject m_leapTrackingRoot = null;
         GameObject[] m_leapHands = null;
+        GameObject[] m_leapElbows = null;
         GameObject m_leapControllerModel = null;
         LeapTracked m_leapTracked = null;
 
@@ -29,14 +30,15 @@ namespace ml_lme
             DependenciesHandler.ExtractDependencies();
 
             Settings.Init();
-            Settings.EnabledChange += this.OnSettingsEnableChange;
-            Settings.DesktopOffsetChange += this.OnSettingsDesktopOffsetChange;
-            Settings.FingersOnlyChange += this.OnSettingsFingersOptionChange;
-            Settings.ModelVisibilityChange += this.OnSettingsModelVisibilityChange;
-            Settings.TrackingModeChange += this.OnSettingsTrackingModeChange;
-            Settings.RootAngleChange += this.OnSettingsRootAngleChange;
-            Settings.HeadAttachChange += this.OnSettingsHeadAttachChange;
-            Settings.HeadOffsetChange += this.OnSettingsHeadOffsetChange;
+            Settings.EnabledChange += this.OnEnableChange;
+            Settings.DesktopOffsetChange += this.OnDesktopOffsetChange;
+            Settings.FingersOnlyChange += this.OnFingersOptionChange;
+            Settings.ModelVisibilityChange += this.OnModelVisibilityChange;
+            Settings.TrackingModeChange += this.OnTrackingModeChange;
+            Settings.RootAngleChange += this.OnRootAngleChange;
+            Settings.HeadAttachChange += this.OnHeadAttachChange;
+            Settings.HeadOffsetChange += this.OnHeadOffsetChange;
+            Settings.TrackElbowsChange += this.OnTrackElbowsChange;
 
             m_leapController = new Leap.Controller();
             m_leapController.Device += this.OnLeapDeviceInitialized;
@@ -47,6 +49,7 @@ namespace ml_lme
 
             m_gesturesData = new GestureMatcher.GesturesData();
             m_leapHands = new GameObject[GestureMatcher.GesturesData.ms_handsCount];
+            m_leapElbows = new GameObject[GestureMatcher.GesturesData.ms_handsCount];
 
             // Patches
             HarmonyInstance.Patch(
@@ -87,6 +90,11 @@ namespace ml_lme
                 m_leapHands[i].transform.parent = m_leapTrackingRoot.transform;
                 m_leapHands[i].transform.localPosition = Vector3.zero;
                 m_leapHands[i].transform.localRotation = Quaternion.identity;
+
+                m_leapElbows[i] = new GameObject("LeapElbow" + i);
+                m_leapElbows[i].transform.parent = m_leapTrackingRoot.transform;
+                m_leapElbows[i].transform.localPosition = Vector3.zero;
+                m_leapElbows[i].transform.localRotation = Quaternion.identity;
             }
 
             m_leapControllerModel = AssetsHandler.GetAsset("assets/models/leapmotion/leap_motion_1_0.obj");
@@ -100,13 +108,14 @@ namespace ml_lme
 
             // Player setup
             m_leapTracked = PlayerSetup.Instance.gameObject.AddComponent<LeapTracked>();
-            m_leapTracked.SetHands(m_leapHands[0].transform, m_leapHands[1].transform);
+            m_leapTracked.SetTransforms(m_leapHands[0].transform, m_leapHands[1].transform, m_leapElbows[0].transform, m_leapElbows[1].transform);
+            m_leapTracked.SetTrackElbows(Settings.TrackElbows);
 
-            OnSettingsEnableChange(Settings.Enabled);
-            OnSettingsFingersOptionChange(Settings.FingersOnly);
-            OnSettingsModelVisibilityChange(Settings.ModelVisibility);
-            OnSettingsTrackingModeChange(Settings.TrackingMode);
-            OnSettingsHeadAttachChange(Settings.HeadAttach); // Includes offsets and parenting
+            OnEnableChange(Settings.Enabled);
+            OnFingersOptionChange(Settings.FingersOnly);
+            OnModelVisibilityChange(Settings.ModelVisibility);
+            OnTrackingModeChange(Settings.TrackingMode);
+            OnHeadAttachChange(Settings.HeadAttach); // Includes offsets and parenting
         }
 
         public override void OnUpdate()
@@ -132,6 +141,10 @@ namespace ml_lme
                                 ReorientateLeapToUnity(ref l_pos, ref l_rot, Settings.TrackingMode);
                                 m_leapHands[i].transform.localPosition = l_pos;
                                 m_leapHands[i].transform.localRotation = l_rot;
+
+                                l_pos = m_gesturesData.m_elbowPositions[i];
+                                ReorientateLeapToUnity(ref l_pos, ref l_rot, Settings.TrackingMode);
+                                m_leapElbows[i].transform.localPosition = l_pos;
                             }
                         }
                     }
@@ -143,7 +156,7 @@ namespace ml_lme
         }
 
         // Settings changes
-        void OnSettingsEnableChange(bool p_state)
+        void OnEnableChange(bool p_state)
         {
             if(p_state)
             {
@@ -157,7 +170,7 @@ namespace ml_lme
                 m_leapTracked.SetEnabled(p_state);
         }
 
-        void OnSettingsDesktopOffsetChange(Vector3 p_offset)
+        void OnDesktopOffsetChange(Vector3 p_offset)
         {
             if((m_leapTrackingRoot != null) && !Settings.HeadAttach)
             {
@@ -168,19 +181,19 @@ namespace ml_lme
             }
         }
 
-        void OnSettingsFingersOptionChange(bool p_state)
+        void OnFingersOptionChange(bool p_state)
         {
             if(m_leapTracked != null)
                 m_leapTracked.SetFingersOnly(p_state);
         }
 
-        void OnSettingsModelVisibilityChange(bool p_state)
+        void OnModelVisibilityChange(bool p_state)
         {
             if(m_leapControllerModel != null)
                 m_leapControllerModel.SetActive(p_state);
         }
 
-        void OnSettingsTrackingModeChange(Settings.LeapTrackingMode p_mode)
+        void OnTrackingModeChange(Settings.LeapTrackingMode p_mode)
         {
             if(Settings.Enabled)
                 UpdateDeviceTrackingMode();
@@ -202,13 +215,13 @@ namespace ml_lme
             }
         }
 
-        void OnSettingsRootAngleChange(float p_angle)
+        void OnRootAngleChange(float p_angle)
         {
             if(m_leapTrackingRoot != null)
                 m_leapTrackingRoot.transform.localRotation = Quaternion.Euler(p_angle, 0f, 0f);
         }
 
-        void OnSettingsHeadAttachChange(bool p_state)
+        void OnHeadAttachChange(bool p_state)
         {
             if(m_leapTrackingRoot != null)
             {
@@ -247,7 +260,7 @@ namespace ml_lme
             }
         }
 
-        void OnSettingsHeadOffsetChange(Vector3 p_offset)
+        void OnHeadOffsetChange(Vector3 p_offset)
         {
             if((m_leapTrackingRoot != null) && Settings.HeadAttach)
             {
@@ -256,6 +269,12 @@ namespace ml_lme
                 else
                     m_leapTrackingRoot.transform.localPosition = p_offset;
             }
+        }
+        
+        void OnTrackElbowsChange(bool p_state)
+        {
+            if(m_leapTracked != null)
+                m_leapTracked.SetTrackElbows(p_state);
         }
 
         // Internal utility
@@ -328,8 +347,7 @@ namespace ml_lme
                 MelonLoader.MelonLogger.Error(e);
             }
         }
-
-        // Sneaky forced IndexIK calibration
+        
         static void OnCalibrateAvatar_Postfix() => ms_instance?.OnCalibrateAvatar();
         void OnCalibrateAvatar()
         {
@@ -338,7 +356,7 @@ namespace ml_lme
                 if(m_leapTracked != null)
                     m_leapTracked.OnCalibrateAvatar();
 
-                OnSettingsHeadAttachChange(Settings.HeadAttach);
+                OnHeadAttachChange(Settings.HeadAttach);
             }
             catch(System.Exception e)
             {

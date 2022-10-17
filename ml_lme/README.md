@@ -18,5 +18,6 @@ Available mod's settings in `Settings - Implementation - Leap Motion Tracking`:
 * **Attach to head:** attach hands transformation to head instead of body, disabled by default.
 * **Head offset X/Y/Z:** offset position for head attachment (`Attach to head` is **`true`**), (0, -30, 15) by default.
 * **Offset angle:** rotation around X axis, useful for neck mounts, 0 by default.
+* **Track elbows:** elbows tracking, works best in `Screentop` and `HMD` tracking modes, `true` by default.
 * **Fingers tracking only:** apply only fingers tracking, disabled by default.
 * **Model visibility:** show Leap Motion controller model, useful for tracking visualizing, disabled by default.

@@ -84,7 +84,6 @@
     <Compile Include="AssetsHandler.cs" />
     <Compile Include="DependenciesHandler.cs" />
     <Compile Include="GestureMatcher.cs" />
-    <Compile Include="LeapIK.cs" />
     <Compile Include="LeapTracked.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
