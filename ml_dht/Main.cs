@@ -20,10 +20,6 @@ namespace ml_dht
                 ms_instance = this;
 
             Settings.Init();
-            Settings.EnabledChange += this.OnEnabledChanged;
-            Settings.MirroredChange += this.OnMirroredChanged;
-            Settings.SmoothingChange += this.OnSmoothingChanged;
-            Settings.FaceOverrideChange += this.OnFaceOverrideChange;
 
             m_mapReader = new MemoryMapReader();
             m_buffer = new byte[1024];
@@ -64,6 +60,18 @@ namespace ml_dht
             m_localTracked.SetEnabled(Settings.Enabled);
             m_localTracked.SetMirrored(Settings.Mirrored);
             m_localTracked.SetSmoothing(Settings.Smoothing);
+            m_localTracked.SetFaceOverride(Settings.FaceOverride);
+        }
+
+        public override void OnDeinitializeMelon()
+        {
+            if(ms_instance == this)
+                ms_instance = null;
+
+            m_mapReader?.Close();
+            m_mapReader = null;
+            m_buffer = null;
+            m_localTracked = null;
         }
 
         public override void OnUpdate()
@@ -74,27 +82,6 @@ namespace ml_dht
                 if(m_localTracked != null)
                     m_localTracked.UpdateTrackingData(ref m_trackingData);
             }
-        }
-
-        void OnEnabledChanged(bool p_state)
-        {
-            if(m_localTracked != null)
-                m_localTracked.SetEnabled(p_state);
-        }
-        void OnMirroredChanged(bool p_state)
-        {
-            if(m_localTracked != null)
-                m_localTracked.SetMirrored(p_state);
-        }
-        void OnSmoothingChanged(float p_value)
-        {
-            if(m_localTracked != null)
-                m_localTracked.SetSmoothing(p_value);
-        }
-        void OnFaceOverrideChange(bool p_state)
-        {
-            if(m_localTracked != null)
-                m_localTracked.SetFaceOverride(p_state);
         }
 
         static void OnCalibrateAvatar_Postfix() => ms_instance?.OnCalibrateAvatar();

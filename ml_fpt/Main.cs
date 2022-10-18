@@ -18,7 +18,7 @@ namespace ml_fpt
 
         bool m_ready = false;
 
-        IndexIK m_indexIk = null;
+        IndexIK m_indexIK = null;
         RootMotion.FinalIK.VRIK m_vrIK = null;
         RuntimeAnimatorController m_runtimeAnimator = null;
         List<CVRAdvancedSettingsFileProfileValue> m_aasParameters = null;
@@ -78,9 +78,26 @@ namespace ml_fpt
             while(PlayerSetup.Instance == null)
                 yield return null;
 
-            m_indexIk = PlayerSetup.Instance.gameObject.GetComponent<IndexIK>();
+            m_indexIK = PlayerSetup.Instance.gameObject.GetComponent<IndexIK>();
 
             m_ready = true;
+        }
+
+        public override void OnDeinitializeMelon()
+        {
+            if(ms_instance == this)
+                ms_instance = null;
+
+            m_ready = false;
+            m_aasParameters?.Clear();
+            m_aasParameters = null;
+            m_avatarCalibrations?.Clear();
+            m_avatarCalibrations = null;
+            m_hipsTrackerIndex = -1;
+
+            if(m_calibrationTask != null)
+                MelonLoader.MelonCoroutines.Stop(m_calibrationTask);
+            m_calibrationTask = null;
         }
 
         void StartCalibration()
@@ -128,7 +145,7 @@ namespace ml_fpt
                 if(m_vrIK != null)
                     m_vrIK.enabled = false;
 
-                m_indexIk.enabled = false;
+                m_indexIK.enabled = false;
 
                 PlayerSetup.Instance._trackerManager.trackers[m_hipsTrackerIndex].ShowLine(true, m_hips);
 
@@ -155,7 +172,7 @@ namespace ml_fpt
                         m_vrIK.enabled = true;
                     }
 
-                    m_indexIk.enabled = true;
+                    m_indexIK.enabled = true;
 
                     PlayerSetup.Instance._animator.runtimeAnimatorController = m_runtimeAnimator;
                     PlayerSetup.Instance.animatorManager.SetAnimator(PlayerSetup.Instance._animator, m_runtimeAnimator);
@@ -213,7 +230,7 @@ namespace ml_fpt
                     if(m_calibrationTask != null)
                         MelonLoader.MelonCoroutines.Stop(m_calibrationTask);
 
-                    m_indexIk.enabled = true;
+                    m_indexIK.enabled = true;
 
                     IKSystem.Instance.leftHandModel.SetActive(false);
                     IKSystem.Instance.rightHandModel.SetActive(false);

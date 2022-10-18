@@ -78,6 +78,30 @@ namespace ml_amt
         {
             m_parameters = new List<AdditionalParameterInfo>();
         }
+        
+        void Start()
+        {
+            Settings.IKOverrideCrouchChange += this.SetIKOverrideCrouch;
+            Settings.CrouchLimitChange += this.SetCrouchLimit;
+            Settings.IKOverrideProneChange += this.SetIKOverrideProne;
+            Settings.ProneLimitChange += this.SetProneLimit;
+            Settings.PoseTransitionsChange += this.SetPoseTransitions;
+            Settings.AdjustedMovementChange += this.SetAdjustedMovement;
+            Settings.IKOverrideFlyChange += this.SetIKOverrideFly;
+            Settings.DetectEmotesChange += this.SetDetectEmotes;
+        }
+        
+        void OnDestroy()
+        {
+            Settings.IKOverrideCrouchChange -= this.SetIKOverrideCrouch;
+            Settings.CrouchLimitChange -= this.SetCrouchLimit;
+            Settings.IKOverrideProneChange -= this.SetIKOverrideProne;
+            Settings.ProneLimitChange -= this.SetProneLimit;
+            Settings.PoseTransitionsChange -= this.SetPoseTransitions;
+            Settings.AdjustedMovementChange -= this.SetAdjustedMovement;
+            Settings.IKOverrideFlyChange -= this.SetIKOverrideFly;
+            Settings.DetectEmotesChange -= this.SetDetectEmotes;
+        }
 
         void Update()
         {
@@ -123,13 +147,12 @@ namespace ml_amt
 
                 m_poseState = l_poseState;
 
+                m_emoteActive = false;
                 if(m_detectEmotes && (m_locomotionLayer >= 0))
                 {
                     AnimatorStateInfo l_animState = PlayerSetup.Instance._animator.GetCurrentAnimatorStateInfo(m_locomotionLayer);
                     m_emoteActive = (l_animState.tagHash == ms_emoteHash);
                 }
-                else
-                    m_emoteActive = false;
 
                 if(m_parameters.Count > 0)
                 {

@@ -53,40 +53,36 @@ namespace ml_lme
                 m_rightHandTarget.localPosition = Vector3.zero;
                 m_rightHandTarget.localRotation = Quaternion.identity;
             }
+
+            Settings.EnabledChange += this.SetEnabled;
+            Settings.FingersOnlyChange += this.SetFingersOnly;
+            Settings.TrackElbowsChange += this.SetTrackElbows;
+        }
+
+        void OnDestroy()
+        {
+            Settings.EnabledChange -= this.SetEnabled;
+            Settings.FingersOnlyChange -= this.SetFingersOnly;
+            Settings.TrackElbowsChange -= this.SetTrackElbows;
         }
 
         public void SetEnabled(bool p_state)
         {
             m_enabled = p_state;
 
-            if(m_indexIK != null)
-            {
-                m_indexIK.activeControl = (m_enabled || Utils.AreKnucklesInUse());
-                CVRInputManager.Instance.individualFingerTracking = (m_enabled || Utils.AreKnucklesInUse());
-            }
-
-            if((m_leftIK != null) && (m_rightIK != null))
-            {
-                m_leftIK.enabled = (m_enabled && !m_fingersOnly);
-                m_rightIK.enabled = (m_enabled && !m_fingersOnly);
-            }
-
+            RefreshFingersTracking();
+            RefreshArmIK();
             if(!m_enabled || m_fingersOnly)
-                RestoreIK();
+                RestoreVRIK();
         }
 
         public void SetFingersOnly(bool p_state)
         {
             m_fingersOnly = p_state;
 
-            if((m_leftIK != null) && (m_rightIK != null))
-            {
-                m_leftIK.enabled = (m_enabled && !m_fingersOnly);
-                m_rightIK.enabled = (m_enabled && !m_fingersOnly);
-            }
-
+            RefreshArmIK();
             if(!m_enabled || m_fingersOnly)
-                RestoreIK();
+                RestoreVRIK();
         }
 
         public void SetTrackElbows(bool p_state)
@@ -126,7 +122,7 @@ namespace ml_lme
                     m_leftIK.solver.IKPositionWeight = Mathf.Lerp(m_leftIK.solver.IKPositionWeight, (p_gesturesData.m_handsPresenses[0] && !m_fingersOnly) ? 1f : 0f, 0.25f);
                     m_leftIK.solver.IKRotationWeight = Mathf.Lerp(m_leftIK.solver.IKRotationWeight, (p_gesturesData.m_handsPresenses[0] && !m_fingersOnly) ? 1f : 0f, 0.25f);
                     m_rightIK.solver.IKPositionWeight = Mathf.Lerp(m_rightIK.solver.IKPositionWeight, (p_gesturesData.m_handsPresenses[1] && !m_fingersOnly) ? 1f : 0f, 0.25f);
-                    m_rightIK.solver.IKRotationWeight = Mathf.Lerp(m_rightIK.solver.IKPositionWeight, (p_gesturesData.m_handsPresenses[1] && !m_fingersOnly) ? 1f : 0f, 0.25f);
+                    m_rightIK.solver.IKRotationWeight = Mathf.Lerp(m_rightIK.solver.IKRotationWeight, (p_gesturesData.m_handsPresenses[1] && !m_fingersOnly) ? 1f : 0f, 0.25f);
                 }
 
                 if(p_gesturesData.m_handsPresenses[0])
@@ -203,6 +199,7 @@ namespace ml_lme
         public void OnAvatarClear()
         {
             m_vrIK = null;
+            m_armsWeights = Vector2.zero;
             m_leftIK = null;
             m_rightIK = null;
             m_leftTargetActive = false;
@@ -212,8 +209,6 @@ namespace ml_lme
             m_leftHandTarget.localRotation = Quaternion.identity;
             m_rightHandTarget.localPosition = Vector3.zero;
             m_rightHandTarget.localRotation = Quaternion.identity;
-
-            m_armsWeights.Set(0f, 0f);
         }
 
         public void OnCalibrateAvatar()
@@ -223,8 +218,7 @@ namespace ml_lme
             if(m_indexIK != null)
             {
                 m_indexIK.avatarAnimator = PlayerSetup.Instance._animator;
-                m_indexIK.activeControl = (m_enabled || Utils.AreKnucklesInUse());
-                CVRInputManager.Instance.individualFingerTracking = (m_enabled || Utils.AreKnucklesInUse());
+                RefreshFingersTracking();
             }
 
             if(PlayerSetup.Instance._animator.isHuman)
@@ -330,7 +324,7 @@ namespace ml_lme
             m_vrIK.solver.rightArm.rotationWeight = m_armsWeights.y;
         }
 
-        void RestoreIK()
+        void RestoreVRIK()
         {
             if(m_vrIK != null)
             {
@@ -348,6 +342,24 @@ namespace ml_lme
                     m_vrIK.solver.rightArm.bendGoalWeight = 0f;
                     m_rightTargetActive = false;
                 }
+            }
+        }
+
+        void RefreshArmIK()
+        {
+            if((m_leftIK != null) && (m_rightIK != null))
+            {
+                m_leftIK.enabled = (m_enabled && !m_fingersOnly);
+                m_rightIK.enabled = (m_enabled && !m_fingersOnly);
+            }
+        }
+
+        void RefreshFingersTracking()
+        {
+            if(m_indexIK != null)
+            {
+                m_indexIK.activeControl = (m_enabled || Utils.AreKnucklesInUse());
+                CVRInputManager.Instance.individualFingerTracking = (m_enabled || Utils.AreKnucklesInUse());
             }
         }
     }

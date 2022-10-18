@@ -15,14 +15,6 @@ namespace ml_amt
                 ms_instance = this;
 
             Settings.Init();
-            Settings.IKOverrideCrouchChange += this.OnIKOverrideCrouchChange;
-            Settings.CrouchLimitChange += this.OnCrouchLimitChange;
-            Settings.IKOverrideProneChange += this.OnIKOverrideProneChange;
-            Settings.ProneLimitChange += this.OnProneLimitChange;
-            Settings.PoseTransitionsChange += this.OnPoseTransitonsChange;
-            Settings.AdjustedMovementChange += this.OnAdjustedMovementChange;
-            Settings.IKOverrideFlyChange += this.OnIKOverrideFlyChange;
-            Settings.DetectEmotesChange += this.OnDetectEmotesChange;
 
             HarmonyInstance.Patch(
                 typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.ClearAvatar)),
@@ -54,45 +46,12 @@ namespace ml_amt
             m_localTweaker.SetDetectEmotes(Settings.DetectEmotes);
         }
 
-        void OnIKOverrideCrouchChange(bool p_state)
+        public override void OnDeinitializeMelon()
         {
-            if(m_localTweaker != null)
-                m_localTweaker.SetIKOverrideCrouch(p_state);
-        }
-        void OnCrouchLimitChange(float p_value)
-        {
-            if(m_localTweaker != null)
-                m_localTweaker.SetCrouchLimit(p_value);
-        }
-        void OnIKOverrideProneChange(bool p_state)
-        {
-            if(m_localTweaker != null)
-                m_localTweaker.SetIKOverrideProne(p_state);
-        }
-        void OnProneLimitChange(float p_value)
-        {
-            if(m_localTweaker != null)
-                m_localTweaker.SetProneLimit(p_value);
-        }
-        void OnPoseTransitonsChange(bool p_state)
-        {
-            if(m_localTweaker != null)
-                m_localTweaker.SetPoseTransitions(p_state);
-        }
-        void OnAdjustedMovementChange(bool p_state)
-        {
-            if(m_localTweaker != null)
-                m_localTweaker.SetAdjustedMovement(p_state);
-        }
-        void OnIKOverrideFlyChange(bool p_state)
-        {
-            if(m_localTweaker != null)
-                m_localTweaker.SetIKOverrideFly(p_state);
-        }
-        void OnDetectEmotesChange(bool p_state)
-        {
-            if(m_localTweaker != null)
-                m_localTweaker.SetDetectEmotes(p_state);
+            if(ms_instance == this)
+                ms_instance = null;
+
+            m_localTweaker = null;
         }
 
         static void OnAvatarClear_Postfix() => ms_instance?.OnAvatarClear();

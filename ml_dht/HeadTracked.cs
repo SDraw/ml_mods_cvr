@@ -34,6 +34,19 @@ namespace ml_dht
         void Start()
         {
             m_camera = PlayerSetup.Instance.desktopCamera.transform;
+            
+            Settings.EnabledChange += this.SetEnabled;
+            Settings.SmoothingChange += this.SetSmoothing;
+            Settings.MirroredChange += this.SetMirrored;
+            Settings.FaceOverrideChange += this.SetFaceOverride;
+        }
+        
+        void OnDestroy()
+        {
+            Settings.EnabledChange -= this.SetEnabled;
+            Settings.SmoothingChange -= this.SetSmoothing;
+            Settings.MirroredChange -= this.SetMirrored;
+            Settings.FaceOverrideChange -= this.SetFaceOverride;
         }
 
         public void UpdateTrackingData(ref TrackingData p_data)
