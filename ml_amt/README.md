@@ -17,6 +17,7 @@ Available mod's settings in `Settings - Implementation - Avatar Motion Tweaker`:
 * **Prone limit:** defines prone limit; default value - `30`.
   * Note: Can be overrided by avatar. For this avatar has to have child gameobject with name `ProneLimit`, its Y-axis location will be used as limit, should be in range [0.0, 1.0].
 * **IK override while flying:** disables legs locomotion/autostep in fly mode; default value - `true`.
+* **IK override while jumping:** disables legs locomotion/autostep in jump; default value - `true`.
 * **Pose transitions:** allows regular avatars animator to transit in crouch/prone states; default value - `true`.
   * Note: Avatar is considered as regular if its AAS animator doesn't have `Upright` parameter.
 * **Adjusted pose movement speed:** scales movement speed upon crouching/proning; default value - `true`.

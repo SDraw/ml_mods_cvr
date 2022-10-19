@@ -16,6 +16,7 @@ namespace ml_amt
             PoseTransitions,
             AdjustedMovement,
             IKOverrideFly,
+            IKOverrideJump,
             DetectEmotes
         };
 
@@ -26,6 +27,7 @@ namespace ml_amt
         static bool ms_poseTransitions = true;
         static bool ms_adjustedMovement = true;
         static bool ms_ikOverrideFly = true;
+        static bool ms_ikOverrideJump = true;
         static bool ms_detectEmotes = true;
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
@@ -38,6 +40,7 @@ namespace ml_amt
         static public event Action<bool> PoseTransitionsChange;
         static public event Action<bool> AdjustedMovementChange;
         static public event Action<bool> IKOverrideFlyChange;
+        static public event Action<bool> IKOverrideJumpChange;
         static public event Action<bool> DetectEmotesChange;
 
         public static void Init()
@@ -52,6 +55,7 @@ namespace ml_amt
             ms_entries.Add(ms_category.CreateEntry(ModSetting.PoseTransitions.ToString(), true));
             ms_entries.Add(ms_category.CreateEntry(ModSetting.AdjustedMovement.ToString(), true));
             ms_entries.Add(ms_category.CreateEntry(ModSetting.IKOverrideFly.ToString(), true));
+            ms_entries.Add(ms_category.CreateEntry(ModSetting.IKOverrideJump.ToString(), true));
             ms_entries.Add(ms_category.CreateEntry(ModSetting.DetectEmotes.ToString(), true));
 
             Load();
@@ -90,6 +94,7 @@ namespace ml_amt
             ms_poseTransitions = (bool)ms_entries[(int)ModSetting.PoseTransitions].BoxedValue;
             ms_adjustedMovement = (bool)ms_entries[(int)ModSetting.AdjustedMovement].BoxedValue;
             ms_ikOverrideFly = (bool)ms_entries[(int)ModSetting.IKOverrideFly].BoxedValue;
+            ms_ikOverrideJump = (bool)ms_entries[(int)ModSetting.IKOverrideJump].BoxedValue;
             ms_detectEmotes = (bool)ms_entries[(int)ModSetting.DetectEmotes].BoxedValue;
         }
 
@@ -159,6 +164,13 @@ namespace ml_amt
                     }
                     break;
 
+                    case ModSetting.IKOverrideJump:
+                    {
+                        ms_ikOverrideJump = bool.Parse(p_value);
+                        IKOverrideJumpChange?.Invoke(ms_ikOverrideJump);
+                    }
+                    break;
+
                     case ModSetting.DetectEmotes:
                     {
                         ms_detectEmotes = bool.Parse(p_value);
@@ -198,6 +210,10 @@ namespace ml_amt
         public static bool IKOverrideFly
         {
             get => ms_ikOverrideFly;
+        }
+        public static bool IKOverrideJump
+        {
+            get => ms_ikOverrideJump;
         }
         public static bool DetectEmotes
         {

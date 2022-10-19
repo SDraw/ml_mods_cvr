@@ -43,6 +43,7 @@ namespace ml_amt
             m_localTweaker.SetPoseTransitions(Settings.PoseTransitions);
             m_localTweaker.SetAdjustedMovement(Settings.AdjustedMovement);
             m_localTweaker.SetIKOverrideFly(Settings.IKOverrideFly);
+            m_localTweaker.SetIKOverrideJump(Settings.IKOverrideJump);
             m_localTweaker.SetDetectEmotes(Settings.DetectEmotes);
         }
 

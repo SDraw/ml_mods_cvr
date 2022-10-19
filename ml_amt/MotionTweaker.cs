@@ -53,6 +53,7 @@ namespace ml_amt
         bool m_compatibleAvatar = false;
         float m_upright = 1f;
         PoseState m_poseState = PoseState.Standing;
+        bool m_grounded = false;
 
         bool m_ikOverrideCrouch = true;
         float m_crouchLimit = 0.65f;
@@ -65,6 +66,7 @@ namespace ml_amt
         bool m_poseTransitions = true;
         bool m_adjustedMovement = true;
         bool m_ikOverrideFly = true;
+        bool m_ikOverrideJump = true;
 
         bool m_customLocomotionOffset = false;
         Vector3 m_locomotionOffset = Vector3.zero;
@@ -78,7 +80,7 @@ namespace ml_amt
         {
             m_parameters = new List<AdditionalParameterInfo>();
         }
-        
+
         void Start()
         {
             Settings.IKOverrideCrouchChange += this.SetIKOverrideCrouch;
@@ -88,9 +90,10 @@ namespace ml_amt
             Settings.PoseTransitionsChange += this.SetPoseTransitions;
             Settings.AdjustedMovementChange += this.SetAdjustedMovement;
             Settings.IKOverrideFlyChange += this.SetIKOverrideFly;
+            Settings.IKOverrideJumpChange += this.SetIKOverrideJump;
             Settings.DetectEmotesChange += this.SetDetectEmotes;
         }
-        
+
         void OnDestroy()
         {
             Settings.IKOverrideCrouchChange -= this.SetIKOverrideCrouch;
@@ -100,6 +103,7 @@ namespace ml_amt
             Settings.PoseTransitionsChange -= this.SetPoseTransitions;
             Settings.AdjustedMovementChange -= this.SetAdjustedMovement;
             Settings.IKOverrideFlyChange -= this.SetIKOverrideFly;
+            Settings.IKOverrideJumpChange -= this.SetIKOverrideJump;
             Settings.DetectEmotesChange -= this.SetDetectEmotes;
         }
 
@@ -107,6 +111,8 @@ namespace ml_amt
         {
             if(m_avatarReady)
             {
+                m_grounded = (bool)ms_groundedRaw.GetValue(MovementSystem.Instance);
+
                 // Update upright
                 Matrix4x4 l_hmdMatrix = PlayerSetup.Instance.transform.GetMatrix().inverse * (PlayerSetup.Instance._inVr ? PlayerSetup.Instance.vrHeadTracker.transform.GetMatrix() : PlayerSetup.Instance.desktopCameraRig.transform.GetMatrix());
                 float l_currentHeight = Mathf.Clamp((l_hmdMatrix * ms_pointVector).y, 0f, float.MaxValue);
@@ -179,10 +185,10 @@ namespace ml_amt
                                 switch(l_param.m_sync)
                                 {
                                     case ParameterSyncType.Local:
-                                        PlayerSetup.Instance._animator.SetBool(l_param.m_hash, (bool)ms_groundedRaw.GetValue(MovementSystem.Instance));
+                                        PlayerSetup.Instance._animator.SetBool(l_param.m_hash, m_grounded);
                                         break;
                                     case ParameterSyncType.Synced:
-                                        PlayerSetup.Instance.animatorManager.SetAnimatorParameterBool(l_param.m_name, (bool)ms_groundedRaw.GetValue(MovementSystem.Instance));
+                                        PlayerSetup.Instance.animatorManager.SetAnimatorParameterBool(l_param.m_name, m_grounded);
                                         break;
                                 }
                             }
@@ -197,6 +203,7 @@ namespace ml_amt
         {
             m_vrIk = null;
             m_locomotionLayer = -1;
+            m_grounded = false;
             m_avatarReady = false;
             m_compatibleAvatar = false;
             m_poseState = PoseState.Standing;
@@ -275,6 +282,7 @@ namespace ml_amt
             if(m_detectEmotes && m_emoteActive)
                 m_vrIk.solver.IKPositionWeight = 0f;
 
+            // Game manages VRIK for desktop itself
             if(PlayerSetup.Instance._inVr)
             {
                 if((m_ikOverrideCrouch && (m_poseState != PoseState.Standing)) || (m_ikOverrideProne && (m_poseState == PoseState.Proning)))
@@ -282,6 +290,10 @@ namespace ml_amt
                 if(m_ikOverrideFly && MovementSystem.Instance.flying)
                     m_vrIk.solver.locomotion.weight = 0f;
             }
+
+            // But not this
+            if(m_ikOverrideJump && !m_grounded && !MovementSystem.Instance.flying)
+                m_vrIk.solver.locomotion.weight = 0f;
         }
 
         void OnIKPostUpdate()
@@ -331,6 +343,10 @@ namespace ml_amt
         public void SetIKOverrideFly(bool p_state)
         {
             m_ikOverrideFly = p_state;
+        }
+        public void SetIKOverrideJump(bool p_state)
+        {
+            m_ikOverrideJump = p_state;
         }
         public void SetDetectEmotes(bool p_state)
         {
