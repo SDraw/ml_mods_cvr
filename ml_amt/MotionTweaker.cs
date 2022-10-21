@@ -10,8 +10,9 @@ namespace ml_amt
     [DisallowMultipleComponent]
     class MotionTweaker : MonoBehaviour
     {
-        static readonly FieldInfo ms_rootVelocity = typeof(IKSolverVR).GetField("rootVelocity", BindingFlags.NonPublic | BindingFlags.Instance);
+        static readonly FieldInfo ms_grounded = typeof(MovementSystem).GetField("_isGrounded", BindingFlags.NonPublic | BindingFlags.Instance);
         static readonly FieldInfo ms_groundedRaw = typeof(MovementSystem).GetField("_isGroundedRaw", BindingFlags.NonPublic | BindingFlags.Instance);
+        static readonly FieldInfo ms_rootVelocity = typeof(IKSolverVR).GetField("rootVelocity", BindingFlags.NonPublic | BindingFlags.Instance);
         static readonly int ms_emoteHash = Animator.StringToHash("Emote");
 
         enum ParameterType
@@ -54,6 +55,7 @@ namespace ml_amt
         float m_upright = 1f;
         PoseState m_poseState = PoseState.Standing;
         bool m_grounded = false;
+        bool m_groundedRaw = false;
 
         bool m_ikOverrideCrouch = true;
         float m_crouchLimit = 0.65f;
@@ -111,7 +113,8 @@ namespace ml_amt
         {
             if(m_avatarReady)
             {
-                m_grounded = (bool)ms_groundedRaw.GetValue(MovementSystem.Instance);
+                m_grounded = (bool)ms_grounded.GetValue(MovementSystem.Instance);
+                m_groundedRaw = (bool)ms_groundedRaw.GetValue(MovementSystem.Instance);
 
                 // Update upright
                 Matrix4x4 l_hmdMatrix = PlayerSetup.Instance.transform.GetMatrix().inverse * (PlayerSetup.Instance._inVr ? PlayerSetup.Instance.vrHeadTracker.transform.GetMatrix() : PlayerSetup.Instance.desktopCameraRig.transform.GetMatrix());
@@ -204,6 +207,7 @@ namespace ml_amt
             m_vrIk = null;
             m_locomotionLayer = -1;
             m_grounded = false;
+            m_groundedRaw = false;
             m_avatarReady = false;
             m_compatibleAvatar = false;
             m_poseState = PoseState.Standing;
