@@ -292,8 +292,8 @@ namespace ml_lme
                 }
                 else
                 {
-                    m_vrIK.onPreSolverUpdate.AddListener(this.OnIKPreUpdate);
-                    m_vrIK.onPostSolverUpdate.AddListener(this.OnIKPostUpdate);
+                    m_vrIK.solver.OnPreUpdate += this.OnIKPreUpdate;
+                    m_vrIK.solver.OnPostUpdate += this.OnIKPostUpdate;
                 }
 
                 l_poseHandler?.Dispose();
