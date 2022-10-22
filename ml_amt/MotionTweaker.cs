@@ -188,10 +188,10 @@ namespace ml_amt
                                 switch(l_param.m_sync)
                                 {
                                     case ParameterSyncType.Local:
-                                        PlayerSetup.Instance._animator.SetBool(l_param.m_hash, m_grounded);
+                                        PlayerSetup.Instance._animator.SetBool(l_param.m_hash, m_groundedRaw);
                                         break;
                                     case ParameterSyncType.Synced:
-                                        PlayerSetup.Instance.animatorManager.SetAnimatorParameterBool(l_param.m_name, m_grounded);
+                                        PlayerSetup.Instance.animatorManager.SetAnimatorParameterBool(l_param.m_name, m_groundedRaw);
                                         break;
                                 }
                             }
