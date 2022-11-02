@@ -211,7 +211,7 @@ namespace ml_lme
             m_rightHandTarget.localRotation = Quaternion.identity;
         }
 
-        public void OnCalibrateAvatar()
+        public void OnSetupAvatar()
         {
             m_vrIK = PlayerSetup.Instance._animator.GetComponent<VRIK>();
 

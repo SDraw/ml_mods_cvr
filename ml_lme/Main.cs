@@ -53,9 +53,9 @@ namespace ml_lme
                 new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnAvatarClear_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
             HarmonyInstance.Patch(
-                typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.CalibrateAvatar)),
+                typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.SetupAvatar)),
                 null,
-                new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnCalibrateAvatar_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
+                new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnSetupAvatar_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
 
 
@@ -341,13 +341,13 @@ namespace ml_lme
             }
         }
 
-        static void OnCalibrateAvatar_Postfix() => ms_instance?.OnCalibrateAvatar();
-        void OnCalibrateAvatar()
+        static void OnSetupAvatar_Postfix() => ms_instance?.OnSetupAvatar();
+        void OnSetupAvatar()
         {
             try
             {
                 if(m_leapTracked != null)
-                    m_leapTracked.OnCalibrateAvatar();
+                    m_leapTracked.OnSetupAvatar();
 
                 OnHeadAttachChange(Settings.HeadAttach);
             }

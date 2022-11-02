@@ -220,7 +220,7 @@ namespace ml_amt
             m_parameters.Clear();
         }
 
-        public void OnCalibrateAvatar()
+        public void OnSetupAvatar()
         {
             m_vrIk = PlayerSetup.Instance._avatar.GetComponent<VRIK>();
             m_locomotionLayer = PlayerSetup.Instance._animator.GetLayerIndex("Locomotion/Emotes");

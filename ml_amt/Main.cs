@@ -22,9 +22,9 @@ namespace ml_amt
                 new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnAvatarClear_Postfix), BindingFlags.NonPublic | BindingFlags.Static))
             );
             HarmonyInstance.Patch(
-                typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.CalibrateAvatar)),
+                typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.SetupAvatar)),
                 null,
-                new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnCalibrateAvatar_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
+                new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnSetupAvatar_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
 
             MelonLoader.MelonCoroutines.Start(WaitForLocalPlayer());
@@ -69,13 +69,13 @@ namespace ml_amt
             }
         }
 
-        static void OnCalibrateAvatar_Postfix() => ms_instance?.OnCalibrateAvatar();
-        void OnCalibrateAvatar()
+        static void OnSetupAvatar_Postfix() => ms_instance?.OnSetupAvatar();
+        void OnSetupAvatar()
         {
             try
             {
                 if(m_localTweaker != null)
-                    m_localTweaker.OnCalibrateAvatar();
+                    m_localTweaker.OnSetupAvatar();
             }
             catch(System.Exception l_exception)
             {

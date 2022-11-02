@@ -44,9 +44,9 @@ namespace ml_fpt
                 new HarmonyLib.HarmonyMethod(typeof(FourPointTracking).GetMethod(nameof(OnAvatarClear_Postfix), BindingFlags.NonPublic | BindingFlags.Static))
             );
             HarmonyInstance.Patch(
-                typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.CalibrateAvatar)),
+                typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.SetupAvatar)),
                 null,
-                new HarmonyLib.HarmonyMethod(typeof(FourPointTracking).GetMethod(nameof(OnCalibrateAvatar_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
+                new HarmonyLib.HarmonyMethod(typeof(FourPointTracking).GetMethod(nameof(OnSetupAvatar_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
 
             MelonLoader.MelonCoroutines.Start(WaitForMainMenuView());
@@ -253,8 +253,8 @@ namespace ml_fpt
             }
         }
 
-        static void OnCalibrateAvatar_Postfix() => ms_instance?.OnCalibrateAvatar();
-        void OnCalibrateAvatar()
+        static void OnSetupAvatar_Postfix() => ms_instance?.OnSetupAvatar();
+        void OnSetupAvatar()
         {
             try
             {
