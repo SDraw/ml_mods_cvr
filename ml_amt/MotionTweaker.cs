@@ -18,7 +18,8 @@ namespace ml_amt
         enum ParameterType
         {
             Upright,
-            GroundedRaw
+            GroundedRaw,
+            Moving
         }
 
         enum ParameterSyncType
@@ -49,6 +50,7 @@ namespace ml_amt
         float m_ikWeight = 1f; // Original weight
         float m_locomotionWeight = 1f; // Original weight
         float m_avatarScale = 1f; // Instantiated scale
+        Transform m_avatarHips = null;
 
         bool m_avatarReady = false;
         bool m_compatibleAvatar = false;
@@ -56,6 +58,7 @@ namespace ml_amt
         PoseState m_poseState = PoseState.Standing;
         bool m_grounded = false;
         bool m_groundedRaw = false;
+        bool m_moving = false;
 
         bool m_ikOverrideCrouch = true;
         float m_crouchLimit = 0.65f;
@@ -76,6 +79,9 @@ namespace ml_amt
         bool m_detectEmotes = true;
         bool m_emoteActive = false;
 
+        bool m_followHips = true;
+        Vector3 m_hipsToPlayer = Vector3.zero;
+
         readonly List<AdditionalParameterInfo> m_parameters = null;
 
         public MotionTweaker()
@@ -94,6 +100,7 @@ namespace ml_amt
             Settings.IKOverrideFlyChange += this.SetIKOverrideFly;
             Settings.IKOverrideJumpChange += this.SetIKOverrideJump;
             Settings.DetectEmotesChange += this.SetDetectEmotes;
+            Settings.FollowHipsChange += this.SetFollowHips;
         }
 
         void OnDestroy()
@@ -107,6 +114,7 @@ namespace ml_amt
             Settings.IKOverrideFlyChange -= this.SetIKOverrideFly;
             Settings.IKOverrideJumpChange -= this.SetIKOverrideJump;
             Settings.DetectEmotesChange -= this.SetDetectEmotes;
+            Settings.FollowHipsChange -= this.SetFollowHips;
         }
 
         void Update()
@@ -115,6 +123,7 @@ namespace ml_amt
             {
                 m_grounded = (bool)ms_grounded.GetValue(MovementSystem.Instance);
                 m_groundedRaw = (bool)ms_groundedRaw.GetValue(MovementSystem.Instance);
+                m_moving = !Mathf.Approximately(MovementSystem.Instance.movementVector.magnitude, 0f);
 
                 // Update upright
                 Matrix4x4 l_hmdMatrix = PlayerSetup.Instance.transform.GetMatrix().inverse * (PlayerSetup.Instance._inVr ? PlayerSetup.Instance.vrHeadTracker.transform.GetMatrix() : PlayerSetup.Instance.desktopCameraRig.transform.GetMatrix());
@@ -123,6 +132,12 @@ namespace ml_amt
                 float l_avatarViewHeight = Mathf.Clamp(PlayerSetup.Instance.GetViewPointHeight() * l_avatarScale, 0f, float.MaxValue);
                 m_upright = Mathf.Clamp(((l_avatarViewHeight > 0f) ? (l_currentHeight / l_avatarViewHeight) : 0f), 0f, 1f);
                 PoseState l_poseState = (m_upright <= m_proneLimit) ? PoseState.Proning : ((m_upright <= m_crouchLimit) ? PoseState.Crouching : PoseState.Standing);
+
+                if(m_followHips && (m_avatarHips != null))
+                {
+                    Vector4 l_hipsToPlayer = (PlayerSetup.Instance.transform.GetMatrix().inverse * m_avatarHips.GetMatrix()) * ms_pointVector;
+                    m_hipsToPlayer.Set(l_hipsToPlayer.x, 0f, l_hipsToPlayer.z);
+                }
 
                 if(PlayerSetup.Instance._inVr && (m_vrIk != null) && m_vrIk.enabled)
                 {
@@ -196,6 +211,20 @@ namespace ml_amt
                                 }
                             }
                             break;
+
+                            case ParameterType.Moving:
+                            {
+                                switch(l_param.m_sync)
+                                {
+                                    case ParameterSyncType.Local:
+                                        PlayerSetup.Instance._animator.SetBool(l_param.m_hash, m_moving);
+                                        break;
+                                    case ParameterSyncType.Synced:
+                                        PlayerSetup.Instance.animatorManager.SetAnimatorParameterBool(l_param.m_name, m_moving);
+                                        break;
+                                }
+                            }
+                            break;
                         }
                     }
                 }
@@ -217,6 +246,9 @@ namespace ml_amt
             m_locomotionOffset = Vector3.zero;
             m_avatarScale = 1f;
             m_emoteActive = false;
+            m_moving = false;
+            m_hipsToPlayer = Vector3.zero;
+            m_avatarHips = null;
             m_parameters.Clear();
         }
 
@@ -224,6 +256,7 @@ namespace ml_amt
         {
             m_vrIk = PlayerSetup.Instance._avatar.GetComponent<VRIK>();
             m_locomotionLayer = PlayerSetup.Instance._animator.GetLayerIndex("Locomotion/Emotes");
+            m_avatarHips = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.Hips);
 
             // Parse animator parameters
             AnimatorControllerParameter[] l_params = PlayerSetup.Instance._animator.parameters;
@@ -280,6 +313,8 @@ namespace ml_amt
 
         void OnIKPreUpdate()
         {
+            bool l_overrided = false;
+
             m_ikWeight = m_vrIk.solver.IKPositionWeight;
             m_locomotionWeight = m_vrIk.solver.locomotion.weight;
 
@@ -290,14 +325,26 @@ namespace ml_amt
             if(PlayerSetup.Instance._inVr)
             {
                 if((m_ikOverrideCrouch && (m_poseState != PoseState.Standing)) || (m_ikOverrideProne && (m_poseState == PoseState.Proning)))
+                {
                     m_vrIk.solver.locomotion.weight = 0f;
+                    l_overrided = true;
+                }
                 if(m_ikOverrideFly && MovementSystem.Instance.flying)
+                {
                     m_vrIk.solver.locomotion.weight = 0f;
+                    l_overrided = true;
+                }
             }
 
             // But not this
             if(m_ikOverrideJump && !m_grounded && !MovementSystem.Instance.flying)
+            {
                 m_vrIk.solver.locomotion.weight = 0f;
+                l_overrided = true;
+            }
+
+            if(l_overrided && m_followHips && !m_moving)
+                PlayerSetup.Instance._avatar.transform.localPosition = m_hipsToPlayer;
         }
 
         void OnIKPostUpdate()
@@ -355,6 +402,10 @@ namespace ml_amt
         public void SetDetectEmotes(bool p_state)
         {
             m_detectEmotes = p_state;
+        }
+        public void SetFollowHips(bool p_state)
+        {
+            m_followHips = p_state;
         }
     }
 }

@@ -18,6 +18,7 @@ Available mod's settings in `Settings - Implementation - Avatar Motion Tweaker`:
   * Note: Can be overrided by avatar. For this avatar has to have child gameobject with name `ProneLimit`, its Y-axis location will be used as limit, should be in range [0.0, 1.0].
 * **IK override while flying:** disables legs locomotion/autostep in fly mode; default value - `true`.
 * **IK override while jumping:** disables legs locomotion/autostep in jump; default value - `true`.
+* **Follow hips on IK override:** adjust avatar position to overcome animation snapping on IK override; default value - `true`.
 * **Pose transitions:** allows regular avatars animator to transit in crouch/prone states; default value - `true`.
   * Note: Avatar is considered as regular if its AAS animator doesn't have `Upright` parameter.
 * **Adjusted pose movement speed:** scales movement speed upon crouching/proning; default value - `true`.
@@ -30,6 +31,8 @@ Available additional parameters for AAS animator:
   * Note: Defining this parameter in AAS animator will consider avatar as compatible with mod.
   * Note: Can't be used for transitions between poses in desktop mode. In desktop mode its value is driven by avatar animations. Use `CVR Parameter Stream` for detecting desktop/VR modes and change AAS animator transitions accordingly.
 * **`GroundedRaw`:** defines instant grounding state of player instead of delayed default parameter `Grounded`.
+  * Note: Can be set as local-only (not synced) if starts with `#` character.
+* **`Moving`:** defines movement state of player
   * Note: Can be set as local-only (not synced) if starts with `#` character.
 
 Additional avatars tweaks:

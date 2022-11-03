@@ -17,7 +17,8 @@ namespace ml_amt
             AdjustedMovement,
             IKOverrideFly,
             IKOverrideJump,
-            DetectEmotes
+            DetectEmotes,
+            FollowHips
         };
 
         static bool ms_ikOverrideCrouch = true;
@@ -29,6 +30,7 @@ namespace ml_amt
         static bool ms_ikOverrideFly = true;
         static bool ms_ikOverrideJump = true;
         static bool ms_detectEmotes = true;
+        static bool ms_followHips = true;
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
@@ -42,6 +44,7 @@ namespace ml_amt
         static public event Action<bool> IKOverrideFlyChange;
         static public event Action<bool> IKOverrideJumpChange;
         static public event Action<bool> DetectEmotesChange;
+        static public event Action<bool> FollowHipsChange;
 
         public static void Init()
         {
@@ -57,6 +60,7 @@ namespace ml_amt
             ms_entries.Add(ms_category.CreateEntry(ModSetting.IKOverrideFly.ToString(), true));
             ms_entries.Add(ms_category.CreateEntry(ModSetting.IKOverrideJump.ToString(), true));
             ms_entries.Add(ms_category.CreateEntry(ModSetting.DetectEmotes.ToString(), true));
+            ms_entries.Add(ms_category.CreateEntry(ModSetting.FollowHips.ToString(), true));
 
             Load();
 
@@ -96,6 +100,7 @@ namespace ml_amt
             ms_ikOverrideFly = (bool)ms_entries[(int)ModSetting.IKOverrideFly].BoxedValue;
             ms_ikOverrideJump = (bool)ms_entries[(int)ModSetting.IKOverrideJump].BoxedValue;
             ms_detectEmotes = (bool)ms_entries[(int)ModSetting.DetectEmotes].BoxedValue;
+            ms_followHips = (bool)ms_entries[(int)ModSetting.FollowHips].BoxedValue;
         }
 
         static void OnSliderUpdate(string p_name, string p_value)
@@ -177,6 +182,13 @@ namespace ml_amt
                         DetectEmotesChange?.Invoke(ms_detectEmotes);
                     }
                     break;
+
+                    case ModSetting.FollowHips:
+                    {
+                        ms_followHips = bool.Parse(p_value);
+                        FollowHipsChange?.Invoke(ms_followHips);
+                    }
+                    break;
                 }
 
                 ms_entries[(int)l_setting].BoxedValue = bool.Parse(p_value);
@@ -218,6 +230,10 @@ namespace ml_amt
         public static bool DetectEmotes
         {
             get => ms_detectEmotes;
+        }
+        public static bool FollowHips
+        {
+            get => ms_followHips;
         }
     }
 }

@@ -221,6 +221,13 @@ function inp_toggle_mod_amt(_obj, _callbackName) {
                 <div id="IKOverrideJump" class ="inp_toggle no-scroll" data-current="true"></div>
             </div>
         </div>
+
+        <div class ="row-wrapper">
+            <div class ="option-caption">Follow hips on IK override: </div>
+            <div class ="option-input">
+                <div id="FollowHips" class ="inp_toggle no-scroll" data-current="true"></div>
+            </div>
+        </div>
         
         <div class ="row-wrapper">
             <div class ="option-caption">Pose transitions: </div>
