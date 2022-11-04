@@ -343,7 +343,7 @@ namespace ml_amt
                 l_overrided = true;
             }
 
-            if(l_overrided && m_followHips && !m_moving)
+            if(l_overrided && m_followHips && !m_moving && PlayerSetup.Instance._inVr)
                 PlayerSetup.Instance._avatar.transform.localPosition = m_hipsToPlayer;
         }
 
