@@ -344,9 +344,23 @@ function inp_dropdown_mod_lme(_obj, _callbackName) {
         </div>
 
         <div class ="row-wrapper">
-            <div class ="option-caption">Offset angle: </div>
+            <div class ="option-caption">Offset angle X: </div>
             <div class ="option-input">
-                <div id="Angle" class ="inp_slider no-scroll" data-min="-180" data-max="180" data-current="0"></div>
+                <div id="AngleX" class ="inp_slider no-scroll" data-min="-180" data-max="180" data-current="0"></div>
+            </div>
+        </div>
+
+        <div class ="row-wrapper">
+            <div class ="option-caption">Offset angle Y: </div>
+            <div class ="option-input">
+                <div id="AngleY" class ="inp_slider no-scroll" data-min="-180" data-max="180" data-current="0"></div>
+            </div>
+        </div>
+
+        <div class ="row-wrapper">
+            <div class ="option-caption">Offset angle Z: </div>
+            <div class ="option-input">
+                <div id="AngleZ" class ="inp_slider no-scroll" data-min="-180" data-max="180" data-current="0"></div>
             </div>
         </div>
 

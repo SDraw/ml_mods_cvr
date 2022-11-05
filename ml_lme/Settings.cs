@@ -24,7 +24,9 @@ namespace ml_lme
             FingersOnly,
             Model,
             Mode,
-            Angle,
+            AngleX,
+            AngleY,
+            AngleZ,
             Head,
             HeadX,
             HeadY,
@@ -37,7 +39,7 @@ namespace ml_lme
         static bool ms_fingersOnly = false;
         static bool ms_modelVisibility = false;
         static LeapTrackingMode ms_trackingMode = LeapTrackingMode.Desktop;
-        static float ms_rootAngle = 0f;
+        static Vector3 ms_rootAngle = Vector3.zero;
         static bool ms_headAttach = false;
         static Vector3 ms_headOffset = new Vector3(0f, -0.3f, 0.15f);
         static bool ms_trackElbows = true;
@@ -50,7 +52,7 @@ namespace ml_lme
         static public event Action<bool> FingersOnlyChange;
         static public event Action<bool> ModelVisibilityChange;
         static public event Action<LeapTrackingMode> TrackingModeChange;
-        static public event Action<float> RootAngleChange;
+        static public event Action<Vector3> RootAngleChange;
         static public event Action<bool> HeadAttachChange;
         static public event Action<Vector3> HeadOffsetChange;
         static public event Action<bool> TrackElbowsChange;
@@ -67,7 +69,9 @@ namespace ml_lme
             ms_entries.Add(ms_category.CreateEntry(ModSetting.FingersOnly.ToString(), ms_modelVisibility));
             ms_entries.Add(ms_category.CreateEntry(ModSetting.Model.ToString(), ms_modelVisibility));
             ms_entries.Add(ms_category.CreateEntry(ModSetting.Mode.ToString(), (int)ms_trackingMode));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.Angle.ToString(), 0));
+            ms_entries.Add(ms_category.CreateEntry(ModSetting.AngleX.ToString(), 0));
+            ms_entries.Add(ms_category.CreateEntry(ModSetting.AngleY.ToString(), 0));
+            ms_entries.Add(ms_category.CreateEntry(ModSetting.AngleZ.ToString(), 0));
             ms_entries.Add(ms_category.CreateEntry(ModSetting.Head.ToString(), ms_headAttach));
             ms_entries.Add(ms_category.CreateEntry(ModSetting.HeadX.ToString(), 0));
             ms_entries.Add(ms_category.CreateEntry(ModSetting.HeadY.ToString(), -30));
@@ -113,7 +117,11 @@ namespace ml_lme
             ms_fingersOnly = (bool)ms_entries[(int)ModSetting.FingersOnly].BoxedValue;
             ms_modelVisibility = (bool)ms_entries[(int)ModSetting.Model].BoxedValue;
             ms_trackingMode = (LeapTrackingMode)(int)ms_entries[(int)ModSetting.Mode].BoxedValue;
-            ms_rootAngle = (int)ms_entries[(int)ModSetting.Angle].BoxedValue;
+            ms_rootAngle = new Vector3(
+                (int)ms_entries[(int)ModSetting.AngleX].BoxedValue,
+                (int)ms_entries[(int)ModSetting.AngleY].BoxedValue,
+                (int)ms_entries[(int)ModSetting.AngleZ].BoxedValue
+            );
             ms_headAttach = (bool)ms_entries[(int)ModSetting.Head].BoxedValue;
             ms_headOffset = new Vector3(
                 (int)ms_entries[(int)ModSetting.HeadX].BoxedValue,
@@ -193,9 +201,23 @@ namespace ml_lme
                     }
                     break;
 
-                    case ModSetting.Angle:
+                    case ModSetting.AngleX:
                     {
-                        ms_rootAngle = int.Parse(p_value);
+                        ms_rootAngle.x = int.Parse(p_value);
+                        RootAngleChange?.Invoke(ms_rootAngle);
+                    }
+                    break;
+
+                    case ModSetting.AngleY:
+                    {
+                        ms_rootAngle.y = int.Parse(p_value);
+                        RootAngleChange?.Invoke(ms_rootAngle);
+                    }
+                    break;
+
+                    case ModSetting.AngleZ:
+                    {
+                        ms_rootAngle.z = int.Parse(p_value);
                         RootAngleChange?.Invoke(ms_rootAngle);
                     }
                     break;
@@ -262,7 +284,7 @@ namespace ml_lme
         {
             get => ms_trackingMode;
         }
-        public static float RootAngle
+        public static Vector3 RootAngle
         {
             get => ms_rootAngle;
         }

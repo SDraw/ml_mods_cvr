@@ -214,10 +214,10 @@ namespace ml_lme
             }
         }
 
-        void OnRootAngleChange(float p_angle)
+        void OnRootAngleChange(Vector3 p_angle)
         {
             if(m_leapTrackingRoot != null)
-                m_leapTrackingRoot.transform.localRotation = Quaternion.Euler(p_angle, 0f, 0f);
+                m_leapTrackingRoot.transform.localRotation = Quaternion.Euler(p_angle);
         }
 
         void OnHeadAttachChange(bool p_state)
@@ -255,7 +255,7 @@ namespace ml_lme
                     }
                 }
 
-                m_leapTrackingRoot.transform.localRotation = Quaternion.Euler(Settings.RootAngle, 0f, 0f);
+                m_leapTrackingRoot.transform.localRotation = Quaternion.Euler(Settings.RootAngle);
             }
         }
 
