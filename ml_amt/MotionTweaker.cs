@@ -313,7 +313,7 @@ namespace ml_amt
 
         void OnIKPreUpdate()
         {
-            bool l_overrided = false;
+            bool l_legsOverride = false;
 
             m_ikWeight = m_vrIk.solver.IKPositionWeight;
             m_locomotionWeight = m_vrIk.solver.locomotion.weight;
@@ -327,12 +327,12 @@ namespace ml_amt
                 if((m_ikOverrideCrouch && (m_poseState != PoseState.Standing)) || (m_ikOverrideProne && (m_poseState == PoseState.Proning)))
                 {
                     m_vrIk.solver.locomotion.weight = 0f;
-                    l_overrided = true;
+                    l_legsOverride = true;
                 }
                 if(m_ikOverrideFly && MovementSystem.Instance.flying)
                 {
                     m_vrIk.solver.locomotion.weight = 0f;
-                    l_overrided = true;
+                    l_legsOverride = true;
                 }
             }
 
@@ -340,10 +340,12 @@ namespace ml_amt
             if(m_ikOverrideJump && !m_grounded && !MovementSystem.Instance.flying)
             {
                 m_vrIk.solver.locomotion.weight = 0f;
-                l_overrided = true;
+                l_legsOverride = true;
             }
 
-            if(l_overrided && m_followHips && !m_moving && PlayerSetup.Instance._inVr)
+            bool l_solverActive = !Mathf.Approximately(m_vrIk.solver.IKPositionWeight, 0f);
+
+            if(l_legsOverride && l_solverActive && m_followHips && !m_moving && PlayerSetup.Instance._inVr)
                 PlayerSetup.Instance._avatar.transform.localPosition = m_hipsToPlayer;
         }
 
