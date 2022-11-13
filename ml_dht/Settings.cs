@@ -10,12 +10,16 @@ namespace ml_dht
         enum ModSetting
         {
             Enabled = 0,
+            EyeTracking,
+            Blinking,
             Mirrored,
             Smoothing,
             FaceOverride
         }
         
         static bool ms_enabled = false;
+        static bool ms_eyeTracking = true;
+        static bool ms_blinking = true;
         static bool ms_mirrored = false;
         static float ms_smoothing = 0.5f;
         static bool ms_faceOverride = true;
@@ -24,6 +28,8 @@ namespace ml_dht
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
         
         static public event Action<bool> EnabledChange;
+        static public event Action<bool> EyeTrackingChange;
+        static public event Action<bool> BlinkingChange;
         static public event Action<bool> MirroredChange;
         static public event Action<float> SmoothingChange;
         static public event Action<bool> FaceOverrideChange;
@@ -34,6 +40,8 @@ namespace ml_dht
             
             ms_entries = new List<MelonLoader.MelonPreferences_Entry>();
             ms_entries.Add(ms_category.CreateEntry(ModSetting.Enabled.ToString(), false));
+            ms_entries.Add(ms_category.CreateEntry(ModSetting.EyeTracking.ToString(), true));
+            ms_entries.Add(ms_category.CreateEntry(ModSetting.Blinking.ToString(), true));
             ms_entries.Add(ms_category.CreateEntry(ModSetting.Mirrored.ToString(), false));
             ms_entries.Add(ms_category.CreateEntry(ModSetting.Smoothing.ToString(), 50));
             ms_entries.Add(ms_category.CreateEntry(ModSetting.FaceOverride.ToString(), true));
@@ -68,6 +76,8 @@ namespace ml_dht
         static void Load()
         {
             ms_enabled = (bool)ms_entries[(int)ModSetting.Enabled].BoxedValue;
+            ms_eyeTracking  = (bool)ms_entries[(int)ModSetting.EyeTracking].BoxedValue;
+            ms_blinking  = (bool)ms_entries[(int)ModSetting.Blinking].BoxedValue;
             ms_mirrored = (bool)ms_entries[(int)ModSetting.Mirrored].BoxedValue;
             ms_smoothing = ((int)ms_entries[(int)ModSetting.Smoothing].BoxedValue) * 0.01f;
             ms_faceOverride = (bool)ms_entries[(int)ModSetting.FaceOverride].BoxedValue;
@@ -104,6 +114,18 @@ namespace ml_dht
                     }
                     break;
 
+                    case ModSetting.EyeTracking:
+                    {
+                        ms_eyeTracking = bool.Parse(p_value);
+                        EyeTrackingChange?.Invoke(ms_eyeTracking);
+                    } break;
+
+                    case ModSetting.Blinking:
+                    {
+                        ms_blinking = bool.Parse(p_value);
+                        BlinkingChange?.Invoke(ms_blinking);
+                    } break;
+
                     case ModSetting.Mirrored:
                     {
                         ms_mirrored = bool.Parse(p_value);
@@ -125,6 +147,14 @@ namespace ml_dht
         public static bool Enabled
         {
             get => ms_enabled;
+        }
+        public static bool EyeTracking
+        {
+            get => ms_eyeTracking;
+        }
+        public static bool Blinking
+        {
+            get => ms_blinking;
         }
         public static bool Mirrored
         {

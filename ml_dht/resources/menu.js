@@ -186,6 +186,20 @@ function inp_toggle_mod_dht(_obj, _callbackName) {
                 <div id="Enabled" class ="inp_toggle no-scroll" data-current="false"></div>
             </div>
         </div>
+
+        <div class ="row-wrapper">
+            <div class ="option-caption">Use eyes tracking: </div>
+            <div class ="option-input">
+                <div id="EyeTracking" class ="inp_toggle no-scroll" data-current="true"></div>
+            </div>
+        </div>
+
+        <div class ="row-wrapper">
+            <div class ="option-caption">Use blinking: </div>
+            <div class ="option-input">
+                <div id="Blinking" class ="inp_toggle no-scroll" data-current="true"></div>
+            </div>
+        </div>
         
         <div class ="row-wrapper">
             <div class ="option-caption">Mirrored movement: </div>
