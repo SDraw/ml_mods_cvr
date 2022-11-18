@@ -85,7 +85,7 @@ namespace ml_dht
                 if(m_eyeTracking)
                 {
                     p_component.manualViewTarget = true;
-                    p_component.targetViewPosition = m_camera.position + m_camera.rotation * new Vector3((m_gazeDirection.x - 0.5f) * -2f, (m_gazeDirection.y - 0.5f) * 2f, 1f);
+                    p_component.targetViewPosition = m_camera.position + m_camera.rotation * new Vector3((m_gazeDirection.x - 0.5f) * 2f, (m_gazeDirection.y - 0.5f) * 2f, 1f);
                 }
 
                 // Blink
