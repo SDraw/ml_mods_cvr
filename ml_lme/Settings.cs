@@ -169,7 +169,8 @@ namespace ml_lme
                     {
                         ms_trackElbows = bool.Parse(p_value);
                         TrackElbowsChange?.Invoke(ms_trackElbows);
-                    } break;
+                    }
+                    break;
                 }
 
                 ms_entries[(int)l_setting].BoxedValue = bool.Parse(p_value);

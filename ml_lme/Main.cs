@@ -63,7 +63,6 @@ namespace ml_lme
                 new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnGetGesturesFromControllers_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
 
-
             MelonLoader.MelonCoroutines.Start(CreateTrackingObjects());
         }
 
@@ -365,8 +364,15 @@ namespace ml_lme
         static void OnGetGesturesFromControllers_Postfix() => ms_instance?.OnGetGesturesFromControllers();
         void OnGetGesturesFromControllers()
         {
-            if(Settings.Enabled && Utils.AreKnucklesInUse() && (m_leapTracked != null))
-                m_leapTracked.UpdateFingers(m_gesturesData);
+            try
+            {
+                if(Settings.Enabled && Utils.AreKnucklesInUse() && (m_leapTracked != null))
+                    m_leapTracked.UpdateFingers(m_gesturesData);
+            }
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
         }
     }
 }
