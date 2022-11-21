@@ -11,11 +11,13 @@ namespace ml_lme
     class LeapTracked : MonoBehaviour
     {
         static readonly float[] ms_tposeMuscles = typeof(ABI_RC.Systems.IK.SubSystems.BodySystem).GetField("TPoseMuscles", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null) as float[];
+        static readonly FieldInfo ms_indexGestureToggle = typeof(InputModuleSteamVR).GetField("_steamVrIndexGestureToggleValue", BindingFlags.Instance | BindingFlags.NonPublic);
         static readonly Quaternion ms_offsetLeft = Quaternion.Euler(0f, 0f, 270f);
         static readonly Quaternion ms_offsetRight = Quaternion.Euler(0f, 0f, 90f);
         static readonly Quaternion ms_offsetLeftDesktop = Quaternion.Euler(0f, 90f, 0f);
         static readonly Quaternion ms_offsetRightDesktop = Quaternion.Euler(0f, 270f, 0f);
 
+        InputModuleSteamVR m_steamVrModule = null;
         IndexIK m_indexIK = null;
         VRIK m_vrIK = null;
         Vector2 m_armsWeights = Vector2.zero;
@@ -38,6 +40,7 @@ namespace ml_lme
         void Start()
         {
             m_indexIK = this.GetComponent<IndexIK>();
+            m_steamVrModule = CVRInputManager.Instance.GetComponent<InputModuleSteamVR>();
 
             if(m_leftHand != null)
             {
@@ -115,7 +118,7 @@ namespace ml_lme
 
         public void UpdateTracking(GestureMatcher.GesturesData p_gesturesData)
         {
-            if(m_enabled && (m_indexIK != null))
+            if(m_enabled)
             {
                 if((m_leftIK != null) && (m_rightIK != null))
                 {
@@ -125,41 +128,8 @@ namespace ml_lme
                     m_rightIK.solver.IKRotationWeight = Mathf.Lerp(m_rightIK.solver.IKRotationWeight, (p_gesturesData.m_handsPresenses[1] && !m_fingersOnly) ? 1f : 0f, 0.25f);
                 }
 
-                if(p_gesturesData.m_handsPresenses[0])
-                {
-                    m_indexIK.leftThumbCurl = p_gesturesData.m_leftFingersBends[0];
-                    m_indexIK.leftIndexCurl = p_gesturesData.m_leftFingersBends[1];
-                    m_indexIK.leftMiddleCurl = p_gesturesData.m_leftFingersBends[2];
-                    m_indexIK.leftRingCurl = p_gesturesData.m_leftFingersBends[3];
-                    m_indexIK.leftPinkyCurl = p_gesturesData.m_leftFingersBends[4];
-
-                    if(CVRInputManager.Instance != null)
-                    {
-                        CVRInputManager.Instance.fingerCurlLeftThumb = p_gesturesData.m_leftFingersBends[0];
-                        CVRInputManager.Instance.fingerCurlLeftIndex = p_gesturesData.m_leftFingersBends[1];
-                        CVRInputManager.Instance.fingerCurlLeftMiddle = p_gesturesData.m_leftFingersBends[2];
-                        CVRInputManager.Instance.fingerCurlLeftRing = p_gesturesData.m_leftFingersBends[3];
-                        CVRInputManager.Instance.fingerCurlLeftPinky = p_gesturesData.m_leftFingersBends[4];
-                    }
-                }
-
-                if(p_gesturesData.m_handsPresenses[1])
-                {
-                    m_indexIK.rightThumbCurl = p_gesturesData.m_rightFingersBends[0];
-                    m_indexIK.rightIndexCurl = p_gesturesData.m_rightFingersBends[1];
-                    m_indexIK.rightMiddleCurl = p_gesturesData.m_rightFingersBends[2];
-                    m_indexIK.rightRingCurl = p_gesturesData.m_rightFingersBends[3];
-                    m_indexIK.rightPinkyCurl = p_gesturesData.m_rightFingersBends[4];
-
-                    if(CVRInputManager.Instance != null)
-                    {
-                        CVRInputManager.Instance.fingerCurlRightThumb = p_gesturesData.m_rightFingersBends[0];
-                        CVRInputManager.Instance.fingerCurlRightIndex = p_gesturesData.m_rightFingersBends[1];
-                        CVRInputManager.Instance.fingerCurlRightMiddle = p_gesturesData.m_rightFingersBends[2];
-                        CVRInputManager.Instance.fingerCurlRightRing = p_gesturesData.m_rightFingersBends[3];
-                        CVRInputManager.Instance.fingerCurlRightPinky = p_gesturesData.m_rightFingersBends[4];
-                    }
-                }
+                if(!Utils.AreKnucklesInUse())
+                    UpdateFingers(p_gesturesData);
 
                 if((m_vrIK != null) && !m_fingersOnly)
                 {
@@ -192,6 +162,42 @@ namespace ml_lme
                         m_vrIK.solver.rightArm.bendGoalWeight = 0f;
                         m_rightTargetActive = false;
                     }
+                }
+            }
+        }
+
+        public void UpdateFingers(GestureMatcher.GesturesData p_data)
+        {
+            if(m_enabled && (m_indexIK != null) && (CVRInputManager.Instance != null))
+            {
+                CVRInputManager.Instance.individualFingerTracking = true;
+
+                if(p_data.m_handsPresenses[0])
+                {
+                    m_indexIK.leftThumbCurl = p_data.m_leftFingersBends[0];
+                    m_indexIK.leftIndexCurl = p_data.m_leftFingersBends[1];
+                    m_indexIK.leftMiddleCurl = p_data.m_leftFingersBends[2];
+                    m_indexIK.leftRingCurl = p_data.m_leftFingersBends[3];
+                    m_indexIK.leftPinkyCurl = p_data.m_leftFingersBends[4];
+                    CVRInputManager.Instance.fingerCurlLeftThumb = p_data.m_leftFingersBends[0];
+                    CVRInputManager.Instance.fingerCurlLeftIndex = p_data.m_leftFingersBends[1];
+                    CVRInputManager.Instance.fingerCurlLeftMiddle = p_data.m_leftFingersBends[2];
+                    CVRInputManager.Instance.fingerCurlLeftRing = p_data.m_leftFingersBends[3];
+                    CVRInputManager.Instance.fingerCurlLeftPinky = p_data.m_leftFingersBends[4];
+                }
+
+                if(p_data.m_handsPresenses[1])
+                {
+                    m_indexIK.rightThumbCurl = p_data.m_rightFingersBends[0];
+                    m_indexIK.rightIndexCurl = p_data.m_rightFingersBends[1];
+                    m_indexIK.rightMiddleCurl = p_data.m_rightFingersBends[2];
+                    m_indexIK.rightRingCurl = p_data.m_rightFingersBends[3];
+                    m_indexIK.rightPinkyCurl = p_data.m_rightFingersBends[4];
+                    CVRInputManager.Instance.fingerCurlRightThumb = p_data.m_rightFingersBends[0];
+                    CVRInputManager.Instance.fingerCurlRightIndex = p_data.m_rightFingersBends[1];
+                    CVRInputManager.Instance.fingerCurlRightMiddle = p_data.m_rightFingersBends[2];
+                    CVRInputManager.Instance.fingerCurlRightRing = p_data.m_rightFingersBends[3];
+                    CVRInputManager.Instance.fingerCurlRightPinky = p_data.m_rightFingersBends[4];
                 }
             }
         }
@@ -358,8 +364,8 @@ namespace ml_lme
         {
             if(m_indexIK != null)
             {
-                m_indexIK.activeControl = (m_enabled || Utils.AreKnucklesInUse());
-                CVRInputManager.Instance.individualFingerTracking = (m_enabled || Utils.AreKnucklesInUse());
+                m_indexIK.activeControl = (m_enabled || (PlayerSetup.Instance._inVr && Utils.AreKnucklesInUse()));
+                CVRInputManager.Instance.individualFingerTracking = (m_enabled || (PlayerSetup.Instance._inVr && Utils.AreKnucklesInUse() && !(bool)ms_indexGestureToggle.GetValue(m_steamVrModule)));
             }
         }
     }
