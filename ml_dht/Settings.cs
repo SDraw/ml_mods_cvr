@@ -10,6 +10,7 @@ namespace ml_dht
         enum ModSetting
         {
             Enabled = 0,
+            HeadTracking,
             EyeTracking,
             Blinking,
             Mirrored,
@@ -18,6 +19,7 @@ namespace ml_dht
         }
         
         static bool ms_enabled = false;
+        static bool ms_headTracking = true;
         static bool ms_eyeTracking = true;
         static bool ms_blinking = true;
         static bool ms_mirrored = false;
@@ -28,6 +30,7 @@ namespace ml_dht
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
         
         static public event Action<bool> EnabledChange;
+        static public event Action<bool> HeadTrackingChange;
         static public event Action<bool> EyeTrackingChange;
         static public event Action<bool> BlinkingChange;
         static public event Action<bool> MirroredChange;
@@ -40,6 +43,7 @@ namespace ml_dht
             
             ms_entries = new List<MelonLoader.MelonPreferences_Entry>();
             ms_entries.Add(ms_category.CreateEntry(ModSetting.Enabled.ToString(), false));
+            ms_entries.Add(ms_category.CreateEntry(ModSetting.HeadTracking.ToString(), false));
             ms_entries.Add(ms_category.CreateEntry(ModSetting.EyeTracking.ToString(), true));
             ms_entries.Add(ms_category.CreateEntry(ModSetting.Blinking.ToString(), true));
             ms_entries.Add(ms_category.CreateEntry(ModSetting.Mirrored.ToString(), false));
@@ -76,6 +80,7 @@ namespace ml_dht
         static void Load()
         {
             ms_enabled = (bool)ms_entries[(int)ModSetting.Enabled].BoxedValue;
+            ms_headTracking  = (bool)ms_entries[(int)ModSetting.HeadTracking].BoxedValue;
             ms_eyeTracking  = (bool)ms_entries[(int)ModSetting.EyeTracking].BoxedValue;
             ms_blinking  = (bool)ms_entries[(int)ModSetting.Blinking].BoxedValue;
             ms_mirrored = (bool)ms_entries[(int)ModSetting.Mirrored].BoxedValue;
@@ -114,6 +119,13 @@ namespace ml_dht
                     }
                     break;
 
+                    case ModSetting.HeadTracking:
+                    {
+                        ms_headTracking = bool.Parse(p_value);
+                        HeadTrackingChange?.Invoke(ms_headTracking);
+                    }
+                    break;
+
                     case ModSetting.EyeTracking:
                     {
                         ms_eyeTracking = bool.Parse(p_value);
@@ -147,6 +159,10 @@ namespace ml_dht
         public static bool Enabled
         {
             get => ms_enabled;
+        }
+        public static bool HeadTracking
+        {
+            get => ms_headTracking;
         }
         public static bool EyeTracking
         {

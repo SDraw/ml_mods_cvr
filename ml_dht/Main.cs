@@ -58,6 +58,7 @@ namespace ml_dht
 
             m_localTracked = PlayerSetup.Instance.gameObject.AddComponent<HeadTracked>();
             m_localTracked.SetEnabled(Settings.Enabled);
+            m_localTracked.SetHeadTracking(Settings.HeadTracking);
             m_localTracked.SetEyeTracking(Settings.EyeTracking);
             m_localTracked.SetBlinking(Settings.Blinking);
             m_localTracked.SetMirrored(Settings.Mirrored);

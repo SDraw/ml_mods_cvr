@@ -13,6 +13,7 @@ namespace ml_dht
         static FieldInfo ms_emotePlaying = typeof(PlayerSetup).GetField("_emotePlaying", BindingFlags.NonPublic | BindingFlags.Instance);
 
         bool m_enabled = false;
+        bool m_headTracking = true;
         bool m_blinking = true;
         bool m_eyeTracking = true;
         float m_smoothing = 0.5f;
@@ -21,7 +22,6 @@ namespace ml_dht
 
         CVRAvatar m_avatarDescriptor = null;
         LookAtIK m_lookIK = null;
-        Transform m_camera = null;
         Transform m_headBone = null;
 
         Vector3 m_headPosition;
@@ -36,9 +36,8 @@ namespace ml_dht
 
         void Start()
         {
-            m_camera = PlayerSetup.Instance.desktopCamera.transform;
-
             Settings.EnabledChange += this.SetEnabled;
+            Settings.HeadTrackingChange += this.SetHeadTracking;
             Settings.EyeTrackingChange += this.SetEyeTracking;
             Settings.BlinkingChange += this.SetBlinking;
             Settings.SmoothingChange += this.SetSmoothing;
@@ -49,6 +48,7 @@ namespace ml_dht
         void OnDestroy()
         {
             Settings.EnabledChange -= this.SetEnabled;
+            Settings.HeadTrackingChange -= this.SetHeadTracking;
             Settings.EyeTrackingChange -= this.SetEyeTracking;
             Settings.BlinkingChange -= this.SetBlinking;
             Settings.SmoothingChange -= this.SetSmoothing;
@@ -68,7 +68,7 @@ namespace ml_dht
 
         void OnLookIKPostUpdate()
         {
-            if(m_enabled && (m_headBone != null))
+            if(m_enabled && m_headTracking && (m_headBone != null))
             {
                 m_lastHeadRotation = Quaternion.Slerp(m_lastHeadRotation, m_avatarDescriptor.transform.rotation * (m_headRotation * m_bindRotation), m_smoothing);
 
@@ -84,8 +84,10 @@ namespace ml_dht
                 // Gaze
                 if(m_eyeTracking)
                 {
+                    Transform l_camera = PlayerSetup.Instance.GetActiveCamera().transform;
+
                     p_component.manualViewTarget = true;
-                    p_component.targetViewPosition = m_camera.position + m_camera.rotation * new Vector3((m_gazeDirection.x - 0.5f) * 2f, (m_gazeDirection.y - 0.5f) * 2f, 1f);
+                    p_component.targetViewPosition = l_camera.position + l_camera.rotation * new Vector3((m_gazeDirection.x - 0.5f) * 2f, (m_gazeDirection.y - 0.5f) * 2f, 1f);
                 }
 
                 // Blink
@@ -142,7 +144,16 @@ namespace ml_dht
             if(m_enabled != p_state)
             {
                 m_enabled = p_state;
-                if(m_enabled)
+                if(m_enabled && m_headTracking)
+                    m_lastHeadRotation = ((m_headBone != null) ? m_headBone.rotation : m_bindRotation);
+            }
+        }
+        public void SetHeadTracking(bool p_state)
+        {
+            if(m_headTracking != p_state)
+            {
+                m_headTracking = p_state;
+                if(m_enabled && m_headTracking)
                     m_lastHeadRotation = ((m_headBone != null) ? m_headBone.rotation : m_bindRotation);
             }
         }

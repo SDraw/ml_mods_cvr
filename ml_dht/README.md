@@ -17,7 +17,8 @@ Refer to `TrackingData.cs` for reference in case of implementing own software.
 
 # Usage
 Available mod's settings in `Settings - Implementation - Desktop Head Tracking`:
-* **Enabled:** enabled head tracking; default value - `false`.
+* **Enabled:** enables mod's activity; default value - `false`.
+* **Use head tracking:** enables head tracking; default value - `true`.
 * **Use eyes tracking:** uses eyes tracking from data; default value - `true`.
 * **Use blinking:** uses blinking from data; default value - `true`.
 * **Mirrored movement:** mirrors movement and gaze along 0YZ plane; default value - `false`.

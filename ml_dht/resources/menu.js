@@ -188,6 +188,13 @@ function inp_toggle_mod_dht(_obj, _callbackName) {
         </div>
 
         <div class ="row-wrapper">
+            <div class ="option-caption">Use head tracking: </div>
+            <div class ="option-input">
+                <div id="HeadTracking" class ="inp_toggle no-scroll" data-current="true"></div>
+            </div>
+        </div>
+
+        <div class ="row-wrapper">
             <div class ="option-caption">Use eyes tracking: </div>
             <div class ="option-input">
                 <div id="EyeTracking" class ="inp_toggle no-scroll" data-current="true"></div>
