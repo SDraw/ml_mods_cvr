@@ -7,11 +7,11 @@ namespace ml_lme
 
         readonly static Vector2[] ms_fingerLimits =
         {
-            new Vector2(0f, 15f),
-            new Vector2(-20f, 20f),
-            new Vector2(-50f, 50f),
-            new Vector2(-7.5f, 7.5f),
-            new Vector2(-20f, 20f)
+            new Vector2(-50f, 0f),
+            new Vector2(-20f, 30f),
+            new Vector2(-15f, 15f),
+            new Vector2(-10f, 20f),
+            new Vector2(-10f, 25f)
         };
 
         public class GesturesData
@@ -156,57 +156,18 @@ namespace ml_lme
                     l_angle -= 360f;
 
                 // Pain
-                switch(l_finger.Type)
-                {
-                    case Leap.Finger.FingerType.TYPE_THUMB:
-                    {
-                        if(p_hand.IsRight)
-                            l_angle *= -1f;
-                        l_angle += ms_fingerLimits[(int)Leap.Finger.FingerType.TYPE_INDEX].y * 2f;
-                        l_angle *= 0.5f;
-                    }
-                    break;
+                if(p_hand.IsRight)
+                    l_angle *= -1f;
 
-                    case Leap.Finger.FingerType.TYPE_INDEX:
-                    {
-                        if(p_hand.IsLeft)
-                            l_angle *= -1f;
-                        l_angle += ms_fingerLimits[(int)Leap.Finger.FingerType.TYPE_INDEX].y;
-                        l_angle *= 0.5f;
-                    }
-                    break;
-
-                    case Leap.Finger.FingerType.TYPE_MIDDLE:
-                    {
-                        l_angle += (ms_fingerLimits[(int)Leap.Finger.FingerType.TYPE_MIDDLE].y * (p_hand.IsRight ? 0.125f : -0.125f));
-                        l_angle *= (p_hand.IsLeft ? -4f : 4f);
-                    }
-                    break;
-
-                    case Leap.Finger.FingerType.TYPE_RING:
-                    {
-                        if(p_hand.IsRight)
-                            l_angle *= -1f;
-                        l_angle += ms_fingerLimits[(int)Leap.Finger.FingerType.TYPE_RING].y;
-                        l_angle *= 0.5f;
-                    }
-                    break;
-
-                    case Leap.Finger.FingerType.TYPE_PINKY:
-                    {
-                        l_angle += (p_hand.IsRight ? ms_fingerLimits[(int)Leap.Finger.FingerType.TYPE_PINKY].x : ms_fingerLimits[(int)Leap.Finger.FingerType.TYPE_PINKY].y);
-                        l_angle *= (p_hand.IsRight ? -0.5f : 0.5f);
-                    }
-                    break;
-
-                }
-
-                p_spreads[(int)l_finger.Type] = Mathf.InverseLerp(ms_fingerLimits[(int)l_finger.Type].x, ms_fingerLimits[(int)l_finger.Type].y, l_angle);
                 if(l_finger.Type != Leap.Finger.FingerType.TYPE_THUMB)
                 {
-                    p_spreads[(int)l_finger.Type] *= 2f;
-                    p_spreads[(int)l_finger.Type] -= 1f;
+                    if(l_angle < 0f)
+                        p_spreads[(int)l_finger.Type] = 0.5f * Mathf.InverseLerp(ms_fingerLimits[(int)l_finger.Type].x, 0f, l_angle);
+                    else
+                        p_spreads[(int)l_finger.Type] = 0.5f + 0.5f * Mathf.InverseLerp(0f, ms_fingerLimits[(int)l_finger.Type].y, l_angle);
                 }
+                else
+                    p_spreads[(int)l_finger.Type] = Mathf.InverseLerp(ms_fingerLimits[(int)l_finger.Type].x, ms_fingerLimits[(int)l_finger.Type].y, l_angle);
             }
         }
     }

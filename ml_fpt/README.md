@@ -13,5 +13,6 @@ This mod adds ability to use 4-point tracking.
 * Press trigger on both controllers
 
 # Notes
+* Will be deprecated soon
 * Calibration is saved per avatar for game session.
 * AAS parameters are restored after calibration.

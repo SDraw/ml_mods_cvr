@@ -19,6 +19,8 @@ namespace ml_lme
         GameObject m_leapControllerModel = null;
         LeapTracked m_leapTracked = null;
 
+        bool m_isInVR = false;
+
         public override void OnInitializeMelon()
         {
             if(ms_instance == null)
@@ -57,11 +59,6 @@ namespace ml_lme
                 null,
                 new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnSetupAvatar_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
-            HarmonyInstance.Patch(
-                typeof(PlayerSetup).GetMethod("GetGesturesFromControllers", BindingFlags.Instance | BindingFlags.NonPublic),
-                null,
-                new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnGetGesturesFromControllers_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
-            );
 
             MelonLoader.MelonCoroutines.Start(CreateTrackingObjects());
         }
@@ -80,6 +77,8 @@ namespace ml_lme
                 yield return null;
             while(PlayerSetup.Instance.vrCamera == null)
                 yield return null;
+
+            m_isInVR = Utils.IsInVR();
 
             m_leapTrackingRoot = new GameObject("[LeapRoot]");
 
@@ -167,6 +166,12 @@ namespace ml_lme
             }
         }
 
+        public override void OnLateUpdate()
+        {
+            if(Settings.Enabled && !m_isInVR && (m_leapTracked != null))
+                m_leapTracked.UpdateTrackingLate(m_gesturesData);
+        }
+
         // Settings changes
         void OnEnableChange(bool p_state)
         {
@@ -183,7 +188,7 @@ namespace ml_lme
         {
             if((m_leapTrackingRoot != null) && !Settings.HeadAttach)
             {
-                if(!PlayerSetup.Instance._inVr)
+                if(!m_isInVR)
                     m_leapTrackingRoot.transform.localPosition = p_offset * PlayerSetup.Instance.vrCameraRig.transform.localScale.x;
                 else
                     m_leapTrackingRoot.transform.localPosition = p_offset;
@@ -230,7 +235,7 @@ namespace ml_lme
             {
                 if(p_state)
                 {
-                    if(!PlayerSetup.Instance._inVr)
+                    if(!m_isInVR)
                     {
                         m_leapTrackingRoot.transform.parent = PlayerSetup.Instance.desktopCamera.transform;
                         m_leapTrackingRoot.transform.localPosition = Settings.HeadOffset * PlayerSetup.Instance.vrCameraRig.transform.localScale.x;
@@ -245,7 +250,7 @@ namespace ml_lme
                 }
                 else
                 {
-                    if(!PlayerSetup.Instance._inVr)
+                    if(!m_isInVR)
                     {
                         m_leapTrackingRoot.transform.parent = PlayerSetup.Instance.desktopCameraRig.transform;
                         m_leapTrackingRoot.transform.localPosition = Settings.DesktopOffset * PlayerSetup.Instance.vrCameraRig.transform.localScale.x;
@@ -267,7 +272,7 @@ namespace ml_lme
         {
             if((m_leapTrackingRoot != null) && Settings.HeadAttach)
             {
-                if(!PlayerSetup.Instance._inVr)
+                if(!m_isInVR)
                     m_leapTrackingRoot.transform.localPosition = p_offset * PlayerSetup.Instance.vrCameraRig.transform.localScale.x;
                 else
                     m_leapTrackingRoot.transform.localPosition = p_offset;
@@ -354,20 +359,6 @@ namespace ml_lme
                     m_leapTracked.OnSetupAvatar();
 
                 OnHeadAttachChange(Settings.HeadAttach);
-            }
-            catch(System.Exception e)
-            {
-                MelonLoader.MelonLogger.Error(e);
-            }
-        }
-
-        static void OnGetGesturesFromControllers_Postfix() => ms_instance?.OnGetGesturesFromControllers();
-        void OnGetGesturesFromControllers()
-        {
-            try
-            {
-                if(Settings.Enabled && Utils.AreKnucklesInUse() && (m_leapTracked != null))
-                    m_leapTracked.UpdateFingers(m_gesturesData);
             }
             catch(System.Exception e)
             {
