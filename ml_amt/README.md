@@ -37,3 +37,6 @@ Available additional parameters for AAS animator:
 
 Additional avatars tweaks:
 * If avatar has child object with name `LocomotionOffset` its local position will be used for offsetting VRIK locomotion mass center.
+
+Additional mod's behaviour:
+* Disables FBT state in 4PT mode (head, hands, hips). Be sure to enable only hips tracking in `Settings - IK` tab.

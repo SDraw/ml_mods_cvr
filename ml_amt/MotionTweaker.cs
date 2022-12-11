@@ -1,4 +1,5 @@
 ﻿using ABI_RC.Core.Player;
+using ABI_RC.Systems.IK.SubSystems;
 using ABI_RC.Systems.MovementSystem;
 using RootMotion.FinalIK;
 using System.Collections.Generic;
@@ -53,6 +54,7 @@ namespace ml_amt
         Transform m_avatarHips = null;
         float m_viewPointHeight = 1f;
         bool m_isInVR = false;
+        public static bool ms_fptActive = false;
 
         bool m_avatarReady = false;
         bool m_compatibleAvatar = false;
@@ -137,10 +139,10 @@ namespace ml_amt
                 m_upright = Mathf.Clamp(((l_avatarViewHeight > 0f) ? (l_currentHeight / l_avatarViewHeight) : 0f), 0f, 1f);
                 PoseState l_poseState = (m_upright <= m_proneLimit) ? PoseState.Proning : ((m_upright <= m_crouchLimit) ? PoseState.Crouching : PoseState.Standing);
 
-                if(m_followHips && (m_avatarHips != null))
+                if(m_avatarHips != null)
                 {
-                    Vector4 l_hipsToPlayer = (PlayerSetup.Instance.transform.GetMatrix().inverse * m_avatarHips.GetMatrix()) * ms_pointVector;
-                    m_hipsToPlayer.Set(l_hipsToPlayer.x, 0f, l_hipsToPlayer.z);
+                    Vector4 l_hipsToPoint = (PlayerSetup.Instance.transform.GetMatrix().inverse * m_avatarHips.GetMatrix()) * ms_pointVector;
+                    m_hipsToPlayer.Set(l_hipsToPoint.x, 0f, l_hipsToPoint.z);
                 }
 
                 if(m_isInVR && (m_vrIk != null) && m_vrIk.enabled)
@@ -255,6 +257,7 @@ namespace ml_amt
             m_avatarHips = null;
             m_viewPointHeight = 1f;
             m_parameters.Clear();
+            ms_fptActive = false;
         }
 
         public void OnSetupAvatar()
@@ -310,11 +313,28 @@ namespace ml_amt
                 if(m_customLocomotionOffset)
                     m_vrIk.solver.locomotion.offset = m_locomotionOffset;
 
-                m_vrIk.solver.OnPreUpdate += this.OnIKPreUpdate;
-                m_vrIk.solver.OnPostUpdate += this.OnIKPostUpdate;
+                // Place our pre-solver listener first
+                m_vrIk.onPreSolverUpdate.AddListener(this.OnIKPreUpdate);
+                m_vrIk.onPostSolverUpdate.AddListener(this.OnIKPostUpdate);
             }
 
             m_avatarReady = true;
+        }
+
+        public void OnCalibrate()
+        {
+            if(m_avatarReady && BodySystem.enableHipTracking && !BodySystem.enableRightFootTracking && !BodySystem.enableLeftFootTracking && !BodySystem.enableLeftKneeTracking && !BodySystem.enableRightKneeTracking)
+            {
+                BodySystem.isCalibratedAsFullBody = false;
+                BodySystem.TrackingLeftLegEnabled = false;
+                BodySystem.TrackingRightLegEnabled = false;
+                BodySystem.TrackingLocomotionEnabled = true;
+
+                if(m_vrIk != null)
+                    m_vrIk.solver.spine.maxRootAngle = 25f; // I need to rotate my legs, ffs!
+
+                ms_fptActive = true;
+            }
         }
 
         void OnIKPreUpdate()
@@ -327,7 +347,6 @@ namespace ml_amt
             if(m_detectEmotes && m_emoteActive)
                 m_vrIk.solver.IKPositionWeight = 0f;
 
-            // Game doesn't manages VRIK for desktop itself anymore
             if((m_ikOverrideCrouch && (m_poseState != PoseState.Standing)) || (m_ikOverrideProne && (m_poseState == PoseState.Proning)))
             {
                 m_vrIk.solver.locomotion.weight = 0f;
@@ -347,8 +366,11 @@ namespace ml_amt
 
             bool l_solverActive = !Mathf.Approximately(m_vrIk.solver.IKPositionWeight, 0f);
 
-            if(l_legsOverride && l_solverActive && m_followHips && (!m_moving || m_poseState == PoseState.Proning) && m_isInVR)
+            if(l_legsOverride && l_solverActive && m_followHips && (!m_moving || (m_poseState == PoseState.Proning)) && m_isInVR && !BodySystem.isCalibratedAsFullBody)
+            {
+                ABI_RC.Systems.IK.IKSystem.VrikRootController.enabled = false;
                 PlayerSetup.Instance._avatar.transform.localPosition = m_hipsToPlayer;
+            }
         }
 
         void OnIKPostUpdate()

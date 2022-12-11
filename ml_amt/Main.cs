@@ -9,6 +9,8 @@ namespace ml_amt
 
         MotionTweaker m_localTweaker = null;
 
+        static int ms_calibrationCounts = 0;
+
         public override void OnInitializeMelon()
         {
             if(ms_instance == null)
@@ -25,6 +27,21 @@ namespace ml_amt
                 typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.SetupAvatar)),
                 null,
                 new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnSetupAvatar_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
+            );
+            HarmonyInstance.Patch(
+                typeof(ABI_RC.Systems.IK.SubSystems.BodySystem).GetMethod(nameof(ABI_RC.Systems.IK.SubSystems.BodySystem.Calibrate)),
+                null,
+                new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnCalibrate_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
+            );
+            HarmonyInstance.Patch(
+                typeof(ABI_RC.Systems.IK.SubSystems.BodySystem).GetMethod(nameof(ABI_RC.Systems.IK.SubSystems.BodySystem.FBTAvailable)),
+                new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnFBTAvailable_Prefix), BindingFlags.Static | BindingFlags.NonPublic)),
+                null
+            );
+            HarmonyInstance.Patch(
+                typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.ReCalibrateAvatar)),
+                new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnReCalibrateAvatar_Prefix), BindingFlags.Static | BindingFlags.NonPublic)),
+                null
             );
 
             MelonLoader.MelonCoroutines.Start(WaitForLocalPlayer());
@@ -75,6 +92,8 @@ namespace ml_amt
         {
             try
             {
+                ms_calibrationCounts = 0;
+
                 if(m_localTweaker != null)
                     m_localTweaker.OnSetupAvatar();
             }
@@ -82,6 +101,36 @@ namespace ml_amt
             {
                 MelonLoader.MelonLogger.Error(l_exception);
             }
+        }
+
+        static void OnCalibrate_Postfix() => ms_instance?.OnCalibrate();
+        void OnCalibrate()
+        {
+            try
+            {
+                if(m_localTweaker != null)
+                    m_localTweaker.OnCalibrate();
+            }
+            catch(System.Exception l_exception)
+            {
+                MelonLoader.MelonLogger.Error(l_exception);
+            }
+        }
+
+        static void OnReCalibrateAvatar_Prefix()
+        {
+            MotionTweaker.ms_fptActive = false;
+            ms_calibrationCounts++;
+        }
+
+        static bool OnFBTAvailable_Prefix(ref bool __result)
+        {
+            if(MotionTweaker.ms_fptActive || (ms_calibrationCounts == 0))
+            {
+                __result = false;
+                return false;
+            }
+            return true;
         }
     }
 }
