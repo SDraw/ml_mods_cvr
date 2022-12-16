@@ -9,7 +9,7 @@ This mod adds features for AAS animator and avatar locomotion behaviour.
   * Put `ml_amt.dll` in `Mods` folder of game
 
 # Usage
-Available mod's settings in `Settings - Implementation - Avatar Motion Tweaker`:
+Available mod's settings in `Settings - IK - Avatar Motion Tweaker`:
 * **IK override while crouching:** disables legs locomotion/autostep upon HMD reaching `Crouch limit`; default value - `true`.
 * **Crouch limit:** defines crouch limit; default value - `65`.
   * Note: Can be overrided by avatar. For this avatar has to have child gameobject with name `CrouchLimit`, its Y-axis location will be used as limit, should be in range [0.0, 1.0].
