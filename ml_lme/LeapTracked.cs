@@ -18,9 +18,11 @@ namespace ml_lme
         static readonly Quaternion ms_offsetRightDesktop = Quaternion.Euler(0f, 270f, 0f);
 
         InputModuleSteamVR m_steamVrModule = null;
-        IndexIK m_indexIK = null;
         VRIK m_vrIK = null;
         Vector2 m_armsWeights = Vector2.zero;
+        bool m_isInVR = false;
+        Transform m_origElbowLeft = null;
+        Transform m_origElbowRight = null;
 
         bool m_enabled = true;
         bool m_fingersOnly = false;
@@ -28,6 +30,8 @@ namespace ml_lme
 
         ArmIK m_leftIK = null;
         ArmIK m_rightIK = null;
+        HumanPoseHandler m_poseHandler = null;
+        HumanPose m_pose;
         Transform m_leftHand = null;
         Transform m_rightHand = null;
         Transform m_leftHandTarget = null;
@@ -39,8 +43,8 @@ namespace ml_lme
 
         void Start()
         {
-            m_indexIK = this.GetComponent<IndexIK>();
             m_steamVrModule = CVRInputManager.Instance.GetComponent<InputModuleSteamVR>();
+            m_isInVR = Utils.IsInVR();
 
             if(m_leftHand != null)
             {
@@ -98,13 +102,7 @@ namespace ml_lme
                 m_rightIK.solver.arm.bendGoalWeight = (m_trackElbows ? 1f : 0f);
             }
 
-            if(m_vrIK != null)
-            {
-                if(m_leftTargetActive)
-                    m_vrIK.solver.leftArm.bendGoalWeight = (m_trackElbows ? 1f : 0f);
-                if(m_rightTargetActive)
-                    m_vrIK.solver.rightArm.bendGoalWeight = (m_trackElbows ? 1f : 0f);
-            }
+            RestoreVRIK();
         }
 
         public void SetTransforms(Transform p_left, Transform p_right, Transform p_leftElbow, Transform p_rightElbow)
@@ -116,100 +114,175 @@ namespace ml_lme
             m_rightElbow = p_rightElbow;
         }
 
-        public void UpdateTracking(GestureMatcher.GesturesData p_gesturesData)
+        public void UpdateTracking(GestureMatcher.GesturesData p_data)
         {
             if(m_enabled)
             {
                 if((m_leftIK != null) && (m_rightIK != null))
                 {
-                    m_leftIK.solver.IKPositionWeight = Mathf.Lerp(m_leftIK.solver.IKPositionWeight, (p_gesturesData.m_handsPresenses[0] && !m_fingersOnly) ? 1f : 0f, 0.25f);
-                    m_leftIK.solver.IKRotationWeight = Mathf.Lerp(m_leftIK.solver.IKRotationWeight, (p_gesturesData.m_handsPresenses[0] && !m_fingersOnly) ? 1f : 0f, 0.25f);
-                    m_rightIK.solver.IKPositionWeight = Mathf.Lerp(m_rightIK.solver.IKPositionWeight, (p_gesturesData.m_handsPresenses[1] && !m_fingersOnly) ? 1f : 0f, 0.25f);
-                    m_rightIK.solver.IKRotationWeight = Mathf.Lerp(m_rightIK.solver.IKRotationWeight, (p_gesturesData.m_handsPresenses[1] && !m_fingersOnly) ? 1f : 0f, 0.25f);
-                }
+                    m_leftIK.solver.IKPositionWeight = Mathf.Lerp(m_leftIK.solver.IKPositionWeight, (p_data.m_handsPresenses[0] && !m_fingersOnly) ? 1f : 0f, 0.25f);
+                    m_leftIK.solver.IKRotationWeight = Mathf.Lerp(m_leftIK.solver.IKRotationWeight, (p_data.m_handsPresenses[0] && !m_fingersOnly) ? 1f : 0f, 0.25f);
+                    if(m_trackElbows)
+                        m_leftIK.solver.arm.bendGoalWeight = Mathf.Lerp(m_leftIK.solver.arm.bendGoalWeight, (p_data.m_handsPresenses[0] && !m_fingersOnly) ? 1f : 0f, 0.25f);
 
-                if(!Utils.AreKnucklesInUse())
-                    UpdateFingers(p_gesturesData);
+                    m_rightIK.solver.IKPositionWeight = Mathf.Lerp(m_rightIK.solver.IKPositionWeight, (p_data.m_handsPresenses[1] && !m_fingersOnly) ? 1f : 0f, 0.25f);
+                    m_rightIK.solver.IKRotationWeight = Mathf.Lerp(m_rightIK.solver.IKRotationWeight, (p_data.m_handsPresenses[1] && !m_fingersOnly) ? 1f : 0f, 0.25f);
+                    if(m_trackElbows)
+                        m_rightIK.solver.arm.bendGoalWeight = Mathf.Lerp(m_rightIK.solver.arm.bendGoalWeight, (p_data.m_handsPresenses[1] && !m_fingersOnly) ? 1f : 0f, 0.25f);
+                }
 
                 if((m_vrIK != null) && !m_fingersOnly)
                 {
-                    if(p_gesturesData.m_handsPresenses[0] && !m_leftTargetActive)
+                    if(p_data.m_handsPresenses[0] && !m_leftTargetActive)
                     {
                         m_vrIK.solver.leftArm.target = m_leftHandTarget;
                         m_vrIK.solver.leftArm.bendGoal = m_leftElbow;
                         m_vrIK.solver.leftArm.bendGoalWeight = (m_trackElbows ? 1f : 0f);
                         m_leftTargetActive = true;
                     }
-                    if(!p_gesturesData.m_handsPresenses[0] && m_leftTargetActive)
+                    if(!p_data.m_handsPresenses[0] && m_leftTargetActive)
                     {
                         m_vrIK.solver.leftArm.target = IKSystem.Instance.leftHandAnchor;
-                        m_vrIK.solver.leftArm.bendGoal = null;
-                        m_vrIK.solver.leftArm.bendGoalWeight = 0f;
+                        m_vrIK.solver.leftArm.bendGoal = m_origElbowLeft;
+                        m_vrIK.solver.leftArm.bendGoalWeight = ((m_origElbowLeft != null) ? 1f : 0f);
                         m_leftTargetActive = false;
                     }
 
-                    if(p_gesturesData.m_handsPresenses[1] && !m_rightTargetActive)
+                    if(p_data.m_handsPresenses[1] && !m_rightTargetActive)
                     {
                         m_vrIK.solver.rightArm.target = m_rightHandTarget;
                         m_vrIK.solver.rightArm.bendGoal = m_rightElbow;
                         m_vrIK.solver.rightArm.bendGoalWeight = (m_trackElbows ? 1f : 0f);
                         m_rightTargetActive = true;
                     }
-                    if(!p_gesturesData.m_handsPresenses[1] && m_rightTargetActive)
+                    if(!p_data.m_handsPresenses[1] && m_rightTargetActive)
                     {
                         m_vrIK.solver.rightArm.target = IKSystem.Instance.rightHandAnchor;
-                        m_vrIK.solver.rightArm.bendGoal = null;
-                        m_vrIK.solver.rightArm.bendGoalWeight = 0f;
+                        m_vrIK.solver.rightArm.bendGoal = m_origElbowRight;
+                        m_vrIK.solver.rightArm.bendGoalWeight = ((m_origElbowRight != null) ? 1f : 0f);
                         m_rightTargetActive = false;
                     }
                 }
-            }
-        }
-
-        public void UpdateFingers(GestureMatcher.GesturesData p_data)
-        {
-            if(m_enabled && (m_indexIK != null) && (CVRInputManager.Instance != null))
-            {
-                CVRInputManager.Instance.individualFingerTracking = true;
 
                 if(p_data.m_handsPresenses[0])
                 {
-                    m_indexIK.leftThumbCurl = p_data.m_leftFingersBends[0];
-                    m_indexIK.leftIndexCurl = p_data.m_leftFingersBends[1];
-                    m_indexIK.leftMiddleCurl = p_data.m_leftFingersBends[2];
-                    m_indexIK.leftRingCurl = p_data.m_leftFingersBends[3];
-                    m_indexIK.leftPinkyCurl = p_data.m_leftFingersBends[4];
+                    CVRInputManager.Instance.individualFingerTracking = true;
                     CVRInputManager.Instance.fingerCurlLeftThumb = p_data.m_leftFingersBends[0];
                     CVRInputManager.Instance.fingerCurlLeftIndex = p_data.m_leftFingersBends[1];
                     CVRInputManager.Instance.fingerCurlLeftMiddle = p_data.m_leftFingersBends[2];
                     CVRInputManager.Instance.fingerCurlLeftRing = p_data.m_leftFingersBends[3];
                     CVRInputManager.Instance.fingerCurlLeftPinky = p_data.m_leftFingersBends[4];
+
+                    IKSystem.Instance.FingerSystem.controlActive = true;
+                    IKSystem.Instance.FingerSystem.leftThumbCurl = p_data.m_leftFingersBends[0];
+                    IKSystem.Instance.FingerSystem.leftIndexCurl = p_data.m_leftFingersBends[1];
+                    IKSystem.Instance.FingerSystem.leftMiddleCurl = p_data.m_leftFingersBends[2];
+                    IKSystem.Instance.FingerSystem.leftRingCurl = p_data.m_leftFingersBends[3];
+                    IKSystem.Instance.FingerSystem.leftPinkyCurl = p_data.m_leftFingersBends[4];
                 }
 
                 if(p_data.m_handsPresenses[1])
                 {
-                    m_indexIK.rightThumbCurl = p_data.m_rightFingersBends[0];
-                    m_indexIK.rightIndexCurl = p_data.m_rightFingersBends[1];
-                    m_indexIK.rightMiddleCurl = p_data.m_rightFingersBends[2];
-                    m_indexIK.rightRingCurl = p_data.m_rightFingersBends[3];
-                    m_indexIK.rightPinkyCurl = p_data.m_rightFingersBends[4];
+                    CVRInputManager.Instance.individualFingerTracking = true;
                     CVRInputManager.Instance.fingerCurlRightThumb = p_data.m_rightFingersBends[0];
                     CVRInputManager.Instance.fingerCurlRightIndex = p_data.m_rightFingersBends[1];
                     CVRInputManager.Instance.fingerCurlRightMiddle = p_data.m_rightFingersBends[2];
                     CVRInputManager.Instance.fingerCurlRightRing = p_data.m_rightFingersBends[3];
                     CVRInputManager.Instance.fingerCurlRightPinky = p_data.m_rightFingersBends[4];
+
+                    IKSystem.Instance.FingerSystem.controlActive = true;
+                    IKSystem.Instance.FingerSystem.rightThumbCurl = p_data.m_rightFingersBends[0];
+                    IKSystem.Instance.FingerSystem.rightIndexCurl = p_data.m_rightFingersBends[1];
+                    IKSystem.Instance.FingerSystem.rightMiddleCurl = p_data.m_rightFingersBends[2];
+                    IKSystem.Instance.FingerSystem.rightRingCurl = p_data.m_rightFingersBends[3];
+                    IKSystem.Instance.FingerSystem.rightPinkyCurl = p_data.m_rightFingersBends[4];
                 }
+            }
+        }
+
+        public void UpdateTrackingLate(GestureMatcher.GesturesData p_data)
+        {
+            if(m_enabled && !m_isInVR && (m_poseHandler != null))
+            {
+                m_poseHandler.GetHumanPose(ref m_pose);
+                UpdateFingers(p_data);
+                m_poseHandler.SetHumanPose(ref m_pose);
+            }
+        }
+
+        void UpdateFingers(GestureMatcher.GesturesData p_data)
+        {
+            if(p_data.m_handsPresenses[0])
+            {
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftThumb1Stretched, Mathf.Lerp(0.85f, -0.85f, p_data.m_leftFingersBends[0]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftThumb2Stretched, Mathf.Lerp(0.85f, -0.85f, p_data.m_leftFingersBends[0]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftThumb3Stretched, Mathf.Lerp(0.85f, -0.85f, p_data.m_leftFingersBends[0]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftThumbSpread, Mathf.Lerp(-1.5f, 1.0f, p_data.m_leftFingersSpreads[0])); // Ok
+
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftIndex1Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_leftFingersBends[1]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftIndex2Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_leftFingersBends[1]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftIndex3Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_leftFingersBends[1]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftIndexSpread, Mathf.Lerp(1f, -1f, p_data.m_leftFingersSpreads[1])); // Ok
+
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftMiddle1Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_leftFingersBends[2]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftMiddle2Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_leftFingersBends[2]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftMiddle3Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_leftFingersBends[2]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftMiddleSpread, Mathf.Lerp(2f, -2f, p_data.m_leftFingersSpreads[2]));
+
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftRing1Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_leftFingersBends[3]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftRing2Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_leftFingersBends[3]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftRing3Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_leftFingersBends[3]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftRingSpread, Mathf.Lerp(-2f, 2f, p_data.m_leftFingersSpreads[3]));
+
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftLittle1Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_leftFingersBends[4]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftLittle2Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_leftFingersBends[4]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftLittle3Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_leftFingersBends[4]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftLittleSpread, Mathf.Lerp(-0.5f, 1f, p_data.m_leftFingersSpreads[4]));
+            }
+
+            if(p_data.m_handsPresenses[1])
+            {
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightThumb1Stretched, Mathf.Lerp(0.85f, -0.85f, p_data.m_rightFingersBends[0]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightThumb2Stretched, Mathf.Lerp(0.85f, -0.85f, p_data.m_rightFingersBends[0]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightThumb3Stretched, Mathf.Lerp(0.85f, -0.85f, p_data.m_rightFingersBends[0]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightThumbSpread, Mathf.Lerp(-1.5f, 1.0f, p_data.m_rightFingersSpreads[0])); // Ok
+
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightIndex1Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_rightFingersBends[1]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightIndex2Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_rightFingersBends[1]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightIndex3Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_rightFingersBends[1]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightIndexSpread, Mathf.Lerp(1f, -1f, p_data.m_rightFingersSpreads[1])); // Ok
+
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightMiddle1Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_rightFingersBends[2]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightMiddle2Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_rightFingersBends[2]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightMiddle3Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_rightFingersBends[2]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightMiddleSpread, Mathf.Lerp(2f, -2f, p_data.m_rightFingersSpreads[2]));
+
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightRing1Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_rightFingersBends[3]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightRing2Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_rightFingersBends[3]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightRing3Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_rightFingersBends[3]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightRingSpread, Mathf.Lerp(-2f, 2f, p_data.m_rightFingersSpreads[3]));
+
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightLittle1Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_rightFingersBends[4]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightLittle2Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_rightFingersBends[4]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightLittle3Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_rightFingersBends[4]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightLittleSpread, Mathf.Lerp(-0.5f, 1f, p_data.m_rightFingersSpreads[4]));
             }
         }
 
         public void OnAvatarClear()
         {
             m_vrIK = null;
+            m_origElbowLeft = null;
+            m_origElbowRight = null;
             m_armsWeights = Vector2.zero;
             m_leftIK = null;
             m_rightIK = null;
             m_leftTargetActive = false;
             m_rightTargetActive = false;
+
+            if(!m_isInVR)
+                m_poseHandler?.Dispose();
+            m_poseHandler = null;
 
             m_leftHandTarget.localPosition = Vector3.zero;
             m_leftHandTarget.localRotation = Quaternion.identity;
@@ -219,33 +292,26 @@ namespace ml_lme
 
         public void OnSetupAvatar()
         {
+            m_isInVR = Utils.IsInVR();
             m_vrIK = PlayerSetup.Instance._animator.GetComponent<VRIK>();
 
-            if(m_indexIK != null)
-            {
-                m_indexIK.avatarAnimator = PlayerSetup.Instance._animator;
-                RefreshFingersTracking();
-            }
+            RefreshFingersTracking();
 
             if(PlayerSetup.Instance._animator.isHuman)
             {
-                HumanPoseHandler l_poseHandler = null;
-                HumanPose l_initPose = new HumanPose();
-
-                // Force desktop non-VRIK avatar into T-Pose
-                if(m_vrIK == null)
+                if(!m_isInVR)
                 {
-                    l_poseHandler = new HumanPoseHandler(PlayerSetup.Instance._animator.avatar, PlayerSetup.Instance._avatar.transform);
-                    l_poseHandler.GetHumanPose(ref l_initPose);
+                    // Force desktop avatar into T-Pose
+                    m_poseHandler = new HumanPoseHandler(PlayerSetup.Instance._animator.avatar, PlayerSetup.Instance._avatar.transform);
+                    m_poseHandler.GetHumanPose(ref m_pose);
 
                     HumanPose l_tPose = new HumanPose();
-                    l_tPose.bodyPosition = l_initPose.bodyPosition;
-                    l_tPose.bodyRotation = l_initPose.bodyRotation;
-                    l_tPose.muscles = new float[l_initPose.muscles.Length];
+                    l_tPose.bodyPosition = m_pose.bodyPosition;
+                    l_tPose.bodyRotation = m_pose.bodyRotation;
+                    l_tPose.muscles = new float[m_pose.muscles.Length];
                     for(int i = 0; i < l_tPose.muscles.Length; i++)
                         l_tPose.muscles[i] = ms_tposeMuscles[i];
-
-                    l_poseHandler.SetHumanPose(ref l_tPose);
+                    m_poseHandler.SetHumanPose(ref l_tPose);
                 }
 
                 Transform l_hand = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftHand);
@@ -294,15 +360,22 @@ namespace ml_lme
                     m_rightIK.solver.arm.bendGoalWeight = (m_trackElbows ? 1f : 0f);
                     m_rightIK.enabled = (m_enabled && !m_fingersOnly);
 
-                    l_poseHandler.SetHumanPose(ref l_initPose);
+                    m_poseHandler?.SetHumanPose(ref m_pose);
                 }
                 else
                 {
                     m_vrIK.solver.OnPreUpdate += this.OnIKPreUpdate;
                     m_vrIK.solver.OnPostUpdate += this.OnIKPostUpdate;
                 }
+            }
+        }
 
-                l_poseHandler?.Dispose();
+        public void OnCalibrate()
+        {
+            if(m_vrIK != null)
+            {
+                m_origElbowLeft = m_vrIK.solver.leftArm.bendGoal;
+                m_origElbowRight = m_vrIK.solver.rightArm.bendGoal;
             }
         }
 
@@ -337,15 +410,15 @@ namespace ml_lme
                 if(m_leftTargetActive)
                 {
                     m_vrIK.solver.leftArm.target = IKSystem.Instance.leftHandAnchor;
-                    m_vrIK.solver.leftArm.bendGoal = null;
-                    m_vrIK.solver.leftArm.bendGoalWeight = 0f;
+                    m_vrIK.solver.leftArm.bendGoal = m_origElbowLeft;
+                    m_vrIK.solver.leftArm.bendGoalWeight = ((m_origElbowLeft != null) ? 1f : 0f);
                     m_leftTargetActive = false;
                 }
                 if(m_rightTargetActive)
                 {
                     m_vrIK.solver.rightArm.target = IKSystem.Instance.rightHandAnchor;
-                    m_vrIK.solver.rightArm.bendGoal = null;
-                    m_vrIK.solver.rightArm.bendGoalWeight = 0f;
+                    m_vrIK.solver.rightArm.bendGoal = m_origElbowRight;
+                    m_vrIK.solver.rightArm.bendGoalWeight = ((m_origElbowRight != null) ? 1f : 0f);
                     m_rightTargetActive = false;
                 }
             }
@@ -362,11 +435,14 @@ namespace ml_lme
 
         void RefreshFingersTracking()
         {
-            if(m_indexIK != null)
-            {
-                m_indexIK.activeControl = (m_enabled || (PlayerSetup.Instance._inVr && Utils.AreKnucklesInUse()));
-                CVRInputManager.Instance.individualFingerTracking = (m_enabled || (PlayerSetup.Instance._inVr && Utils.AreKnucklesInUse() && !(bool)ms_indexGestureToggle.GetValue(m_steamVrModule)));
-            }
+            CVRInputManager.Instance.individualFingerTracking = (m_enabled || (m_isInVR && Utils.AreKnucklesInUse() && !(bool)ms_indexGestureToggle.GetValue(m_steamVrModule)));
+            IKSystem.Instance.FingerSystem.controlActive = CVRInputManager.Instance.individualFingerTracking;
+        }
+
+        static void UpdatePoseMuscle(ref HumanPose p_pose, int p_index, float p_value)
+        {
+            if(p_pose.muscles.Length > p_index)
+                p_pose.muscles[p_index] = p_value;
         }
     }
 }

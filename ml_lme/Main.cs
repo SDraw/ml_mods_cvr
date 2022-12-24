@@ -1,5 +1,6 @@
 ﻿using ABI_RC.Core.Player;
 using ABI_RC.Core.UI;
+using ABI_RC.Systems.IK.SubSystems;
 using System.Reflection;
 using UnityEngine;
 
@@ -18,6 +19,8 @@ namespace ml_lme
         GameObject[] m_leapElbows = null;
         GameObject m_leapControllerModel = null;
         LeapTracked m_leapTracked = null;
+
+        bool m_isInVR = false;
 
         public override void OnInitializeMelon()
         {
@@ -58,9 +61,9 @@ namespace ml_lme
                 new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnSetupAvatar_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
             HarmonyInstance.Patch(
-                typeof(PlayerSetup).GetMethod("GetGesturesFromControllers", BindingFlags.Instance | BindingFlags.NonPublic),
+                typeof(BodySystem).GetMethod(nameof(BodySystem.Calibrate)),
                 null,
-                new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnGetGesturesFromControllers_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
+                new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnCalibrate_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
 
             MelonLoader.MelonCoroutines.Start(CreateTrackingObjects());
@@ -80,6 +83,8 @@ namespace ml_lme
                 yield return null;
             while(PlayerSetup.Instance.vrCamera == null)
                 yield return null;
+
+            m_isInVR = Utils.IsInVR();
 
             m_leapTrackingRoot = new GameObject("[LeapRoot]");
 
@@ -167,6 +172,12 @@ namespace ml_lme
             }
         }
 
+        public override void OnLateUpdate()
+        {
+            if(Settings.Enabled && !m_isInVR && (m_leapTracked != null))
+                m_leapTracked.UpdateTrackingLate(m_gesturesData);
+        }
+
         // Settings changes
         void OnEnableChange(bool p_state)
         {
@@ -183,7 +194,7 @@ namespace ml_lme
         {
             if((m_leapTrackingRoot != null) && !Settings.HeadAttach)
             {
-                if(!PlayerSetup.Instance._inVr)
+                if(!m_isInVR)
                     m_leapTrackingRoot.transform.localPosition = p_offset * PlayerSetup.Instance.vrCameraRig.transform.localScale.x;
                 else
                     m_leapTrackingRoot.transform.localPosition = p_offset;
@@ -230,7 +241,7 @@ namespace ml_lme
             {
                 if(p_state)
                 {
-                    if(!PlayerSetup.Instance._inVr)
+                    if(!m_isInVR)
                     {
                         m_leapTrackingRoot.transform.parent = PlayerSetup.Instance.desktopCamera.transform;
                         m_leapTrackingRoot.transform.localPosition = Settings.HeadOffset * PlayerSetup.Instance.vrCameraRig.transform.localScale.x;
@@ -245,7 +256,7 @@ namespace ml_lme
                 }
                 else
                 {
-                    if(!PlayerSetup.Instance._inVr)
+                    if(!m_isInVR)
                     {
                         m_leapTrackingRoot.transform.parent = PlayerSetup.Instance.desktopCameraRig.transform;
                         m_leapTrackingRoot.transform.localPosition = Settings.DesktopOffset * PlayerSetup.Instance.vrCameraRig.transform.localScale.x;
@@ -267,7 +278,7 @@ namespace ml_lme
         {
             if((m_leapTrackingRoot != null) && Settings.HeadAttach)
             {
-                if(!PlayerSetup.Instance._inVr)
+                if(!m_isInVR)
                     m_leapTrackingRoot.transform.localPosition = p_offset * PlayerSetup.Instance.vrCameraRig.transform.localScale.x;
                 else
                     m_leapTrackingRoot.transform.localPosition = p_offset;
@@ -350,6 +361,8 @@ namespace ml_lme
         {
             try
             {
+                m_isInVR = Utils.IsInVR();
+
                 if(m_leapTracked != null)
                     m_leapTracked.OnSetupAvatar();
 
@@ -361,13 +374,13 @@ namespace ml_lme
             }
         }
 
-        static void OnGetGesturesFromControllers_Postfix() => ms_instance?.OnGetGesturesFromControllers();
-        void OnGetGesturesFromControllers()
+        static void OnCalibrate_Postfix() => ms_instance?.OnCalibrate();
+        void OnCalibrate()
         {
             try
             {
-                if(Settings.Enabled && Utils.AreKnucklesInUse() && (m_leapTracked != null))
-                    m_leapTracked.UpdateFingers(m_gesturesData);
+                if(m_leapTracked != null)
+                    m_leapTracked.OnCalibrate();
             }
             catch(System.Exception e)
             {

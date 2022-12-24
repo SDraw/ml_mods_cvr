@@ -250,7 +250,7 @@ function inp_toggle_mod_amt(_obj, _callbackName) {
             </div>
         </div>
     `;
-    document.getElementById('settings-implementation').appendChild(l_block);
+    document.getElementById('settings-ik').appendChild(l_block);
 
     // Update sliders in new menu block
     let l_sliders = l_block.querySelectorAll('.inp_slider');
