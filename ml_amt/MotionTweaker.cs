@@ -290,9 +290,6 @@ namespace ml_amt
             m_customProneLimit = (l_customTransform != null);
             m_proneLimit = m_customProneLimit ? Mathf.Clamp(l_customTransform.localPosition.y, 0f, 1f) : Settings.ProneLimit;
 
-            if(m_proneLimit > m_crouchLimit)
-                Utils.Swap(ref m_proneLimit, ref m_crouchLimit);
-
             l_customTransform = PlayerSetup.Instance._avatar.transform.Find("LocomotionOffset");
             m_customLocomotionOffset = (l_customTransform != null);
             m_locomotionOffset = m_customLocomotionOffset ? l_customTransform.localPosition : Vector3.zero;
