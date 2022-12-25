@@ -13,7 +13,6 @@ namespace ml_amt
     {
         static readonly FieldInfo ms_grounded = typeof(MovementSystem).GetField("_isGrounded", BindingFlags.NonPublic | BindingFlags.Instance);
         static readonly FieldInfo ms_groundedRaw = typeof(MovementSystem).GetField("_isGroundedRaw", BindingFlags.NonPublic | BindingFlags.Instance);
-        static readonly FieldInfo ms_rootVelocity = typeof(IKSolverVR).GetField("rootVelocity", BindingFlags.NonPublic | BindingFlags.Instance);
         static readonly int ms_emoteHash = Animator.StringToHash("Emote");
 
         enum ParameterType
@@ -136,7 +135,7 @@ namespace ml_amt
                 float l_avatarScale = (m_avatarScale > 0f) ? (PlayerSetup.Instance._avatar.transform.localScale.y / m_avatarScale) : 0f;
                 float l_avatarViewHeight = Mathf.Clamp(m_viewPointHeight * l_avatarScale, 0f, float.MaxValue);
                 m_upright = Mathf.Clamp(((l_avatarViewHeight > 0f) ? (l_currentHeight / l_avatarViewHeight) : 0f), 0f, 1f);
-                PoseState l_poseState = (m_upright <= m_proneLimit) ? PoseState.Proning : ((m_upright <= m_crouchLimit) ? PoseState.Crouching : PoseState.Standing);
+                m_poseState = (m_upright <= Mathf.Min(m_proneLimit, m_crouchLimit)) ? PoseState.Proning : ((m_upright <= Mathf.Max(m_proneLimit, m_crouchLimit)) ? PoseState.Crouching : PoseState.Standing);
 
                 if(m_avatarHips != null)
                 {
@@ -146,19 +145,10 @@ namespace ml_amt
 
                 if(m_isInVR && (m_vrIk != null) && m_vrIk.enabled)
                 {
-                    if(m_poseState != l_poseState)
-                    {
-                        // Weird fix of torso shaking
-                        if(m_ikOverrideCrouch && (l_poseState == PoseState.Standing))
-                            ms_rootVelocity.SetValue(m_vrIk.solver, Vector3.zero);
-                        if(m_ikOverrideProne && !m_ikOverrideCrouch && (l_poseState == PoseState.Crouching))
-                            ms_rootVelocity.SetValue(m_vrIk.solver, Vector3.zero);
-                    }
-
                     if(m_adjustedMovement)
                     {
-                        MovementSystem.Instance.ChangeCrouch(l_poseState == PoseState.Crouching);
-                        MovementSystem.Instance.ChangeProne(l_poseState == PoseState.Proning);
+                        MovementSystem.Instance.ChangeCrouch(m_poseState == PoseState.Crouching);
+                        MovementSystem.Instance.ChangeProne(m_poseState == PoseState.Proning);
 
                         if(!m_poseTransitions)
                         {
@@ -169,12 +159,10 @@ namespace ml_amt
 
                     if(m_poseTransitions)
                     {
-                        PlayerSetup.Instance.animatorManager.SetAnimatorParameterBool("Crouching", (l_poseState == PoseState.Crouching) && !m_compatibleAvatar && !BodySystem.isCalibratedAsFullBody);
-                        PlayerSetup.Instance.animatorManager.SetAnimatorParameterBool("Prone", (l_poseState == PoseState.Proning) && !m_compatibleAvatar && !BodySystem.isCalibratedAsFullBody);
+                        PlayerSetup.Instance.animatorManager.SetAnimatorParameterBool("Crouching", (m_poseState == PoseState.Crouching) && !m_compatibleAvatar && !BodySystem.isCalibratedAsFullBody);
+                        PlayerSetup.Instance.animatorManager.SetAnimatorParameterBool("Prone", (m_poseState == PoseState.Proning) && !m_compatibleAvatar && !BodySystem.isCalibratedAsFullBody);
                     }
                 }
-
-                m_poseState = l_poseState;
 
                 m_emoteActive = false;
                 if(m_detectEmotes && (m_locomotionLayer >= 0))
@@ -301,6 +289,9 @@ namespace ml_amt
             l_customTransform = PlayerSetup.Instance._avatar.transform.Find("ProneLimit");
             m_customProneLimit = (l_customTransform != null);
             m_proneLimit = m_customProneLimit ? Mathf.Clamp(l_customTransform.localPosition.y, 0f, 1f) : Settings.ProneLimit;
+
+            if(m_proneLimit > m_crouchLimit)
+                Utils.Swap(ref m_proneLimit, ref m_crouchLimit);
 
             l_customTransform = PlayerSetup.Instance._avatar.transform.Find("LocomotionOffset");
             m_customLocomotionOffset = (l_customTransform != null);

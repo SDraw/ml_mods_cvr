@@ -4,7 +4,7 @@ Merged set of MelonLoader mods for ChilloutVR.
 | Full name | Short name | Latest version | Available in [CVRMA](https://github.com/knah/CVRMelonAssistant) | Current Status | Notes |
 |-----------|------------|----------------|-----------------------------------------------------------------|----------------|-------|
 | Avatar Change Info | ml_aci | 1.0.3 | Yes | Working |
-| Avatar Motion Tweaker | ml_amt | 1.1.9 | Yes | Working |
+| Avatar Motion Tweaker | ml_amt | 1.2.0 | Yes, pending review | Working |
 | Desktop Head Tracking | ml_dht | 1.1.1 | Yes | Working |
 | Desktop Reticle Switch | ml_drs | 1.0.0 | Yes | Working |
 | Four Point Tracking | ml_fpt | 1.0.9 | Retired | Deprecated | In-game feature since 2022r170 update

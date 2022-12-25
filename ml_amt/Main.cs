@@ -1,4 +1,5 @@
-﻿using ABI_RC.Core.Player;
+﻿using ABI.CCK.Components;
+using ABI_RC.Core.Player;
 using ABI_RC.Systems.IK.SubSystems;
 using System.Reflection;
 
@@ -6,6 +7,14 @@ namespace ml_amt
 {
     public class AvatarMotionTweaker : MelonLoader.MelonMod
     {
+        static readonly MethodInfo[] ms_fbtDetouredMethods =
+        {
+            typeof(PlayerSetup).GetMethod("Update", BindingFlags.NonPublic | BindingFlags.Instance),
+            typeof(PlayerSetup).GetMethod("FixedUpdate", BindingFlags.NonPublic | BindingFlags.Instance),
+            typeof(PlayerSetup).GetMethod("UpdatePlayerAvatarMovementData", BindingFlags.NonPublic | BindingFlags.Instance),
+            typeof(CVRParameterStreamEntry).GetMethod(nameof(CVRParameterStreamEntry.CheckUpdate))
+        };
+
         static AvatarMotionTweaker ms_instance = null;
 
         MotionTweaker m_localTweaker = null;
@@ -34,22 +43,21 @@ namespace ml_amt
                 null,
                 new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnCalibrate_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
+
+            // FBT detour
             HarmonyInstance.Patch(
                 typeof(BodySystem).GetMethod(nameof(BodySystem.FBTAvailable)),
                 new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnFBTAvailable_Prefix), BindingFlags.Static | BindingFlags.NonPublic)),
                 null
             );
-
-            HarmonyInstance.Patch(
-                typeof(PlayerSetup).GetMethod("Update", BindingFlags.NonPublic | BindingFlags.Instance),
-                new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(FBTDetour_Prefix), BindingFlags.Static | BindingFlags.NonPublic)),
-                new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(FBTDetour_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
-            );
-            HarmonyInstance.Patch(
-                typeof(PlayerSetup).GetMethod("FixedUpdate", BindingFlags.NonPublic | BindingFlags.Instance),
-                new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(FBTDetour_Prefix), BindingFlags.Static | BindingFlags.NonPublic)),
-                new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(FBTDetour_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
-            );
+            foreach(MethodInfo l_detoured in ms_fbtDetouredMethods)
+            {
+                HarmonyInstance.Patch(
+                    l_detoured,
+                    new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(FBTDetour_Prefix), BindingFlags.Static | BindingFlags.NonPublic)),
+                    new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(FBTDetour_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
+                );
+            }
 
             MelonLoader.MelonCoroutines.Start(WaitForLocalPlayer());
         }

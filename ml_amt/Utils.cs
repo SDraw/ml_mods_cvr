@@ -12,5 +12,13 @@ namespace ml_amt
         {
             return Matrix4x4.TRS(p_pos ? p_transform.position : Vector3.zero, p_rot ? p_transform.rotation : Quaternion.identity, p_scl ? p_transform.localScale : Vector3.one);
         }
+
+        // Usefull
+        public static void Swap<T>(ref T lhs, ref T rhs)
+        {
+            T temp = lhs;
+            lhs = rhs;
+            rhs = temp;
+        }
     }
 }
