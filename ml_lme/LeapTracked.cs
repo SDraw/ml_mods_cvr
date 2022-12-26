@@ -23,6 +23,8 @@ namespace ml_lme
         bool m_isInVR = false;
         Transform m_origElbowLeft = null;
         Transform m_origElbowRight = null;
+        Transform m_hips = null;
+        Vector3 m_hipsLocal = Vector3.zero;
 
         bool m_enabled = true;
         bool m_fingersOnly = false;
@@ -204,9 +206,15 @@ namespace ml_lme
         {
             if(m_enabled && !m_isInVR && (m_poseHandler != null))
             {
+                if(m_hips != null)
+                    m_hipsLocal = m_hips.localPosition;
+
                 m_poseHandler.GetHumanPose(ref m_pose);
                 UpdateFingers(p_data);
                 m_poseHandler.SetHumanPose(ref m_pose);
+
+                if(m_hips != null)
+                    m_hips.localPosition = m_hipsLocal;
             }
         }
 
@@ -274,6 +282,8 @@ namespace ml_lme
             m_vrIK = null;
             m_origElbowLeft = null;
             m_origElbowRight = null;
+            m_hips = null;
+            m_hipsLocal = Vector3.zero;
             m_armsWeights = Vector2.zero;
             m_leftIK = null;
             m_rightIK = null;
@@ -299,6 +309,8 @@ namespace ml_lme
 
             if(PlayerSetup.Instance._animator.isHuman)
             {
+                m_hips = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.Hips);
+
                 if(!m_isInVR)
                 {
                     // Force desktop avatar into T-Pose
