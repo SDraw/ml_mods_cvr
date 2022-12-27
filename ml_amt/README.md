@@ -22,8 +22,9 @@ Available mod's settings in `Settings - IK - Avatar Motion Tweaker`:
 * **Pose transitions:** allows regular avatars animator to transit in crouch/prone states; default value - `true`.
   * Note: Avatar is considered as regular if its AAS animator doesn't have `Upright` parameter.
 * **Adjusted pose movement speed:** scales movement speed upon crouching/proning; default value - `true`.
-* **Detect animations emote tag:** disables avatar's IK entirely if current animator state has `Emote` tag; default value - `true`;
+* **Detect animations emote tag:** disables avatar's IK entirely if current animator state has `Emote` tag; default value - `true`.
   * Note: Created as example for [propoused game feature](https://feedback.abinteractive.net/p/disabling-vr-ik-for-emotes-via-animator-state-tag-7b80d963-053a-41c0-86ac-e3d53c61c1e2).
+* **Alternative avatar collider scale:** applies slightly different approach to avatar collider size change; default value - `true`
 
 Available additional parameters for AAS animator:
 * **`Upright`:** defines linear coefficient between current viewpoint height and avatar's viewpoint height; float, range - [0.0, 1.0].

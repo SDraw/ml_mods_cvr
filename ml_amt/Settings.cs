@@ -18,7 +18,8 @@ namespace ml_amt
             IKOverrideFly,
             IKOverrideJump,
             DetectEmotes,
-            FollowHips
+            FollowHips,
+            CollisionScale
         };
 
         static bool ms_ikOverrideCrouch = true;
@@ -31,6 +32,7 @@ namespace ml_amt
         static bool ms_ikOverrideJump = true;
         static bool ms_detectEmotes = true;
         static bool ms_followHips = true;
+        static bool ms_collisionScale = true;
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
@@ -45,6 +47,7 @@ namespace ml_amt
         static public event Action<bool> IKOverrideJumpChange;
         static public event Action<bool> DetectEmotesChange;
         static public event Action<bool> FollowHipsChange;
+        static public event Action<bool> CollisionScaleChange;
 
         public static void Init()
         {
@@ -61,6 +64,7 @@ namespace ml_amt
             ms_entries.Add(ms_category.CreateEntry(ModSetting.IKOverrideJump.ToString(), true));
             ms_entries.Add(ms_category.CreateEntry(ModSetting.DetectEmotes.ToString(), true));
             ms_entries.Add(ms_category.CreateEntry(ModSetting.FollowHips.ToString(), true));
+            ms_entries.Add(ms_category.CreateEntry(ModSetting.CollisionScale.ToString(), true));
 
             Load();
 
@@ -101,6 +105,7 @@ namespace ml_amt
             ms_ikOverrideJump = (bool)ms_entries[(int)ModSetting.IKOverrideJump].BoxedValue;
             ms_detectEmotes = (bool)ms_entries[(int)ModSetting.DetectEmotes].BoxedValue;
             ms_followHips = (bool)ms_entries[(int)ModSetting.FollowHips].BoxedValue;
+            ms_collisionScale = (bool)ms_entries[(int)ModSetting.CollisionScale].BoxedValue;
         }
 
         static void OnSliderUpdate(string p_name, string p_value)
@@ -189,6 +194,13 @@ namespace ml_amt
                         FollowHipsChange?.Invoke(ms_followHips);
                     }
                     break;
+                
+                    case ModSetting.CollisionScale:
+                    {
+                        ms_collisionScale = bool.Parse(p_value);
+                        CollisionScaleChange?.Invoke(ms_collisionScale);
+                    }
+                    break;
                 }
 
                 ms_entries[(int)l_setting].BoxedValue = bool.Parse(p_value);
@@ -234,6 +246,10 @@ namespace ml_amt
         public static bool FollowHips
         {
             get => ms_followHips;
+        }
+        public static bool CollisionScale
+        {
+            get => ms_collisionScale;
         }
     }
 }

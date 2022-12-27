@@ -2,6 +2,8 @@
 using ABI_RC.Core.Player;
 using ABI_RC.Systems.IK.SubSystems;
 using System.Reflection;
+using ABI_RC.Systems.MovementSystem;
+using UnityEngine;
 
 namespace ml_amt
 {
@@ -58,6 +60,13 @@ namespace ml_amt
                     new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(FBTDetour_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
                 );
             }
+
+            // Alternative collider height
+            HarmonyInstance.Patch(
+                typeof(MovementSystem).GetMethod("UpdateCollider", BindingFlags.NonPublic | BindingFlags.Instance),
+                new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnUpdateCollider_Prefix), BindingFlags.Static | BindingFlags.NonPublic)),
+                null
+            );
 
             MelonLoader.MelonCoroutines.Start(WaitForLocalPlayer());
         }
@@ -148,6 +157,65 @@ namespace ml_amt
             }
 
             return true;
+        }
+
+        // Alternative collider size
+        static bool OnUpdateCollider_Prefix(
+            ref MovementSystem __instance,
+            bool __0, // updateRadius
+            CharacterController ___controller,
+            float ____avatarHeight,
+            float ____avatarHeightFactor,
+            float ____minimumColliderRadius,
+            Vector3 ____colliderCenter
+        )
+        {
+            if(!Settings.CollisionScale)
+                return true;
+            
+            try
+            {
+                if(___controller != null)
+                {
+                    float l_scaledHeight = ____avatarHeight * ____avatarHeightFactor;
+                    float l_newRadius = (__0 ? Mathf.Max(____minimumColliderRadius, l_scaledHeight / 6f) : ___controller.radius);
+
+                    float l_newHeight = Mathf.Max(l_scaledHeight, l_newRadius * 2f);
+                    float l_currentHeight = ___controller.height;
+
+                    Vector3 l_newCenter = ____colliderCenter;
+                    l_newCenter.y = (l_newHeight + 0.075f * ____avatarHeightFactor) * 0.5f;
+                    Vector3 l_currentCenter = ___controller.center;
+
+                    if((Mathf.Abs(l_currentHeight - l_newHeight) > (l_currentHeight * 0.05f)) || (Vector3.Distance(l_currentCenter,l_newCenter) > (l_currentHeight * 0.05f)))
+                    {
+                        bool l_active = ___controller.enabled;
+        
+                        if(__0)
+                            ___controller.radius = l_newRadius;
+                        ___controller.height = l_newHeight;
+                        ___controller.center = l_newCenter;
+                        
+                        __instance.groundDistance = l_newRadius;
+                        
+                        if(__0)
+                            __instance.proxyCollider.radius = l_newRadius;
+                        __instance.proxyCollider.height = l_newHeight;
+                        __instance.proxyCollider.center = new Vector3(0f, l_newCenter.y, 0f);
+                        
+                        __instance.forceObject.transform.localScale = new Vector3(l_newRadius + 0.1f, l_newHeight, l_newRadius + 0.1f);
+                        __instance.groundCheck.localPosition = ____colliderCenter;
+        
+                        ___controller.enabled = l_active;
+                    }
+                }
+            }
+            catch(System.Exception l_exception)
+            {
+                MelonLoader.MelonLogger.Error(l_exception);
+            }
+
+            return false;
         }
     }
 }
