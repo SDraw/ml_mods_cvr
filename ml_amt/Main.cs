@@ -1,8 +1,8 @@
 ﻿using ABI.CCK.Components;
 using ABI_RC.Core.Player;
 using ABI_RC.Systems.IK.SubSystems;
-using System.Reflection;
 using ABI_RC.Systems.MovementSystem;
+using System.Reflection;
 using UnityEngine;
 
 namespace ml_amt
@@ -172,7 +172,7 @@ namespace ml_amt
         {
             if(!Settings.CollisionScale)
                 return true;
-            
+
             try
             {
                 if(___controller != null)
@@ -187,25 +187,25 @@ namespace ml_amt
                     l_newCenter.y = (l_newHeight + 0.075f * ____avatarHeightFactor) * 0.5f;
                     Vector3 l_currentCenter = ___controller.center;
 
-                    if((Mathf.Abs(l_currentHeight - l_newHeight) > (l_currentHeight * 0.05f)) || (Vector3.Distance(l_currentCenter,l_newCenter) > (l_currentHeight * 0.05f)))
+                    if(__0 || (Mathf.Abs(l_currentHeight - l_newHeight) > (l_currentHeight * 0.05f)) || (Vector3.Distance(l_currentCenter, l_newCenter) > (l_currentHeight * 0.05f)))
                     {
                         bool l_active = ___controller.enabled;
-        
+
                         if(__0)
                             ___controller.radius = l_newRadius;
                         ___controller.height = l_newHeight;
                         ___controller.center = l_newCenter;
-                        
+
                         __instance.groundDistance = l_newRadius;
-                        
+
                         if(__0)
                             __instance.proxyCollider.radius = l_newRadius;
                         __instance.proxyCollider.height = l_newHeight;
                         __instance.proxyCollider.center = new Vector3(0f, l_newCenter.y, 0f);
-                        
+
                         __instance.forceObject.transform.localScale = new Vector3(l_newRadius + 0.1f, l_newHeight, l_newRadius + 0.1f);
                         __instance.groundCheck.localPosition = ____colliderCenter;
-        
+
                         ___controller.enabled = l_active;
                     }
                 }
