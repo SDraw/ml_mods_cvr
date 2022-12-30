@@ -15,27 +15,6 @@ namespace ml_amt
         static readonly FieldInfo ms_groundedRaw = typeof(MovementSystem).GetField("_isGroundedRaw", BindingFlags.NonPublic | BindingFlags.Instance);
         static readonly int ms_emoteHash = Animator.StringToHash("Emote");
 
-        enum ParameterType
-        {
-            Upright,
-            GroundedRaw,
-            Moving
-        }
-
-        enum ParameterSyncType
-        {
-            Local,
-            Synced
-        }
-
-        struct AdditionalParameterInfo
-        {
-            public ParameterType m_type;
-            public ParameterSyncType m_sync;
-            public string m_name;
-            public int m_hash; // For local only
-        }
-
         enum PoseState
         {
             Standing = 0,
@@ -84,11 +63,11 @@ namespace ml_amt
         bool m_followHips = true;
         Vector3 m_hipsToPlayer = Vector3.zero;
 
-        readonly List<AdditionalParameterInfo> m_parameters = null;
+        readonly List<AvatarParameter> m_parameters = null;
 
         public MotionTweaker()
         {
-            m_parameters = new List<AdditionalParameterInfo>();
+            m_parameters = new List<AvatarParameter>();
         }
 
         void Start()
@@ -173,53 +152,8 @@ namespace ml_amt
 
                 if(m_parameters.Count > 0)
                 {
-                    foreach(AdditionalParameterInfo l_param in m_parameters)
-                    {
-                        switch(l_param.m_type)
-                        {
-                            case ParameterType.Upright:
-                            {
-                                switch(l_param.m_sync)
-                                {
-                                    case ParameterSyncType.Local:
-                                        PlayerSetup.Instance._animator.SetFloat(l_param.m_hash, m_upright);
-                                        break;
-                                    case ParameterSyncType.Synced:
-                                        PlayerSetup.Instance.animatorManager.SetAnimatorParameterFloat(l_param.m_name, m_upright);
-                                        break;
-                                }
-                            }
-                            break;
-
-                            case ParameterType.GroundedRaw:
-                            {
-                                switch(l_param.m_sync)
-                                {
-                                    case ParameterSyncType.Local:
-                                        PlayerSetup.Instance._animator.SetBool(l_param.m_hash, m_groundedRaw);
-                                        break;
-                                    case ParameterSyncType.Synced:
-                                        PlayerSetup.Instance.animatorManager.SetAnimatorParameterBool(l_param.m_name, m_groundedRaw);
-                                        break;
-                                }
-                            }
-                            break;
-
-                            case ParameterType.Moving:
-                            {
-                                switch(l_param.m_sync)
-                                {
-                                    case ParameterSyncType.Local:
-                                        PlayerSetup.Instance._animator.SetBool(l_param.m_hash, m_moving);
-                                        break;
-                                    case ParameterSyncType.Synced:
-                                        PlayerSetup.Instance.animatorManager.SetAnimatorParameterBool(l_param.m_name, m_moving);
-                                        break;
-                                }
-                            }
-                            break;
-                        }
-                    }
+                    foreach(AvatarParameter l_param in m_parameters)
+                        l_param.Update(this);
                 }
             }
         }
@@ -256,30 +190,27 @@ namespace ml_amt
 
             // Parse animator parameters
             AnimatorControllerParameter[] l_params = PlayerSetup.Instance._animator.parameters;
-            ParameterType[] l_enumParams = (ParameterType[])System.Enum.GetValues(typeof(ParameterType));
-
             foreach(var l_param in l_params)
             {
-                foreach(var l_enumParam in l_enumParams)
+                foreach(AvatarParameter.ParameterType l_enumParam in System.Enum.GetValues(typeof(AvatarParameter.ParameterType)))
                 {
                     if(l_param.name.Contains(l_enumParam.ToString()) && (m_parameters.FindIndex(p => p.m_type == l_enumParam) == -1))
                     {
                         bool l_local = (l_param.name[0] == '#');
 
-                        m_parameters.Add(new AdditionalParameterInfo
-                        {
-                            m_type = l_enumParam,
-                            m_sync = (l_local ? ParameterSyncType.Local : ParameterSyncType.Synced),
-                            m_name = l_param.name,
-                            m_hash = (l_local ? l_param.nameHash : 0)
-                        });
+                        m_parameters.Add(new AvatarParameter(
+                            l_enumParam,
+                            l_param.name,
+                            (l_local ? AvatarParameter.ParameterSyncType.Local : AvatarParameter.ParameterSyncType.Synced),
+                            (l_local ? l_param.nameHash : 0)
+                        ));
 
                         break;
                     }
                 }
             }
 
-            m_compatibleAvatar = m_parameters.Exists(p => p.m_name.Contains("Upright"));
+            m_compatibleAvatar = m_parameters.Exists(p => p.m_type == AvatarParameter.ParameterType.Upright);
             m_avatarScale = Mathf.Abs(PlayerSetup.Instance._avatar.transform.localScale.y);
 
             Transform l_customTransform = PlayerSetup.Instance._avatar.transform.Find("CrouchLimit");
@@ -417,5 +348,9 @@ namespace ml_amt
         {
             m_followHips = p_state;
         }
+
+        public float GetUpright() => m_upright;
+        public bool GetGroundedRaw() => m_groundedRaw;
+        public bool GetMoving() => m_moving;
     }
 }
