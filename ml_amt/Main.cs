@@ -184,7 +184,7 @@ namespace ml_amt
                     float l_currentHeight = ___controller.height;
 
                     Vector3 l_newCenter = ____colliderCenter;
-                    l_newCenter.y = (l_newHeight + 0.075f * ____avatarHeightFactor) * 0.5f;
+                    l_newCenter.y = (l_newHeight + 0.075f) * 0.5f;
                     Vector3 l_currentCenter = ___controller.center;
 
                     if(__0 || (Mathf.Abs(l_currentHeight - l_newHeight) > (l_currentHeight * 0.05f)) || (Vector3.Distance(l_currentCenter, l_newCenter) > (l_currentHeight * 0.05f)))
