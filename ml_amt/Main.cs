@@ -184,7 +184,7 @@ namespace ml_amt
                     float l_currentHeight = ___controller.height;
 
                     Vector3 l_newCenter = ____colliderCenter;
-                    l_newCenter.y = (l_newHeight + 0.075f) * 0.5f;
+                    l_newCenter.y = (l_newHeight + 0.075f) * 0.5f; // Idk where 0.075f has come from
                     Vector3 l_currentCenter = ___controller.center;
 
                     if(__0 || (Mathf.Abs(l_currentHeight - l_newHeight) > (l_currentHeight * 0.05f)) || (Vector3.Distance(l_currentCenter, l_newCenter) > (l_currentHeight * 0.05f)))
@@ -198,13 +198,18 @@ namespace ml_amt
 
                         __instance.groundDistance = l_newRadius;
 
-                        if(__0)
-                            __instance.proxyCollider.radius = l_newRadius;
-                        __instance.proxyCollider.height = l_newHeight;
-                        __instance.proxyCollider.center = new Vector3(0f, l_newCenter.y, 0f);
+                        if(__instance.proxyCollider != null)
+                        {
+                            if(__0)
+                                __instance.proxyCollider.radius = l_newRadius;
+                            __instance.proxyCollider.height = l_newHeight;
+                            __instance.proxyCollider.center = new Vector3(0f, l_newCenter.y, 0f);
+                        }
 
-                        __instance.forceObject.transform.localScale = new Vector3(l_newRadius + 0.1f, l_newHeight, l_newRadius + 0.1f);
-                        __instance.groundCheck.localPosition = ____colliderCenter;
+                        if(__instance.forceObject != null)
+                            __instance.forceObject.transform.localScale = new Vector3(l_newRadius + 0.1f, l_newHeight, l_newRadius + 0.1f);
+                        if(__instance.groundCheck != null)
+                            __instance.groundCheck.localPosition = ____colliderCenter;
 
                         ___controller.enabled = l_active;
                     }
