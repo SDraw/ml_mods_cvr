@@ -19,7 +19,7 @@ Available mod's settings in `Settings - IK - Avatar Motion Tweaker`:
 * **IK override while flying:** disables legs locomotion/autostep in fly mode; default value - `true`.
 * **IK override while jumping:** disables legs locomotion/autostep in jump; default value - `true`.
 * **Follow hips on IK override:** adjust avatar position to overcome animation snapping on IK override; default value - `true`.
-  * Note: Works perfect with animations that have root transform position (XZ) based on center of mass.
+  * Note: Works best with animations that have root transform position (XZ) based on center of mass.
   * Note: Made for four point tracking (head, hands, hips) in mind.
 * **Pose transitions:** allows regular avatars animator to transit in crouch/prone states; default value - `true`.
   * Note: Avatar is considered as regular if its AAS animator doesn't have `Upright` parameter.
