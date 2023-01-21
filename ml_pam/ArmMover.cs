@@ -10,17 +10,20 @@ namespace ml_pam
         static readonly Quaternion ms_rotationOffset = Quaternion.Euler(0f, 0f, -90f);
 
         Animator m_animator = null;
+
+        int m_mainLayer = -1;
         CVRPickupObject m_target = null;
         Matrix4x4 m_offset = Matrix4x4.identity;
 
         void Start()
         {
             m_animator = PlayerSetup.Instance._animator;
+            m_mainLayer = m_animator.GetLayerIndex("Locomotion/Emotes");
         }
 
         void OnAnimatorIK(int p_layerIndex)
         {
-            if((p_layerIndex == 0) && (m_target != null)) // Only main Locomotion/Emotes layer
+            if((p_layerIndex == m_mainLayer) && (m_target != null)) // Only main Locomotion/Emotes layer
             {
                 Transform l_camera = PlayerSetup.Instance.GetActiveCamera().transform;
 
