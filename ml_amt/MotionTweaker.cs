@@ -28,6 +28,7 @@ namespace ml_amt
         int m_locomotionLayer = 0;
         float m_ikWeight = 1f; // Original weight
         float m_locomotionWeight = 1f; // Original weight
+        bool m_plantFeet = false; // Original plant feet
         float m_avatarScale = 1f; // Instantiated scale
         Transform m_avatarHips = null;
         float m_viewPointHeight = 1f;
@@ -258,6 +259,7 @@ namespace ml_amt
 
             m_ikWeight = m_vrIk.solver.IKPositionWeight;
             m_locomotionWeight = m_vrIk.solver.locomotion.weight;
+            m_plantFeet = m_vrIk.solver.plantFeet;
 
             if(m_detectEmotes && m_emoteActive)
                 m_vrIk.solver.IKPositionWeight = 0f;
@@ -283,6 +285,7 @@ namespace ml_amt
 
             if(l_legsOverride && l_solverActive && m_followHips && (!m_moving || (m_poseState == PoseState.Proning)) && m_isInVR && !BodySystem.isCalibratedAsFullBody)
             {
+                m_vrIk.solver.plantFeet = false;
                 ABI_RC.Systems.IK.IKSystem.VrikRootController.enabled = false;
                 PlayerSetup.Instance._avatar.transform.localPosition = m_hipsToPlayer;
             }
@@ -292,6 +295,7 @@ namespace ml_amt
         {
             m_vrIk.solver.IKPositionWeight = m_ikWeight;
             m_vrIk.solver.locomotion.weight = m_locomotionWeight;
+            m_vrIk.solver.plantFeet = m_plantFeet;
         }
 
         public void SetIKOverrideCrouch(bool p_state)
