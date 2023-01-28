@@ -77,7 +77,7 @@ namespace ml_dht
             }
         }
 
-        public void OnEyeControllerUpdate(CVREyeController p_component)
+        internal void OnEyeControllerUpdate(CVREyeController p_component)
         {
             if(m_enabled)
             {
@@ -99,7 +99,7 @@ namespace ml_dht
             }
         }
 
-        public void OnFaceTrackingUpdate(CVRFaceTracking p_component)
+        internal void OnFaceTrackingUpdate(CVRFaceTracking p_component)
         {
             if(m_enabled && m_faceOverride)
             {
@@ -117,7 +117,7 @@ namespace ml_dht
             }
         }
 
-        public void OnSetupAvatar()
+        internal void OnSetupAvatar()
         {
             m_avatarDescriptor = PlayerSetup.Instance._avatar.GetComponent<CVRAvatar>();
             m_headBone = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.Head);
@@ -130,7 +130,7 @@ namespace ml_dht
                 m_lookIK.solver.OnPostUpdate += this.OnLookIKPostUpdate;
 
         }
-        public void OnAvatarClear()
+        internal void OnAvatarClear()
         {
             m_avatarDescriptor = null;
             m_lookIK = null;

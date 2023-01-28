@@ -49,22 +49,24 @@ namespace ml_amt
         static public event Action<bool> FollowHipsChange;
         static public event Action<bool> CollisionScaleChange;
 
-        public static void Init()
+        internal static void Init()
         {
             ms_category = MelonLoader.MelonPreferences.CreateCategory("AMT");
 
-            ms_entries = new List<MelonLoader.MelonPreferences_Entry>();
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.IKOverrideCrouch.ToString(), true));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.CrouchLimit.ToString(), 65));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.IKOverrideProne.ToString(), true));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.ProneLimit.ToString(), 30));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.PoseTransitions.ToString(), true));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.AdjustedMovement.ToString(), true));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.IKOverrideFly.ToString(), true));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.IKOverrideJump.ToString(), true));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.DetectEmotes.ToString(), true));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.FollowHips.ToString(), true));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.CollisionScale.ToString(), true));
+            ms_entries = new List<MelonLoader.MelonPreferences_Entry>()
+            {
+                ms_category.CreateEntry(ModSetting.IKOverrideCrouch.ToString(), true),
+                ms_category.CreateEntry(ModSetting.CrouchLimit.ToString(), 65),
+                ms_category.CreateEntry(ModSetting.IKOverrideProne.ToString(), true),
+                ms_category.CreateEntry(ModSetting.ProneLimit.ToString(), 30),
+                ms_category.CreateEntry(ModSetting.PoseTransitions.ToString(), true),
+                ms_category.CreateEntry(ModSetting.AdjustedMovement.ToString(), true),
+                ms_category.CreateEntry(ModSetting.IKOverrideFly.ToString(), true),
+                ms_category.CreateEntry(ModSetting.IKOverrideJump.ToString(), true),
+                ms_category.CreateEntry(ModSetting.DetectEmotes.ToString(), true),
+                ms_category.CreateEntry(ModSetting.FollowHips.ToString(), true),
+                ms_category.CreateEntry(ModSetting.CollisionScale.ToString(), true)
+            };
 
             Load();
 
@@ -194,7 +196,7 @@ namespace ml_amt
                         FollowHipsChange?.Invoke(ms_followHips);
                     }
                     break;
-                
+
                     case ModSetting.CollisionScale:
                     {
                         ms_collisionScale = bool.Parse(p_value);

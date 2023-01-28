@@ -31,7 +31,10 @@ namespace ml_lme
             HeadX,
             HeadY,
             HeadZ,
-            TrackElbows
+            TrackElbows,
+            Input,
+            HoldThreadhold,
+            ReleaseThreadhold
         };
 
         static bool ms_enabled = false;
@@ -43,6 +46,9 @@ namespace ml_lme
         static bool ms_headAttach = false;
         static Vector3 ms_headOffset = new Vector3(0f, -0.3f, 0.15f);
         static bool ms_trackElbows = true;
+        static bool ms_input = true;
+        static float ms_holdThreadhold = 0.5f;
+        static float ms_releaseThreadhold = 0.5f;
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
@@ -56,27 +62,35 @@ namespace ml_lme
         static public event Action<bool> HeadAttachChange;
         static public event Action<Vector3> HeadOffsetChange;
         static public event Action<bool> TrackElbowsChange;
+        static public event Action<bool> InputChange;
+        static public event Action<float> HoldThreadholdChange;
+        static public event Action<float> ReleaseThreadholdChange;
 
-        public static void Init()
+        internal static void Init()
         {
             ms_category = MelonLoader.MelonPreferences.CreateCategory("LME");
 
-            ms_entries = new List<MelonLoader.MelonPreferences_Entry>();
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.Enabled.ToString(), ms_enabled));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.DesktopX.ToString(), 0));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.DesktopY.ToString(), -45));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.DesktopZ.ToString(), 30));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.FingersOnly.ToString(), ms_modelVisibility));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.Model.ToString(), ms_modelVisibility));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.Mode.ToString(), (int)ms_trackingMode));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.AngleX.ToString(), 0));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.AngleY.ToString(), 0));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.AngleZ.ToString(), 0));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.Head.ToString(), ms_headAttach));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.HeadX.ToString(), 0));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.HeadY.ToString(), -30));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.HeadZ.ToString(), 15));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.TrackElbows.ToString(), true));
+            ms_entries = new List<MelonLoader.MelonPreferences_Entry>()
+            {
+                ms_category.CreateEntry(ModSetting.Enabled.ToString(), ms_enabled),
+                ms_category.CreateEntry(ModSetting.DesktopX.ToString(), 0),
+                ms_category.CreateEntry(ModSetting.DesktopY.ToString(), -45),
+                ms_category.CreateEntry(ModSetting.DesktopZ.ToString(), 30),
+                ms_category.CreateEntry(ModSetting.FingersOnly.ToString(), ms_modelVisibility),
+                ms_category.CreateEntry(ModSetting.Model.ToString(), ms_modelVisibility),
+                ms_category.CreateEntry(ModSetting.Mode.ToString(), (int)ms_trackingMode),
+                ms_category.CreateEntry(ModSetting.AngleX.ToString(), 0),
+                ms_category.CreateEntry(ModSetting.AngleY.ToString(), 0),
+                ms_category.CreateEntry(ModSetting.AngleZ.ToString(), 0),
+                ms_category.CreateEntry(ModSetting.Head.ToString(), ms_headAttach),
+                ms_category.CreateEntry(ModSetting.HeadX.ToString(), 0),
+                ms_category.CreateEntry(ModSetting.HeadY.ToString(), -30),
+                ms_category.CreateEntry(ModSetting.HeadZ.ToString(), 15),
+                ms_category.CreateEntry(ModSetting.TrackElbows.ToString(), true),
+                ms_category.CreateEntry(ModSetting.Input.ToString(), true),
+                ms_category.CreateEntry(ModSetting.HoldThreadhold.ToString(), 50),
+                ms_category.CreateEntry(ModSetting.ReleaseThreadhold.ToString(), 50),
+            };
 
             Load();
 
@@ -129,6 +143,9 @@ namespace ml_lme
                 (int)ms_entries[(int)ModSetting.HeadZ].BoxedValue
             ) * 0.01f;
             ms_trackElbows = (bool)ms_entries[(int)ModSetting.TrackElbows].BoxedValue;
+            ms_input = (bool)ms_entries[(int)ModSetting.Input].BoxedValue;
+            ms_holdThreadhold = (int)ms_entries[(int)ModSetting.HoldThreadhold].BoxedValue * 0.01f;
+            ms_releaseThreadhold = (int)ms_entries[(int)ModSetting.ReleaseThreadhold].BoxedValue * 0.01f;
         }
 
         static void OnToggleUpdate(string p_name, string p_value)
@@ -169,6 +186,13 @@ namespace ml_lme
                     {
                         ms_trackElbows = bool.Parse(p_value);
                         TrackElbowsChange?.Invoke(ms_trackElbows);
+                    }
+                    break;
+
+                    case ModSetting.Input:
+                    {
+                        ms_input = bool.Parse(p_value);
+                        InputChange?.Invoke(ms_input);
                     }
                     break;
                 }
@@ -241,6 +265,18 @@ namespace ml_lme
                         HeadOffsetChange?.Invoke(ms_headOffset);
                     }
                     break;
+                    case ModSetting.HoldThreadhold:
+                    {
+                        ms_holdThreadhold = int.Parse(p_value) * 0.01f;
+                        HoldThreadholdChange?.Invoke(ms_holdThreadhold);
+                    }
+                    break;
+                    case ModSetting.ReleaseThreadhold:
+                    {
+                        ms_releaseThreadhold = int.Parse(p_value) * 0.01f;
+                        ReleaseThreadholdChange?.Invoke(ms_releaseThreadhold);
+                    }
+                    break;
                 }
 
                 ms_entries[(int)l_setting].BoxedValue = int.Parse(p_value);
@@ -300,6 +336,18 @@ namespace ml_lme
         public static bool TrackElbows
         {
             get => ms_trackElbows;
+        }
+        public static bool Input
+        {
+            get => ms_input;
+        }
+        public static float HoldThreadhold
+        {
+            get => ms_holdThreadhold;
+        }
+        public static float ReleaseThreadhold
+        {
+            get => ms_releaseThreadhold;
         }
     }
 }

@@ -66,7 +66,7 @@ namespace ml_amt
 
         readonly List<AvatarParameter> m_parameters = null;
 
-        public MotionTweaker()
+        internal MotionTweaker()
         {
             m_parameters = new List<AvatarParameter>();
         }
@@ -159,7 +159,7 @@ namespace ml_amt
             }
         }
 
-        public void OnAvatarClear()
+        internal void OnAvatarClear()
         {
             m_vrIk = null;
             m_locomotionLayer = -1;
@@ -181,7 +181,7 @@ namespace ml_amt
             m_parameters.Clear();
         }
 
-        public void OnSetupAvatar()
+        internal void OnSetupAvatar()
         {
             m_isInVR = Utils.IsInVR();
             m_vrIk = PlayerSetup.Instance._avatar.GetComponent<VRIK>();
@@ -239,7 +239,7 @@ namespace ml_amt
             m_avatarReady = true;
         }
 
-        public void OnCalibrate()
+        internal void OnCalibrate()
         {
             if(m_avatarReady && BodySystem.isCalibratedAsFullBody && BodySystem.enableHipTracking && !BodySystem.enableRightFootTracking && !BodySystem.enableLeftFootTracking && !BodySystem.enableLeftKneeTracking && !BodySystem.enableRightKneeTracking)
             {

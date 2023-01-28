@@ -1,5 +1,5 @@
 # Leap Motion Extension
-This mod allows you to use your Leap Motion controller for hands and fingers visual tracking.
+This mod allows you to use your Leap Motion controller for hands and fingers tracking.
 
 [![](.github/img_01.png)](https://youtu.be/nak1C8uibgc)
 
@@ -21,3 +21,6 @@ Available mod's settings in `Settings - Implementation - Leap Motion Tracking`:
 * **Track elbows:** elbows tracking, works best in `Screentop` and `HMD` tracking modes, `true` by default.
 * **Fingers tracking only:** apply only fingers tracking, disabled by default.
 * **Model visibility:** show Leap Motion controller model, useful for tracking visualizing, disabled by default.
+* **Interaction input:** enables in-game interactions (props, menu and etc.); `true` by default.
+  ** Note: Suggested to use with disabled `Settings - Input & Key-Bindings - Use grip to grab`.
+* **Hold/Release gesture threadhold:** limits for interaction/grip activation based on hand gesture; 50 by default.

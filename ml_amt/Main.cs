@@ -4,6 +4,7 @@ using ABI_RC.Systems.IK.SubSystems;
 using ABI_RC.Systems.MovementSystem;
 using System.Reflection;
 using UnityEngine;
+using System.Collections;
 
 namespace ml_amt
 {
@@ -71,7 +72,7 @@ namespace ml_amt
             MelonLoader.MelonCoroutines.Start(WaitForLocalPlayer());
         }
 
-        System.Collections.IEnumerator WaitForLocalPlayer()
+        IEnumerator WaitForLocalPlayer()
         {
             while(PlayerSetup.Instance == null)
                 yield return null;

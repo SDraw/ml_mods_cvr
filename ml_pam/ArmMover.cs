@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace ml_pam
 {
+    [DisallowMultipleComponent]
     class ArmMover : MonoBehaviour
     {
         static readonly Vector4 ms_pointVector = new Vector4(0f, 0f, 0f, 1f);

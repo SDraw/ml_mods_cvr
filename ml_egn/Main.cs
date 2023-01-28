@@ -59,7 +59,7 @@ namespace ml_egn
                 else
                 {
                     if(Utils.IsMenuOpened())
-                        ViewManager.Instance.TriggerAlert("Prop Error", "Not connected to live instance", -1, true);
+                        Utils.ShowMenuAlert("Prop Error", "Not connected to live instance");
                     else
                         Utils.ShowHUDNotification("(Local) Client", "Unable to spawn prop", "Not connected to live instance");
                 }
@@ -70,7 +70,7 @@ namespace ml_egn
             }
         }
 
-        static void OnGameNetworkConnectionClosed(object __0, DisconnectedEventArgs __1)
+        static void OnGameNetworkConnectionClosed(DisconnectedEventArgs __1)
         {
             try
             {
