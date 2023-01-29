@@ -158,6 +158,8 @@ namespace ml_lme
         // Game events
         internal void OnAvatarClear()
         {
+            if(m_leapTracking != null)
+                m_leapTracking.OnAvatarClear();
             if(m_leapTracked != null)
                 m_leapTracked.OnAvatarClear();
         }
@@ -182,6 +184,12 @@ namespace ml_lme
         {
             if(m_leapInput != null)
                 m_leapInput.OnRayScale(p_scale);
+        }
+
+        internal void OnPlayspaceScale(float p_relation)
+        {
+            if(m_leapTracking != null)
+                m_leapTracking.OnPlayspaceScale(p_relation);
         }
 
         // Arbitrary

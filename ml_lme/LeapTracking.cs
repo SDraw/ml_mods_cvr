@@ -18,6 +18,8 @@ namespace ml_lme
         GameObject m_leapElbowRight = null;
         GameObject m_leapControllerModel = null;
 
+        float m_scaleRelation = 1f;
+
         public static LeapTracking GetInstance() => ms_instance;
 
         void Start()
@@ -75,9 +77,7 @@ namespace ml_lme
             while(PlayerSetup.Instance == null)
                 yield return null;
 
-            OnDesktopOffsetChange(Settings.DesktopOffset);
             OnHeadAttachChange(Settings.HeadAttach);
-            OnHeadOffsetChange(Settings.HeadOffset);
         }
 
         void OnDestroy()
@@ -130,12 +130,7 @@ namespace ml_lme
         void OnDesktopOffsetChange(Vector3 p_offset)
         {
             if(!Settings.HeadAttach)
-            {
-                if(!m_inVR)
-                    this.transform.localPosition = p_offset * PlayerSetup.Instance.vrCameraRig.transform.localScale.x;
-                else
-                    this.transform.localPosition = p_offset;
-            }
+                this.transform.localPosition = p_offset * (!m_inVR ? m_scaleRelation : 1f);
         }
 
         void OnModelVisibilityChange(bool p_state)
@@ -166,55 +161,43 @@ namespace ml_lme
 
         void OnHeadAttachChange(bool p_state)
         {
-            if(p_state)
+            if(!m_inVR)
             {
-                if(!m_inVR)
-                {
-                    this.transform.parent = PlayerSetup.Instance.desktopCamera.transform;
-                    this.transform.localPosition = Settings.HeadOffset * PlayerSetup.Instance.vrCameraRig.transform.localScale.x;
-                    this.transform.localScale = PlayerSetup.Instance.vrCameraRig.transform.localScale;
-                }
-                else
-                {
-                    this.transform.parent = PlayerSetup.Instance.vrCamera.transform;
-                    this.transform.localPosition = Settings.HeadOffset;
-                    this.transform.localScale = Vector3.one;
-                }
+                this.transform.parent = (p_state ? PlayerSetup.Instance.desktopCamera.transform : PlayerSetup.Instance.desktopCameraRig.transform);
+                this.transform.localPosition = (p_state ? Settings.HeadOffset : Settings.DesktopOffset) * m_scaleRelation;
             }
             else
             {
-                if(!m_inVR)
-                {
-                    this.transform.parent = PlayerSetup.Instance.desktopCameraRig.transform;
-                    this.transform.localPosition = Settings.DesktopOffset * PlayerSetup.Instance.vrCameraRig.transform.localScale.x;
-                    this.transform.localScale = PlayerSetup.Instance.vrCameraRig.transform.localScale;
-                }
-                else
-                {
-                    this.transform.parent = PlayerSetup.Instance.vrCameraRig.transform;
-                    this.transform.localPosition = Settings.DesktopOffset;
-                    this.transform.localScale = Vector3.one;
-                }
+                this.transform.parent = (p_state ? PlayerSetup.Instance.vrCamera.transform : PlayerSetup.Instance.vrCameraRig.transform);
+                this.transform.localPosition = (p_state ? Settings.HeadOffset : Settings.DesktopOffset);
             }
 
+            this.transform.localScale = Vector3.one * (!m_inVR ? m_scaleRelation : 1f);
             this.transform.localRotation = Quaternion.Euler(Settings.RootAngle);
         }
 
         void OnHeadOffsetChange(Vector3 p_offset)
         {
             if(Settings.HeadAttach)
-            {
-                if(!m_inVR)
-                    this.transform.localPosition = p_offset * PlayerSetup.Instance.vrCameraRig.transform.localScale.x;
-                else
-                    this.transform.localPosition = p_offset;
-            }
+                this.transform.localPosition = p_offset * (!m_inVR ? m_scaleRelation : 1f);
         }
 
         // Game events
+        internal void OnAvatarClear()
+        {
+            m_scaleRelation = 1f;
+            OnHeadAttachChange(Settings.HeadAttach);
+        }
+
         internal void OnAvatarSetup()
         {
             m_inVR = Utils.IsInVR();
+            OnHeadAttachChange(Settings.HeadAttach);
+        }
+
+        internal void OnPlayspaceScale(float p_relation)
+        {
+            m_scaleRelation = p_relation;
             OnHeadAttachChange(Settings.HeadAttach);
         }
     }

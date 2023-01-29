@@ -31,7 +31,7 @@ namespace ml_lme
             base.Start();
 
             m_inputManager = CVRInputManager.Instance; // _inputManager is stripped out, cool beans
-            m_steamVrModule = this.GetComponent<InputModuleSteamVR>();
+            m_steamVrModule = m_inputManager.GetComponent<InputModuleSteamVR>();
             m_inVR = Utils.IsInVR();
 
             m_handRayLeft = LeapTracking.GetInstance().GetLeftHand().gameObject.AddComponent<ControllerRay>();
@@ -91,7 +91,9 @@ namespace ml_lme
                 yield return null;
 
             m_lineLeft.material = PlayerSetup.Instance.leftRay.lineRenderer.material;
+            m_lineLeft.gameObject.layer = PlayerSetup.Instance.leftRay.gameObject.layer;
             m_lineRight.material = PlayerSetup.Instance.leftRay.lineRenderer.material;
+            m_lineRight.gameObject.layer = PlayerSetup.Instance.leftRay.gameObject.layer;
         }
 
         void OnDestroy()

@@ -1,5 +1,9 @@
 # Extended Game Notifications
-This mod shows main menu notifications and HUD popups upon avatar changing, prop spawning and server connection loss.  
+This mod shows main menu notifications and HUD popups upon:
+* Avatar changing
+* Prop spawning/deletion
+* Server connection loss
+* Screenshot saving
 Basically, merged previous `Avatar Change Info` and `Server Connection Info` mods in one.
 
 # Installation

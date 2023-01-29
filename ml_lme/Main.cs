@@ -43,6 +43,11 @@ namespace ml_lme
                 null,
                 new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnRayScale_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
+            HarmonyInstance.Patch(
+                typeof(PlayerSetup).GetMethod("SetPlaySpaceScale", BindingFlags.NonPublic | BindingFlags.Instance),
+                null,
+                new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnPlayspaceScale_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
+            );
 
             MelonLoader.MelonCoroutines.Start(WaitForRootLogic());
         }
@@ -111,6 +116,20 @@ namespace ml_lme
             {
                 if(m_leapManager != null)
                     m_leapManager.OnRayScale(p_scale);
+            }
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
+        }
+
+        static void OnPlayspaceScale_Postfix(float ____avatarScaleRelation) => ms_instance?.OnPlayspaceScale(____avatarScaleRelation);
+        void OnPlayspaceScale(float p_relation)
+        {
+            try
+            {
+                if(m_leapManager != null)
+                    m_leapManager.OnPlayspaceScale(p_relation);
             }
             catch(System.Exception e)
             {

@@ -1,5 +1,6 @@
 ﻿using ABI_RC.Core.EventSystem;
 using ABI_RC.Core.InteractionSystem;
+using ABI_RC.Core.IO;
 using ABI_RC.Core.Networking;
 using ABI_RC.Core.Util;
 using DarkRift.Client;
@@ -27,6 +28,24 @@ namespace ml_egn
                 typeof(NetworkManager).GetMethod("OnGameNetworkConnectionClosed", BindingFlags.NonPublic | BindingFlags.Instance),
                 null,
                 new HarmonyLib.HarmonyMethod(typeof(ExtendedGameNotifications).GetMethod(nameof(OnGameNetworkConnectionClosed), BindingFlags.NonPublic | BindingFlags.Static))
+            );
+
+            HarmonyInstance.Patch(
+                typeof(CVRCamImageSaver).GetMethod(nameof(CVRCamImageSaver.SavePicture), BindingFlags.Public | BindingFlags.Static),
+                null,
+                new HarmonyLib.HarmonyMethod(typeof(ExtendedGameNotifications).GetMethod(nameof(OnPictureSave), BindingFlags.NonPublic | BindingFlags.Static))
+            );
+
+            HarmonyInstance.Patch(
+                typeof(CVRSyncHelper).GetMethod(nameof(CVRSyncHelper.DeleteAllProps), BindingFlags.Public | BindingFlags.Static),
+                null,
+                new HarmonyLib.HarmonyMethod(typeof(ExtendedGameNotifications).GetMethod(nameof(OnAllPropsDelete), BindingFlags.NonPublic | BindingFlags.Static))
+            );
+
+            HarmonyInstance.Patch(
+                typeof(CVRSyncHelper).GetMethod(nameof(CVRSyncHelper.DeleteMyProps), BindingFlags.Public | BindingFlags.Static),
+                null,
+                new HarmonyLib.HarmonyMethod(typeof(ExtendedGameNotifications).GetMethod(nameof(OnOwnPropsDelete), BindingFlags.NonPublic | BindingFlags.Static))
             );
         }
 
@@ -76,6 +95,44 @@ namespace ml_egn
             {
                 if((__1 != null) && (!__1.LocalDisconnect))
                     Utils.ShowHUDNotification("(Local) Client", "Connection lost", (__1.Error != System.Net.Sockets.SocketError.Success) ? ("Reason: " + __1.Error.ToString()) : "", true);
+            }
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
+        }
+
+        static void OnPictureSave()
+        {
+            try
+            {
+                Utils.ShowHUDNotification("(Local) Client", "Screenshot saved");
+            }
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
+        }
+
+        static void OnAllPropsDelete()
+        {
+            try
+            {
+                if(Utils.IsMenuOpened())
+                    Utils.ShowMenuNotification("Props are removed");
+            }
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
+        }
+
+        static void OnOwnPropsDelete()
+        {
+            try
+            {
+                if(Utils.IsMenuOpened())
+                    Utils.ShowMenuNotification("Own props are removed");
             }
             catch(System.Exception e)
             {
