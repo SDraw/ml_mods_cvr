@@ -127,39 +127,53 @@ namespace ml_lme
                 if(l_data.m_leftHand.m_present && (!m_inVR || (VRTrackerManager.Instance.leftHand == null) || !VRTrackerManager.Instance.leftHand.active || !Settings.FingersOnly))
                 {
                     float l_strength = l_data.m_leftHand.m_grabStrength;
-                    m_inputManager.interactLeftValue = l_strength;
                     if(m_interactLeft != (l_strength > Settings.HoldThreadhold))
                     {
                         m_interactLeft = (l_strength > Settings.HoldThreadhold);
                         m_inputManager.interactLeftUp |= !m_interactLeft;
                         m_inputManager.interactLeftDown |= m_interactLeft;
                     }
-                    m_inputManager.gripLeftValue = 1f - l_strength; // Inversed
+                    if(m_interactLeft)
+                        m_inputManager.interactLeftValue = Mathf.InverseLerp(Settings.HoldThreadhold, 1f, l_strength);
+                    else
+                        m_inputManager.interactLeftValue = Mathf.Max(0f, m_inputManager.interactLeftValue);
+
                     if(m_gripLeft != (l_strength < Settings.ReleaseThreadhold))
                     {
                         m_gripLeft = (l_strength < Settings.ReleaseThreadhold);
                         m_inputManager.gripLeftUp |= !m_gripLeft;
                         m_inputManager.gripLeftDown |= m_gripLeft;
                     }
+                    if(m_gripLeft)
+                        m_inputManager.gripLeftValue = Mathf.InverseLerp(Settings.ReleaseThreadhold, 0f, l_strength);
+                    else
+                        m_inputManager.gripLeftValue = Mathf.Max(0f, m_inputManager.gripLeftValue);
                 }
 
                 if(l_data.m_rightHand.m_present && (!m_inVR || (VRTrackerManager.Instance.rightHand == null) || !VRTrackerManager.Instance.rightHand.active || !Settings.FingersOnly))
                 {
                     float l_strength = l_data.m_rightHand.m_grabStrength;
-                    m_inputManager.interactRightValue = l_strength;
                     if(m_interactRight != (l_strength > Settings.HoldThreadhold))
                     {
                         m_interactRight = (l_strength > Settings.HoldThreadhold);
                         m_inputManager.interactRightUp |= !m_interactRight;
                         m_inputManager.interactRightDown |= m_interactRight;
                     }
-                    m_inputManager.gripRightValue = 1f - l_strength;
+                    if(m_interactRight)
+                        m_inputManager.interactRightValue = Mathf.InverseLerp(Settings.HoldThreadhold, 1f, l_strength);
+                    else
+                        m_inputManager.interactRightValue = Mathf.Max(0f, m_inputManager.interactRightValue);
+
                     if(m_gripRight != (l_strength < Settings.HoldThreadhold))
                     {
                         m_gripRight = (l_strength < Settings.HoldThreadhold);
                         m_inputManager.gripRightUp |= !m_gripRight;
                         m_inputManager.gripRightDown |= m_gripRight;
                     }
+                    if(m_gripRight)
+                        m_inputManager.gripRightValue = Mathf.InverseLerp(Settings.ReleaseThreadhold, 0f, l_strength);
+                    else
+                        m_inputManager.gripRightValue = Mathf.Max(0f, m_inputManager.gripRightValue);
                 }
             }
         }
