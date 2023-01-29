@@ -131,14 +131,14 @@ namespace ml_lme
                     if(m_interactLeft != (l_strength > Settings.HoldThreadhold))
                     {
                         m_interactLeft = (l_strength > Settings.HoldThreadhold);
-                        m_inputManager.interactLeftUp |= m_interactLeft;
+                        m_inputManager.interactLeftUp |= !m_interactLeft;
                         m_inputManager.interactLeftDown |= m_interactLeft;
                     }
                     m_inputManager.gripLeftValue = 1f - l_strength; // Inversed
                     if(m_gripLeft != (l_strength < Settings.ReleaseThreadhold))
                     {
                         m_gripLeft = (l_strength < Settings.ReleaseThreadhold);
-                        m_inputManager.gripLeftUp |= m_gripLeft;
+                        m_inputManager.gripLeftUp |= !m_gripLeft;
                         m_inputManager.gripLeftDown |= m_gripLeft;
                     }
                 }
@@ -150,14 +150,14 @@ namespace ml_lme
                     if(m_interactRight != (l_strength > Settings.HoldThreadhold))
                     {
                         m_interactRight = (l_strength > Settings.HoldThreadhold);
-                        m_inputManager.interactRightUp |= m_interactRight;
+                        m_inputManager.interactRightUp |= !m_interactRight;
                         m_inputManager.interactRightDown |= m_interactRight;
                     }
                     m_inputManager.gripRightValue = 1f - l_strength;
                     if(m_gripRight != (l_strength < Settings.HoldThreadhold))
                     {
                         m_gripRight = (l_strength < Settings.HoldThreadhold);
-                        m_inputManager.gripRightUp |= m_gripRight;
+                        m_inputManager.gripRightUp |= !m_gripRight;
                         m_inputManager.gripRightDown |= m_gripRight;
                     }
                 }
