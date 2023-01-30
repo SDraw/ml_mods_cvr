@@ -10,9 +10,10 @@ namespace ml_lme
         static readonly Quaternion ms_hmdRotationFix = new Quaternion(0f, 0.7071068f, 0.7071068f, 0f);
         static readonly Quaternion ms_screentopRotationFix = new Quaternion(0f, 0f, -1f, 0f);
 
-        public static bool AreKnucklesInUse() => PlayerSetup.Instance._trackerManager.trackerNames.Contains("knuckles");
-
         public static bool IsInVR() => ((ABI_RC.Core.Savior.CheckVR.Instance != null) && ABI_RC.Core.Savior.CheckVR.Instance.hasVrDeviceLoaded);
+        public static bool AreKnucklesInUse() => PlayerSetup.Instance._trackerManager.trackerNames.Contains("knuckles");
+        public static bool IsLeftHandTracked() => ((VRTrackerManager.Instance.leftHand != null) && VRTrackerManager.Instance.leftHand.active);
+        public static bool IsRightHandTracked() => ((VRTrackerManager.Instance.rightHand != null) && VRTrackerManager.Instance.rightHand.active);
 
         public static Matrix4x4 GetMatrix(this Transform p_transform, bool p_pos = true, bool p_rot = true, bool p_scl = false)
         {

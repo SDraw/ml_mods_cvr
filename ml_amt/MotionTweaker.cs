@@ -114,7 +114,7 @@ namespace ml_amt
                 float l_currentHeight = Mathf.Clamp((l_hmdMatrix * ms_pointVector).y, 0f, float.MaxValue);
                 float l_avatarScale = (m_avatarScale > 0f) ? (PlayerSetup.Instance._avatar.transform.localScale.y / m_avatarScale) : 0f;
                 float l_avatarViewHeight = Mathf.Clamp(m_viewPointHeight * l_avatarScale, 0f, float.MaxValue);
-                m_upright = Mathf.Clamp(((l_avatarViewHeight > 0f) ? (l_currentHeight / l_avatarViewHeight) : 0f), 0f, 1f);
+                m_upright = Mathf.Clamp01((l_avatarViewHeight > 0f) ? (l_currentHeight / l_avatarViewHeight) : 0f);
                 m_poseState = (m_upright <= Mathf.Min(m_proneLimit, m_crouchLimit)) ? PoseState.Proning : ((m_upright <= Mathf.Max(m_proneLimit, m_crouchLimit)) ? PoseState.Crouching : PoseState.Standing);
 
                 if(m_avatarHips != null)
@@ -216,11 +216,11 @@ namespace ml_amt
 
             Transform l_customTransform = PlayerSetup.Instance._avatar.transform.Find("CrouchLimit");
             m_customCrouchLimit = (l_customTransform != null);
-            m_crouchLimit = m_customCrouchLimit ? Mathf.Clamp(l_customTransform.localPosition.y, 0f, 1f) : Settings.CrouchLimit;
+            m_crouchLimit = m_customCrouchLimit ? Mathf.Clamp01(l_customTransform.localPosition.y) : Settings.CrouchLimit;
 
             l_customTransform = PlayerSetup.Instance._avatar.transform.Find("ProneLimit");
             m_customProneLimit = (l_customTransform != null);
-            m_proneLimit = m_customProneLimit ? Mathf.Clamp(l_customTransform.localPosition.y, 0f, 1f) : Settings.ProneLimit;
+            m_proneLimit = m_customProneLimit ? Mathf.Clamp01(l_customTransform.localPosition.y) : Settings.ProneLimit;
 
             l_customTransform = PlayerSetup.Instance._avatar.transform.Find("LocomotionOffset");
             m_customLocomotionOffset = (l_customTransform != null);
@@ -305,7 +305,7 @@ namespace ml_amt
         public void SetCrouchLimit(float p_value)
         {
             if(!m_customCrouchLimit)
-                m_crouchLimit = Mathf.Clamp(p_value, 0f, 1f);
+                m_crouchLimit = Mathf.Clamp01(p_value);
         }
         public void SetIKOverrideProne(bool p_state)
         {
@@ -314,7 +314,7 @@ namespace ml_amt
         public void SetProneLimit(float p_value)
         {
             if(!m_customProneLimit)
-                m_proneLimit = Mathf.Clamp(p_value, 0f, 1f);
+                m_proneLimit = Mathf.Clamp01(p_value);
         }
         public void SetPoseTransitions(bool p_state)
         {

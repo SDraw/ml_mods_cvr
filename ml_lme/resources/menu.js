@@ -393,16 +393,16 @@ function inp_dropdown_mod_lme(_obj, _callbackName) {
         </div>
 
         <div class ="row-wrapper">
-            <div class ="option-caption">Hold gesture threadhold: </div>
+            <div class ="option-caption">Interact gesture threadhold: </div>
             <div class ="option-input">
-                <div id="HoldThreadhold" class ="inp_slider no-scroll" data-min="0" data-max="100" data-current="50"></div>
+                <div id="InteractThreadhold" class ="inp_slider no-scroll" data-min="0" data-max="100" data-current="80"></div>
             </div>
         </div>
 
         <div class ="row-wrapper">
-            <div class ="option-caption">Release gesture threadhold: </div>
+            <div class ="option-caption">Grip gesture threadhold: </div>
             <div class ="option-input">
-                <div id="ReleaseThreadhold" class ="inp_slider no-scroll" data-min="0" data-max="100" data-current="50"></div>
+                <div id="GripThreadhold" class ="inp_slider no-scroll" data-min="0" data-max="100" data-current="40"></div>
             </div>
         </div>
     `;

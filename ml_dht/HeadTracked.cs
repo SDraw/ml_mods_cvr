@@ -106,7 +106,7 @@ namespace ml_dht
                 if(m_avatarDescriptor != null)
                     m_avatarDescriptor.useVisemeLipsync = false;
 
-                float l_weight = Mathf.Clamp(Mathf.InverseLerp(0.25f, 1f, Mathf.Abs(m_mouthShapes.y)), 0f, 1f) * 100f;
+                float l_weight = Mathf.Clamp01(Mathf.InverseLerp(0.25f, 1f, Mathf.Abs(m_mouthShapes.y))) * 100f;
 
                 p_component.BlendShapeValues[(int)LipShape_v2.Jaw_Open] = m_mouthShapes.x * 100f;
                 p_component.BlendShapeValues[(int)LipShape_v2.Mouth_Pout] = ((m_mouthShapes.y > 0f) ? l_weight : 0f);

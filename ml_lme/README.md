@@ -23,4 +23,5 @@ Available mod's settings in `Settings - Implementation - Leap Motion Tracking`:
 * **Model visibility:** show Leap Motion controller model, useful for tracking visualizing, disabled by default.
 * **Interaction input:** enables in-game interactions (props, menu and etc.); `true` by default.
   * Note: Suggested to use with disabled `Settings - Input & Key-Bindings - Use grip to grab`.
-* **Hold/Release gesture threadhold:** limits for interaction/grip activation based on hand gesture; 50 by default.
+* **Interact gesture threadhold:** activation limit for interaction based on hand gesture; 80 by default.
+* **Grip gesture threadhold:** activation limit for grip based on hand gesture; 40 by default.

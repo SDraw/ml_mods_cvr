@@ -33,8 +33,8 @@ namespace ml_lme
             HeadZ,
             TrackElbows,
             Input,
-            HoldThreadhold,
-            ReleaseThreadhold
+            InteractThreadhold,
+            GripThreadhold
         };
 
         static bool ms_enabled = false;
@@ -47,8 +47,8 @@ namespace ml_lme
         static Vector3 ms_headOffset = new Vector3(0f, -0.3f, 0.15f);
         static bool ms_trackElbows = true;
         static bool ms_input = true;
-        static float ms_holdThreadhold = 0.5f;
-        static float ms_releaseThreadhold = 0.5f;
+        static float ms_interactThreadhold = 0.8f;
+        static float ms_gripThreadhold = 0.4f;
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
@@ -63,8 +63,8 @@ namespace ml_lme
         static public event Action<Vector3> HeadOffsetChange;
         static public event Action<bool> TrackElbowsChange;
         static public event Action<bool> InputChange;
-        static public event Action<float> HoldThreadholdChange;
-        static public event Action<float> ReleaseThreadholdChange;
+        static public event Action<float> InteractThreadholdChange;
+        static public event Action<float> GripThreadholdChange;
 
         internal static void Init()
         {
@@ -88,8 +88,8 @@ namespace ml_lme
                 ms_category.CreateEntry(ModSetting.HeadZ.ToString(), 15),
                 ms_category.CreateEntry(ModSetting.TrackElbows.ToString(), true),
                 ms_category.CreateEntry(ModSetting.Input.ToString(), true),
-                ms_category.CreateEntry(ModSetting.HoldThreadhold.ToString(), 50),
-                ms_category.CreateEntry(ModSetting.ReleaseThreadhold.ToString(), 50),
+                ms_category.CreateEntry(ModSetting.InteractThreadhold.ToString(), 80),
+                ms_category.CreateEntry(ModSetting.GripThreadhold.ToString(), 40),
             };
 
             Load();
@@ -144,8 +144,8 @@ namespace ml_lme
             ) * 0.01f;
             ms_trackElbows = (bool)ms_entries[(int)ModSetting.TrackElbows].BoxedValue;
             ms_input = (bool)ms_entries[(int)ModSetting.Input].BoxedValue;
-            ms_holdThreadhold = (int)ms_entries[(int)ModSetting.HoldThreadhold].BoxedValue * 0.01f;
-            ms_releaseThreadhold = (int)ms_entries[(int)ModSetting.ReleaseThreadhold].BoxedValue * 0.01f;
+            ms_interactThreadhold = (int)ms_entries[(int)ModSetting.InteractThreadhold].BoxedValue * 0.01f;
+            ms_gripThreadhold = (int)ms_entries[(int)ModSetting.GripThreadhold].BoxedValue * 0.01f;
         }
 
         static void OnToggleUpdate(string p_name, string p_value)
@@ -265,16 +265,16 @@ namespace ml_lme
                         HeadOffsetChange?.Invoke(ms_headOffset);
                     }
                     break;
-                    case ModSetting.HoldThreadhold:
+                    case ModSetting.InteractThreadhold:
                     {
-                        ms_holdThreadhold = int.Parse(p_value) * 0.01f;
-                        HoldThreadholdChange?.Invoke(ms_holdThreadhold);
+                        ms_interactThreadhold = int.Parse(p_value) * 0.01f;
+                        InteractThreadholdChange?.Invoke(ms_interactThreadhold);
                     }
                     break;
-                    case ModSetting.ReleaseThreadhold:
+                    case ModSetting.GripThreadhold:
                     {
-                        ms_releaseThreadhold = int.Parse(p_value) * 0.01f;
-                        ReleaseThreadholdChange?.Invoke(ms_releaseThreadhold);
+                        ms_gripThreadhold = int.Parse(p_value) * 0.01f;
+                        GripThreadholdChange?.Invoke(ms_gripThreadhold);
                     }
                     break;
                 }
@@ -341,13 +341,13 @@ namespace ml_lme
         {
             get => ms_input;
         }
-        public static float HoldThreadhold
+        public static float InteractThreadhold
         {
-            get => ms_holdThreadhold;
+            get => ms_interactThreadhold;
         }
-        public static float ReleaseThreadhold
+        public static float GripThreadhold
         {
-            get => ms_releaseThreadhold;
+            get => ms_gripThreadhold;
         }
     }
 }
