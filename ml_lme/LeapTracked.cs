@@ -275,11 +275,11 @@ namespace ml_lme
 
                 Transform l_hand = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftHand);
                 if(l_hand != null)
-                    m_leftHandTarget.localRotation = ((m_vrIK != null) ? ms_offsetLeft : ms_offsetLeftDesktop) * (PlayerSetup.Instance._avatar.transform.GetMatrix().inverse * l_hand.GetMatrix()).rotation;
+                    m_leftHandTarget.localRotation = (m_inVR ? ms_offsetLeft : ms_offsetLeftDesktop) * (PlayerSetup.Instance._avatar.transform.GetMatrix().inverse * l_hand.GetMatrix()).rotation;
 
                 l_hand = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightHand);
                 if(l_hand != null)
-                    m_rightHandTarget.localRotation = ((m_vrIK != null) ? ms_offsetRight : ms_offsetRightDesktop) * (PlayerSetup.Instance._avatar.transform.GetMatrix().inverse * l_hand.GetMatrix()).rotation;
+                    m_rightHandTarget.localRotation = (m_inVR ? ms_offsetRight : ms_offsetRightDesktop) * (PlayerSetup.Instance._avatar.transform.GetMatrix().inverse * l_hand.GetMatrix()).rotation;
 
                 if(m_vrIK == null)
                 {
