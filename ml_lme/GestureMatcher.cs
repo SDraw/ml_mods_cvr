@@ -4,7 +4,6 @@ namespace ml_lme
 {
     static class GestureMatcher
     {
-
         readonly static Vector2[] ms_fingerLimits =
         {
             new Vector2(-50f, 0f),
