@@ -1,10 +1,11 @@
 ﻿using ABI.CCK.Components;
+using ABI_RC.Core;
 using ABI_RC.Core.Player;
 using ABI_RC.Systems.IK.SubSystems;
 using ABI_RC.Systems.MovementSystem;
+using System.Collections;
 using System.Reflection;
 using UnityEngine;
-using System.Collections;
 
 namespace ml_amt
 {
@@ -66,6 +67,18 @@ namespace ml_amt
             HarmonyInstance.Patch(
                 typeof(MovementSystem).GetMethod("UpdateCollider", BindingFlags.NonPublic | BindingFlags.Instance),
                 new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnUpdateCollider_Prefix), BindingFlags.Static | BindingFlags.NonPublic)),
+                null
+            );
+
+            // AAS overriding "fix"
+            HarmonyInstance.Patch(
+                typeof(CVRAnimatorManager).GetMethod(nameof(CVRAnimatorManager.SetOverrideAnimation), BindingFlags.Instance),
+                new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnAnimationOverride_Prefix), BindingFlags.Static | BindingFlags.NonPublic)),
+                null
+            );
+            HarmonyInstance.Patch(
+                typeof(CVRAnimatorManager).GetMethod(nameof(CVRAnimatorManager.RestoreOverrideAnimation)),
+                new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnAnimationOverrideRestore_Prefix), BindingFlags.Static | BindingFlags.NonPublic)),
                 null
             );
 
@@ -221,6 +234,16 @@ namespace ml_amt
                 MelonLoader.MelonLogger.Error(l_exception);
             }
 
+            return false;
+        }
+
+        static bool OnAnimationOverride_Prefix()
+        {
+            return false;
+        }
+
+        static bool OnAnimationOverrideRestore_Prefix()
+        {
             return false;
         }
     }
