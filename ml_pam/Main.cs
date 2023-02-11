@@ -1,4 +1,5 @@
 ﻿using ABI.CCK.Components;
+using ABI_RC.Core.InteractionSystem;
 using ABI_RC.Core.Player;
 using System;
 using System.Reflection;
@@ -10,12 +11,14 @@ namespace ml_pam
     {
         static PickupArmMovement ms_instance = null;
 
-        ArmMover m_localPuller = null;
+        ArmMover m_localMover = null;
 
         public override void OnInitializeMelon()
         {
             if(ms_instance == null)
                 ms_instance = this;
+
+            Settings.Init();
 
             HarmonyInstance.Patch(
                 typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.ClearAvatar)),
@@ -37,6 +40,21 @@ namespace ml_pam
                 null,
                 new HarmonyLib.HarmonyMethod(typeof(PickupArmMovement).GetMethod(nameof(OnCVRPickupObjectDrop_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
+            HarmonyInstance.Patch(
+                typeof(PlayerSetup).GetMethod("SetPlaySpaceScale", BindingFlags.NonPublic | BindingFlags.Instance),
+                null,
+                new HarmonyLib.HarmonyMethod(typeof(PickupArmMovement).GetMethod(nameof(OnPlayspaceScale_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
+            );
+
+            MelonLoader.MelonCoroutines.Start(WaitForLocalPlayer());
+        }
+
+        System.Collections.IEnumerator WaitForLocalPlayer()
+        {
+            while(PlayerSetup.Instance == null)
+                yield return null;
+
+            m_localMover = PlayerSetup.Instance.gameObject.AddComponent<ArmMover>();
         }
 
         public override void OnDeinitializeMelon()
@@ -50,7 +68,8 @@ namespace ml_pam
         {
             try
             {
-                m_localPuller = null;
+                if(m_localMover != null)
+                    m_localMover.OnAvatarClear();
             }
             catch(Exception e)
             {
@@ -63,8 +82,8 @@ namespace ml_pam
         {
             try
             {
-                if(!Utils.IsInVR())
-                    m_localPuller = PlayerSetup.Instance._avatar.AddComponent<ArmMover>();
+                if(m_localMover != null)
+                    m_localMover.OnAvatarSetup();
             }
             catch(Exception e)
             {
@@ -72,15 +91,13 @@ namespace ml_pam
             }
         }
 
-        static void OnCVRPickupObjectGrab_Postfix(ref CVRPickupObject __instance, Vector3 __2) => ms_instance?.OnCVRPickupObjectGrab(__instance, __2);
-        void OnCVRPickupObjectGrab(CVRPickupObject p_pickup, Vector3 p_hit)
+        static void OnCVRPickupObjectGrab_Postfix(ref CVRPickupObject __instance, ControllerRay __1, Vector3 __2) => ms_instance?.OnCVRPickupObjectGrab(__instance, __1, __2);
+        void OnCVRPickupObjectGrab(CVRPickupObject p_pickup, ControllerRay p_ray, Vector3 p_hit)
         {
             try
             {
-                if(p_pickup.IsGrabbedByMe() && (m_localPuller != null))
-                {
-                    m_localPuller.SetTarget(p_pickup, p_hit);
-                }
+                if(p_pickup.IsGrabbedByMe() && (m_localMover != null))
+                    m_localMover.OnPickupGrab(p_pickup, p_ray, p_hit);
             }
             catch(Exception e)
             {
@@ -88,15 +105,27 @@ namespace ml_pam
             }
         }
 
-        static void OnCVRPickupObjectDrop_Postfix() => ms_instance?.OnCVRPickupObjectDrop();
-        void OnCVRPickupObjectDrop()
+        static void OnCVRPickupObjectDrop_Postfix(ref CVRPickupObject __instance) => ms_instance?.OnCVRPickupObjectDrop(__instance);
+        void OnCVRPickupObjectDrop(CVRPickupObject p_pickup)
         {
             try
             {
-                if(m_localPuller != null)
-                {
-                    m_localPuller.SetTarget(null, Vector3.zero);
-                }
+                if(m_localMover != null)
+                    m_localMover.OnPickupDrop(p_pickup);
+            }
+            catch(Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
+        }
+
+        static void OnPlayspaceScale_Postfix(float ____avatarScaleRelation) => ms_instance?.OnPlayspaceScale(____avatarScaleRelation);
+        void OnPlayspaceScale(float p_relation)
+        {
+            try
+            {
+                if(m_localMover != null)
+                    m_localMover.OnPlayspaceScale(p_relation);
             }
             catch(Exception e)
             {

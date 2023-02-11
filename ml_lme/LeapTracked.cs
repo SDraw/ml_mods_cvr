@@ -16,7 +16,7 @@ namespace ml_lme
         static readonly Quaternion ms_offsetRightDesktop = Quaternion.Euler(0f, 270f, 0f);
 
         VRIK m_vrIK = null;
-        Vector2 m_armsWeights = Vector2.zero;
+        Vector4 m_armsWeights = Vector2.zero;
         bool m_inVR = false;
         Transform m_hips = null;
         Transform m_origLeftHand = null;
@@ -350,14 +350,19 @@ namespace ml_lme
 
         void OnIKPreUpdate()
         {
-            m_armsWeights.Set(m_vrIK.solver.leftArm.positionWeight, m_vrIK.solver.rightArm.positionWeight);
+            m_armsWeights.Set(
+                m_vrIK.solver.leftArm.positionWeight,
+                m_vrIK.solver.leftArm.rotationWeight,
+                m_vrIK.solver.rightArm.positionWeight,
+                m_vrIK.solver.rightArm.rotationWeight
+            );
 
-            if(m_leftTargetActive && Mathf.Approximately(m_armsWeights.x, 0f))
+            if(m_leftTargetActive && (Mathf.Approximately(m_armsWeights.x, 0f) || Mathf.Approximately(m_armsWeights.y, 0f)))
             {
                 m_vrIK.solver.leftArm.positionWeight = 1f;
                 m_vrIK.solver.leftArm.rotationWeight = 1f;
             }
-            if(m_rightTargetActive && Mathf.Approximately(m_armsWeights.y, 0f))
+            if(m_rightTargetActive && (Mathf.Approximately(m_armsWeights.z, 0f) || Mathf.Approximately(m_armsWeights.w, 0f)))
             {
                 m_vrIK.solver.rightArm.positionWeight = 1f;
                 m_vrIK.solver.rightArm.rotationWeight = 1f;
@@ -366,10 +371,9 @@ namespace ml_lme
         void OnIKPostUpdate()
         {
             m_vrIK.solver.leftArm.positionWeight = m_armsWeights.x;
-            m_vrIK.solver.leftArm.rotationWeight = m_armsWeights.x;
-
-            m_vrIK.solver.rightArm.positionWeight = m_armsWeights.y;
-            m_vrIK.solver.rightArm.rotationWeight = m_armsWeights.y;
+            m_vrIK.solver.leftArm.rotationWeight = m_armsWeights.y;
+            m_vrIK.solver.rightArm.positionWeight = m_armsWeights.z;
+            m_vrIK.solver.rightArm.rotationWeight = m_armsWeights.w;
         }
 
         void RestoreVRIK()

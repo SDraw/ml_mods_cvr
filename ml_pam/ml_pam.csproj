@@ -42,6 +42,16 @@
       <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="cohtml.Net">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Cohtml.Runtime">
+      <Private>False</Private>
+    </Reference>
     <Reference Include="MelonLoader, Version=0.5.7.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\MelonLoader\MelonLoader.dll</HintPath>
@@ -66,7 +76,12 @@
     <Compile Include="ArmMover.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Scripts.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="Utils.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="resources\menu.js" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -11,8 +11,10 @@ namespace ml_amt
     [DisallowMultipleComponent]
     class MotionTweaker : MonoBehaviour
     {
+        static readonly Vector4 ms_pointVector = new Vector4(0f, 0f, 0f, 1f);
         static readonly FieldInfo ms_grounded = typeof(MovementSystem).GetField("_isGrounded", BindingFlags.NonPublic | BindingFlags.Instance);
         static readonly FieldInfo ms_groundedRaw = typeof(MovementSystem).GetField("_isGroundedRaw", BindingFlags.NonPublic | BindingFlags.Instance);
+        static readonly FieldInfo ms_hasToes = typeof(IKSolverVR).GetField("hasToes", BindingFlags.NonPublic | BindingFlags.Instance);
         static readonly int ms_emoteHash = Animator.StringToHash("Emote");
 
         enum PoseState
@@ -22,17 +24,18 @@ namespace ml_amt
             Proning
         }
 
-        static readonly Vector4 ms_pointVector = new Vector4(0f, 0f, 0f, 1f);
-
         VRIK m_vrIk = null;
         int m_locomotionLayer = 0;
         float m_ikWeight = 1f; // Original weight
         float m_locomotionWeight = 1f; // Original weight
         bool m_plantFeet = false; // Original plant feet
         float m_avatarScale = 1f; // Instantiated scale
+        Vector3 m_locomotionOffset = Vector3.zero; // Original locomotion offset
+        bool m_bendNormalLeft = false;
+        bool m_bendNormalRight = false;
         Transform m_avatarHips = null;
         float m_viewPointHeight = 1f;
-        bool m_isInVR = false;
+        bool m_inVR = false;
 
         bool m_avatarReady = false;
         bool m_compatibleAvatar = false;
@@ -55,14 +58,13 @@ namespace ml_amt
         bool m_ikOverrideFly = true;
         bool m_ikOverrideJump = true;
 
-        bool m_customLocomotionOffset = false;
-        Vector3 m_locomotionOffset = Vector3.zero;
-
         bool m_detectEmotes = true;
         bool m_emoteActive = false;
 
         bool m_followHips = true;
         Vector3 m_hipsToPlayer = Vector3.zero;
+
+        Vector3 m_massCenter = Vector3.zero;
 
         readonly List<AvatarParameter> m_parameters = null;
 
@@ -73,7 +75,7 @@ namespace ml_amt
 
         void Start()
         {
-            m_isInVR = Utils.IsInVR();
+            m_inVR = Utils.IsInVR();
 
             Settings.IKOverrideCrouchChange += this.SetIKOverrideCrouch;
             Settings.CrouchLimitChange += this.SetCrouchLimit;
@@ -85,6 +87,7 @@ namespace ml_amt
             Settings.IKOverrideJumpChange += this.SetIKOverrideJump;
             Settings.DetectEmotesChange += this.SetDetectEmotes;
             Settings.FollowHipsChange += this.SetFollowHips;
+            Settings.MassCenterChange += this.SetMassCenter;
         }
 
         void OnDestroy()
@@ -99,6 +102,7 @@ namespace ml_amt
             Settings.IKOverrideJumpChange -= this.SetIKOverrideJump;
             Settings.DetectEmotesChange -= this.SetDetectEmotes;
             Settings.FollowHipsChange -= this.SetFollowHips;
+            Settings.MassCenterChange -= this.SetMassCenter;
         }
 
         void Update()
@@ -110,7 +114,7 @@ namespace ml_amt
                 m_moving = !Mathf.Approximately(MovementSystem.Instance.movementVector.magnitude, 0f);
 
                 // Update upright
-                Matrix4x4 l_hmdMatrix = PlayerSetup.Instance.transform.GetMatrix().inverse * (m_isInVR ? PlayerSetup.Instance.vrHeadTracker.transform.GetMatrix() : PlayerSetup.Instance.desktopCameraRig.transform.GetMatrix());
+                Matrix4x4 l_hmdMatrix = PlayerSetup.Instance.transform.GetMatrix().inverse * (m_inVR ? PlayerSetup.Instance.vrHeadTracker.transform.GetMatrix() : PlayerSetup.Instance.desktopCameraRig.transform.GetMatrix());
                 float l_currentHeight = Mathf.Clamp((l_hmdMatrix * ms_pointVector).y, 0f, float.MaxValue);
                 float l_avatarScale = (m_avatarScale > 0f) ? (PlayerSetup.Instance._avatar.transform.localScale.y / m_avatarScale) : 0f;
                 float l_avatarViewHeight = Mathf.Clamp(m_viewPointHeight * l_avatarScale, 0f, float.MaxValue);
@@ -123,7 +127,7 @@ namespace ml_amt
                     m_hipsToPlayer.Set(l_hipsToPoint.x, 0f, l_hipsToPoint.z);
                 }
 
-                if(m_isInVR && (m_vrIk != null) && m_vrIk.enabled)
+                if(m_inVR && (m_vrIk != null) && m_vrIk.enabled)
                 {
                     if(m_adjustedMovement)
                     {
@@ -170,20 +174,20 @@ namespace ml_amt
             m_poseState = PoseState.Standing;
             m_customCrouchLimit = false;
             m_customProneLimit = false;
-            m_customLocomotionOffset = false;
-            m_locomotionOffset = Vector3.zero;
             m_avatarScale = 1f;
+            m_locomotionOffset = Vector3.zero;
             m_emoteActive = false;
             m_moving = false;
             m_hipsToPlayer = Vector3.zero;
             m_avatarHips = null;
             m_viewPointHeight = 1f;
+            m_massCenter = Vector3.zero;
             m_parameters.Clear();
         }
 
         internal void OnSetupAvatar()
         {
-            m_isInVR = Utils.IsInVR();
+            m_inVR = Utils.IsInVR();
             m_vrIk = PlayerSetup.Instance._avatar.GetComponent<VRIK>();
             m_locomotionLayer = PlayerSetup.Instance._animator.GetLayerIndex("Locomotion/Emotes");
             m_avatarHips = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.Hips);
@@ -222,15 +226,31 @@ namespace ml_amt
             m_customProneLimit = (l_customTransform != null);
             m_proneLimit = m_customProneLimit ? Mathf.Clamp01(l_customTransform.localPosition.y) : Settings.ProneLimit;
 
-            l_customTransform = PlayerSetup.Instance._avatar.transform.Find("LocomotionOffset");
-            m_customLocomotionOffset = (l_customTransform != null);
-            m_locomotionOffset = m_customLocomotionOffset ? l_customTransform.localPosition : Vector3.zero;
-
             // Apply VRIK tweaks
             if(m_vrIk != null)
             {
-                if(m_customLocomotionOffset)
-                    m_vrIk.solver.locomotion.offset = m_locomotionOffset;
+                m_locomotionOffset = m_vrIk.solver.locomotion.offset;
+                m_massCenter = m_locomotionOffset;
+
+                if((bool)ms_hasToes.GetValue(m_vrIk.solver))
+                {
+                    Transform l_foot = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftFoot);
+                    if(l_foot == null)
+                        l_foot = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightFoot);
+
+                    Transform l_toe = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftToes);
+                    if(l_toe == null)
+                        l_toe = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightToes);
+
+                    if((l_foot != null) && (l_toe != null))
+                    {
+                        Vector3 l_footPos = (PlayerSetup.Instance._avatar.transform.GetMatrix().inverse * l_foot.GetMatrix()) * ms_pointVector;
+                        Vector3 l_toePos = (PlayerSetup.Instance._avatar.transform.GetMatrix().inverse * l_toe.GetMatrix()) * ms_pointVector;
+                        m_massCenter = new Vector3(0f, 0f, l_toePos.z - l_footPos.z);
+                    }
+                }
+
+                m_vrIk.solver.locomotion.offset = (Settings.MassCenter ? m_massCenter : m_locomotionOffset);
 
                 m_vrIk.onPreSolverUpdate.AddListener(this.OnIKPreUpdate);
                 m_vrIk.onPostSolverUpdate.AddListener(this.OnIKPostUpdate);
@@ -260,6 +280,8 @@ namespace ml_amt
             m_ikWeight = m_vrIk.solver.IKPositionWeight;
             m_locomotionWeight = m_vrIk.solver.locomotion.weight;
             m_plantFeet = m_vrIk.solver.plantFeet;
+            m_bendNormalLeft = m_vrIk.solver.leftLeg.useAnimatedBendNormal;
+            m_bendNormalRight = m_vrIk.solver.rightLeg.useAnimatedBendNormal;
 
             if(m_detectEmotes && m_emoteActive)
                 m_vrIk.solver.IKPositionWeight = 0f;
@@ -272,18 +294,22 @@ namespace ml_amt
             if(m_ikOverrideFly && MovementSystem.Instance.flying)
             {
                 m_vrIk.solver.locomotion.weight = 0f;
+                m_vrIk.solver.leftLeg.useAnimatedBendNormal = true;
+                m_vrIk.solver.rightLeg.useAnimatedBendNormal = true;
                 l_legsOverride = true;
             }
 
             if(m_ikOverrideJump && !m_grounded && !MovementSystem.Instance.flying)
             {
                 m_vrIk.solver.locomotion.weight = 0f;
+                m_vrIk.solver.leftLeg.useAnimatedBendNormal = true;
+                m_vrIk.solver.rightLeg.useAnimatedBendNormal = true;
                 l_legsOverride = true;
             }
 
             bool l_solverActive = !Mathf.Approximately(m_vrIk.solver.IKPositionWeight, 0f);
 
-            if(l_legsOverride && l_solverActive && m_followHips && (!m_moving || (m_poseState == PoseState.Proning)) && m_isInVR && !BodySystem.isCalibratedAsFullBody)
+            if(l_legsOverride && l_solverActive && m_followHips && (!m_moving || (m_poseState == PoseState.Proning)) && m_inVR && !BodySystem.isCalibratedAsFullBody)
             {
                 m_vrIk.solver.plantFeet = false;
                 ABI_RC.Systems.IK.IKSystem.VrikRootController.enabled = false;
@@ -296,6 +322,8 @@ namespace ml_amt
             m_vrIk.solver.IKPositionWeight = m_ikWeight;
             m_vrIk.solver.locomotion.weight = m_locomotionWeight;
             m_vrIk.solver.plantFeet = m_plantFeet;
+            m_vrIk.solver.leftLeg.useAnimatedBendNormal = m_bendNormalLeft;
+            m_vrIk.solver.rightLeg.useAnimatedBendNormal = m_bendNormalRight;
         }
 
         public void SetIKOverrideCrouch(bool p_state)
@@ -320,7 +348,7 @@ namespace ml_amt
         {
             m_poseTransitions = p_state;
 
-            if(!m_poseTransitions && m_avatarReady && m_isInVR)
+            if(!m_poseTransitions && m_avatarReady && m_inVR)
             {
                 PlayerSetup.Instance.animatorManager.SetAnimatorParameterBool("Crouching", false);
                 PlayerSetup.Instance.animatorManager.SetAnimatorParameterBool("Prone", false);
@@ -330,7 +358,7 @@ namespace ml_amt
         {
             m_adjustedMovement = p_state;
 
-            if(!m_adjustedMovement && m_avatarReady && m_isInVR)
+            if(!m_adjustedMovement && m_avatarReady && m_inVR)
             {
                 MovementSystem.Instance.ChangeCrouch(false);
                 MovementSystem.Instance.ChangeProne(false);
@@ -351,6 +379,11 @@ namespace ml_amt
         public void SetFollowHips(bool p_state)
         {
             m_followHips = p_state;
+        }
+        public void SetMassCenter(bool p_state)
+        {
+            if(m_vrIk != null)
+                m_vrIk.solver.locomotion.offset = (Settings.MassCenter ? m_massCenter : m_locomotionOffset);
         }
 
         public float GetUpright() => m_upright;
