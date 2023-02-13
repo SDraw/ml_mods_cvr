@@ -249,6 +249,27 @@ function inp_toggle_mod_amt(_obj, _callbackName) {
                 <div id="DetectEmotes" class ="inp_toggle no-scroll" data-current="true"></div>
             </div>
         </div>
+
+        <div class ="row-wrapper">
+            <div class ="option-caption">Adjusted locomotion mass center: </div>
+            <div class ="option-input">
+                <div id="MassCenter" class ="inp_toggle no-scroll" data-current="true"></div>
+            </div>
+        </div>
+        
+        <div class ="row-wrapper">
+            <div class ="option-caption">Alternative avatar collider scale: </div>
+            <div class ="option-input">
+                <div id="CollisionScale" class ="inp_toggle no-scroll" data-current="true"></div>
+            </div>
+        </div>
+
+        <div class ="row-wrapper">
+            <div class ="option-caption">Prevent Unity animation override (chairs, etc.): </div>
+            <div class ="option-input">
+                <div id="OverrideFix" class ="inp_toggle no-scroll" data-current="false"></div>
+            </div>
+        </div>
     `;
     document.getElementById('settings-ik').appendChild(l_block);
 

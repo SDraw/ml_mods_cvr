@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{6DD89FC3-A974-4C39-A3EE-F60C24B17B5B}</ProjectGuid>
+    <ProjectGuid>{1B5ACA07-6266-4C9A-BA30-D4BBE6634846}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ml_dht</RootNamespace>
-    <AssemblyName>ml_dht</AssemblyName>
+    <RootNamespace>ml_egn</RootNamespace>
+    <AssemblyName>ml_egn</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -34,27 +34,24 @@
   <ItemGroup>
     <Reference Include="0Harmony, Version=2.9.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
+      <HintPath>F:\games\Steam\common\ChilloutVR\MelonLoader\0Harmony.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
+      <HintPath>F:\games\Steam\common\ChilloutVR\ChilloutVR_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="DarkRift">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="DarkRift.Client, Version=2.4.5.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Games\Steam\common\ChilloutVR\ChilloutVR_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="cohtml.Net">
-      <HintPath>C:\Games\Steam\common\ChilloutVR\ChilloutVR_Data\Managed\cohtml.Net.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Cohtml.Runtime">
-      <HintPath>C:\Games\Steam\common\ChilloutVR\ChilloutVR_Data\Managed\Cohtml.Runtime.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="MelonLoader">
-      <HintPath>C:\Games\Steam\common\ChilloutVR\MelonLoader\MelonLoader.dll</HintPath>
+    <Reference Include="MelonLoader, Version=0.5.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>F:\games\Steam\common\ChilloutVR\MelonLoader\MelonLoader.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -64,29 +61,21 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="UnityEngine.AnimationModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
     </Reference>
-    <Reference Include="UnityEngine.CoreModule">
-      <Private>False</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="HeadTracked.cs" />
     <Compile Include="Main.cs" />
-    <Compile Include="MemoryMapReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Scripts.cs" />
-    <Compile Include="Settings.cs" />
-    <Compile Include="TrackingData.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
-  <ItemGroup />
-  <ItemGroup>
-    <EmbeddedResource Include="resources\menu.js" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
   <PropertyGroup>
     <PostBuildEvent>copy /y "$(TargetPath)" "D:\Games\Steam\steamapps\common\ChilloutVR\Mods\"</PostBuildEvent>
   </PropertyGroup>

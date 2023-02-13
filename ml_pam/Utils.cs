@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
-using ABI_RC.Systems.IK;
 
-namespace ml_amt
+namespace ml_pam
 {
     static class Utils
     {

@@ -18,7 +18,10 @@ namespace ml_amt
             IKOverrideFly,
             IKOverrideJump,
             DetectEmotes,
-            FollowHips
+            FollowHips,
+            CollisionScale,
+            MassCenter,
+            OverrideFix
         };
 
         static bool ms_ikOverrideCrouch = true;
@@ -31,6 +34,9 @@ namespace ml_amt
         static bool ms_ikOverrideJump = true;
         static bool ms_detectEmotes = true;
         static bool ms_followHips = true;
+        static bool ms_collisionScale = true;
+        static bool ms_massCenter = true;
+        static bool ms_overrideFix = false;
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
@@ -45,22 +51,30 @@ namespace ml_amt
         static public event Action<bool> IKOverrideJumpChange;
         static public event Action<bool> DetectEmotesChange;
         static public event Action<bool> FollowHipsChange;
+        static public event Action<bool> CollisionScaleChange;
+        static public event Action<bool> MassCenterChange;
+        static public event Action<bool> OverrideFixChange;
 
-        public static void Init()
+        internal static void Init()
         {
             ms_category = MelonLoader.MelonPreferences.CreateCategory("AMT");
 
-            ms_entries = new List<MelonLoader.MelonPreferences_Entry>();
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.IKOverrideCrouch.ToString(), true));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.CrouchLimit.ToString(), 65));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.IKOverrideProne.ToString(), true));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.ProneLimit.ToString(), 30));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.PoseTransitions.ToString(), true));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.AdjustedMovement.ToString(), true));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.IKOverrideFly.ToString(), true));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.IKOverrideJump.ToString(), true));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.DetectEmotes.ToString(), true));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.FollowHips.ToString(), true));
+            ms_entries = new List<MelonLoader.MelonPreferences_Entry>()
+            {
+                ms_category.CreateEntry(ModSetting.IKOverrideCrouch.ToString(), true),
+                ms_category.CreateEntry(ModSetting.CrouchLimit.ToString(), 65),
+                ms_category.CreateEntry(ModSetting.IKOverrideProne.ToString(), true),
+                ms_category.CreateEntry(ModSetting.ProneLimit.ToString(), 30),
+                ms_category.CreateEntry(ModSetting.PoseTransitions.ToString(), true),
+                ms_category.CreateEntry(ModSetting.AdjustedMovement.ToString(), true),
+                ms_category.CreateEntry(ModSetting.IKOverrideFly.ToString(), true),
+                ms_category.CreateEntry(ModSetting.IKOverrideJump.ToString(), true),
+                ms_category.CreateEntry(ModSetting.DetectEmotes.ToString(), true),
+                ms_category.CreateEntry(ModSetting.FollowHips.ToString(), true),
+                ms_category.CreateEntry(ModSetting.CollisionScale.ToString(), true),
+                ms_category.CreateEntry(ModSetting.MassCenter.ToString(), true),
+                ms_category.CreateEntry(ModSetting.OverrideFix.ToString(), false)
+            };
 
             Load();
 
@@ -101,6 +115,9 @@ namespace ml_amt
             ms_ikOverrideJump = (bool)ms_entries[(int)ModSetting.IKOverrideJump].BoxedValue;
             ms_detectEmotes = (bool)ms_entries[(int)ModSetting.DetectEmotes].BoxedValue;
             ms_followHips = (bool)ms_entries[(int)ModSetting.FollowHips].BoxedValue;
+            ms_collisionScale = (bool)ms_entries[(int)ModSetting.CollisionScale].BoxedValue;
+            ms_massCenter = (bool)ms_entries[(int)ModSetting.MassCenter].BoxedValue;
+            ms_overrideFix = (bool)ms_entries[(int)ModSetting.OverrideFix].BoxedValue;
         }
 
         static void OnSliderUpdate(string p_name, string p_value)
@@ -189,6 +206,27 @@ namespace ml_amt
                         FollowHipsChange?.Invoke(ms_followHips);
                     }
                     break;
+
+                    case ModSetting.CollisionScale:
+                    {
+                        ms_collisionScale = bool.Parse(p_value);
+                        CollisionScaleChange?.Invoke(ms_collisionScale);
+                    }
+                    break;
+
+                    case ModSetting.MassCenter:
+                    {
+                        ms_massCenter = bool.Parse(p_value);
+                        MassCenterChange?.Invoke(ms_massCenter);
+                    }
+                    break;
+
+                    case ModSetting.OverrideFix:
+                    {
+                        ms_overrideFix = bool.Parse(p_value);
+                        OverrideFixChange?.Invoke(ms_overrideFix);
+                    }
+                    break;
                 }
 
                 ms_entries[(int)l_setting].BoxedValue = bool.Parse(p_value);
@@ -234,6 +272,18 @@ namespace ml_amt
         public static bool FollowHips
         {
             get => ms_followHips;
+        }
+        public static bool CollisionScale
+        {
+            get => ms_collisionScale;
+        }
+        public static bool MassCenter
+        {
+            get => ms_massCenter;
+        }
+        public static bool OverrideFix
+        {
+            get => ms_overrideFix;
         }
     }
 }

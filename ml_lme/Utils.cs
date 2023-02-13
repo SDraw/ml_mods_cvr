@@ -1,4 +1,5 @@
 ﻿using ABI_RC.Core.Player;
+using ABI_RC.Core.UI;
 using System.Linq;
 using UnityEngine;
 
@@ -8,16 +9,28 @@ namespace ml_lme
     {
         static readonly Quaternion ms_hmdRotationFix = new Quaternion(0f, 0.7071068f, 0.7071068f, 0f);
         static readonly Quaternion ms_screentopRotationFix = new Quaternion(0f, 0f, -1f, 0f);
-        
-        public static bool AreKnucklesInUse() => PlayerSetup.Instance._trackerManager.trackerNames.Contains("knuckles");
 
         public static bool IsInVR() => ((ABI_RC.Core.Savior.CheckVR.Instance != null) && ABI_RC.Core.Savior.CheckVR.Instance.hasVrDeviceLoaded);
+        public static bool AreKnucklesInUse() => PlayerSetup.Instance._trackerManager.trackerNames.Contains("knuckles");
+        public static bool IsLeftHandTracked() => ((VRTrackerManager.Instance.leftHand != null) && VRTrackerManager.Instance.leftHand.active);
+        public static bool IsRightHandTracked() => ((VRTrackerManager.Instance.rightHand != null) && VRTrackerManager.Instance.rightHand.active);
 
         public static Matrix4x4 GetMatrix(this Transform p_transform, bool p_pos = true, bool p_rot = true, bool p_scl = false)
         {
             return Matrix4x4.TRS(p_pos ? p_transform.position : Vector3.zero, p_rot ? p_transform.rotation : Quaternion.identity, p_scl ? p_transform.lossyScale : Vector3.one);
         }
-        
+
+        public static void ShowHUDNotification(string p_title, string p_message, string p_small = "", bool p_immediate = false)
+        {
+            if(CohtmlHud.Instance != null)
+            {
+                if(p_immediate)
+                    CohtmlHud.Instance.ViewDropTextImmediate(p_title, p_message, p_small);
+                else
+                    CohtmlHud.Instance.ViewDropText(p_title, p_message, p_small);
+            }
+        }
+
         public static void LeapToUnity(ref Vector3 p_pos, ref Quaternion p_rot, Settings.LeapTrackingMode p_mode)
         {
             p_pos *= 0.001f;

@@ -17,7 +17,7 @@ namespace ml_dht
             Smoothing,
             FaceOverride
         }
-        
+
         static bool ms_enabled = false;
         static bool ms_headTracking = true;
         static bool ms_eyeTracking = true;
@@ -25,10 +25,10 @@ namespace ml_dht
         static bool ms_mirrored = false;
         static float ms_smoothing = 0.5f;
         static bool ms_faceOverride = true;
-        
+
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
-        
+
         static public event Action<bool> EnabledChange;
         static public event Action<bool> HeadTrackingChange;
         static public event Action<bool> EyeTrackingChange;
@@ -36,25 +36,27 @@ namespace ml_dht
         static public event Action<bool> MirroredChange;
         static public event Action<float> SmoothingChange;
         static public event Action<bool> FaceOverrideChange;
-        
-        public static void Init()
+
+        internal static void Init()
         {
             ms_category = MelonLoader.MelonPreferences.CreateCategory("DHT");
-            
-            ms_entries = new List<MelonLoader.MelonPreferences_Entry>();
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.Enabled.ToString(), false));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.HeadTracking.ToString(), false));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.EyeTracking.ToString(), true));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.Blinking.ToString(), true));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.Mirrored.ToString(), false));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.Smoothing.ToString(), 50));
-            ms_entries.Add(ms_category.CreateEntry(ModSetting.FaceOverride.ToString(), true));
-            
+
+            ms_entries = new List<MelonLoader.MelonPreferences_Entry>()
+            {
+                ms_category.CreateEntry(ModSetting.Enabled.ToString(), false),
+                ms_category.CreateEntry(ModSetting.HeadTracking.ToString(), false),
+                ms_category.CreateEntry(ModSetting.EyeTracking.ToString(), true),
+                ms_category.CreateEntry(ModSetting.Blinking.ToString(), true),
+                ms_category.CreateEntry(ModSetting.Mirrored.ToString(), false),
+                ms_category.CreateEntry(ModSetting.Smoothing.ToString(), 50),
+                ms_category.CreateEntry(ModSetting.FaceOverride.ToString(), true)
+            };
+
             Load();
 
             MelonLoader.MelonCoroutines.Start(WaitMainMenuUi());
         }
-        
+
         static System.Collections.IEnumerator WaitMainMenuUi()
         {
             while(ViewManager.Instance == null)
@@ -76,18 +78,18 @@ namespace ml_dht
                     ViewManager.Instance.gameMenuView.View.TriggerEvent("updateModSettingDHT", l_entry.DisplayName, l_entry.GetValueAsString());
             };
         }
-        
+
         static void Load()
         {
             ms_enabled = (bool)ms_entries[(int)ModSetting.Enabled].BoxedValue;
-            ms_headTracking  = (bool)ms_entries[(int)ModSetting.HeadTracking].BoxedValue;
-            ms_eyeTracking  = (bool)ms_entries[(int)ModSetting.EyeTracking].BoxedValue;
-            ms_blinking  = (bool)ms_entries[(int)ModSetting.Blinking].BoxedValue;
+            ms_headTracking = (bool)ms_entries[(int)ModSetting.HeadTracking].BoxedValue;
+            ms_eyeTracking = (bool)ms_entries[(int)ModSetting.EyeTracking].BoxedValue;
+            ms_blinking = (bool)ms_entries[(int)ModSetting.Blinking].BoxedValue;
             ms_mirrored = (bool)ms_entries[(int)ModSetting.Mirrored].BoxedValue;
             ms_smoothing = ((int)ms_entries[(int)ModSetting.Smoothing].BoxedValue) * 0.01f;
             ms_faceOverride = (bool)ms_entries[(int)ModSetting.FaceOverride].BoxedValue;
         }
-        
+
         static void OnSliderUpdate(string p_name, string p_value)
         {
             if(Enum.TryParse(p_name, out ModSetting l_setting))
@@ -105,7 +107,7 @@ namespace ml_dht
                 ms_entries[(int)l_setting].BoxedValue = int.Parse(p_value);
             }
         }
-        
+
         static void OnToggleUpdate(string p_name, string p_value)
         {
             if(Enum.TryParse(p_name, out ModSetting l_setting))
@@ -130,13 +132,15 @@ namespace ml_dht
                     {
                         ms_eyeTracking = bool.Parse(p_value);
                         EyeTrackingChange?.Invoke(ms_eyeTracking);
-                    } break;
+                    }
+                    break;
 
                     case ModSetting.Blinking:
                     {
                         ms_blinking = bool.Parse(p_value);
                         BlinkingChange?.Invoke(ms_blinking);
-                    } break;
+                    }
+                    break;
 
                     case ModSetting.Mirrored:
                     {
@@ -149,13 +153,14 @@ namespace ml_dht
                     {
                         ms_faceOverride = bool.Parse(p_value);
                         FaceOverrideChange?.Invoke(ms_faceOverride);
-                    } break;
+                    }
+                    break;
                 }
 
                 ms_entries[(int)l_setting].BoxedValue = bool.Parse(p_value);
             }
         }
-        
+
         public static bool Enabled
         {
             get => ms_enabled;

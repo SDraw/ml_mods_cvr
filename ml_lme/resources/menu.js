@@ -384,6 +384,27 @@ function inp_dropdown_mod_lme(_obj, _callbackName) {
                 <div id="Model" class ="inp_toggle no-scroll" data-current="false"></div>
             </div>
         </div>
+
+        <div class ="row-wrapper">
+            <div class ="option-caption">Interaction input: </div>
+            <div class ="option-input">
+                <div id="Input" class ="inp_toggle no-scroll" data-current="false"></div>
+            </div>
+        </div>
+
+        <div class ="row-wrapper">
+            <div class ="option-caption">Interact gesture threadhold: </div>
+            <div class ="option-input">
+                <div id="InteractThreadhold" class ="inp_slider no-scroll" data-min="0" data-max="100" data-current="80"></div>
+            </div>
+        </div>
+
+        <div class ="row-wrapper">
+            <div class ="option-caption">Grip gesture threadhold: </div>
+            <div class ="option-input">
+                <div id="GripThreadhold" class ="inp_slider no-scroll" data-min="0" data-max="100" data-current="40"></div>
+            </div>
+        </div>
     `;
     document.getElementById('settings-implementation').appendChild(l_block);
 
