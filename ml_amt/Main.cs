@@ -239,12 +239,12 @@ namespace ml_amt
 
         static bool OnAnimationOverride_Prefix()
         {
-            return false;
+            return !Settings.OverrideFix;
         }
 
         static bool OnAnimationOverrideRestore_Prefix()
         {
-            return false;
+            return !Settings.OverrideFix;
         }
     }
 }
