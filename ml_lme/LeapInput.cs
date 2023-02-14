@@ -11,10 +11,10 @@ namespace ml_lme
     [DisallowMultipleComponent]
     class LeapInput : CVRInputModule
     {
-        static readonly FieldInfo ms_indexGestureToggle = typeof(InputModuleSteamVR).GetField("_steamVrIndexGestureToggleValue", BindingFlags.Instance | BindingFlags.NonPublic);
+        static readonly FieldInfo ms_indexGestureToggle = typeof(InputModuleOpenXR).GetField("_steamVrIndexGestureToggleValue", BindingFlags.Instance | BindingFlags.NonPublic);
 
         CVRInputManager m_inputManager = null;
-        InputModuleSteamVR m_steamVrModule = null;
+        InputModuleOpenXR m_openXrModule = null;
         bool m_inVR = false;
         bool m_gripToGrab = true;
 
@@ -32,7 +32,7 @@ namespace ml_lme
             base.Start();
 
             m_inputManager = CVRInputManager.Instance; // _inputManager is stripped out, cool beans
-            m_steamVrModule = m_inputManager.GetComponent<InputModuleSteamVR>();
+            m_openXrModule = m_inputManager.GetComponent<InputModuleOpenXR>();
             m_inVR = Utils.IsInVR();
 
             m_handRayLeft = LeapTracking.GetInstance().GetLeftHand().gameObject.AddComponent<ControllerRay>();
@@ -240,7 +240,7 @@ namespace ml_lme
         // Arbitrary
         void UpdateFingerTracking()
         {
-            m_inputManager.individualFingerTracking = (Settings.Enabled || (m_inVR && Utils.AreKnucklesInUse() && !(bool)ms_indexGestureToggle.GetValue(m_steamVrModule)));
+            m_inputManager.individualFingerTracking = (Settings.Enabled || (m_inVR && m_openXrModule.AreKnucklesInUse() && !(bool)ms_indexGestureToggle.GetValue(m_openXrModule)));
             IKSystem.Instance.FingerSystem.controlActive = m_inputManager.individualFingerTracking;
         }
 
@@ -256,11 +256,6 @@ namespace ml_lme
                 m_inputManager.fingerCurlLeftMiddle = p_hand.m_bends[2];
                 m_inputManager.fingerCurlLeftRing = p_hand.m_bends[3];
                 m_inputManager.fingerCurlLeftPinky = p_hand.m_bends[4];
-                IKSystem.Instance.FingerSystem.leftThumbCurl = p_hand.m_bends[0];
-                IKSystem.Instance.FingerSystem.leftIndexCurl = p_hand.m_bends[1];
-                IKSystem.Instance.FingerSystem.leftMiddleCurl = p_hand.m_bends[2];
-                IKSystem.Instance.FingerSystem.leftRingCurl = p_hand.m_bends[3];
-                IKSystem.Instance.FingerSystem.leftPinkyCurl = p_hand.m_bends[4];
             }
             else
             {
@@ -269,11 +264,6 @@ namespace ml_lme
                 m_inputManager.fingerCurlRightMiddle = p_hand.m_bends[2];
                 m_inputManager.fingerCurlRightRing = p_hand.m_bends[3];
                 m_inputManager.fingerCurlRightPinky = p_hand.m_bends[4];
-                IKSystem.Instance.FingerSystem.rightThumbCurl = p_hand.m_bends[0];
-                IKSystem.Instance.FingerSystem.rightIndexCurl = p_hand.m_bends[1];
-                IKSystem.Instance.FingerSystem.rightMiddleCurl = p_hand.m_bends[2];
-                IKSystem.Instance.FingerSystem.rightRingCurl = p_hand.m_bends[3];
-                IKSystem.Instance.FingerSystem.rightPinkyCurl = p_hand.m_bends[4];
             }
         }
 

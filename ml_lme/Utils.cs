@@ -1,7 +1,8 @@
-﻿using ABI_RC.Core.Player;
+﻿using ABI_RC.Core.Savior;
 using ABI_RC.Core.UI;
-using System.Linq;
+using System.Reflection;
 using UnityEngine;
+using UnityEngine.XR;
 
 namespace ml_lme
 {
@@ -9,11 +10,13 @@ namespace ml_lme
     {
         static readonly Quaternion ms_hmdRotationFix = new Quaternion(0f, 0.7071068f, 0.7071068f, 0f);
         static readonly Quaternion ms_screentopRotationFix = new Quaternion(0f, 0f, -1f, 0f);
+        static readonly FieldInfo ms_leftControllerName = typeof(InputModuleOpenXR).GetField("_leftHandControllerName", BindingFlags.NonPublic | BindingFlags.Instance);
+        static readonly FieldInfo ms_rightControllerName = typeof(InputModuleOpenXR).GetField("_rightHandControllerName", BindingFlags.NonPublic | BindingFlags.Instance);
 
-        public static bool IsInVR() => ((ABI_RC.Core.Savior.CheckVR.Instance != null) && ABI_RC.Core.Savior.CheckVR.Instance.hasVrDeviceLoaded);
-        public static bool AreKnucklesInUse() => PlayerSetup.Instance._trackerManager.trackerNames.Contains("knuckles");
-        public static bool IsLeftHandTracked() => ((VRTrackerManager.Instance.leftHand != null) && VRTrackerManager.Instance.leftHand.active);
-        public static bool IsRightHandTracked() => ((VRTrackerManager.Instance.rightHand != null) && VRTrackerManager.Instance.rightHand.active);
+        public static bool IsInVR() => ((CheckVR.Instance != null) && CheckVR.Instance.hasVrDeviceLoaded);
+        public static bool AreKnucklesInUse(this InputModuleOpenXR p_module) => (((string)ms_leftControllerName.GetValue(p_module)).Contains("Index") || ((string)ms_rightControllerName.GetValue(p_module)).Contains("Index"));
+        public static bool IsLeftHandTracked() => InputDevices.GetDeviceAtXRNode(XRNode.LeftHand).isValid;
+        public static bool IsRightHandTracked() => InputDevices.GetDeviceAtXRNode(XRNode.RightHand).isValid;
 
         public static Matrix4x4 GetMatrix(this Transform p_transform, bool p_pos = true, bool p_rot = true, bool p_scl = false)
         {
@@ -22,9 +25,9 @@ namespace ml_lme
 
         public static void ShowHUDNotification(string p_title, string p_message, string p_small = "", bool p_immediate = false)
         {
-            if(CohtmlHud.Instance != null)
+            if (CohtmlHud.Instance != null)
             {
-                if(p_immediate)
+                if (p_immediate)
                     CohtmlHud.Instance.ViewDropTextImmediate(p_title, p_message, p_small);
                 else
                     CohtmlHud.Instance.ViewDropText(p_title, p_message, p_small);
@@ -38,23 +41,23 @@ namespace ml_lme
             p_rot.x *= -1f;
             p_rot.y *= -1f;
 
-            switch(p_mode)
+            switch (p_mode)
             {
                 case Settings.LeapTrackingMode.Screentop:
-                {
-                    p_pos.x *= -1f;
-                    p_pos.y *= -1f;
-                    p_rot = (ms_screentopRotationFix * p_rot);
-                }
-                break;
+                    {
+                        p_pos.x *= -1f;
+                        p_pos.y *= -1f;
+                        p_rot = (ms_screentopRotationFix * p_rot);
+                    }
+                    break;
 
                 case Settings.LeapTrackingMode.HMD:
-                {
-                    p_pos.x *= -1f;
-                    Swap(ref p_pos.y, ref p_pos.z);
-                    p_rot = (ms_hmdRotationFix * p_rot);
-                }
-                break;
+                    {
+                        p_pos.x *= -1f;
+                        Swap(ref p_pos.y, ref p_pos.z);
+                        p_rot = (ms_hmdRotationFix * p_rot);
+                    }
+                    break;
             }
         }
 
