@@ -116,8 +116,7 @@ namespace ml_amt
                 // Update upright
                 Matrix4x4 l_hmdMatrix = PlayerSetup.Instance.transform.GetMatrix().inverse * (m_inVR ? PlayerSetup.Instance.vrHeadTracker.transform.GetMatrix() : PlayerSetup.Instance.desktopCameraRig.transform.GetMatrix());
                 float l_currentHeight = Mathf.Clamp((l_hmdMatrix * ms_pointVector).y, 0f, float.MaxValue);
-                float l_avatarScale = (m_avatarScale > 0f) ? (PlayerSetup.Instance._avatar.transform.localScale.y / m_avatarScale) : 0f;
-                float l_avatarViewHeight = Mathf.Clamp(m_viewPointHeight * l_avatarScale, 0f, float.MaxValue);
+                float l_avatarViewHeight = Mathf.Clamp(m_viewPointHeight * GetRelativeScale(), 0f, float.MaxValue);
                 m_upright = Mathf.Clamp01((l_avatarViewHeight > 0f) ? (l_currentHeight / l_avatarViewHeight) : 0f);
                 m_poseState = (m_upright <= Mathf.Min(m_proneLimit, m_crouchLimit)) ? PoseState.Proning : ((m_upright <= Mathf.Max(m_proneLimit, m_crouchLimit)) ? PoseState.Crouching : PoseState.Standing);
 
@@ -273,6 +272,14 @@ namespace ml_amt
             }
         }
 
+        internal void OnPlayspaceScale()
+        {
+            if((m_vrIk != null) && Settings.MassCenter)
+            {
+                m_vrIk.solver.locomotion.offset = m_massCenter * GetRelativeScale();
+            }
+        }
+
         void OnIKPreUpdate()
         {
             bool l_legsOverride = false;
@@ -383,7 +390,12 @@ namespace ml_amt
         public void SetMassCenter(bool p_state)
         {
             if(m_vrIk != null)
-                m_vrIk.solver.locomotion.offset = (Settings.MassCenter ? m_massCenter : m_locomotionOffset);
+                m_vrIk.solver.locomotion.offset = (Settings.MassCenter ? (m_massCenter * GetRelativeScale()) : m_locomotionOffset);
+        }
+
+        float GetRelativeScale()
+        {
+            return ((m_avatarScale > 0f) ? (PlayerSetup.Instance._avatar.transform.localScale.y / m_avatarScale) : 0f);
         }
 
         public float GetUpright() => m_upright;
