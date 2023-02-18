@@ -19,6 +19,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Test.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="AvatarMotionTweaker.json" />
     <None Remove="resources\menu.js" />
   </ItemGroup>

@@ -293,29 +293,32 @@ namespace ml_amt
             if(m_detectEmotes && m_emoteActive)
                 m_vrIk.solver.IKPositionWeight = 0f;
 
-            if((m_ikOverrideCrouch && (m_poseState != PoseState.Standing)) || (m_ikOverrideProne && (m_poseState == PoseState.Proning)))
+            if(!BodySystem.isCalibratedAsFullBody)
             {
-                m_vrIk.solver.locomotion.weight = 0f;
-                l_legsOverride = true;
-            }
-            if(m_ikOverrideFly && MovementSystem.Instance.flying)
-            {
-                m_vrIk.solver.locomotion.weight = 0f;
-                m_vrIk.solver.leftLeg.useAnimatedBendNormal = true;
-                m_vrIk.solver.rightLeg.useAnimatedBendNormal = true;
-                l_legsOverride = true;
-            }
-
-            if(m_ikOverrideJump && !m_grounded && !MovementSystem.Instance.flying)
-            {
-                m_vrIk.solver.locomotion.weight = 0f;
-                m_vrIk.solver.leftLeg.useAnimatedBendNormal = true;
-                m_vrIk.solver.rightLeg.useAnimatedBendNormal = true;
-                l_legsOverride = true;
+                if((m_ikOverrideCrouch && (m_poseState != PoseState.Standing)) || (m_ikOverrideProne && (m_poseState == PoseState.Proning)))
+                {
+                    m_vrIk.solver.locomotion.weight = 0f;
+                    m_vrIk.solver.leftLeg.useAnimatedBendNormal = true;
+                    m_vrIk.solver.rightLeg.useAnimatedBendNormal = true;
+                    l_legsOverride = true;
+                }
+                if(m_ikOverrideFly && MovementSystem.Instance.flying)
+                {
+                    m_vrIk.solver.locomotion.weight = 0f;
+                    m_vrIk.solver.leftLeg.useAnimatedBendNormal = true;
+                    m_vrIk.solver.rightLeg.useAnimatedBendNormal = true;
+                    l_legsOverride = true;
+                }
+                if(m_ikOverrideJump && !m_grounded && !MovementSystem.Instance.flying)
+                {
+                    m_vrIk.solver.locomotion.weight = 0f;
+                    m_vrIk.solver.leftLeg.useAnimatedBendNormal = true;
+                    m_vrIk.solver.rightLeg.useAnimatedBendNormal = true;
+                    l_legsOverride = true;
+                }
             }
 
             bool l_solverActive = !Mathf.Approximately(m_vrIk.solver.IKPositionWeight, 0f);
-
             if(l_legsOverride && l_solverActive && m_followHips && (!m_moving || (m_poseState == PoseState.Proning)) && m_inVR && !BodySystem.isCalibratedAsFullBody)
             {
                 m_vrIk.solver.plantFeet = false;
