@@ -36,7 +36,7 @@ namespace ml_amt
         static bool ms_followHips = true;
         static bool ms_collisionScale = true;
         static bool ms_massCenter = true;
-        static bool ms_overrideFix = false;
+        static bool ms_overrideFix = true;
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
@@ -73,7 +73,7 @@ namespace ml_amt
                 ms_category.CreateEntry(ModSetting.FollowHips.ToString(), true),
                 ms_category.CreateEntry(ModSetting.CollisionScale.ToString(), true),
                 ms_category.CreateEntry(ModSetting.MassCenter.ToString(), true),
-                ms_category.CreateEntry(ModSetting.OverrideFix.ToString(), false)
+                ms_category.CreateEntry(ModSetting.OverrideFix.ToString(), true)
             };
 
             Load();

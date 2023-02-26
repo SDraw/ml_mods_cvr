@@ -75,16 +75,16 @@ namespace ml_amt
                 null
             );
 
-            // AAS overriding "fix"
+            // AAS overriding fix
             HarmonyInstance.Patch(
-                typeof(CVRAnimatorManager).GetMethod(nameof(CVRAnimatorManager.SetOverrideAnimation), BindingFlags.Instance),
-                new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnAnimationOverride_Prefix), BindingFlags.Static | BindingFlags.NonPublic)),
-                null
+                typeof(CVRAnimatorManager).GetMethod(nameof(CVRAnimatorManager.SetOverrideAnimation)),
+                new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnOverride_Prefix), BindingFlags.Static | BindingFlags.NonPublic)),
+                new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnOverride_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
             HarmonyInstance.Patch(
                 typeof(CVRAnimatorManager).GetMethod(nameof(CVRAnimatorManager.RestoreOverrideAnimation)),
-                new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnAnimationOverrideRestore_Prefix), BindingFlags.Static | BindingFlags.NonPublic)),
-                null
+                new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnOverride_Prefix), BindingFlags.Static | BindingFlags.NonPublic)),
+                new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnOverride_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
 
             MelonLoader.MelonCoroutines.Start(WaitForLocalPlayer());
@@ -256,14 +256,41 @@ namespace ml_amt
             return false;
         }
 
-        static bool OnAnimationOverride_Prefix()
+        static void OnOverride_Prefix(ref CVRAnimatorManager __instance)
         {
-            return !Settings.OverrideFix;
+            try
+            {
+                if(Settings.OverrideFix)
+                {
+                    if(__instance.animator != null)
+                    {
+                        __instance.animator.enabled = false;
+                        __instance.animator.WriteDefaultValues();
+                    }
+                }
+            }
+            catch(System.Exception l_exception)
+            {
+                MelonLoader.MelonLogger.Error(l_exception);
+            }
         }
-
-        static bool OnAnimationOverrideRestore_Prefix()
+        static void OnOverride_Postfix(ref CVRAnimatorManager __instance)
         {
-            return !Settings.OverrideFix;
+            try
+            {
+                if(Settings.OverrideFix)
+                {
+                    if(__instance.animator != null)
+                    {
+                        __instance.animator.enabled = true;
+                        __instance.animator.Update(0f);
+                    }
+                }
+            }
+            catch(System.Exception l_exception)
+            {
+                MelonLoader.MelonLogger.Error(l_exception);
+            }
         }
     }
 }
