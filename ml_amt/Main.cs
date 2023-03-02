@@ -98,7 +98,7 @@ namespace ml_amt
             m_localTweaker = PlayerSetup.Instance.gameObject.AddComponent<MotionTweaker>();
             m_localTweaker.SetIKOverrideCrouch(Settings.IKOverrideCrouch);
             m_localTweaker.SetCrouchLimit(Settings.CrouchLimit);
-            m_localTweaker.SetIKOverrideCrouch(Settings.IKOverrideProne);
+            m_localTweaker.SetIKOverrideProne(Settings.IKOverrideProne);
             m_localTweaker.SetProneLimit(Settings.ProneLimit);
             m_localTweaker.SetPoseTransitions(Settings.PoseTransitions);
             m_localTweaker.SetAdjustedMovement(Settings.AdjustedMovement);
@@ -260,13 +260,10 @@ namespace ml_amt
         {
             try
             {
-                if(Settings.OverrideFix)
+                if(Settings.OverrideFix && (__instance.animator != null))
                 {
-                    if(__instance.animator != null)
-                    {
-                        __instance.animator.enabled = false;
-                        __instance.animator.WriteDefaultValues();
-                    }
+                    __instance.animator.enabled = false;
+                    __instance.animator.WriteDefaultValues();
                 }
             }
             catch(System.Exception l_exception)
@@ -278,13 +275,10 @@ namespace ml_amt
         {
             try
             {
-                if(Settings.OverrideFix)
+                if(Settings.OverrideFix && (__instance.animator != null))
                 {
-                    if(__instance.animator != null)
-                    {
-                        __instance.animator.enabled = true;
-                        __instance.animator.Update(0f);
-                    }
+                    __instance.animator.enabled = true;
+                    __instance.animator.Update(0f);
                 }
             }
             catch(System.Exception l_exception)

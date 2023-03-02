@@ -34,6 +34,7 @@ namespace ml_dht
         Quaternion m_bindRotation;
         Quaternion m_lastHeadRotation;
 
+        // Unity events
         void Start()
         {
             Settings.EnabledChange += this.SetEnabled;
@@ -56,6 +57,7 @@ namespace ml_dht
             Settings.FaceOverrideChange -= this.SetFaceOverride;
         }
 
+        // Tracking updates
         public void UpdateTrackingData(ref TrackingData p_data)
         {
             m_headPosition.Set(p_data.m_headPositionX * (m_mirrored ? -1f : 1f), p_data.m_headPositionY, p_data.m_headPositionZ);
@@ -77,6 +79,7 @@ namespace ml_dht
             }
         }
 
+        // Game events
         internal void OnEyeControllerUpdate(CVREyeController p_component)
         {
             if(m_enabled)
@@ -139,7 +142,8 @@ namespace ml_dht
             m_bindRotation = Quaternion.identity;
         }
 
-        public void SetEnabled(bool p_state)
+        // Settings
+        internal void SetEnabled(bool p_state)
         {
             if(m_enabled != p_state)
             {
@@ -148,7 +152,7 @@ namespace ml_dht
                     m_lastHeadRotation = ((m_headBone != null) ? m_headBone.rotation : m_bindRotation);
             }
         }
-        public void SetHeadTracking(bool p_state)
+        internal void SetHeadTracking(bool p_state)
         {
             if(m_headTracking != p_state)
             {
@@ -157,23 +161,23 @@ namespace ml_dht
                     m_lastHeadRotation = ((m_headBone != null) ? m_headBone.rotation : m_bindRotation);
             }
         }
-        public void SetEyeTracking(bool p_state)
+        internal void SetEyeTracking(bool p_state)
         {
             m_eyeTracking = p_state;
         }
-        public void SetBlinking(bool p_state)
+        internal void SetBlinking(bool p_state)
         {
             m_blinking = p_state;
         }
-        public void SetSmoothing(float p_value)
+        internal void SetSmoothing(float p_value)
         {
             m_smoothing = 1f - Mathf.Clamp(p_value, 0f, 0.99f);
         }
-        public void SetMirrored(bool p_state)
+        internal void SetMirrored(bool p_state)
         {
             m_mirrored = p_state;
         }
-        public void SetFaceOverride(bool p_state)
+        internal void SetFaceOverride(bool p_state)
         {
             m_faceOverride = p_state;
         }

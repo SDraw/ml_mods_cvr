@@ -32,6 +32,7 @@ namespace ml_pam
         Matrix4x4 m_offset = Matrix4x4.identity;
         bool m_targetActive = false;
 
+        // Unity events
         void Start()
         {
             m_inVR = Utils.IsInVR();
@@ -67,6 +68,7 @@ namespace ml_pam
             }
         }
 
+        // IK updates
         void OnIKPreUpdate()
         {
             m_armWeight.Set(m_vrIK.solver.rightArm.positionWeight, m_vrIK.solver.rightArm.rotationWeight);

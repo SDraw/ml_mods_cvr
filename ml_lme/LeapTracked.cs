@@ -37,6 +37,7 @@ namespace ml_lme
         bool m_leftTargetActive = false;
         bool m_rightTargetActive = false;
 
+        // Unity events
         void Start()
         {
             m_inVR = Utils.IsInVR();
@@ -51,51 +52,20 @@ namespace ml_lme
             m_rightHandTarget.localPosition = Vector3.zero;
             m_rightHandTarget.localRotation = Quaternion.identity;
 
-            Settings.EnabledChange += this.SetEnabled;
-            Settings.FingersOnlyChange += this.SetFingersOnly;
-            Settings.TrackElbowsChange += this.SetTrackElbows;
+            Settings.EnabledChange += this.OnEnabledChange;
+            Settings.FingersOnlyChange += this.OnFingersOnlyChange;
+            Settings.TrackElbowsChange += this.OnTrackElbowsChange;
 
-            SetEnabled(Settings.Enabled);
-            SetFingersOnly(Settings.FingersOnly);
-            SetTrackElbows(Settings.TrackElbows);
+            OnEnabledChange(Settings.Enabled);
+            OnFingersOnlyChange(Settings.FingersOnly);
+            OnTrackElbowsChange(Settings.TrackElbows);
         }
 
         void OnDestroy()
         {
-            Settings.EnabledChange -= this.SetEnabled;
-            Settings.FingersOnlyChange -= this.SetFingersOnly;
-            Settings.TrackElbowsChange -= this.SetTrackElbows;
-        }
-
-        void SetEnabled(bool p_state)
-        {
-            m_enabled = p_state;
-
-            RefreshArmIK();
-            if(!m_enabled || m_fingersOnly)
-                RestoreVRIK();
-        }
-
-        void SetFingersOnly(bool p_state)
-        {
-            m_fingersOnly = p_state;
-
-            RefreshArmIK();
-            if(!m_enabled || m_fingersOnly)
-                RestoreVRIK();
-        }
-
-        void SetTrackElbows(bool p_state)
-        {
-            m_trackElbows = p_state;
-
-            if((m_leftArmIK != null) && (m_rightArmIK != null))
-            {
-                m_leftArmIK.solver.arm.bendGoalWeight = (m_trackElbows ? 1f : 0f);
-                m_rightArmIK.solver.arm.bendGoalWeight = (m_trackElbows ? 1f : 0f);
-            }
-
-            RestoreVRIK();
+            Settings.EnabledChange -= this.OnEnabledChange;
+            Settings.FingersOnlyChange -= this.OnFingersOnlyChange;
+            Settings.TrackElbowsChange -= this.OnTrackElbowsChange;
         }
 
         void Update()
@@ -168,6 +138,7 @@ namespace ml_lme
             }
         }
 
+        // Tracking update
         void UpdateFingers(GestureMatcher.LeapData p_data)
         {
             if(p_data.m_leftHand.m_present)
@@ -227,6 +198,7 @@ namespace ml_lme
             }
         }
 
+        // Game events
         internal void OnAvatarClear()
         {
             m_vrIK = null;
@@ -348,6 +320,7 @@ namespace ml_lme
             }
         }
 
+        // IK updates
         void OnIKPreUpdate()
         {
             m_armsWeights.Set(
@@ -376,6 +349,39 @@ namespace ml_lme
             m_vrIK.solver.rightArm.rotationWeight = m_armsWeights.w;
         }
 
+        // Settings
+        void OnEnabledChange(bool p_state)
+        {
+            m_enabled = p_state;
+
+            RefreshArmIK();
+            if(!m_enabled || m_fingersOnly)
+                RestoreVRIK();
+        }
+
+        void OnFingersOnlyChange(bool p_state)
+        {
+            m_fingersOnly = p_state;
+
+            RefreshArmIK();
+            if(!m_enabled || m_fingersOnly)
+                RestoreVRIK();
+        }
+
+        void OnTrackElbowsChange(bool p_state)
+        {
+            m_trackElbows = p_state;
+
+            if((m_leftArmIK != null) && (m_rightArmIK != null))
+            {
+                m_leftArmIK.solver.arm.bendGoalWeight = (m_trackElbows ? 1f : 0f);
+                m_rightArmIK.solver.arm.bendGoalWeight = (m_trackElbows ? 1f : 0f);
+            }
+
+            RestoreVRIK();
+        }
+
+        // Arbitrary
         void RestoreVRIK()
         {
             if(m_vrIK != null)
