@@ -4,6 +4,7 @@ This mod shows main menu notifications and HUD popups upon:
 * Prop spawning/deletion
 * Server connection loss
 * Screenshot saving
+
 Basically, merged previous `Avatar Change Info` and `Server Connection Info` mods in one.
 
 # Installation
