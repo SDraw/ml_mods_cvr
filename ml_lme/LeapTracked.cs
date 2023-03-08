@@ -129,12 +129,14 @@ namespace ml_lme
                 GestureMatcher.LeapData l_data = LeapManager.GetInstance().GetLatestData();
 
                 Vector3 l_hipsLocalPos = m_hips.localPosition;
+                Quaternion l_hipsLocalRot = m_hips.localRotation;
 
                 m_poseHandler.GetHumanPose(ref m_pose);
                 UpdateFingers(l_data);
                 m_poseHandler.SetHumanPose(ref m_pose);
 
                 m_hips.localPosition = l_hipsLocalPos;
+                m_hips.localRotation = l_hipsLocalRot;
             }
         }
 

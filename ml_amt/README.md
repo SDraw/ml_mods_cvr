@@ -28,9 +28,10 @@ Available mod's settings in `Settings - IK - Avatar Motion Tweaker`:
   * Note: Created as example for [propoused game feature](https://feedback.abinteractive.net/p/disabling-vr-ik-for-emotes-via-animator-state-tag-7b80d963-053a-41c0-86ac-e3d53c61c1e2).
 * **Adjusted locomotion mass center:** automatically changes IK locomotion center if avatar has toe bones; default value - `true`.
   * Note: Compatible with [DesktopVRIK](https://github.com/NotAKidOnSteam/DesktopVRIK) and [FuckToes](https://github.com/NotAKidOnSteam/FuckToes).
-* **Alternative avatar collider scale:** applies slightly different approach to avatar collider size change; default value - `true`
-* **Prevent Unity animation override:** disables overriding of animations at runtime for avatars with AAS; default value - `false`.
-  * Note: This options is made for "fix" of [broken animator issues with chairs and combat worlds](https://feedback.abinteractive.net/p/gestures-getting-stuck-locally-upon-entering-vehicles-chairs).
+* **Scaled locomotion steps:** scales VRIK locomotion steps according to avatar height and scale; default value - `true`.
+* **Alternative avatar collider scale:** applies slightly different approach to avatar collider size change; default value - `true`.
+* **Fix animation overrides (chairs, etc.):** fixes animations overriding for avatars with AAS; default value - `true`.
+  * Note: This options is made to address [broken animator in chairs and combat worlds issue](https://feedback.abinteractive.net/p/gestures-getting-stuck-locally-upon-entering-vehicles-chairs).
 
 Available additional parameters for AAS animator:
 * **`Upright`:** defines linear coefficient between current viewpoint height and avatar's viewpoint height; float, range - [0.0, 1.0].
