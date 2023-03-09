@@ -209,60 +209,78 @@ namespace ml_lme
                 {
                     case ModSetting.DesktopX:
                     {
-                        DesktopOffset.Set(int.Parse(p_value) * 0.01f, DesktopOffset.y, DesktopOffset.z);
-                        DesktopOffsetChange?.Invoke(DesktopOffset);
+                        Vector3 l_current = DesktopOffset;
+                        l_current.x = int.Parse(p_value) * 0.01f;
+                        DesktopOffset = l_current;
+                        DesktopOffsetChange?.Invoke(l_current);
                     }
                     break;
                     case ModSetting.DesktopY:
                     {
-                        DesktopOffset.Set(DesktopOffset.x, int.Parse(p_value) * 0.01f, DesktopOffset.z);
-                        DesktopOffsetChange?.Invoke(DesktopOffset);
+                        Vector3 l_current = DesktopOffset;
+                        l_current.y = int.Parse(p_value) * 0.01f;
+                        DesktopOffset = l_current;
+                        DesktopOffsetChange?.Invoke(l_current);
                     }
                     break;
                     case ModSetting.DesktopZ:
                     {
-                        DesktopOffset.Set(DesktopOffset.x, DesktopOffset.y, int.Parse(p_value) * 0.01f);
-                        DesktopOffsetChange?.Invoke(DesktopOffset);
+                        Vector3 l_current = DesktopOffset;
+                        l_current.z = int.Parse(p_value) * 0.01f;
+                        DesktopOffset = l_current;
+                        DesktopOffsetChange?.Invoke(l_current);
                     }
                     break;
 
                     case ModSetting.AngleX:
                     {
-                        RootAngle.Set(int.Parse(p_value), RootAngle.y, RootAngle.z);
-                        RootAngleChange?.Invoke(RootAngle);
+                        Vector3 l_current = RootAngle;
+                        l_current.x = int.Parse(p_value);
+                        RootAngle = l_current;
+                        RootAngleChange?.Invoke(l_current);
                     }
                     break;
 
                     case ModSetting.AngleY:
                     {
-                        RootAngle.Set(RootAngle.x, int.Parse(p_value), RootAngle.z);
-                        RootAngleChange?.Invoke(RootAngle);
+                        Vector3 l_current = RootAngle;
+                        l_current.y = int.Parse(p_value);
+                        RootAngle = l_current;
+                        RootAngleChange?.Invoke(l_current);
                     }
                     break;
 
                     case ModSetting.AngleZ:
                     {
-                        RootAngle.Set(RootAngle.x, RootAngle.y, int.Parse(p_value));
-                        RootAngleChange?.Invoke(RootAngle);
+                        Vector3 l_current = RootAngle;
+                        l_current.z = int.Parse(p_value);
+                        RootAngle = l_current;
+                        RootAngleChange?.Invoke(l_current);
                     }
                     break;
 
                     case ModSetting.HeadX:
                     {
-                        HeadOffset.Set(int.Parse(p_value) * 0.01f, HeadOffset.y, HeadOffset.z);
-                        HeadOffsetChange?.Invoke(HeadOffset);
+                        Vector3 l_current = HeadOffset;
+                        l_current.x = int.Parse(p_value) * 0.01f;
+                        HeadOffset = l_current;
+                        HeadOffsetChange?.Invoke(l_current);
                     }
                     break;
                     case ModSetting.HeadY:
                     {
-                        HeadOffset.Set(HeadOffset.x, int.Parse(p_value) * 0.01f, HeadOffset.z);
-                        HeadOffsetChange?.Invoke(HeadOffset);
+                        Vector3 l_current = HeadOffset;
+                        l_current.y = int.Parse(p_value) * 0.01f;
+                        HeadOffset = l_current;
+                        HeadOffsetChange?.Invoke(l_current);
                     }
                     break;
                     case ModSetting.HeadZ:
                     {
-                        HeadOffset.Set(HeadOffset.x, HeadOffset.y, int.Parse(p_value) * 0.01f);
-                        HeadOffsetChange?.Invoke(HeadOffset);
+                        Vector3 l_current = HeadOffset;
+                        l_current.z = int.Parse(p_value) * 0.01f;
+                        HeadOffset = l_current;
+                        HeadOffsetChange?.Invoke(l_current);
                     }
                     break;
                     case ModSetting.InteractThreadhold:
