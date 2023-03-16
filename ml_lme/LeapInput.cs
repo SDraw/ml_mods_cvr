@@ -11,8 +11,6 @@ namespace ml_lme
     [DisallowMultipleComponent]
     class LeapInput : CVRInputModule
     {
-        static readonly FieldInfo ms_indexGestureToggle = typeof(InputModuleOpenXR).GetField("_steamVrIndexGestureToggleValue", BindingFlags.Instance | BindingFlags.NonPublic);
-
         CVRInputManager m_inputManager = null;
         InputModuleOpenXR m_openXrModule = null;
         bool m_inVR = false;
@@ -123,8 +121,18 @@ namespace ml_lme
             {
                 if(l_data.m_leftHand.m_present)
                     SetFingersInput(l_data.m_leftHand, true);
+
                 if(l_data.m_rightHand.m_present)
                     SetFingersInput(l_data.m_rightHand, false);
+
+                if(m_inVR)
+                {
+                    m_inputManager.individualFingerTracking = !m_openXrModule.GetIndexGestureToggle();
+                    m_inputManager.individualFingerTracking |= (l_data.m_leftHand.m_present || l_data.m_rightHand.m_present);
+                }
+                else
+                    m_inputManager.individualFingerTracking = (l_data.m_leftHand.m_present || l_data.m_rightHand.m_present);
+                IKSystem.Instance.FingerSystem.controlActive = m_inputManager.individualFingerTracking;
             }
 
             m_handRayLeft.enabled = (l_data.m_leftHand.m_present && (!m_inVR || !Utils.IsLeftHandTracked() || !Settings.FingersOnly));
@@ -240,15 +248,12 @@ namespace ml_lme
         // Arbitrary
         void UpdateFingerTracking()
         {
-            m_inputManager.individualFingerTracking = (Settings.Enabled || (m_inVR && m_openXrModule.AreKnucklesInUse() && !(bool)ms_indexGestureToggle.GetValue(m_openXrModule)));
+            m_inputManager.individualFingerTracking = (Settings.Enabled || (m_inVR && m_openXrModule.AreKnucklesInUse() && !m_openXrModule.GetIndexGestureToggle()));
             IKSystem.Instance.FingerSystem.controlActive = m_inputManager.individualFingerTracking;
         }
 
         void SetFingersInput(GestureMatcher.HandData p_hand, bool p_left)
         {
-            m_inputManager.individualFingerTracking = true;
-            IKSystem.Instance.FingerSystem.controlActive = true;
-
             if(p_left)
             {
                 m_inputManager.fingerCurlLeftThumb = p_hand.m_bends[0];
@@ -267,6 +272,7 @@ namespace ml_lme
             }
         }
 
+        // Game settings
         void OnGameSettingBoolChange(string p_name, bool p_state)
         {
             if(p_name == "ControlUseGripToGrab")
