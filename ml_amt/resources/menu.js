@@ -256,6 +256,13 @@ function inp_toggle_mod_amt(_obj, _callbackName) {
                 <div id="MassCenter" class ="inp_toggle no-scroll" data-current="true"></div>
             </div>
         </div>
+
+        <div class ="row-wrapper">
+            <div class ="option-caption">Scaled locomotion steps: </div>
+            <div class ="option-input">
+                <div id="ScaledSteps" class ="inp_toggle no-scroll" data-current="true"></div>
+            </div>
+        </div>
         
         <div class ="row-wrapper">
             <div class ="option-caption">Alternative avatar collider scale: </div>
@@ -265,9 +272,9 @@ function inp_toggle_mod_amt(_obj, _callbackName) {
         </div>
 
         <div class ="row-wrapper">
-            <div class ="option-caption">Prevent Unity animation override (chairs, etc.): </div>
+            <div class ="option-caption">Fix animation overrides (chairs, etc.): </div>
             <div class ="option-input">
-                <div id="OverrideFix" class ="inp_toggle no-scroll" data-current="false"></div>
+                <div id="OverrideFix" class ="inp_toggle no-scroll" data-current="true"></div>
             </div>
         </div>
     `;

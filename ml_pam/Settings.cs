@@ -13,8 +13,8 @@ namespace ml_pam
             GrabOffset
         }
 
-        static bool ms_enabled = true;
-        static float ms_grabOffset = 0.25f;
+        public static bool Enabled { get; private set; } = true;
+        public static float GrabOffset { get; private set; } = 0.25f;
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
@@ -28,8 +28,8 @@ namespace ml_pam
 
             ms_entries = new List<MelonLoader.MelonPreferences_Entry>()
             {
-                ms_category.CreateEntry(ModSetting.Enabled.ToString(), ms_enabled),
-                ms_category.CreateEntry(ModSetting.GrabOffset.ToString(), 25),
+                ms_category.CreateEntry(ModSetting.Enabled.ToString(), Enabled),
+                ms_category.CreateEntry(ModSetting.GrabOffset.ToString(), (int)(GrabOffset * 100f)),
             };
 
             Load();
@@ -61,8 +61,8 @@ namespace ml_pam
 
         static void Load()
         {
-            ms_enabled = (bool)ms_entries[(int)ModSetting.Enabled].BoxedValue;
-            ms_grabOffset = (int)ms_entries[(int)ModSetting.GrabOffset].BoxedValue * 0.01f;
+            Enabled = (bool)ms_entries[(int)ModSetting.Enabled].BoxedValue;
+            GrabOffset = (int)ms_entries[(int)ModSetting.GrabOffset].BoxedValue * 0.01f;
         }
 
         static void OnToggleUpdate(string p_name, string p_value)
@@ -73,8 +73,8 @@ namespace ml_pam
                 {
                     case ModSetting.Enabled:
                     {
-                        ms_enabled = bool.Parse(p_value);
-                        EnabledChange?.Invoke(ms_enabled);
+                        Enabled = bool.Parse(p_value);
+                        EnabledChange?.Invoke(Enabled);
                     }
                     break;
                 }
@@ -91,23 +91,14 @@ namespace ml_pam
                 {
                     case ModSetting.GrabOffset:
                     {
-                        ms_grabOffset = int.Parse(p_value) * 0.01f;
-                        GrabOffsetChange?.Invoke(ms_grabOffset);
+                        GrabOffset = int.Parse(p_value) * 0.01f;
+                        GrabOffsetChange?.Invoke(GrabOffset);
                     }
                     break;
                 }
 
                 ms_entries[(int)l_setting].BoxedValue = int.Parse(p_value);
             }
-        }
-
-        public static bool Enabled
-        {
-            get => ms_enabled;
-        }
-        public static float GrabOffset
-        {
-            get => ms_grabOffset;
         }
     }
 }

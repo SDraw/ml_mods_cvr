@@ -20,23 +20,25 @@ namespace ml_amt
             DetectEmotes,
             FollowHips,
             CollisionScale,
+            ScaledSteps,
             MassCenter,
             OverrideFix
         };
 
-        static bool ms_ikOverrideCrouch = true;
-        static float ms_crouchLimit = 0.65f;
-        static bool ms_ikOverrideProne = true;
-        static float ms_proneLimit = 0.3f;
-        static bool ms_poseTransitions = true;
-        static bool ms_adjustedMovement = true;
-        static bool ms_ikOverrideFly = true;
-        static bool ms_ikOverrideJump = true;
-        static bool ms_detectEmotes = true;
-        static bool ms_followHips = true;
-        static bool ms_collisionScale = true;
-        static bool ms_massCenter = true;
-        static bool ms_overrideFix = false;
+        public static bool IKOverrideCrouch { get; private set; } = true;
+        public static float CrouchLimit { get; private set; } = 0.65f;
+        public static bool IKOverrideProne { get; private set; } = true;
+        public static float ProneLimit { get; private set; } = 0.3f;
+        public static bool PoseTransitions { get; private set; } = true;
+        public static bool AdjustedMovement { get; private set; } = true;
+        public static bool IKOverrideFly { get; private set; } = true;
+        public static bool IKOverrideJump { get; private set; } = true;
+        public static bool DetectEmotes { get; private set; } = true;
+        public static bool FollowHips { get; private set; } = true;
+        public static bool MassCenter { get; private set; } = true;
+        public static bool ScaledSteps { get; private set; } = true;
+        public static bool CollisionScale { get; private set; } = true;
+        public static bool OverrideFix { get; private set; } = true;
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
@@ -51,8 +53,9 @@ namespace ml_amt
         static public event Action<bool> IKOverrideJumpChange;
         static public event Action<bool> DetectEmotesChange;
         static public event Action<bool> FollowHipsChange;
-        static public event Action<bool> CollisionScaleChange;
         static public event Action<bool> MassCenterChange;
+        static public event Action<bool> ScaledStepsChange;
+        static public event Action<bool> CollisionScaleChange;
         static public event Action<bool> OverrideFixChange;
 
         internal static void Init()
@@ -61,19 +64,20 @@ namespace ml_amt
 
             ms_entries = new List<MelonLoader.MelonPreferences_Entry>()
             {
-                ms_category.CreateEntry(ModSetting.IKOverrideCrouch.ToString(), true),
-                ms_category.CreateEntry(ModSetting.CrouchLimit.ToString(), 65),
-                ms_category.CreateEntry(ModSetting.IKOverrideProne.ToString(), true),
-                ms_category.CreateEntry(ModSetting.ProneLimit.ToString(), 30),
-                ms_category.CreateEntry(ModSetting.PoseTransitions.ToString(), true),
-                ms_category.CreateEntry(ModSetting.AdjustedMovement.ToString(), true),
-                ms_category.CreateEntry(ModSetting.IKOverrideFly.ToString(), true),
-                ms_category.CreateEntry(ModSetting.IKOverrideJump.ToString(), true),
-                ms_category.CreateEntry(ModSetting.DetectEmotes.ToString(), true),
-                ms_category.CreateEntry(ModSetting.FollowHips.ToString(), true),
-                ms_category.CreateEntry(ModSetting.CollisionScale.ToString(), true),
-                ms_category.CreateEntry(ModSetting.MassCenter.ToString(), true),
-                ms_category.CreateEntry(ModSetting.OverrideFix.ToString(), false)
+                ms_category.CreateEntry(ModSetting.IKOverrideCrouch.ToString(), IKOverrideCrouch),
+                ms_category.CreateEntry(ModSetting.CrouchLimit.ToString(), (int)(CrouchLimit * 100f)),
+                ms_category.CreateEntry(ModSetting.IKOverrideProne.ToString(), IKOverrideProne),
+                ms_category.CreateEntry(ModSetting.ProneLimit.ToString(), (int)(ProneLimit * 100f)),
+                ms_category.CreateEntry(ModSetting.PoseTransitions.ToString(), PoseTransitions),
+                ms_category.CreateEntry(ModSetting.AdjustedMovement.ToString(), AdjustedMovement),
+                ms_category.CreateEntry(ModSetting.IKOverrideFly.ToString(), IKOverrideFly),
+                ms_category.CreateEntry(ModSetting.IKOverrideJump.ToString(), IKOverrideJump),
+                ms_category.CreateEntry(ModSetting.DetectEmotes.ToString(), DetectEmotes),
+                ms_category.CreateEntry(ModSetting.FollowHips.ToString(), FollowHips),
+                ms_category.CreateEntry(ModSetting.MassCenter.ToString(), MassCenter),
+                ms_category.CreateEntry(ModSetting.ScaledSteps.ToString(), ScaledSteps),
+                ms_category.CreateEntry(ModSetting.CollisionScale.ToString(), CollisionScale),
+                ms_category.CreateEntry(ModSetting.OverrideFix.ToString(), OverrideFix)
             };
 
             Load();
@@ -105,19 +109,20 @@ namespace ml_amt
 
         static void Load()
         {
-            ms_ikOverrideCrouch = (bool)ms_entries[(int)ModSetting.IKOverrideCrouch].BoxedValue;
-            ms_crouchLimit = ((int)ms_entries[(int)ModSetting.CrouchLimit].BoxedValue) * 0.01f;
-            ms_ikOverrideProne = (bool)ms_entries[(int)ModSetting.IKOverrideProne].BoxedValue;
-            ms_proneLimit = ((int)ms_entries[(int)ModSetting.ProneLimit].BoxedValue) * 0.01f;
-            ms_poseTransitions = (bool)ms_entries[(int)ModSetting.PoseTransitions].BoxedValue;
-            ms_adjustedMovement = (bool)ms_entries[(int)ModSetting.AdjustedMovement].BoxedValue;
-            ms_ikOverrideFly = (bool)ms_entries[(int)ModSetting.IKOverrideFly].BoxedValue;
-            ms_ikOverrideJump = (bool)ms_entries[(int)ModSetting.IKOverrideJump].BoxedValue;
-            ms_detectEmotes = (bool)ms_entries[(int)ModSetting.DetectEmotes].BoxedValue;
-            ms_followHips = (bool)ms_entries[(int)ModSetting.FollowHips].BoxedValue;
-            ms_collisionScale = (bool)ms_entries[(int)ModSetting.CollisionScale].BoxedValue;
-            ms_massCenter = (bool)ms_entries[(int)ModSetting.MassCenter].BoxedValue;
-            ms_overrideFix = (bool)ms_entries[(int)ModSetting.OverrideFix].BoxedValue;
+            IKOverrideCrouch = (bool)ms_entries[(int)ModSetting.IKOverrideCrouch].BoxedValue;
+            CrouchLimit = ((int)ms_entries[(int)ModSetting.CrouchLimit].BoxedValue) * 0.01f;
+            IKOverrideProne = (bool)ms_entries[(int)ModSetting.IKOverrideProne].BoxedValue;
+            ProneLimit = ((int)ms_entries[(int)ModSetting.ProneLimit].BoxedValue) * 0.01f;
+            PoseTransitions = (bool)ms_entries[(int)ModSetting.PoseTransitions].BoxedValue;
+            AdjustedMovement = (bool)ms_entries[(int)ModSetting.AdjustedMovement].BoxedValue;
+            IKOverrideFly = (bool)ms_entries[(int)ModSetting.IKOverrideFly].BoxedValue;
+            IKOverrideJump = (bool)ms_entries[(int)ModSetting.IKOverrideJump].BoxedValue;
+            DetectEmotes = (bool)ms_entries[(int)ModSetting.DetectEmotes].BoxedValue;
+            FollowHips = (bool)ms_entries[(int)ModSetting.FollowHips].BoxedValue;
+            MassCenter = (bool)ms_entries[(int)ModSetting.MassCenter].BoxedValue;
+            ScaledSteps = (bool)ms_entries[(int)ModSetting.ScaledSteps].BoxedValue;
+            CollisionScale = (bool)ms_entries[(int)ModSetting.CollisionScale].BoxedValue;
+            OverrideFix = (bool)ms_entries[(int)ModSetting.OverrideFix].BoxedValue;
         }
 
         static void OnSliderUpdate(string p_name, string p_value)
@@ -128,15 +133,15 @@ namespace ml_amt
                 {
                     case ModSetting.CrouchLimit:
                     {
-                        ms_crouchLimit = int.Parse(p_value) * 0.01f;
-                        CrouchLimitChange?.Invoke(ms_crouchLimit);
+                        CrouchLimit = int.Parse(p_value) * 0.01f;
+                        CrouchLimitChange?.Invoke(CrouchLimit);
                     }
                     break;
 
                     case ModSetting.ProneLimit:
                     {
-                        ms_proneLimit = int.Parse(p_value) * 0.01f;
-                        ProneLimitChange?.Invoke(ms_proneLimit);
+                        ProneLimit = int.Parse(p_value) * 0.01f;
+                        ProneLimitChange?.Invoke(ProneLimit);
                     }
                     break;
                 }
@@ -153,137 +158,91 @@ namespace ml_amt
                 {
                     case ModSetting.IKOverrideCrouch:
                     {
-                        ms_ikOverrideCrouch = bool.Parse(p_value);
-                        IKOverrideCrouchChange?.Invoke(ms_ikOverrideCrouch);
+                        IKOverrideCrouch = bool.Parse(p_value);
+                        IKOverrideCrouchChange?.Invoke(IKOverrideCrouch);
                     }
                     break;
 
                     case ModSetting.IKOverrideProne:
                     {
-                        ms_ikOverrideProne = bool.Parse(p_value);
-                        IKOverrideProneChange?.Invoke(ms_ikOverrideProne);
+                        IKOverrideProne = bool.Parse(p_value);
+                        IKOverrideProneChange?.Invoke(IKOverrideProne);
                     }
                     break;
 
                     case ModSetting.PoseTransitions:
                     {
-                        ms_poseTransitions = bool.Parse(p_value);
-                        PoseTransitionsChange?.Invoke(ms_poseTransitions);
+                        PoseTransitions = bool.Parse(p_value);
+                        PoseTransitionsChange?.Invoke(PoseTransitions);
                     }
                     break;
 
                     case ModSetting.AdjustedMovement:
                     {
-                        ms_adjustedMovement = bool.Parse(p_value);
-                        AdjustedMovementChange?.Invoke(ms_adjustedMovement);
+                        AdjustedMovement = bool.Parse(p_value);
+                        AdjustedMovementChange?.Invoke(AdjustedMovement);
                     }
                     break;
 
                     case ModSetting.IKOverrideFly:
                     {
-                        ms_ikOverrideFly = bool.Parse(p_value);
-                        IKOverrideFlyChange?.Invoke(ms_ikOverrideFly);
+                        IKOverrideFly = bool.Parse(p_value);
+                        IKOverrideFlyChange?.Invoke(IKOverrideFly);
                     }
                     break;
 
                     case ModSetting.IKOverrideJump:
                     {
-                        ms_ikOverrideJump = bool.Parse(p_value);
-                        IKOverrideJumpChange?.Invoke(ms_ikOverrideJump);
+                        IKOverrideJump = bool.Parse(p_value);
+                        IKOverrideJumpChange?.Invoke(IKOverrideJump);
                     }
                     break;
 
                     case ModSetting.DetectEmotes:
                     {
-                        ms_detectEmotes = bool.Parse(p_value);
-                        DetectEmotesChange?.Invoke(ms_detectEmotes);
+                        DetectEmotes = bool.Parse(p_value);
+                        DetectEmotesChange?.Invoke(DetectEmotes);
                     }
                     break;
 
                     case ModSetting.FollowHips:
                     {
-                        ms_followHips = bool.Parse(p_value);
-                        FollowHipsChange?.Invoke(ms_followHips);
-                    }
-                    break;
-
-                    case ModSetting.CollisionScale:
-                    {
-                        ms_collisionScale = bool.Parse(p_value);
-                        CollisionScaleChange?.Invoke(ms_collisionScale);
+                        FollowHips = bool.Parse(p_value);
+                        FollowHipsChange?.Invoke(FollowHips);
                     }
                     break;
 
                     case ModSetting.MassCenter:
                     {
-                        ms_massCenter = bool.Parse(p_value);
-                        MassCenterChange?.Invoke(ms_massCenter);
+                        MassCenter = bool.Parse(p_value);
+                        MassCenterChange?.Invoke(MassCenter);
+                    }
+                    break;
+
+                    case ModSetting.ScaledSteps:
+                    {
+                        ScaledSteps = bool.Parse(p_value);
+                        ScaledStepsChange?.Invoke(ScaledSteps);
+                    }
+                    break;
+
+                    case ModSetting.CollisionScale:
+                    {
+                        CollisionScale = bool.Parse(p_value);
+                        CollisionScaleChange?.Invoke(CollisionScale);
                     }
                     break;
 
                     case ModSetting.OverrideFix:
                     {
-                        ms_overrideFix = bool.Parse(p_value);
-                        OverrideFixChange?.Invoke(ms_overrideFix);
+                        OverrideFix = bool.Parse(p_value);
+                        OverrideFixChange?.Invoke(OverrideFix);
                     }
                     break;
                 }
 
                 ms_entries[(int)l_setting].BoxedValue = bool.Parse(p_value);
             }
-        }
-
-        public static bool IKOverrideCrouch
-        {
-            get => ms_ikOverrideCrouch;
-        }
-        public static float CrouchLimit
-        {
-            get => ms_crouchLimit;
-        }
-        public static bool IKOverrideProne
-        {
-            get => ms_ikOverrideProne;
-        }
-        public static float ProneLimit
-        {
-            get => ms_proneLimit;
-        }
-        public static bool PoseTransitions
-        {
-            get => ms_poseTransitions;
-        }
-        public static bool AdjustedMovement
-        {
-            get => ms_adjustedMovement;
-        }
-        public static bool IKOverrideFly
-        {
-            get => ms_ikOverrideFly;
-        }
-        public static bool IKOverrideJump
-        {
-            get => ms_ikOverrideJump;
-        }
-        public static bool DetectEmotes
-        {
-            get => ms_detectEmotes;
-        }
-        public static bool FollowHips
-        {
-            get => ms_followHips;
-        }
-        public static bool CollisionScale
-        {
-            get => ms_collisionScale;
-        }
-        public static bool MassCenter
-        {
-            get => ms_massCenter;
-        }
-        public static bool OverrideFix
-        {
-            get => ms_overrideFix;
         }
     }
 }

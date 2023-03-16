@@ -37,18 +37,18 @@ namespace ml_lme
             GripThreadhold
         };
 
-        static bool ms_enabled = false;
-        static Vector3 ms_desktopOffset = new Vector3(0f, -0.45f, 0.3f);
-        static bool ms_fingersOnly = false;
-        static bool ms_modelVisibility = false;
-        static LeapTrackingMode ms_trackingMode = LeapTrackingMode.Desktop;
-        static Vector3 ms_rootAngle = Vector3.zero;
-        static bool ms_headAttach = false;
-        static Vector3 ms_headOffset = new Vector3(0f, -0.3f, 0.15f);
-        static bool ms_trackElbows = true;
-        static bool ms_input = true;
-        static float ms_interactThreadhold = 0.8f;
-        static float ms_gripThreadhold = 0.4f;
+        public static bool Enabled { get; private set; } = false;
+        public static Vector3 DesktopOffset { get; private set; } = new Vector3(0f, -0.45f, 0.3f);
+        public static bool FingersOnly { get; private set; } = false;
+        public static bool ModelVisibility { get; private set; } = false;
+        public static LeapTrackingMode TrackingMode { get; private set; } = LeapTrackingMode.Desktop;
+        public static Vector3 RootAngle { get; private set; } = Vector3.zero;
+        public static bool HeadAttach { get; private set; } = false;
+        public static Vector3 HeadOffset { get; private set; } = new Vector3(0f, -0.3f, 0.15f);
+        public static bool TrackElbows { get; private set; } = true;
+        public static bool Input { get; private set; } = true;
+        public static float InteractThreadhold { get; private set; } = 0.8f;
+        public static float GripThreadhold { get; private set; } = 0.4f;
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
@@ -72,24 +72,24 @@ namespace ml_lme
 
             ms_entries = new List<MelonLoader.MelonPreferences_Entry>()
             {
-                ms_category.CreateEntry(ModSetting.Enabled.ToString(), ms_enabled),
-                ms_category.CreateEntry(ModSetting.DesktopX.ToString(), 0),
-                ms_category.CreateEntry(ModSetting.DesktopY.ToString(), -45),
-                ms_category.CreateEntry(ModSetting.DesktopZ.ToString(), 30),
-                ms_category.CreateEntry(ModSetting.FingersOnly.ToString(), ms_modelVisibility),
-                ms_category.CreateEntry(ModSetting.Model.ToString(), ms_modelVisibility),
-                ms_category.CreateEntry(ModSetting.Mode.ToString(), (int)ms_trackingMode),
-                ms_category.CreateEntry(ModSetting.AngleX.ToString(), 0),
-                ms_category.CreateEntry(ModSetting.AngleY.ToString(), 0),
-                ms_category.CreateEntry(ModSetting.AngleZ.ToString(), 0),
-                ms_category.CreateEntry(ModSetting.Head.ToString(), ms_headAttach),
-                ms_category.CreateEntry(ModSetting.HeadX.ToString(), 0),
-                ms_category.CreateEntry(ModSetting.HeadY.ToString(), -30),
-                ms_category.CreateEntry(ModSetting.HeadZ.ToString(), 15),
-                ms_category.CreateEntry(ModSetting.TrackElbows.ToString(), true),
-                ms_category.CreateEntry(ModSetting.Input.ToString(), true),
-                ms_category.CreateEntry(ModSetting.InteractThreadhold.ToString(), 80),
-                ms_category.CreateEntry(ModSetting.GripThreadhold.ToString(), 40),
+                ms_category.CreateEntry(ModSetting.Enabled.ToString(), Enabled),
+                ms_category.CreateEntry(ModSetting.DesktopX.ToString(), (int)(DesktopOffset.x * 100f)),
+                ms_category.CreateEntry(ModSetting.DesktopY.ToString(), (int)(DesktopOffset.y * 100f)),
+                ms_category.CreateEntry(ModSetting.DesktopZ.ToString(), (int)(DesktopOffset.z * 100f)),
+                ms_category.CreateEntry(ModSetting.FingersOnly.ToString(), FingersOnly),
+                ms_category.CreateEntry(ModSetting.Model.ToString(), ModelVisibility),
+                ms_category.CreateEntry(ModSetting.Mode.ToString(), (int)TrackingMode),
+                ms_category.CreateEntry(ModSetting.AngleX.ToString(), (int)(RootAngle.x * 100f)),
+                ms_category.CreateEntry(ModSetting.AngleY.ToString(), (int)(RootAngle.y * 100f)),
+                ms_category.CreateEntry(ModSetting.AngleZ.ToString(), (int)(RootAngle.z * 100f)),
+                ms_category.CreateEntry(ModSetting.Head.ToString(), HeadAttach),
+                ms_category.CreateEntry(ModSetting.HeadX.ToString(), (int)(HeadOffset.x * 100f)),
+                ms_category.CreateEntry(ModSetting.HeadY.ToString(), (int)(HeadOffset.y * 100f)),
+                ms_category.CreateEntry(ModSetting.HeadZ.ToString(), (int)(HeadOffset.z * 100f)),
+                ms_category.CreateEntry(ModSetting.TrackElbows.ToString(), TrackElbows),
+                ms_category.CreateEntry(ModSetting.Input.ToString(), Input),
+                ms_category.CreateEntry(ModSetting.InteractThreadhold.ToString(), (int)(InteractThreadhold * 100f)),
+                ms_category.CreateEntry(ModSetting.GripThreadhold.ToString(), (int)(GripThreadhold * 100f)),
             };
 
             Load();
@@ -122,30 +122,30 @@ namespace ml_lme
 
         static void Load()
         {
-            ms_enabled = (bool)ms_entries[(int)ModSetting.Enabled].BoxedValue;
-            ms_desktopOffset = new Vector3(
+            Enabled = (bool)ms_entries[(int)ModSetting.Enabled].BoxedValue;
+            DesktopOffset = new Vector3(
                 (int)ms_entries[(int)ModSetting.DesktopX].BoxedValue,
                 (int)ms_entries[(int)ModSetting.DesktopY].BoxedValue,
                 (int)ms_entries[(int)ModSetting.DesktopZ].BoxedValue
             ) * 0.01f;
-            ms_fingersOnly = (bool)ms_entries[(int)ModSetting.FingersOnly].BoxedValue;
-            ms_modelVisibility = (bool)ms_entries[(int)ModSetting.Model].BoxedValue;
-            ms_trackingMode = (LeapTrackingMode)(int)ms_entries[(int)ModSetting.Mode].BoxedValue;
-            ms_rootAngle = new Vector3(
+            FingersOnly = (bool)ms_entries[(int)ModSetting.FingersOnly].BoxedValue;
+            ModelVisibility = (bool)ms_entries[(int)ModSetting.Model].BoxedValue;
+            TrackingMode = (LeapTrackingMode)(int)ms_entries[(int)ModSetting.Mode].BoxedValue;
+            RootAngle = new Vector3(
                 (int)ms_entries[(int)ModSetting.AngleX].BoxedValue,
                 (int)ms_entries[(int)ModSetting.AngleY].BoxedValue,
                 (int)ms_entries[(int)ModSetting.AngleZ].BoxedValue
             );
-            ms_headAttach = (bool)ms_entries[(int)ModSetting.Head].BoxedValue;
-            ms_headOffset = new Vector3(
+            HeadAttach = (bool)ms_entries[(int)ModSetting.Head].BoxedValue;
+            HeadOffset = new Vector3(
                 (int)ms_entries[(int)ModSetting.HeadX].BoxedValue,
                 (int)ms_entries[(int)ModSetting.HeadY].BoxedValue,
                 (int)ms_entries[(int)ModSetting.HeadZ].BoxedValue
             ) * 0.01f;
-            ms_trackElbows = (bool)ms_entries[(int)ModSetting.TrackElbows].BoxedValue;
-            ms_input = (bool)ms_entries[(int)ModSetting.Input].BoxedValue;
-            ms_interactThreadhold = (int)ms_entries[(int)ModSetting.InteractThreadhold].BoxedValue * 0.01f;
-            ms_gripThreadhold = (int)ms_entries[(int)ModSetting.GripThreadhold].BoxedValue * 0.01f;
+            TrackElbows = (bool)ms_entries[(int)ModSetting.TrackElbows].BoxedValue;
+            Input = (bool)ms_entries[(int)ModSetting.Input].BoxedValue;
+            InteractThreadhold = (int)ms_entries[(int)ModSetting.InteractThreadhold].BoxedValue * 0.01f;
+            GripThreadhold = (int)ms_entries[(int)ModSetting.GripThreadhold].BoxedValue * 0.01f;
         }
 
         static void OnToggleUpdate(string p_name, string p_value)
@@ -156,43 +156,43 @@ namespace ml_lme
                 {
                     case ModSetting.Enabled:
                     {
-                        ms_enabled = bool.Parse(p_value);
-                        EnabledChange?.Invoke(ms_enabled);
+                        Enabled = bool.Parse(p_value);
+                        EnabledChange?.Invoke(Enabled);
                     }
                     break;
 
                     case ModSetting.FingersOnly:
                     {
-                        ms_fingersOnly = bool.Parse(p_value);
-                        FingersOnlyChange?.Invoke(ms_fingersOnly);
+                        FingersOnly = bool.Parse(p_value);
+                        FingersOnlyChange?.Invoke(FingersOnly);
                     }
                     break;
 
                     case ModSetting.Model:
                     {
-                        ms_modelVisibility = bool.Parse(p_value);
-                        ModelVisibilityChange?.Invoke(ms_modelVisibility);
+                        ModelVisibility = bool.Parse(p_value);
+                        ModelVisibilityChange?.Invoke(ModelVisibility);
                     }
                     break;
 
                     case ModSetting.Head:
                     {
-                        ms_headAttach = bool.Parse(p_value);
-                        HeadAttachChange?.Invoke(ms_headAttach);
+                        HeadAttach = bool.Parse(p_value);
+                        HeadAttachChange?.Invoke(HeadAttach);
                     }
                     break;
 
                     case ModSetting.TrackElbows:
                     {
-                        ms_trackElbows = bool.Parse(p_value);
-                        TrackElbowsChange?.Invoke(ms_trackElbows);
+                        TrackElbows = bool.Parse(p_value);
+                        TrackElbowsChange?.Invoke(TrackElbows);
                     }
                     break;
 
                     case ModSetting.Input:
                     {
-                        ms_input = bool.Parse(p_value);
-                        InputChange?.Invoke(ms_input);
+                        Input = bool.Parse(p_value);
+                        InputChange?.Invoke(Input);
                     }
                     break;
                 }
@@ -209,72 +209,90 @@ namespace ml_lme
                 {
                     case ModSetting.DesktopX:
                     {
-                        ms_desktopOffset.x = int.Parse(p_value) * 0.01f;
-                        DesktopOffsetChange?.Invoke(ms_desktopOffset);
+                        Vector3 l_current = DesktopOffset;
+                        l_current.x = int.Parse(p_value) * 0.01f;
+                        DesktopOffset = l_current;
+                        DesktopOffsetChange?.Invoke(l_current);
                     }
                     break;
                     case ModSetting.DesktopY:
                     {
-                        ms_desktopOffset.y = int.Parse(p_value) * 0.01f;
-                        DesktopOffsetChange?.Invoke(ms_desktopOffset);
+                        Vector3 l_current = DesktopOffset;
+                        l_current.y = int.Parse(p_value) * 0.01f;
+                        DesktopOffset = l_current;
+                        DesktopOffsetChange?.Invoke(l_current);
                     }
                     break;
                     case ModSetting.DesktopZ:
                     {
-                        ms_desktopOffset.z = int.Parse(p_value) * 0.01f;
-                        DesktopOffsetChange?.Invoke(ms_desktopOffset);
+                        Vector3 l_current = DesktopOffset;
+                        l_current.z = int.Parse(p_value) * 0.01f;
+                        DesktopOffset = l_current;
+                        DesktopOffsetChange?.Invoke(l_current);
                     }
                     break;
 
                     case ModSetting.AngleX:
                     {
-                        ms_rootAngle.x = int.Parse(p_value);
-                        RootAngleChange?.Invoke(ms_rootAngle);
+                        Vector3 l_current = RootAngle;
+                        l_current.x = int.Parse(p_value);
+                        RootAngle = l_current;
+                        RootAngleChange?.Invoke(l_current);
                     }
                     break;
 
                     case ModSetting.AngleY:
                     {
-                        ms_rootAngle.y = int.Parse(p_value);
-                        RootAngleChange?.Invoke(ms_rootAngle);
+                        Vector3 l_current = RootAngle;
+                        l_current.y = int.Parse(p_value);
+                        RootAngle = l_current;
+                        RootAngleChange?.Invoke(l_current);
                     }
                     break;
 
                     case ModSetting.AngleZ:
                     {
-                        ms_rootAngle.z = int.Parse(p_value);
-                        RootAngleChange?.Invoke(ms_rootAngle);
+                        Vector3 l_current = RootAngle;
+                        l_current.z = int.Parse(p_value);
+                        RootAngle = l_current;
+                        RootAngleChange?.Invoke(l_current);
                     }
                     break;
 
                     case ModSetting.HeadX:
                     {
-                        ms_headOffset.x = int.Parse(p_value) * 0.01f;
-                        HeadOffsetChange?.Invoke(ms_headOffset);
+                        Vector3 l_current = HeadOffset;
+                        l_current.x = int.Parse(p_value) * 0.01f;
+                        HeadOffset = l_current;
+                        HeadOffsetChange?.Invoke(l_current);
                     }
                     break;
                     case ModSetting.HeadY:
                     {
-                        ms_headOffset.y = int.Parse(p_value) * 0.01f;
-                        HeadOffsetChange?.Invoke(ms_headOffset);
+                        Vector3 l_current = HeadOffset;
+                        l_current.y = int.Parse(p_value) * 0.01f;
+                        HeadOffset = l_current;
+                        HeadOffsetChange?.Invoke(l_current);
                     }
                     break;
                     case ModSetting.HeadZ:
                     {
-                        ms_headOffset.z = int.Parse(p_value) * 0.01f;
-                        HeadOffsetChange?.Invoke(ms_headOffset);
+                        Vector3 l_current = HeadOffset;
+                        l_current.z = int.Parse(p_value) * 0.01f;
+                        HeadOffset = l_current;
+                        HeadOffsetChange?.Invoke(l_current);
                     }
                     break;
                     case ModSetting.InteractThreadhold:
                     {
-                        ms_interactThreadhold = int.Parse(p_value) * 0.01f;
-                        InteractThreadholdChange?.Invoke(ms_interactThreadhold);
+                        InteractThreadhold = int.Parse(p_value) * 0.01f;
+                        InteractThreadholdChange?.Invoke(InteractThreadhold);
                     }
                     break;
                     case ModSetting.GripThreadhold:
                     {
-                        ms_gripThreadhold = int.Parse(p_value) * 0.01f;
-                        GripThreadholdChange?.Invoke(ms_gripThreadhold);
+                        GripThreadhold = int.Parse(p_value) * 0.01f;
+                        GripThreadholdChange?.Invoke(GripThreadhold);
                     }
                     break;
                 }
@@ -291,63 +309,14 @@ namespace ml_lme
                 {
                     case ModSetting.Mode:
                     {
-                        ms_trackingMode = (LeapTrackingMode)int.Parse(p_value);
-                        TrackingModeChange?.Invoke(ms_trackingMode);
+                        TrackingMode = (LeapTrackingMode)int.Parse(p_value);
+                        TrackingModeChange?.Invoke(TrackingMode);
                     }
                     break;
                 }
 
                 ms_entries[(int)l_setting].BoxedValue = int.Parse(p_value);
             }
-        }
-
-        public static bool Enabled
-        {
-            get => ms_enabled;
-        }
-        public static Vector3 DesktopOffset
-        {
-            get => ms_desktopOffset;
-        }
-        public static bool FingersOnly
-        {
-            get => ms_fingersOnly;
-        }
-        public static bool ModelVisibility
-        {
-            get => ms_modelVisibility;
-        }
-        public static LeapTrackingMode TrackingMode
-        {
-            get => ms_trackingMode;
-        }
-        public static Vector3 RootAngle
-        {
-            get => ms_rootAngle;
-        }
-        public static bool HeadAttach
-        {
-            get => ms_headAttach;
-        }
-        public static Vector3 HeadOffset
-        {
-            get => ms_headOffset;
-        }
-        public static bool TrackElbows
-        {
-            get => ms_trackElbows;
-        }
-        public static bool Input
-        {
-            get => ms_input;
-        }
-        public static float InteractThreadhold
-        {
-            get => ms_interactThreadhold;
-        }
-        public static float GripThreadhold
-        {
-            get => ms_gripThreadhold;
         }
     }
 }
