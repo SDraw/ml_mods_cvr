@@ -4,7 +4,7 @@ Merged set of MelonLoader mods for ChilloutVR.
 | Full name | Short name | Latest version | Available in [CVRMA](https://github.com/knah/CVRMelonAssistant) | Current Status | Notes |
 |-----------|------------|----------------|-----------------------------------------------------------------|----------------|-------|
 | Avatar Change Info | ml_aci | 1.0.3 | Retired | Retired | Superseded by `Extended Game Notifications`
-| Avatar Motion Tweaker | ml_amt | 1.2.3 | Yes | Working |
+| Avatar Motion Tweaker | ml_amt | 1.2.4 | Yes, update review | Working |
 | Desktop Head Tracking | ml_dht | 1.1.2 | Yes | Working |
 | Desktop Reticle Switch | ml_drs | 1.0.0 | Yes | Working |
 | Extended Game Notifications | ml_egn | 1.0.1 | Yes | Working
