@@ -256,14 +256,15 @@ namespace ml_amt
             return false;
         }
 
-        static void OnOverride_Prefix(ref CVRAnimatorManager __instance, ref bool __state)
+        static void OnOverride_Prefix(ref CVRAnimatorManager __instance, out AnimatorAnalyzer __state)
         {
+            __state = new AnimatorAnalyzer();
             try
             {
                 if(Settings.OverrideFix && (__instance.animator != null))
                 {
-                    __state = __instance.animator.enabled;
-                    if(__state)
+                    __state.AnalyzeFrom(__instance.animator);
+                    if(__state.IsEnabled())
                         __instance.animator.enabled = false;
                     __instance.animator.WriteDefaultValues();
                 }
@@ -273,14 +274,14 @@ namespace ml_amt
                 MelonLoader.MelonLogger.Error(l_exception);
             }
         }
-        static void OnOverride_Postfix(ref CVRAnimatorManager __instance, bool __state)
+        static void OnOverride_Postfix(ref CVRAnimatorManager __instance, AnimatorAnalyzer __state)
         {
             try
             {
                 if(Settings.OverrideFix && (__instance.animator != null))
                 {
-                    __instance.animator.enabled = __state;
-                    if(__state)
+                    __state.ApplyTo(__instance.animator);
+                    if(__state.IsEnabled())
                         __instance.animator.Update(0f);
                 }
             }

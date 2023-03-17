@@ -75,6 +75,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AnimatorAnalyzer.cs" />
     <Compile Include="AvatarParameter.cs" />
     <Compile Include="MotionTweaker.cs" />
     <Compile Include="Main.cs" />
