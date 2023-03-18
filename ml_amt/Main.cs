@@ -222,8 +222,6 @@ namespace ml_amt
 
                     if(__0 || (Mathf.Abs(l_currentHeight - l_newHeight) > (l_currentHeight * 0.05f)) || (Vector3.Distance(l_currentCenter, l_newCenter) > (l_currentHeight * 0.05f)))
                     {
-                        bool l_active = ___controller.enabled;
-
                         if(__0)
                             ___controller.radius = l_newRadius;
                         ___controller.height = l_newHeight;
@@ -243,8 +241,6 @@ namespace ml_amt
                             __instance.forceObject.transform.localScale = new Vector3(l_newRadius + 0.1f, l_newHeight, l_newRadius + 0.1f);
                         if(__instance.groundCheck != null)
                             __instance.groundCheck.localPosition = ____colliderCenter;
-
-                        ___controller.enabled = l_active;
                     }
                 }
             }
