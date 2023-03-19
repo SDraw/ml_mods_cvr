@@ -10,5 +10,5 @@ Merged set of MelonLoader mods for ChilloutVR.
 | Extended Game Notifications | ml_egn | 1.0.1 | Yes | Working
 | Four Point Tracking | ml_fpt | 1.0.9 | Retired | Deprecated | In-game feature since 2022r170 update
 | Leap Motion Extension | ml_lme | 1.3.2 | Yes | Working |
-| Pickup Arm Movement | ml_pam | 1.0.1 | Yes | Working |
+| Pickup Arm Movement | ml_pam | 1.0.2 | Yes, update review| Working |
 | Server Connection Info | ml_sci | 1.0.2 | Retired | Retired | Superseded by `Extended Game Notifications`
