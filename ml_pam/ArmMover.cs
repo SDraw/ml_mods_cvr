@@ -61,10 +61,15 @@ namespace ml_pam
 
         void Update()
         {
-            if(m_enabled && (m_pickup != null))
+            if(m_enabled && !ReferenceEquals(m_pickup, null))
             {
-                Matrix4x4 l_result = m_pickup.transform.GetMatrix() * m_offset;
-                m_target.position = l_result * ms_pointVector;
+                if(m_pickup != null)
+                {
+                    Matrix4x4 l_result = m_pickup.transform.GetMatrix() * m_offset;
+                    m_target.position = l_result * ms_pointVector;
+                }
+                else
+                    this.OnPickupDrop(m_pickup);
             }
         }
 
