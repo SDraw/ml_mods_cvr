@@ -1,11 +1,13 @@
 ﻿using UnityEngine;
 using System.Reflection;
+using ABI_RC.Core.UI;
 
 namespace ml_amt
 {
     static class Utils
     {
         static MethodInfo ms_getSineKeyframes = typeof(RootMotion.FinalIK.IKSolverVR).GetMethod("GetSineKeyframes", BindingFlags.NonPublic | BindingFlags.Static);
+        static FieldInfo ms_cohtmlView = typeof(CohtmlControlledViewDisposable).GetField("_view", BindingFlags.NonPublic | BindingFlags.Instance);
 
         public static bool IsInVR() => ((ABI_RC.Core.Savior.CheckVR.Instance != null) && ABI_RC.Core.Savior.CheckVR.Instance.hasVrDeviceLoaded);
 
@@ -19,5 +21,7 @@ namespace ml_amt
         {
             return (Keyframe[])ms_getSineKeyframes.Invoke(null, new object[] { p_mag });
         }
+
+        public static void ExecuteScript(this CohtmlControlledViewDisposable p_viewDisposable, string p_script) => ((cohtml.Net.View)ms_cohtmlView.GetValue(p_viewDisposable))?.ExecuteScript(p_script);
     }
 }
