@@ -261,6 +261,11 @@ namespace ml_lme
                 m_inputManager.fingerCurlLeftMiddle = p_hand.m_bends[2];
                 m_inputManager.fingerCurlLeftRing = p_hand.m_bends[3];
                 m_inputManager.fingerCurlLeftPinky = p_hand.m_bends[4];
+                IKSystem.Instance.FingerSystem.leftThumbCurl = p_hand.m_bends[0];
+                IKSystem.Instance.FingerSystem.leftIndexCurl = p_hand.m_bends[1];
+                IKSystem.Instance.FingerSystem.leftMiddleCurl = p_hand.m_bends[2];
+                IKSystem.Instance.FingerSystem.leftRingCurl = p_hand.m_bends[3];
+                IKSystem.Instance.FingerSystem.leftPinkyCurl = p_hand.m_bends[4];
             }
             else
             {
@@ -269,6 +274,11 @@ namespace ml_lme
                 m_inputManager.fingerCurlRightMiddle = p_hand.m_bends[2];
                 m_inputManager.fingerCurlRightRing = p_hand.m_bends[3];
                 m_inputManager.fingerCurlRightPinky = p_hand.m_bends[4];
+                IKSystem.Instance.FingerSystem.rightThumbCurl = p_hand.m_bends[0];
+                IKSystem.Instance.FingerSystem.rightIndexCurl = p_hand.m_bends[1];
+                IKSystem.Instance.FingerSystem.rightMiddleCurl = p_hand.m_bends[2];
+                IKSystem.Instance.FingerSystem.rightRingCurl = p_hand.m_bends[3];
+                IKSystem.Instance.FingerSystem.rightPinkyCurl = p_hand.m_bends[4];
             }
         }
 
