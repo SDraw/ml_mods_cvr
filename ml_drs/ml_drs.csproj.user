@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <ReferencePath>C:\Games\Steam\common\ChilloutVR\MelonLoader\;C:\Games\Steam\common\ChilloutVR\ChilloutVR_Data\Managed\</ReferencePath>
+    <ReferencePath>D:\Games\Steam\steamapps\common\ChilloutVR\MelonLoader\net35\;D:\games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\</ReferencePath>
   </PropertyGroup>
 </Project>
