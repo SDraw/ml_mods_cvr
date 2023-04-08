@@ -89,6 +89,7 @@
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RagdollController.cs" />
+    <Compile Include="RagdollToggle.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="vendor\RootMotion\PuppetMaster\Scripts\AnimationBlocker.cs" />

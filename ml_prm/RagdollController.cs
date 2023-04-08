@@ -70,10 +70,8 @@ namespace ml_prm
             if(Settings.Hotkey && Input.GetKeyDown(KeyCode.R) && !ViewManager.Instance.isGameMenuOpen())
                 SwitchRagdoll();
 
-            if (m_avatarRagdollToggle != null && m_avatarRagdollToggle.isActiveAndEnabled && m_avatarRagdollToggle.shouldOverride) {
-                if (m_enabled != m_avatarRagdollToggle.isOn)
-                    SwitchRagdoll();
-            }
+            if((m_avatarRagdollToggle != null) && m_avatarRagdollToggle.isActiveAndEnabled && m_avatarRagdollToggle.shouldOverride && (m_enabled != m_avatarRagdollToggle.isOn))
+                SwitchRagdoll();
         }
 
         void LateUpdate()
@@ -98,6 +96,7 @@ namespace ml_prm
             m_vrIK = null;
             m_enabled = false;
             m_avatarReady = false;
+            m_avatarRagdollToggle = null;
             m_rigidBodies.Clear();
             m_colliders.Clear();
             m_avatarReferences = new BipedRagdollReferences();
@@ -158,7 +157,7 @@ namespace ml_prm
                             l_body.isKinematic = true;
                             l_body.angularDrag = Settings.AngularDrag;
                             l_body.drag = Settings.MovementDrag;
-                            l_body.useGravity = Settings.Gravity;
+                            l_body.useGravity = (!Utils.IsWorldSafe() || Settings.Gravity);
                             l_body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
                         }
 
@@ -210,7 +209,15 @@ namespace ml_prm
         internal void OnWorldSpawn()
         {
             if(m_enabled && m_avatarReady)
-                SwitchRagdoll(true);
+                SwitchRagdoll();
+
+            if(m_avatarReady)
+            {
+                foreach(Rigidbody l_body in m_rigidBodies)
+                {
+                    l_body.useGravity = (!Utils.IsWorldSafe() || Settings.Gravity);
+                }
+            }
         }
 
         // IK updates
@@ -250,15 +257,14 @@ namespace ml_prm
             if(m_avatarReady)
             {
                 foreach(Rigidbody l_body in m_rigidBodies)
-                    l_body.useGravity = p_state;
+                    l_body.useGravity = (!Utils.IsWorldSafe() || p_state);
             }
         }
 
         // Arbitrary
-        void SwitchRagdoll() => SwitchRagdoll(false);
-        public void SwitchRagdoll(bool p_force = false)
+        public void SwitchRagdoll()
         {
-            if(m_avatarReady && (MovementSystem.Instance.lastSeat == null) && !BodySystem.isCalibrating && (Utils.IsWorldSafe() || p_force))
+            if(m_avatarReady && (MovementSystem.Instance.lastSeat == null) && !BodySystem.isCalibrating)
             {
                 m_enabled = !m_enabled;
 
@@ -273,7 +279,7 @@ namespace ml_prm
                     foreach(Rigidbody l_body in m_rigidBodies)
                         l_body.isKinematic = false;
 
-                    Vector3 l_velocity = m_velocity * Settings.VelocityMultiplier;
+                    Vector3 l_velocity = m_velocity * Mathf.Clamp(Settings.VelocityMultiplier, 1f, (Utils.IsWorldSafe() ? Utils.GetWorldFlyMultiplier() : 1f));
                     foreach(Rigidbody l_body in m_rigidBodies)
                     {
                         l_body.velocity = l_velocity;

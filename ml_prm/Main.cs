@@ -49,8 +49,7 @@ namespace ml_prm
             );
 
             // Whitelist the toggle script
-            var l_localComponentWhitelist = typeof(SharedFilter).GetField("_localComponentWhitelist", BindingFlags.NonPublic | BindingFlags.Static)!.GetValue(null) as HashSet<Type>;
-            l_localComponentWhitelist!.Add(typeof(RagdollToggle));
+            (typeof(SharedFilter).GetField("_localComponentWhitelist", BindingFlags.NonPublic | BindingFlags.Static)?.GetValue(null) as HashSet<Type>)?.Add(typeof(RagdollToggle));
 
             MelonLoader.MelonCoroutines.Start(WaitForLocalPlayer());
         }
