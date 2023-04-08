@@ -3,7 +3,9 @@ using ABI_RC.Core.InteractionSystem;
 using ABI_RC.Core.Player;
 using ABI_RC.Systems.IK.SubSystems;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
+using ABI_RC.Core.Util.AssetFiltering;
 
 namespace ml_prm
 {
@@ -45,6 +47,10 @@ namespace ml_prm
                 new HarmonyLib.HarmonyMethod(typeof(PlayerRagdollMod).GetMethod(nameof(OnWorldSpawn_Prefix), BindingFlags.Static | BindingFlags.NonPublic)),
                 null
             );
+
+            // Whitelist the toggle script
+            var l_localComponentWhitelist = typeof(SharedFilter).GetField("_localComponentWhitelist", BindingFlags.NonPublic | BindingFlags.Static)!.GetValue(null) as HashSet<Type>;
+            l_localComponentWhitelist!.Add(typeof(RagdollToggle));
 
             MelonLoader.MelonCoroutines.Start(WaitForLocalPlayer());
         }

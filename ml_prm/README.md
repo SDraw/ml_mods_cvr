@@ -23,3 +23,15 @@ Optional mod's settings with [BTKUILib](https://github.com/BTK-Development/BTKUI
 * Incompatible with `Follow hips on IK override` option in AvatarMotionTweaker.
 * Not suggested to activate fly mode with enabled ragdoll state.
 * Can't be activated in worlds that don't allow flying and spawnables.
+
+# Unity Editor Script
+You can also trigger the ragdoll via animations on your avatar. To do this you need to download and import the 
+`ml_prm_editor_script.unitypackage` into your unity project. Then add the component `Ragdoll Toggle` anywhere inside of
+your avatar's hierarchy. Now you can animate both parameters available:
+
+- **Should Override:** Whether the animation should override the toggled state of the ragdoll.
+- **Is On:** Whether the ragdoll state is On or Off (only works if `Should Override` is also On).
+
+![](resources/ragdoll_toggle_editor_script.png)
+
+**Note:** In order to work the game object needs to be active and the component enabled.
