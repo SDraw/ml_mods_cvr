@@ -11,6 +11,8 @@ namespace ml_prm
 {
     class RagdollController : MonoBehaviour
     {
+        static readonly Vector4 ms_pointVector = new Vector4(0f, 0f, 0f, 1f);
+
         VRIK m_vrIK = null;
         float m_vrIkWeight = 1f;
 
@@ -196,6 +198,12 @@ namespace ml_prm
                 SwitchRagdoll();
         }
 
+        internal void OnWorldSpawn()
+        {
+            if(m_enabled && m_avatarReady)
+                SwitchRagdoll(true);
+        }
+
         // IK updates
         void OnIKPreUpdate()
         {
@@ -238,13 +246,15 @@ namespace ml_prm
         }
 
         // Arbitrary
-        public void SwitchRagdoll()
+        void SwitchRagdoll() => SwitchRagdoll(false);
+        public void SwitchRagdoll(bool p_force = false)
         {
-            if(m_avatarReady && (MovementSystem.Instance.lastSeat == null) && !BodySystem.isCalibrating)
+            if(m_avatarReady && (MovementSystem.Instance.lastSeat == null) && !BodySystem.isCalibrating && (Utils.IsWorldSafe() || p_force))
             {
                 m_enabled = !m_enabled;
 
                 MovementSystem.Instance.SetImmobilized(m_enabled);
+                PlayerSetup.Instance.animatorManager.SetAnimatorParameterTrigger("CancelEmote");
 
                 if(m_enabled)
                 {
@@ -268,8 +278,21 @@ namespace ml_prm
 
                     if(!Settings.RestorePosition && (m_puppetReferences.hips != null))
                     {
-                        Vector3 l_pos = m_puppetReferences.hips.position;
-                        PlayerSetup.Instance.transform.position = l_pos;
+                        if(Utils.IsInVR())
+                        {
+                            Matrix4x4 l_playerMatrix = PlayerSetup.Instance.transform.GetMatrix();
+                            Matrix4x4 l_avatarMatrix = PlayerSetup.Instance._avatar.transform.GetMatrix();
+                            Matrix4x4 l_avatarToPlayer = l_avatarMatrix.inverse * l_playerMatrix;
+
+                            Vector3 l_pos = m_puppetReferences.hips.position;
+                            Vector3 l_offset = l_avatarToPlayer * ms_pointVector;
+                            PlayerSetup.Instance.transform.position = (l_pos + l_offset);
+                        }
+                        else
+                        {
+                            Vector3 l_pos = m_puppetReferences.hips.position;
+                            PlayerSetup.Instance.transform.position = l_pos;
+                        }
                     }
                 }
 

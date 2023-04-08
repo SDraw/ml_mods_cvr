@@ -16,6 +16,16 @@ namespace ml_prm
             Gravity
         }
 
+        enum UiElementIndex
+        {
+            Hotkey = 0,
+            RestorePosition,
+            Gravity,
+            VelocityMultiplier,
+            MovementDrag,
+            AngularDrag
+        }
+
         public static bool Hotkey { get; private set; } = true;
         public static float VelocityMultiplier { get; private set; } = 2f;
         public static bool RestorePosition { get; private set; } = false;
@@ -33,6 +43,8 @@ namespace ml_prm
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
+
+        static List<object> ms_uiElements = new List<object>();
 
         internal static void Init()
         {
@@ -71,41 +83,86 @@ namespace ml_prm
             {
                 SwitchChange?.Invoke();
             };
-            l_categoryMod.AddToggle("Use hotkey", "Switch ragdoll mode with 'R' key", Hotkey).OnValueUpdated += (state) =>
+
+            ms_uiElements.Add(l_categoryMod.AddToggle("Use hotkey", "Switch ragdoll mode with 'R' key", Hotkey));
+            (ms_uiElements[(int)UiElementIndex.Hotkey] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) =>
             {
                 Hotkey = state;
                 ms_entries[(int)ModSetting.Hotkey].BoxedValue = state;
-                HotkeyChange?.Invoke(Hotkey);
+                HotkeyChange?.Invoke(state);
             };
-            l_categoryMod.AddToggle("Restore position", "Bring avatar back where ragdoll state was activated", RestorePosition).OnValueUpdated += (state) =>
+
+            ms_uiElements.Add(l_categoryMod.AddToggle("Restore position", "Bring avatar back where ragdoll state was activated", RestorePosition));
+            (ms_uiElements[(int)UiElementIndex.RestorePosition] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) =>
             {
                 RestorePosition = state;
                 ms_entries[(int)ModSetting.RestorePosition].BoxedValue = state;
-                RestorePositionChange?.Invoke(RestorePosition);
+                RestorePositionChange?.Invoke(state);
             };
-            l_categoryMod.AddToggle("Use gravity", "Apply gravity to ragdoll", Gravity).OnValueUpdated += (state) =>
+
+            ms_uiElements.Add(l_categoryMod.AddToggle("Use gravity", "Apply gravity to ragdoll", Gravity));
+            (ms_uiElements[(int)UiElementIndex.Gravity] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) =>
             {
                 Gravity = state;
                 ms_entries[(int)ModSetting.Gravity].BoxedValue = state;
-                GravityChange?.Invoke(Gravity);
+                GravityChange?.Invoke(state);
             };
-            l_page.AddSlider("Velocity multiplier", "Velocity multiplier upon entering ragdoll state", VelocityMultiplier, 1f, 50f).OnValueUpdated += (value) =>
+
+            ms_uiElements.Add(l_page.AddSlider("Velocity multiplier", "Velocity multiplier upon entering ragdoll state", VelocityMultiplier, 1f, 50f));
+            (ms_uiElements[(int)UiElementIndex.VelocityMultiplier] as BTKUILib.UIObjects.Components.SliderFloat).OnValueUpdated += (value) =>
             {
                 VelocityMultiplier = value;
                 ms_entries[(int)ModSetting.VelocityMultiplier].BoxedValue = value;
-                VelocityMultiplierChange?.Invoke(VelocityMultiplier);
+                VelocityMultiplierChange?.Invoke(value);
             };
-            l_page.AddSlider("Movement drag", "Movement resistance", MovementDrag, 0f, 100f).OnValueUpdated += (value) =>
+
+            ms_uiElements.Add(l_page.AddSlider("Movement drag", "Movement resistance", MovementDrag, 0f, 100f));
+            (ms_uiElements[(int)UiElementIndex.MovementDrag] as BTKUILib.UIObjects.Components.SliderFloat).OnValueUpdated += (value) =>
             {
                 MovementDrag = value;
                 ms_entries[(int)ModSetting.MovementDrag].BoxedValue = value;
-                MovementDragChange?.Invoke(MovementDrag);
+                MovementDragChange?.Invoke(value);
             };
-            l_page.AddSlider("Angular movement drag", "Rotation movement resistance", AngularDrag, 0.5f, 50f).OnValueUpdated += (value) =>
+
+            ms_uiElements.Add(l_page.AddSlider("Angular movement drag", "Rotation movement resistance", AngularDrag, 0.5f, 50f));
+            (ms_uiElements[(int)UiElementIndex.AngularDrag] as BTKUILib.UIObjects.Components.SliderFloat).OnValueUpdated += (value) =>
             {
                 AngularDrag = value;
                 ms_entries[(int)ModSetting.AngularDrag].BoxedValue = value;
                 AngularDragChange?.Invoke(AngularDrag);
+            };
+
+            l_categoryMod.AddButton("Reset settings", "", "Reset mod settings to default").OnPress += () =>
+            {
+                Hotkey = true;
+                (ms_uiElements[(int)UiElementIndex.Hotkey] as BTKUILib.UIObjects.Components.ToggleButton).ToggleValue = true;
+                ms_entries[(int)ModSetting.Hotkey].BoxedValue = true;
+                HotkeyChange?.Invoke(true);
+
+                RestorePosition = false;
+                ms_entries[(int)ModSetting.RestorePosition].BoxedValue = false;
+                (ms_uiElements[(int)UiElementIndex.RestorePosition] as BTKUILib.UIObjects.Components.ToggleButton).ToggleValue = false;
+                RestorePositionChange?.Invoke(false);
+
+                Gravity = true;
+                ms_entries[(int)ModSetting.Gravity].BoxedValue = true;
+                (ms_uiElements[(int)UiElementIndex.Gravity] as BTKUILib.UIObjects.Components.ToggleButton).ToggleValue = true;
+                GravityChange?.Invoke(true);
+
+                VelocityMultiplier = 2f;
+                ms_entries[(int)ModSetting.VelocityMultiplier].BoxedValue = 2f;
+                (ms_uiElements[(int)UiElementIndex.VelocityMultiplier] as BTKUILib.UIObjects.Components.SliderFloat).SetSliderValue(2f);
+                VelocityMultiplierChange?.Invoke(2f);
+
+                MovementDrag = 1f;
+                ms_entries[(int)ModSetting.MovementDrag].BoxedValue = 1f;
+                (ms_uiElements[(int)UiElementIndex.MovementDrag] as BTKUILib.UIObjects.Components.SliderFloat).SetSliderValue(1f);
+                MovementDragChange?.Invoke(1f);
+
+                AngularDrag = 0.5f;
+                ms_entries[(int)ModSetting.MovementDrag].BoxedValue = 0.5f;
+                (ms_uiElements[(int)UiElementIndex.AngularDrag] as BTKUILib.UIObjects.Components.SliderFloat).SetSliderValue(0.5f);
+                AngularDragChange?.Invoke(0.5f);
             };
         }
     }

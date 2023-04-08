@@ -1,4 +1,5 @@
-﻿using ABI_RC.Core.InteractionSystem;
+﻿using ABI_RC.Core;
+using ABI_RC.Core.InteractionSystem;
 using ABI_RC.Core.Player;
 using ABI_RC.Systems.IK.SubSystems;
 using System;
@@ -37,6 +38,11 @@ namespace ml_prm
             HarmonyInstance.Patch(
                 typeof(BodySystem).GetMethod(nameof(BodySystem.StartCalibration)),
                 new HarmonyLib.HarmonyMethod(typeof(PlayerRagdollMod).GetMethod(nameof(OnStartCalibration_Prefix), BindingFlags.Static | BindingFlags.NonPublic)),
+                null
+            );
+            HarmonyInstance.Patch(
+                typeof(RootLogic).GetMethod(nameof(RootLogic.SpawnOnWorldInstance)),
+                new HarmonyLib.HarmonyMethod(typeof(PlayerRagdollMod).GetMethod(nameof(OnWorldSpawn_Prefix), BindingFlags.Static | BindingFlags.NonPublic)),
                 null
             );
 
@@ -108,6 +114,20 @@ namespace ml_prm
             {
                 if(m_localController != null)
                     m_localController.OnStartCalibration();
+            }
+            catch(Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
+        }
+
+        static void OnWorldSpawn_Prefix() => ms_instance?.OnWorldSpawn();
+        void OnWorldSpawn()
+        {
+            try
+            {
+                if(m_localController != null)
+                    m_localController.OnWorldSpawn();
             }
             catch(Exception e)
             {

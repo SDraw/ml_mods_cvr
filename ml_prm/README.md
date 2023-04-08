@@ -17,8 +17,9 @@ Optional mod's settings with [BTKUILib](https://github.com/BTK-Development/BTKUI
 * **Velocity multiplier:** velocity force multiplier based on player's movement direction; `2.0` by default.
 * **Movement drag:** movement resistance; `1.0` by default.
 * **Angular movement drag:** angular movement resistance; `0.5` by default.
+* **Reset settings:** resets mod settings to default.
 
 # Notes
 * Incompatible with `Follow hips on IK override` option in AvatarMotionTweaker.
-* Even if locally ragdoll state is activated in the middle of playing emote, remote players still see whole emote animation.
 * Not suggested to activate fly mode with enabled ragdoll state.
+* Can't be activated in worlds that don't allow flying and spawnables.
