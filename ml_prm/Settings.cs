@@ -9,18 +9,27 @@ namespace ml_prm
         public enum ModSetting
         {
             Hotkey = 0,
-            Multiplier,
-            RestorePosition
+            VelocityMultiplier,
+            RestorePosition,
+            MovementDrag,
+            AngularDrag,
+            Gravity
         }
 
         public static bool Hotkey { get; private set; } = true;
-        public static float Multiplier { get; private set; } = 2f;
+        public static float VelocityMultiplier { get; private set; } = 2f;
         public static bool RestorePosition { get; private set; } = false;
+        public static float MovementDrag { get; private set; } = 1f;
+        public static float AngularDrag { get; private set; } = 0.5f;
+        public static bool Gravity { get; private set; } = true;
 
         static public event Action SwitchChange;
         static public event Action<bool> HotkeyChange;
         static public event Action<bool> RestorePositionChange;
-        static public event Action<float> MultiplierChange;
+        static public event Action<float> VelocityMultiplierChange;
+        static public event Action<float> MovementDragChange;
+        static public event Action<float> AngularDragChange;
+        static public event Action<bool> GravityChange;
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
@@ -31,13 +40,19 @@ namespace ml_prm
             ms_entries = new List<MelonLoader.MelonPreferences_Entry>()
             {
                 ms_category.CreateEntry(ModSetting.Hotkey.ToString(), Hotkey),
-                ms_category.CreateEntry(ModSetting.Multiplier.ToString(), Multiplier),
+                ms_category.CreateEntry(ModSetting.VelocityMultiplier.ToString(), VelocityMultiplier),
                 ms_category.CreateEntry(ModSetting.RestorePosition.ToString(), RestorePosition),
+                ms_category.CreateEntry(ModSetting.MovementDrag.ToString(), MovementDrag),
+                ms_category.CreateEntry(ModSetting.AngularDrag.ToString(), AngularDrag),
+                ms_category.CreateEntry(ModSetting.Gravity.ToString(), Gravity),
             };
 
             Hotkey = (bool)ms_entries[(int)ModSetting.Hotkey].BoxedValue;
-            Multiplier = (float)ms_entries[(int)ModSetting.Multiplier].BoxedValue;
+            VelocityMultiplier = UnityEngine.Mathf.Clamp((float)ms_entries[(int)ModSetting.VelocityMultiplier].BoxedValue, 0f, 50f);
             RestorePosition = (bool)ms_entries[(int)ModSetting.RestorePosition].BoxedValue;
+            MovementDrag = UnityEngine.Mathf.Clamp((float)ms_entries[(int)ModSetting.MovementDrag].BoxedValue, 0f, 100f);
+            AngularDrag = UnityEngine.Mathf.Clamp((float)ms_entries[(int)ModSetting.MovementDrag].BoxedValue, 0.5f, 50f);
+            Gravity = (bool)ms_entries[(int)ModSetting.Gravity].BoxedValue;
 
             if(MelonLoader.MelonMod.RegisteredMelons.First(m => m.Info.Name == "BTKUILib") != null)
             {
@@ -66,13 +81,31 @@ namespace ml_prm
             {
                 RestorePosition = state;
                 ms_entries[(int)ModSetting.RestorePosition].BoxedValue = state;
-                RestorePositionChange?.Invoke(Hotkey);
+                RestorePositionChange?.Invoke(RestorePosition);
             };
-            l_page.AddSlider("Velocity multiplier", "Velocity multiplier upon entering ragdoll state", Multiplier, 1f, 50f).OnValueUpdated += (value) =>
+            l_categoryMod.AddToggle("Use gravity", "Apply gravity to ragdoll", Gravity).OnValueUpdated += (state) =>
             {
-                Multiplier = value;
-                ms_entries[(int)ModSetting.Multiplier].BoxedValue = value;
-                MultiplierChange?.Invoke(value);
+                Gravity = state;
+                ms_entries[(int)ModSetting.Gravity].BoxedValue = state;
+                GravityChange?.Invoke(Gravity);
+            };
+            l_page.AddSlider("Velocity multiplier", "Velocity multiplier upon entering ragdoll state", VelocityMultiplier, 1f, 50f).OnValueUpdated += (value) =>
+            {
+                VelocityMultiplier = value;
+                ms_entries[(int)ModSetting.VelocityMultiplier].BoxedValue = value;
+                VelocityMultiplierChange?.Invoke(VelocityMultiplier);
+            };
+            l_page.AddSlider("Movement drag", "Movement resistance", MovementDrag, 0f, 100f).OnValueUpdated += (value) =>
+            {
+                MovementDrag = value;
+                ms_entries[(int)ModSetting.MovementDrag].BoxedValue = value;
+                MovementDragChange?.Invoke(MovementDrag);
+            };
+            l_page.AddSlider("Angular movement drag", "Rotation movement resistance", AngularDrag, 0.5f, 50f).OnValueUpdated += (value) =>
+            {
+                AngularDrag = value;
+                ms_entries[(int)ModSetting.AngularDrag].BoxedValue = value;
+                AngularDragChange?.Invoke(AngularDrag);
             };
         }
     }

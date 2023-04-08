@@ -1,8 +1,8 @@
-﻿using ABI_RC.Core.Player;
+﻿using ABI_RC.Core.InteractionSystem;
+using ABI_RC.Core.Player;
+using ABI_RC.Systems.IK.SubSystems;
 using System;
 using System.Reflection;
-using ABI_RC.Core.InteractionSystem;
-using UnityEngine;
 
 namespace ml_prm
 {
@@ -34,6 +34,11 @@ namespace ml_prm
                 new HarmonyLib.HarmonyMethod(typeof(PlayerRagdollMod).GetMethod(nameof(OnCVRSeatSitDown_Prefix), BindingFlags.Static | BindingFlags.NonPublic)),
                 null
             );
+            HarmonyInstance.Patch(
+                typeof(BodySystem).GetMethod(nameof(BodySystem.StartCalibration)),
+                new HarmonyLib.HarmonyMethod(typeof(PlayerRagdollMod).GetMethod(nameof(OnStartCalibration_Prefix), BindingFlags.Static | BindingFlags.NonPublic)),
+                null
+            );
 
             MelonLoader.MelonCoroutines.Start(WaitForLocalPlayer());
         }
@@ -42,6 +47,8 @@ namespace ml_prm
         {
             if(ms_instance == this)
                 ms_instance = null;
+
+            m_localController = null;
         }
 
         System.Collections.IEnumerator WaitForLocalPlayer()
@@ -87,6 +94,20 @@ namespace ml_prm
             {
                 if(m_localController != null)
                     m_localController.OnSeatSitDown(p_seat);
+            }
+            catch(Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
+        }
+
+        static void OnStartCalibration_Prefix() => ms_instance?.OnStartCalibration();
+        void OnStartCalibration()
+        {
+            try
+            {
+                if(m_localController != null)
+                    m_localController.OnStartCalibration();
             }
             catch(Exception e)
             {

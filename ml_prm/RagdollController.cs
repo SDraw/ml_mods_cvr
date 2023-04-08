@@ -1,5 +1,6 @@
 ﻿using ABI_RC.Core.InteractionSystem;
 using ABI_RC.Core.Player;
+using ABI_RC.Systems.IK.SubSystems;
 using ABI_RC.Systems.MovementSystem;
 using RootMotion.Dynamics;
 using RootMotion.FinalIK;
@@ -43,11 +44,17 @@ namespace ml_prm
             m_puppetRoot.localRotation = Quaternion.identity;
 
             Settings.SwitchChange += this.SwitchRagdoll;
+            Settings.MovementDragChange += this.OnMovementDragChange;
+            Settings.AngularDragChange += this.OnAngularDragChange;
+            Settings.GravityChange += this.OnGravityChange;
         }
 
         void OnDestroy()
         {
             Settings.SwitchChange -= this.SwitchRagdoll;
+            Settings.MovementDragChange -= this.OnMovementDragChange;
+            Settings.AngularDragChange -= this.OnAngularDragChange;
+            Settings.GravityChange -= this.OnGravityChange;
         }
 
         void Update()
@@ -140,8 +147,9 @@ namespace ml_prm
                         {
                             m_rigidBodies.Add(l_body);
                             l_body.isKinematic = true;
-                            l_body.angularDrag = 0.5f;
-                            l_body.drag = 1.0f;
+                            l_body.angularDrag = Settings.AngularDrag;
+                            l_body.drag = Settings.MovementDrag;
+                            l_body.useGravity = Settings.Gravity;
                             l_body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
                         }
 
@@ -182,6 +190,12 @@ namespace ml_prm
                 SwitchRagdoll();
         }
 
+        internal void OnStartCalibration()
+        {
+            if(m_enabled && m_avatarReady)
+                SwitchRagdoll();
+        }
+
         // IK updates
         void OnIKPreUpdate()
         {
@@ -197,10 +211,36 @@ namespace ml_prm
                 m_vrIK.solver.IKPositionWeight = m_vrIkWeight;
         }
 
+        // Settings
+        void OnMovementDragChange(float p_value)
+        {
+            if(m_avatarReady)
+            {
+                foreach(Rigidbody l_body in m_rigidBodies)
+                    l_body.drag = p_value;
+            }
+        }
+        void OnAngularDragChange(float p_value)
+        {
+            if(m_avatarReady)
+            {
+                foreach(Rigidbody l_body in m_rigidBodies)
+                    l_body.angularDrag = p_value;
+            }
+        }
+        void OnGravityChange(bool p_state)
+        {
+            if(m_avatarReady)
+            {
+                foreach(Rigidbody l_body in m_rigidBodies)
+                    l_body.useGravity = p_state;
+            }
+        }
+
         // Arbitrary
         public void SwitchRagdoll()
         {
-            if(m_avatarReady && (MovementSystem.Instance.lastSeat == null))
+            if(m_avatarReady && (MovementSystem.Instance.lastSeat == null) && !BodySystem.isCalibrating)
             {
                 m_enabled = !m_enabled;
 
@@ -214,7 +254,7 @@ namespace ml_prm
                     foreach(Rigidbody l_body in m_rigidBodies)
                         l_body.isKinematic = false;
 
-                    Vector3 l_velocity = m_velocity * Settings.Multiplier;
+                    Vector3 l_velocity = m_velocity * Settings.VelocityMultiplier;
                     foreach(Rigidbody l_body in m_rigidBodies)
                     {
                         l_body.velocity = l_velocity;
