@@ -66,7 +66,7 @@ namespace ml_prm
             AngularDrag = UnityEngine.Mathf.Clamp((float)ms_entries[(int)ModSetting.MovementDrag].BoxedValue, 0.5f, 50f);
             Gravity = (bool)ms_entries[(int)ModSetting.Gravity].BoxedValue;
 
-            if(MelonLoader.MelonMod.RegisteredMelons.First(m => m.Info.Name == "BTKUILib") != null)
+            if(MelonLoader.MelonMod.RegisteredMelons.FirstOrDefault(m => m.Info.Name == "BTKUILib") != null)
             {
                 CreateBtkUi();
             }
