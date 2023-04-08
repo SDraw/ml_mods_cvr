@@ -22,7 +22,7 @@ Optional mod's settings with [BTKUILib](https://github.com/BTK-Development/BTKUI
 # Notes
 * Incompatible with `Follow hips on IK override` option in AvatarMotionTweaker.
 * Not suggested to activate fly mode with enabled ragdoll state.
-* Can't be activated in worlds that don't allow flying and spawnables.
+* In worlds that don't allow flying velocity multiplier is forced to 1 and gravity is forced on.
 * If ragdoll state is enabled in during emote, remote players see whole emote playing while local player sees ragdolling. It's tied to how game handles remote players, currently can be prevented with renaming avatar emote animations to not have default name or containing `Emote` substring.
 
 # Unity Editor Script
