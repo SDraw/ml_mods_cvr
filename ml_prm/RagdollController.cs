@@ -30,6 +30,8 @@ namespace ml_prm
         Vector3 m_lastPosition = Vector3.zero;
         Vector3 m_velocity = Vector3.zero;
 
+        RagdollToggle m_avatarRagdollToggle = null;
+
         internal RagdollController()
         {
             m_rigidBodies = new List<Rigidbody>();
@@ -67,6 +69,11 @@ namespace ml_prm
 
             if(Settings.Hotkey && Input.GetKeyDown(KeyCode.R) && !ViewManager.Instance.isGameMenuOpen())
                 SwitchRagdoll();
+
+            if (m_avatarRagdollToggle != null && m_avatarRagdollToggle.isActiveAndEnabled && m_avatarRagdollToggle.shouldOverride) {
+                if (m_enabled != m_avatarRagdollToggle.isOn)
+                    SwitchRagdoll();
+            }
         }
 
         void LateUpdate()
@@ -181,6 +188,8 @@ namespace ml_prm
                     m_vrIK.onPreSolverUpdate.AddListener(this.OnIKPreUpdate);
                     m_vrIK.onPostSolverUpdate.AddListener(this.OnIKPostUpdate);
                 }
+
+                m_avatarRagdollToggle = PlayerSetup.Instance._avatar.GetComponentInChildren<RagdollToggle>(true);
 
                 m_avatarReady = true;
             }
