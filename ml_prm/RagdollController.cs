@@ -103,14 +103,17 @@ namespace ml_prm
                 m_puppetReferences.root = m_puppet;
                 m_puppetReferences.hips = CloneTransform(m_avatarReferences.hips, m_puppetReferences.root, "Hips");
                 m_puppetReferences.spine = CloneTransform(m_avatarReferences.spine, m_puppetReferences.hips, "Spine");
-                m_puppetReferences.chest = CloneTransform(m_avatarReferences.chest, m_puppetReferences.spine, "Chest");
-                m_puppetReferences.head = CloneTransform(m_avatarReferences.head, m_puppetReferences.chest, "Head");
 
-                m_puppetReferences.leftUpperArm = CloneTransform(m_avatarReferences.leftUpperArm, m_puppetReferences.chest, "LeftUpperArm");
+                if(m_avatarReferences.chest != null)
+                    m_puppetReferences.chest = CloneTransform(m_avatarReferences.chest, m_puppetReferences.spine, "Chest");
+
+                m_puppetReferences.head = CloneTransform(m_avatarReferences.head, (m_puppetReferences.chest != null) ? m_puppetReferences.chest : m_puppetReferences.spine, "Head");
+
+                m_puppetReferences.leftUpperArm = CloneTransform(m_avatarReferences.leftUpperArm, (m_puppetReferences.chest != null) ? m_puppetReferences.chest : m_puppetReferences.spine, "LeftUpperArm");
                 m_puppetReferences.leftLowerArm = CloneTransform(m_avatarReferences.leftLowerArm, m_puppetReferences.leftUpperArm, "LeftLowerArm");
                 m_puppetReferences.leftHand = CloneTransform(m_avatarReferences.leftHand, m_puppetReferences.leftLowerArm, "LeftHand");
 
-                m_puppetReferences.rightUpperArm = CloneTransform(m_avatarReferences.rightUpperArm, m_puppetReferences.chest, "RightUpperArm");
+                m_puppetReferences.rightUpperArm = CloneTransform(m_avatarReferences.rightUpperArm, (m_puppetReferences.chest != null) ? m_puppetReferences.chest : m_puppetReferences.spine, "RightUpperArm");
                 m_puppetReferences.rightLowerArm = CloneTransform(m_avatarReferences.rightLowerArm, m_puppetReferences.rightUpperArm, "RightLowerArm");
                 m_puppetReferences.rightHand = CloneTransform(m_avatarReferences.rightHand, m_puppetReferences.rightLowerArm, "RightHand");
 

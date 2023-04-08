@@ -1,5 +1,5 @@
 # Player Ragdoll Mod
-This mod turns your player's avatar into ragdoll puppet.
+This mod turns player's avatar into ragdoll puppet.
 
 # Installation
 * Install [latest MelonLoader](https://github.com/LavaGang/MelonLoader)
