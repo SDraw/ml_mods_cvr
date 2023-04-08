@@ -11,8 +11,6 @@ namespace ml_prm
 {
     class RagdollController : MonoBehaviour
     {
-        static readonly Vector4 ms_pointVector = new Vector4(0f, 0f, 0f, 1f);
-
         VRIK m_vrIK = null;
         float m_vrIkWeight = 1f;
 
@@ -23,7 +21,6 @@ namespace ml_prm
         Transform m_puppetRoot = null;
         Transform m_puppet = null;
         BipedRagdollReferences m_puppetReferences;
-        BipedRagdollReferences m_avatarReferences;
         readonly List<System.Tuple<Transform, Transform>> m_boneLinks = null;
 
         bool m_avatarReady = false;
@@ -72,12 +69,18 @@ namespace ml_prm
 
             if((m_avatarRagdollToggle != null) && m_avatarRagdollToggle.isActiveAndEnabled && m_avatarRagdollToggle.shouldOverride && (m_enabled != m_avatarRagdollToggle.isOn))
                 SwitchRagdoll();
+
+            if(m_enabled && m_avatarReady && BodySystem.isCalibratedAsFullBody)
+                BodySystem.TrackingPositionWeight = 0f;
         }
 
         void LateUpdate()
         {
             if(m_enabled && m_avatarReady)
             {
+                if(BodySystem.isCalibratedAsFullBody)
+                    BodySystem.TrackingPositionWeight = 0f;
+
                 foreach(var l_link in m_boneLinks)
                     l_link.Item1.CopyGlobal(l_link.Item2);
             }
@@ -99,7 +102,6 @@ namespace ml_prm
             m_avatarRagdollToggle = null;
             m_rigidBodies.Clear();
             m_colliders.Clear();
-            m_avatarReferences = new BipedRagdollReferences();
             m_puppetReferences = new BipedRagdollReferences();
             m_boneLinks.Clear();
         }
@@ -108,7 +110,7 @@ namespace ml_prm
         {
             if(PlayerSetup.Instance._animator.isHuman)
             {
-                m_avatarReferences = BipedRagdollReferences.FromAvatar(PlayerSetup.Instance._animator);
+                BipedRagdollReferences l_avatarReferences = BipedRagdollReferences.FromAvatar(PlayerSetup.Instance._animator);
 
                 m_puppet = new GameObject("Root").transform;
                 m_puppet.parent = m_puppetRoot;
@@ -116,36 +118,36 @@ namespace ml_prm
                 m_puppet.localRotation = Quaternion.identity;
 
                 m_puppetReferences.root = m_puppet;
-                m_puppetReferences.hips = CloneTransform(m_avatarReferences.hips, m_puppetReferences.root, "Hips");
-                m_puppetReferences.spine = CloneTransform(m_avatarReferences.spine, m_puppetReferences.hips, "Spine");
+                m_puppetReferences.hips = CloneTransform(l_avatarReferences.hips, m_puppetReferences.root, "Hips");
+                m_puppetReferences.spine = CloneTransform(l_avatarReferences.spine, m_puppetReferences.hips, "Spine");
 
-                if(m_avatarReferences.chest != null)
-                    m_puppetReferences.chest = CloneTransform(m_avatarReferences.chest, m_puppetReferences.spine, "Chest");
+                if(l_avatarReferences.chest != null)
+                    m_puppetReferences.chest = CloneTransform(l_avatarReferences.chest, m_puppetReferences.spine, "Chest");
 
-                m_puppetReferences.head = CloneTransform(m_avatarReferences.head, (m_puppetReferences.chest != null) ? m_puppetReferences.chest : m_puppetReferences.spine, "Head");
+                m_puppetReferences.head = CloneTransform(l_avatarReferences.head, (m_puppetReferences.chest != null) ? m_puppetReferences.chest : m_puppetReferences.spine, "Head");
 
-                m_puppetReferences.leftUpperArm = CloneTransform(m_avatarReferences.leftUpperArm, (m_puppetReferences.chest != null) ? m_puppetReferences.chest : m_puppetReferences.spine, "LeftUpperArm");
-                m_puppetReferences.leftLowerArm = CloneTransform(m_avatarReferences.leftLowerArm, m_puppetReferences.leftUpperArm, "LeftLowerArm");
-                m_puppetReferences.leftHand = CloneTransform(m_avatarReferences.leftHand, m_puppetReferences.leftLowerArm, "LeftHand");
+                m_puppetReferences.leftUpperArm = CloneTransform(l_avatarReferences.leftUpperArm, (m_puppetReferences.chest != null) ? m_puppetReferences.chest : m_puppetReferences.spine, "LeftUpperArm");
+                m_puppetReferences.leftLowerArm = CloneTransform(l_avatarReferences.leftLowerArm, m_puppetReferences.leftUpperArm, "LeftLowerArm");
+                m_puppetReferences.leftHand = CloneTransform(l_avatarReferences.leftHand, m_puppetReferences.leftLowerArm, "LeftHand");
 
-                m_puppetReferences.rightUpperArm = CloneTransform(m_avatarReferences.rightUpperArm, (m_puppetReferences.chest != null) ? m_puppetReferences.chest : m_puppetReferences.spine, "RightUpperArm");
-                m_puppetReferences.rightLowerArm = CloneTransform(m_avatarReferences.rightLowerArm, m_puppetReferences.rightUpperArm, "RightLowerArm");
-                m_puppetReferences.rightHand = CloneTransform(m_avatarReferences.rightHand, m_puppetReferences.rightLowerArm, "RightHand");
+                m_puppetReferences.rightUpperArm = CloneTransform(l_avatarReferences.rightUpperArm, (m_puppetReferences.chest != null) ? m_puppetReferences.chest : m_puppetReferences.spine, "RightUpperArm");
+                m_puppetReferences.rightLowerArm = CloneTransform(l_avatarReferences.rightLowerArm, m_puppetReferences.rightUpperArm, "RightLowerArm");
+                m_puppetReferences.rightHand = CloneTransform(l_avatarReferences.rightHand, m_puppetReferences.rightLowerArm, "RightHand");
 
-                m_puppetReferences.leftUpperLeg = CloneTransform(m_avatarReferences.leftUpperLeg, m_puppetReferences.hips, "LeftUpperLeg");
-                m_puppetReferences.leftLowerLeg = CloneTransform(m_avatarReferences.leftLowerLeg, m_puppetReferences.leftUpperLeg, "LeftLowerLeg");
-                m_puppetReferences.leftFoot = CloneTransform(m_avatarReferences.leftFoot, m_puppetReferences.leftLowerLeg, "LeftFoot");
+                m_puppetReferences.leftUpperLeg = CloneTransform(l_avatarReferences.leftUpperLeg, m_puppetReferences.hips, "LeftUpperLeg");
+                m_puppetReferences.leftLowerLeg = CloneTransform(l_avatarReferences.leftLowerLeg, m_puppetReferences.leftUpperLeg, "LeftLowerLeg");
+                m_puppetReferences.leftFoot = CloneTransform(l_avatarReferences.leftFoot, m_puppetReferences.leftLowerLeg, "LeftFoot");
 
-                m_puppetReferences.rightUpperLeg = CloneTransform(m_avatarReferences.rightUpperLeg, m_puppetReferences.hips, "RightUpperLeg");
-                m_puppetReferences.rightLowerLeg = CloneTransform(m_avatarReferences.rightLowerLeg, m_puppetReferences.rightUpperLeg, "RightLowerLeg");
-                m_puppetReferences.rightFoot = CloneTransform(m_avatarReferences.rightFoot, m_puppetReferences.rightLowerLeg, "RightFoot");
+                m_puppetReferences.rightUpperLeg = CloneTransform(l_avatarReferences.rightUpperLeg, m_puppetReferences.hips, "RightUpperLeg");
+                m_puppetReferences.rightLowerLeg = CloneTransform(l_avatarReferences.rightLowerLeg, m_puppetReferences.rightUpperLeg, "RightLowerLeg");
+                m_puppetReferences.rightFoot = CloneTransform(l_avatarReferences.rightFoot, m_puppetReferences.rightLowerLeg, "RightFoot");
 
                 BipedRagdollCreator.Options l_options = BipedRagdollCreator.AutodetectOptions(m_puppetReferences);
                 l_options.joints = RagdollCreator.JointType.Character;
                 BipedRagdollCreator.Create(m_puppetReferences, l_options);
 
                 Transform[] l_puppetTransforms = m_puppetReferences.GetRagdollTransforms();
-                Transform[] l_avatarTransforms = m_avatarReferences.GetRagdollTransforms();
+                Transform[] l_avatarTransforms = l_avatarReferences.GetRagdollTransforms();
                 for(int i = 0; i < l_puppetTransforms.Length; i++)
                 {
                     if(l_puppetTransforms[i] != null)
@@ -241,7 +243,10 @@ namespace ml_prm
             if(m_avatarReady)
             {
                 foreach(Rigidbody l_body in m_rigidBodies)
+                {
                     l_body.drag = p_value;
+                    l_body.WakeUp();
+                }
             }
         }
         void OnAngularDragChange(float p_value)
@@ -249,7 +254,10 @@ namespace ml_prm
             if(m_avatarReady)
             {
                 foreach(Rigidbody l_body in m_rigidBodies)
+                {
                     l_body.angularDrag = p_value;
+                    l_body.WakeUp();
+                }
             }
         }
         void OnGravityChange(bool p_state)
@@ -273,6 +281,9 @@ namespace ml_prm
 
                 if(m_enabled)
                 {
+                    if(BodySystem.isCalibratedAsFullBody)
+                        BodySystem.TrackingPositionWeight = 0f;
+
                     foreach(var l_link in m_boneLinks)
                         l_link.Item2.CopyGlobal(l_link.Item1);
 
@@ -288,33 +299,36 @@ namespace ml_prm
                 }
                 else
                 {
+                    if(BodySystem.isCalibratedAsFullBody)
+                        BodySystem.TrackingPositionWeight = 1f;
+
                     foreach(Rigidbody l_body in m_rigidBodies)
                         l_body.isKinematic = true;
 
-                    if(!Settings.RestorePosition && (m_puppetReferences.hips != null))
+                    if((m_puppetReferences.hips != null))
                     {
-                        if(Utils.IsInVR())
-                        {
-                            Matrix4x4 l_playerMatrix = PlayerSetup.Instance.transform.GetMatrix();
-                            Matrix4x4 l_avatarMatrix = PlayerSetup.Instance._avatar.transform.GetMatrix();
-                            Matrix4x4 l_avatarToPlayer = l_avatarMatrix.inverse * l_playerMatrix;
+                        Vector3 l_hipsPos = m_puppetReferences.hips.position;
 
-                            Vector3 l_pos = m_puppetReferences.hips.position;
-                            Vector3 l_offset = l_avatarToPlayer * ms_pointVector;
-                            PlayerSetup.Instance.transform.position = (l_pos + l_offset);
-                        }
-                        else
+                        if(!Settings.RestorePosition)
                         {
-                            Vector3 l_pos = m_puppetReferences.hips.position;
-                            PlayerSetup.Instance.transform.position = l_pos;
+                            if(Utils.IsInVR())
+                            {
+                                Vector3 l_diff = l_hipsPos - PlayerSetup.Instance._avatar.transform.position;
+                                Vector3 l_playerPos = PlayerSetup.Instance.transform.position;
+                                PlayerSetup.Instance.transform.position = l_playerPos + l_diff;
+                            }
+                            else
+                                PlayerSetup.Instance.transform.position = l_hipsPos;
                         }
                     }
                 }
-
-                foreach(Collider l_collider in m_colliders)
-                    l_collider.enabled = m_enabled;
             }
+
+            foreach(Collider l_collider in m_colliders)
+                l_collider.enabled = m_enabled;
         }
+
+        public bool IsRagdolled() => (m_enabled && m_avatarReady);
 
         static Transform CloneTransform(Transform p_source, Transform p_parent, string p_name)
         {
