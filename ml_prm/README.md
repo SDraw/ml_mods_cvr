@@ -14,16 +14,20 @@ Optional mod's settings with [BTKUILib](https://github.com/BTK-Development/BTKUI
 * **Use hotkey:** enables/disables ragdoll state switch with `R` key; `true` by default.
 * **Restore position:** returns to position of ragdoll state activation upon ragdoll state exit; `false` by default.
 * **Use gravity:** enables/disables gravity for ragdoll; `true` by default.
+  * Note: Forcibly enabled in worlds that don't allow flight.
 * **Velocity multiplier:** velocity force multiplier based on player's movement direction; `2.0` by default.
+  * Note: Limited according to world's fly multiplier.
+  * Note: Forcibly set to `1.0` in worlds that don't allow flight.
 * **Movement drag:** movement resistance; `1.0` by default.
 * **Angular movement drag:** angular movement resistance; `0.5` by default.
 * **Reset settings:** resets mod settings to default.
 
 # Notes
-* Incompatible with `Follow hips on IK override` option in AvatarMotionTweaker.
+* Slightly incompatible with `Follow hips on IK override` option in AvatarMotionTweaker.
 * Not suggested to activate fly mode with enabled ragdoll state.
-* In worlds that don't allow flying velocity multiplier is forced to 1 and gravity is forced on.
-* If ragdoll state is enabled in during emote, remote players see whole emote playing while local player sees ragdolling. It's tied to how game handles remote players, currently can be prevented with renaming avatar emote animations to not have default name or containing `Emote` substring.
+* If ragdoll state is enabled during emote, remote players see whole emote playing while local player sees ragdolling. It's tied to how game handles remote players, currently can be prevented with (choose one):
+  * Renaming avatar emote animations to not have default name or containing `Emote` substring.
+  * Holding any movement key when activating ragdoll state.
 
 # Unity Editor Script
 You can also trigger the ragdoll via animations on your avatar. To do this you need to download and import the 
