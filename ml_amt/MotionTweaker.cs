@@ -126,7 +126,7 @@ namespace ml_amt
                 m_moving = !Mathf.Approximately(MovementSystem.Instance.movementVector.magnitude, 0f);
 
                 // Update upright
-                Matrix4x4 l_hmdMatrix = PlayerSetup.Instance.transform.GetMatrix().inverse * (m_inVR ? PlayerSetup.Instance.vrHeadTracker.transform.GetMatrix() : PlayerSetup.Instance.desktopCameraRig.transform.GetMatrix());
+                Matrix4x4 l_hmdMatrix = PlayerSetup.Instance.transform.GetMatrix().inverse * PlayerSetup.Instance.GetActiveCamera().transform.GetMatrix();
                 float l_currentHeight = Mathf.Clamp((l_hmdMatrix * ms_pointVector).y, 0f, float.MaxValue);
                 float l_avatarViewHeight = Mathf.Clamp(m_viewPointHeight * GetRelativeScale(), 0f, float.MaxValue);
                 m_upright = Mathf.Clamp01((l_avatarViewHeight > 0f) ? (l_currentHeight / l_avatarViewHeight) : 0f);
