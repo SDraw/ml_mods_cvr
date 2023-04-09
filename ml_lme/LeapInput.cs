@@ -111,6 +111,8 @@ namespace ml_lme
         {
             Settings.EnabledChange -= this.OnEnableChange;
             Settings.InputChange -= this.OnInputChange;
+
+            MetaPort.Instance.settings.settingBoolChanged.RemoveListener(this.OnGameSettingBoolChange);
         }
 
         void Update()

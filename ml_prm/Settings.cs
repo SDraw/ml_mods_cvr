@@ -62,7 +62,7 @@ namespace ml_prm
             Hotkey = (bool)ms_entries[(int)ModSetting.Hotkey].BoxedValue;
             VelocityMultiplier = UnityEngine.Mathf.Clamp((float)ms_entries[(int)ModSetting.VelocityMultiplier].BoxedValue, 0f, 50f);
             RestorePosition = (bool)ms_entries[(int)ModSetting.RestorePosition].BoxedValue;
-            MovementDrag = UnityEngine.Mathf.Clamp((float)ms_entries[(int)ModSetting.MovementDrag].BoxedValue, 0f, 100f);
+            MovementDrag = UnityEngine.Mathf.Clamp((float)ms_entries[(int)ModSetting.MovementDrag].BoxedValue, 0f, 50f);
             AngularDrag = UnityEngine.Mathf.Clamp((float)ms_entries[(int)ModSetting.MovementDrag].BoxedValue, 0.5f, 50f);
             Gravity = (bool)ms_entries[(int)ModSetting.Gravity].BoxedValue;
 
@@ -116,7 +116,7 @@ namespace ml_prm
                 VelocityMultiplierChange?.Invoke(value);
             };
 
-            ms_uiElements.Add(l_page.AddSlider("Movement drag", "Movement resistance", MovementDrag, 0f, 100f));
+            ms_uiElements.Add(l_page.AddSlider("Movement drag", "Movement resistance", MovementDrag, 0f, 50f));
             (ms_uiElements[(int)UiElementIndex.MovementDrag] as BTKUILib.UIObjects.Components.SliderFloat).OnValueUpdated += (value) =>
             {
                 MovementDrag = value;

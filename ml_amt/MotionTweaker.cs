@@ -1,4 +1,5 @@
 ﻿using ABI_RC.Core.Player;
+using ABI_RC.Core.Savior;
 using ABI_RC.Systems.IK;
 using ABI_RC.Systems.IK.SubSystems;
 using ABI_RC.Systems.MovementSystem;
@@ -37,6 +38,7 @@ namespace ml_amt
         Transform m_avatarHips = null;
         float m_viewPointHeight = 1f;
         bool m_inVR = false;
+        bool m_fbtAnimations = true;
 
         bool m_avatarReady = false;
         bool m_compatibleAvatar = false;
@@ -93,6 +95,9 @@ namespace ml_amt
             Settings.FollowHipsChange += this.SetFollowHips;
             Settings.MassCenterChange += this.OnMassCenterChange;
             Settings.ScaledStepsChange += this.OnScaledStepsChange;
+
+            m_fbtAnimations = MetaPort.Instance.settings.GetSettingsBool("GeneralEnableRunningAnimationFullBody");
+            MetaPort.Instance.settings.settingBoolChanged.AddListener(this.OnGameSettingBoolChange);
         }
 
         void OnDestroy()
@@ -108,6 +113,8 @@ namespace ml_amt
             Settings.DetectEmotesChange -= this.SetDetectEmotes;
             Settings.FollowHipsChange -= this.SetFollowHips;
             Settings.MassCenterChange -= this.OnMassCenterChange;
+
+            MetaPort.Instance.settings.settingBoolChanged.RemoveListener(this.OnGameSettingBoolChange);
         }
 
         void Update()
@@ -147,8 +154,8 @@ namespace ml_amt
 
                     if(m_poseTransitions)
                     {
-                        PlayerSetup.Instance.animatorManager.SetAnimatorParameterBool("Crouching", (m_poseState == PoseState.Crouching) && !m_compatibleAvatar && !BodySystem.isCalibratedAsFullBody);
-                        PlayerSetup.Instance.animatorManager.SetAnimatorParameterBool("Prone", (m_poseState == PoseState.Proning) && !m_compatibleAvatar && !BodySystem.isCalibratedAsFullBody);
+                        PlayerSetup.Instance.animatorManager.SetAnimatorParameterBool("Crouching", (m_poseState == PoseState.Crouching) && !m_compatibleAvatar && (!BodySystem.isCalibratedAsFullBody || m_fbtAnimations));
+                        PlayerSetup.Instance.animatorManager.SetAnimatorParameterBool("Prone", (m_poseState == PoseState.Proning) && !m_compatibleAvatar && (!BodySystem.isCalibratedAsFullBody || m_fbtAnimations));
                     }
                 }
 
@@ -439,6 +446,13 @@ namespace ml_amt
                     m_vrIk.solver.locomotion.heelHeight.keys = Utils.GetSineKeyframes(0.03f);
                 }
             }
+        }
+
+        // Game settings
+        void OnGameSettingBoolChange(string p_name, bool p_state)
+        {
+            if(p_name == "GeneralEnableRunningAnimationFullBody")
+                m_fbtAnimations = p_state;
         }
 
         // Arbitrary

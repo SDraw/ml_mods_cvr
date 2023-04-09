@@ -284,6 +284,7 @@ namespace ml_prm
                     if(BodySystem.isCalibratedAsFullBody)
                         BodySystem.TrackingPositionWeight = 0f;
 
+                    // Copy before set to non-kinematic to reduce stacked forces
                     foreach(var l_link in m_boneLinks)
                         l_link.Item2.CopyGlobal(l_link.Item1);
 
@@ -322,10 +323,10 @@ namespace ml_prm
                         }
                     }
                 }
-            }
 
-            foreach(Collider l_collider in m_colliders)
-                l_collider.enabled = m_enabled;
+                foreach(Collider l_collider in m_colliders)
+                    l_collider.enabled = m_enabled;
+            }
         }
 
         public bool IsRagdolled() => (m_enabled && m_avatarReady);
