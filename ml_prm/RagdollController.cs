@@ -31,6 +31,7 @@ namespace ml_prm
         Vector3 m_velocity = Vector3.zero;
 
         RagdollToggle m_avatarRagdollToggle = null;
+        RagdollTrigger m_customTrigger = null;
 
         internal RagdollController()
         {
@@ -55,6 +56,8 @@ namespace ml_prm
             m_puppetRoot.localPosition = Vector3.zero;
             m_puppetRoot.localRotation = Quaternion.identity;
 
+            m_customTrigger = MovementSystem.Instance.proxyCollider.gameObject.AddComponent<RagdollTrigger>();
+
             Settings.SwitchChange += this.SwitchRagdoll;
             Settings.MovementDragChange += this.OnMovementDragChange;
             Settings.AngularDragChange += this.OnAngularDragChange;
@@ -63,6 +66,12 @@ namespace ml_prm
 
         void OnDestroy()
         {
+            if(m_customTrigger != null)
+            {
+                Object.Destroy(m_customTrigger);
+                m_customTrigger = null;
+            }
+
             Settings.SwitchChange -= this.SwitchRagdoll;
             Settings.MovementDragChange -= this.OnMovementDragChange;
             Settings.AngularDragChange -= this.OnAngularDragChange;
@@ -83,6 +92,9 @@ namespace ml_prm
 
             if(m_enabled && m_avatarReady && BodySystem.isCalibratedAsFullBody)
                 BodySystem.TrackingPositionWeight = 0f;
+
+            if(!m_enabled && m_avatarReady && (m_customTrigger != null) && m_customTrigger.GetStateWithReset() && Settings.PointersReaction)
+                SwitchRagdoll();
         }
 
         void LateUpdate()

@@ -13,7 +13,8 @@ namespace ml_prm
             RestorePosition,
             MovementDrag,
             AngularDrag,
-            Gravity
+            Gravity,
+            PointersReaction
         }
 
         enum UiElementIndex
@@ -21,6 +22,7 @@ namespace ml_prm
             Hotkey = 0,
             RestorePosition,
             Gravity,
+            PointersReaction,
             VelocityMultiplier,
             MovementDrag,
             AngularDrag
@@ -32,6 +34,7 @@ namespace ml_prm
         public static float MovementDrag { get; private set; } = 2f;
         public static float AngularDrag { get; private set; } = 2f;
         public static bool Gravity { get; private set; } = true;
+        public static bool PointersReaction { get; private set; } = true;
 
         static public event Action SwitchChange;
         static public event Action<bool> HotkeyChange;
@@ -40,6 +43,7 @@ namespace ml_prm
         static public event Action<float> MovementDragChange;
         static public event Action<float> AngularDragChange;
         static public event Action<bool> GravityChange;
+        static public event Action<bool> PointersReactionChange;
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
@@ -57,6 +61,7 @@ namespace ml_prm
                 ms_category.CreateEntry(ModSetting.MovementDrag.ToString(), MovementDrag),
                 ms_category.CreateEntry(ModSetting.AngularDrag.ToString(), AngularDrag),
                 ms_category.CreateEntry(ModSetting.Gravity.ToString(), Gravity),
+                ms_category.CreateEntry(ModSetting.PointersReaction.ToString(), PointersReaction)
             };
 
             Hotkey = (bool)ms_entries[(int)ModSetting.Hotkey].BoxedValue;
@@ -65,6 +70,7 @@ namespace ml_prm
             MovementDrag = UnityEngine.Mathf.Clamp((float)ms_entries[(int)ModSetting.MovementDrag].BoxedValue, 0f, 50f);
             AngularDrag = UnityEngine.Mathf.Clamp((float)ms_entries[(int)ModSetting.MovementDrag].BoxedValue, 0f, 50f);
             Gravity = (bool)ms_entries[(int)ModSetting.Gravity].BoxedValue;
+            PointersReaction = (bool)ms_entries[(int)ModSetting.PointersReaction].BoxedValue;
 
             if(MelonLoader.MelonMod.RegisteredMelons.FirstOrDefault(m => m.Info.Name == "BTKUILib") != null)
             {
@@ -108,6 +114,14 @@ namespace ml_prm
                 GravityChange?.Invoke(state);
             };
 
+            ms_uiElements.Add(l_categoryMod.AddToggle("Pointers reaction", "React to CVRPointer components with 'ragdoll' type", PointersReaction));
+            (ms_uiElements[(int)UiElementIndex.PointersReaction] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) =>
+            {
+                PointersReaction = state;
+                ms_entries[(int)ModSetting.PointersReaction].BoxedValue = state;
+                PointersReactionChange?.Invoke(state);
+            };
+
             ms_uiElements.Add(l_page.AddSlider("Velocity multiplier", "Velocity multiplier upon entering ragdoll state", VelocityMultiplier, 1f, 50f));
             (ms_uiElements[(int)UiElementIndex.VelocityMultiplier] as BTKUILib.UIObjects.Components.SliderFloat).OnValueUpdated += (value) =>
             {
@@ -148,6 +162,11 @@ namespace ml_prm
                 ms_entries[(int)ModSetting.Gravity].BoxedValue = true;
                 (ms_uiElements[(int)UiElementIndex.Gravity] as BTKUILib.UIObjects.Components.ToggleButton).ToggleValue = true;
                 GravityChange?.Invoke(true);
+
+                PointersReaction = true;
+                ms_entries[(int)ModSetting.PointersReaction].BoxedValue = true;
+                (ms_uiElements[(int)UiElementIndex.PointersReaction] as BTKUILib.UIObjects.Components.ToggleButton).ToggleValue = true;
+                PointersReactionChange?.Invoke(true);
 
                 VelocityMultiplier = 2f;
                 ms_entries[(int)ModSetting.VelocityMultiplier].BoxedValue = 2f;
