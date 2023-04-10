@@ -142,9 +142,17 @@ namespace ml_prm
                 m_puppetReferences.rightLowerLeg = CloneTransform(l_avatarReferences.rightLowerLeg, m_puppetReferences.rightUpperLeg, "RightLowerLeg");
                 m_puppetReferences.rightFoot = CloneTransform(l_avatarReferences.rightFoot, m_puppetReferences.rightLowerLeg, "RightFoot");
 
+                // Move to world origin to overcome possible issues, maybe?
+                m_puppetRoot.position = Vector3.zero;
+                m_puppetRoot.rotation = Quaternion.identity;
+
                 BipedRagdollCreator.Options l_options = BipedRagdollCreator.AutodetectOptions(m_puppetReferences);
                 l_options.joints = RagdollCreator.JointType.Character;
                 BipedRagdollCreator.Create(m_puppetReferences, l_options);
+
+                // And return back
+                m_puppetRoot.localPosition = Vector3.zero;
+                m_puppetRoot.localRotation = Quaternion.identity;
 
                 Transform[] l_puppetTransforms = m_puppetReferences.GetRagdollTransforms();
                 Transform[] l_avatarTransforms = l_avatarReferences.GetRagdollTransforms();
@@ -173,7 +181,10 @@ namespace ml_prm
                         Collider l_collider = l_puppetTransforms[i].GetComponent<Collider>();
                         if(l_collider != null)
                         {
-                            Physics.IgnoreCollision(MovementSystem.Instance.proxyCollider, l_collider, true);
+                            l_collider.gameObject.layer = LayerMask.NameToLayer("PlayerLocal");
+                            Physics.IgnoreCollision(l_collider, MovementSystem.Instance.proxyCollider, true);
+                            Physics.IgnoreCollision(l_collider, MovementSystem.Instance.controller, true);
+                            Physics.IgnoreCollision(l_collider, MovementSystem.Instance.forceCollider, true);
                             l_collider.enabled = false;
                             m_colliders.Add(l_collider);
                         }
