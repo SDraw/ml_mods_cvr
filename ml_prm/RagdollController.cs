@@ -9,8 +9,11 @@ using UnityEngine;
 
 namespace ml_prm
 {
-    class RagdollController : MonoBehaviour
+    [DisallowMultipleComponent]
+    public class RagdollController : MonoBehaviour
     {
+        public static RagdollController Instance { get; private set; } = null;
+
         VRIK m_vrIK = null;
         float m_vrIkWeight = 1f;
 
@@ -31,9 +34,17 @@ namespace ml_prm
 
         internal RagdollController()
         {
+            if(Instance == null)
+                Instance = this;
+
             m_rigidBodies = new List<Rigidbody>();
             m_colliders = new List<Collider>();
             m_boneLinks = new List<System.Tuple<Transform, Transform>>();
+        }
+        ~RagdollController()
+        {
+            if(Instance == this)
+                Instance = null;
         }
 
         // Unity events
@@ -227,9 +238,7 @@ namespace ml_prm
             if(m_avatarReady)
             {
                 foreach(Rigidbody l_body in m_rigidBodies)
-                {
                     l_body.useGravity = (!Utils.IsWorldSafe() || Settings.Gravity);
-                }
             }
         }
 
@@ -317,7 +326,7 @@ namespace ml_prm
                     foreach(Rigidbody l_body in m_rigidBodies)
                         l_body.isKinematic = true;
 
-                    if((m_puppetReferences.hips != null))
+                    if(m_puppetReferences.hips != null)
                     {
                         Vector3 l_hipsPos = m_puppetReferences.hips.position;
 

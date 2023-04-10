@@ -27,7 +27,7 @@ Optional mod's settings with [BTKUILib](https://github.com/BTK-Development/BTKUI
 * Not suggested to activate fly mode with enabled ragdoll state.
 * If ragdoll state is enabled during emote, remote players see whole emote playing while local player sees ragdolling. It's tied to how game handles remote players, currently can be prevented with (choose one):
   * Renaming avatar emote animations to not have default name or containing `Emote` substring.
-  * Holding any movement key when activating ragdoll state.
+  * Holding any movement key right after activating ragdoll state.
 
 # Unity Editor Script
 You can also trigger the ragdoll via animations on your avatar. To do this you need to download and import the 
@@ -37,6 +37,14 @@ your avatar's hierarchy. Now you can animate both parameters available:
 - **Should Override:** Whether the animation should override the toggled state of the ragdoll.
 - **Is On:** Whether the ragdoll state is On or Off (only works if `Should Override` is also On).
 
-![](resources/ragdoll_toggle_editor_script.png)
+![](.github/img_01.png)
 
 **Note:** In order to work the game object needs to be active and the component enabled.
+
+# Mods Integration
+* Add mod's dll as reference in your project
+* Access ragdoll controller with `ml_prm.RagdollController.Instance`.
+
+Available methods:
+* ```bool IsRagdolled()```
+* ```void SwitchRagdoll()```

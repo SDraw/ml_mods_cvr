@@ -6,7 +6,7 @@ namespace ml_prm
 {
     static class Settings
     {
-        public enum ModSetting
+        enum ModSetting
         {
             Hotkey = 0,
             VelocityMultiplier,
@@ -29,8 +29,8 @@ namespace ml_prm
         public static bool Hotkey { get; private set; } = true;
         public static float VelocityMultiplier { get; private set; } = 2f;
         public static bool RestorePosition { get; private set; } = false;
-        public static float MovementDrag { get; private set; } = 1f;
-        public static float AngularDrag { get; private set; } = 0.5f;
+        public static float MovementDrag { get; private set; } = 2f;
+        public static float AngularDrag { get; private set; } = 2f;
         public static bool Gravity { get; private set; } = true;
 
         static public event Action SwitchChange;
@@ -60,10 +60,10 @@ namespace ml_prm
             };
 
             Hotkey = (bool)ms_entries[(int)ModSetting.Hotkey].BoxedValue;
-            VelocityMultiplier = UnityEngine.Mathf.Clamp((float)ms_entries[(int)ModSetting.VelocityMultiplier].BoxedValue, 0f, 50f);
+            VelocityMultiplier = UnityEngine.Mathf.Clamp((float)ms_entries[(int)ModSetting.VelocityMultiplier].BoxedValue, 1f, 50f);
             RestorePosition = (bool)ms_entries[(int)ModSetting.RestorePosition].BoxedValue;
             MovementDrag = UnityEngine.Mathf.Clamp((float)ms_entries[(int)ModSetting.MovementDrag].BoxedValue, 0f, 50f);
-            AngularDrag = UnityEngine.Mathf.Clamp((float)ms_entries[(int)ModSetting.MovementDrag].BoxedValue, 0.5f, 50f);
+            AngularDrag = UnityEngine.Mathf.Clamp((float)ms_entries[(int)ModSetting.MovementDrag].BoxedValue, 0f, 50f);
             Gravity = (bool)ms_entries[(int)ModSetting.Gravity].BoxedValue;
 
             if(MelonLoader.MelonMod.RegisteredMelons.FirstOrDefault(m => m.Info.Name == "BTKUILib") != null)
@@ -124,7 +124,7 @@ namespace ml_prm
                 MovementDragChange?.Invoke(value);
             };
 
-            ms_uiElements.Add(l_page.AddSlider("Angular movement drag", "Rotation movement resistance", AngularDrag, 0.5f, 50f));
+            ms_uiElements.Add(l_page.AddSlider("Angular movement drag", "Rotation movement resistance", AngularDrag, 0f, 50f));
             (ms_uiElements[(int)UiElementIndex.AngularDrag] as BTKUILib.UIObjects.Components.SliderFloat).OnValueUpdated += (value) =>
             {
                 AngularDrag = value;
@@ -154,15 +154,15 @@ namespace ml_prm
                 (ms_uiElements[(int)UiElementIndex.VelocityMultiplier] as BTKUILib.UIObjects.Components.SliderFloat).SetSliderValue(2f);
                 VelocityMultiplierChange?.Invoke(2f);
 
-                MovementDrag = 1f;
-                ms_entries[(int)ModSetting.MovementDrag].BoxedValue = 1f;
-                (ms_uiElements[(int)UiElementIndex.MovementDrag] as BTKUILib.UIObjects.Components.SliderFloat).SetSliderValue(1f);
-                MovementDragChange?.Invoke(1f);
+                MovementDrag = 2f;
+                ms_entries[(int)ModSetting.MovementDrag].BoxedValue = 2f;
+                (ms_uiElements[(int)UiElementIndex.MovementDrag] as BTKUILib.UIObjects.Components.SliderFloat).SetSliderValue(2f);
+                MovementDragChange?.Invoke(2f);
 
-                AngularDrag = 0.5f;
-                ms_entries[(int)ModSetting.MovementDrag].BoxedValue = 0.5f;
-                (ms_uiElements[(int)UiElementIndex.AngularDrag] as BTKUILib.UIObjects.Components.SliderFloat).SetSliderValue(0.5f);
-                AngularDragChange?.Invoke(0.5f);
+                AngularDrag = 2f;
+                ms_entries[(int)ModSetting.MovementDrag].BoxedValue = 2f;
+                (ms_uiElements[(int)UiElementIndex.AngularDrag] as BTKUILib.UIObjects.Components.SliderFloat).SetSliderValue(2f);
+                AngularDragChange?.Invoke(2f);
             };
         }
     }
