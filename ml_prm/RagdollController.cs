@@ -204,7 +204,6 @@ namespace ml_prm
                         Collider l_collider = l_puppetTransforms[i].GetComponent<Collider>();
                         if(l_collider != null)
                         {
-                            l_collider.gameObject.layer = LayerMask.NameToLayer("PlayerLocal");
                             Physics.IgnoreCollision(l_collider, MovementSystem.Instance.proxyCollider, true);
                             Physics.IgnoreCollision(l_collider, MovementSystem.Instance.controller, true);
                             Physics.IgnoreCollision(l_collider, MovementSystem.Instance.forceCollider, true);
