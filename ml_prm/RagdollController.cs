@@ -93,7 +93,7 @@ namespace ml_prm
             if(m_enabled && m_avatarReady && BodySystem.isCalibratedAsFullBody)
                 BodySystem.TrackingPositionWeight = 0f;
 
-            if(!m_enabled && m_avatarReady && (m_customTrigger != null) && m_customTrigger.GetStateWithReset() && Settings.PointersReaction)
+            if((m_customTrigger != null) && m_customTrigger.GetStateWithReset() && !m_enabled && m_avatarReady && Settings.PointersReaction)
                 SwitchRagdoll();
         }
 
@@ -277,7 +277,8 @@ namespace ml_prm
                 foreach(Rigidbody l_body in m_rigidBodies)
                 {
                     l_body.drag = p_value;
-                    l_body.WakeUp();
+                    if(m_enabled)
+                        l_body.WakeUp();
                 }
             }
         }
@@ -288,7 +289,8 @@ namespace ml_prm
                 foreach(Rigidbody l_body in m_rigidBodies)
                 {
                     l_body.angularDrag = p_value;
-                    l_body.WakeUp();
+                    if(m_enabled)
+                        l_body.WakeUp();
                 }
             }
         }
@@ -309,10 +311,10 @@ namespace ml_prm
                 m_enabled = !m_enabled;
 
                 MovementSystem.Instance.SetImmobilized(m_enabled);
-                PlayerSetup.Instance.animatorManager.SetAnimatorParameterTrigger("CancelEmote");
 
                 if(m_enabled)
                 {
+                    PlayerSetup.Instance.animatorManager.SetAnimatorParameterTrigger("CancelEmote");
                     if(BodySystem.isCalibratedAsFullBody)
                         BodySystem.TrackingPositionWeight = 0f;
 
