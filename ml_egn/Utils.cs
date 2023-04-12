@@ -1,5 +1,6 @@
 ﻿using ABI_RC.Core.InteractionSystem;
 using ABI_RC.Core.Networking;
+using ABI_RC.Core.Savior;
 using ABI_RC.Core.UI;
 using DarkRift;
 
@@ -42,5 +43,8 @@ namespace ml_egn
                 l_result = (NetworkManager.Instance.GameNetwork.ConnectionState == ConnectionState.Connected);
             return l_result;
         }
+
+        public static bool ArePropsAllowed() => ((MetaPort.Instance != null) && MetaPort.Instance.worldAllowProps);
+        public static bool ArePropsEnabled() => ((MetaPort.Instance != null) && MetaPort.Instance.settings.GetSettingsBool("ContentFilterPropsEnabled"));
     }
 }

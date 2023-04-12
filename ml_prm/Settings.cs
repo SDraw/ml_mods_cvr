@@ -14,7 +14,8 @@ namespace ml_prm
             MovementDrag,
             AngularDrag,
             Gravity,
-            PointersReaction
+            PointersReaction,
+            CombatReaction
         }
 
         enum UiElementIndex
@@ -23,6 +24,7 @@ namespace ml_prm
             RestorePosition,
             Gravity,
             PointersReaction,
+            CombatReaction,
             VelocityMultiplier,
             MovementDrag,
             AngularDrag
@@ -35,6 +37,7 @@ namespace ml_prm
         public static float AngularDrag { get; private set; } = 2f;
         public static bool Gravity { get; private set; } = true;
         public static bool PointersReaction { get; private set; } = true;
+        public static bool CombatReaction { get; private set; } = true;
 
         static public event Action SwitchChange;
         static public event Action<bool> HotkeyChange;
@@ -44,6 +47,7 @@ namespace ml_prm
         static public event Action<float> AngularDragChange;
         static public event Action<bool> GravityChange;
         static public event Action<bool> PointersReactionChange;
+        static public event Action<bool> CombatReactionChange;
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
@@ -61,7 +65,8 @@ namespace ml_prm
                 ms_category.CreateEntry(ModSetting.MovementDrag.ToString(), MovementDrag),
                 ms_category.CreateEntry(ModSetting.AngularDrag.ToString(), AngularDrag),
                 ms_category.CreateEntry(ModSetting.Gravity.ToString(), Gravity),
-                ms_category.CreateEntry(ModSetting.PointersReaction.ToString(), PointersReaction)
+                ms_category.CreateEntry(ModSetting.PointersReaction.ToString(), PointersReaction),
+                ms_category.CreateEntry(ModSetting.CombatReaction.ToString(), CombatReaction)
             };
 
             Hotkey = (bool)ms_entries[(int)ModSetting.Hotkey].BoxedValue;
@@ -71,6 +76,7 @@ namespace ml_prm
             AngularDrag = UnityEngine.Mathf.Clamp((float)ms_entries[(int)ModSetting.MovementDrag].BoxedValue, 0f, 50f);
             Gravity = (bool)ms_entries[(int)ModSetting.Gravity].BoxedValue;
             PointersReaction = (bool)ms_entries[(int)ModSetting.PointersReaction].BoxedValue;
+            CombatReaction = (bool)ms_entries[(int)ModSetting.CombatReaction].BoxedValue;
 
             if(MelonLoader.MelonMod.RegisteredMelons.FirstOrDefault(m => m.Info.Name == "BTKUILib") != null)
             {
@@ -122,6 +128,14 @@ namespace ml_prm
                 PointersReactionChange?.Invoke(state);
             };
 
+            ms_uiElements.Add(l_categoryMod.AddToggle("Combat reaction", "Ragdoll upon combat system death", CombatReaction));
+            (ms_uiElements[(int)UiElementIndex.CombatReaction] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) =>
+            {
+                CombatReaction = state;
+                ms_entries[(int)ModSetting.CombatReaction].BoxedValue = state;
+                CombatReactionChange?.Invoke(state);
+            };
+
             ms_uiElements.Add(l_page.AddSlider("Velocity multiplier", "Velocity multiplier upon entering ragdoll state", VelocityMultiplier, 1f, 50f));
             (ms_uiElements[(int)UiElementIndex.VelocityMultiplier] as BTKUILib.UIObjects.Components.SliderFloat).OnValueUpdated += (value) =>
             {
@@ -167,6 +181,11 @@ namespace ml_prm
                 ms_entries[(int)ModSetting.PointersReaction].BoxedValue = true;
                 (ms_uiElements[(int)UiElementIndex.PointersReaction] as BTKUILib.UIObjects.Components.ToggleButton).ToggleValue = true;
                 PointersReactionChange?.Invoke(true);
+
+                CombatReaction = true;
+                ms_entries[(int)ModSetting.CombatReaction].BoxedValue = true;
+                (ms_uiElements[(int)UiElementIndex.CombatReaction] as BTKUILib.UIObjects.Components.ToggleButton).ToggleValue = true;
+                CombatReactionChange?.Invoke(true);
 
                 VelocityMultiplier = 2f;
                 ms_entries[(int)ModSetting.VelocityMultiplier].BoxedValue = 2f;

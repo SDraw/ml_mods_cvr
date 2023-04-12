@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using ABI_RC.Core.Util.AssetFiltering;
+using ABI.CCK.Components;
+using System.Linq;
 
 namespace ml_prm
 {
@@ -45,6 +47,11 @@ namespace ml_prm
             HarmonyInstance.Patch(
                 typeof(RootLogic).GetMethod(nameof(RootLogic.SpawnOnWorldInstance)),
                 new HarmonyLib.HarmonyMethod(typeof(PlayerRagdollMod).GetMethod(nameof(OnWorldSpawn_Prefix), BindingFlags.Static | BindingFlags.NonPublic)),
+                null
+            );
+            HarmonyInstance.Patch(
+                typeof(CombatSystem).GetMethods().First(m => (!m.IsGenericMethod && m.Name == nameof(CombatSystem.Down))),
+                new HarmonyLib.HarmonyMethod(typeof(PlayerRagdollMod).GetMethod(nameof(OnCombatDown_Prefix), BindingFlags.Static | BindingFlags.NonPublic)),
                 null
             );
 
@@ -140,5 +147,22 @@ namespace ml_prm
             }
         }
 
+        static void OnCombatDown_Prefix(ref CombatSystem __instance)
+        {
+            if((__instance == CombatSystem.Instance) && !__instance.isDown)
+                ms_instance?.OnCombatDown();
+        }
+        void OnCombatDown()
+        {
+            try
+            {
+                if(m_localController != null)
+                    m_localController.OnCombatDown();
+            }
+            catch(Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
+        }
     }
 }

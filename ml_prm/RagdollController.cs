@@ -1,4 +1,5 @@
-﻿using ABI_RC.Core.InteractionSystem;
+﻿using ABI.CCK.Components;
+using ABI_RC.Core.InteractionSystem;
 using ABI_RC.Core.Player;
 using ABI_RC.Systems.IK.SubSystems;
 using ABI_RC.Systems.MovementSystem;
@@ -32,6 +33,8 @@ namespace ml_prm
 
         RagdollToggle m_avatarRagdollToggle = null;
         RagdollTrigger m_customTrigger = null;
+
+        bool m_reachedGround = true;
 
         internal RagdollController()
         {
@@ -84,14 +87,17 @@ namespace ml_prm
             m_velocity = (m_velocity + (l_pos - m_lastPosition) / Time.deltaTime) * 0.5f;
             m_lastPosition = l_pos;
 
+            if(m_avatarReady && !m_reachedGround && MovementSystem.Instance.IsGrounded())
+                m_reachedGround = true;
+
+            if(m_enabled && m_avatarReady && BodySystem.isCalibratedAsFullBody)
+                BodySystem.TrackingPositionWeight = 0f;
+
             if(Settings.Hotkey && Input.GetKeyDown(KeyCode.R) && !ViewManager.Instance.isGameMenuOpen())
                 SwitchRagdoll();
 
             if((m_avatarRagdollToggle != null) && m_avatarRagdollToggle.isActiveAndEnabled && m_avatarRagdollToggle.shouldOverride && (m_enabled != m_avatarRagdollToggle.isOn))
                 SwitchRagdoll();
-
-            if(m_enabled && m_avatarReady && BodySystem.isCalibratedAsFullBody)
-                BodySystem.TrackingPositionWeight = 0f;
 
             if((m_customTrigger != null) && m_customTrigger.GetStateWithReset() && !m_enabled && m_avatarReady && Settings.PointersReaction)
                 SwitchRagdoll();
@@ -127,6 +133,7 @@ namespace ml_prm
             m_colliders.Clear();
             m_puppetReferences = new BipedRagdollReferences();
             m_boneLinks.Clear();
+            m_reachedGround = true;
         }
 
         internal void OnAvatarSetup()
@@ -253,6 +260,12 @@ namespace ml_prm
             }
         }
 
+        internal void OnCombatDown()
+        {
+            if(!m_enabled && m_avatarReady && Settings.CombatReaction)
+                SwitchRagdoll();
+        }
+
         // IK updates
         void OnIKPreUpdate()
         {
@@ -305,60 +318,88 @@ namespace ml_prm
         // Arbitrary
         public void SwitchRagdoll()
         {
-            if(m_avatarReady && (MovementSystem.Instance.lastSeat == null) && !BodySystem.isCalibrating)
+            if(m_avatarReady)
             {
-                m_enabled = !m_enabled;
-
-                MovementSystem.Instance.SetImmobilized(m_enabled);
-
-                if(m_enabled)
+                if(!m_enabled)
                 {
-                    PlayerSetup.Instance.animatorManager.SetAnimatorParameterTrigger("CancelEmote");
-                    if(BodySystem.isCalibratedAsFullBody)
-                        BodySystem.TrackingPositionWeight = 0f;
-
-                    // Copy before set to non-kinematic to reduce stacked forces
-                    foreach(var l_link in m_boneLinks)
-                        l_link.Item2.CopyGlobal(l_link.Item1);
-
-                    foreach(Rigidbody l_body in m_rigidBodies)
-                        l_body.isKinematic = false;
-
-                    Vector3 l_velocity = m_velocity * Mathf.Clamp(Settings.VelocityMultiplier, 1f, (Utils.IsWorldSafe() ? Utils.GetWorldFlyMultiplier() : 1f));
-                    foreach(Rigidbody l_body in m_rigidBodies)
+                    if(IsSafeToRagdoll() && m_reachedGround)
                     {
-                        l_body.velocity = l_velocity;
-                        l_body.angularVelocity = Vector3.zero;
+                        // Eject player from seat
+                        if(MovementSystem.Instance.lastSeat != null)
+                        {
+                            Vector3 l_pos = PlayerSetup.Instance.transform.position;
+                            Quaternion l_rot = PlayerSetup.Instance.transform.rotation;
+                            MovementSystem.Instance.lastSeat.ExitSeat();
+                            PlayerSetup.Instance.transform.position = l_pos;
+                            PlayerSetup.Instance.transform.rotation = Quaternion.Euler(0f, l_rot.eulerAngles.y, 0f);
+                        }
+
+                        MovementSystem.Instance.SetImmobilized(true);
+                        PlayerSetup.Instance.animatorManager.SetAnimatorParameterTrigger("CancelEmote");
+                        if(BodySystem.isCalibratedAsFullBody)
+                            BodySystem.TrackingPositionWeight = 0f;
+
+                        if(!Utils.IsWorldSafe())
+                            m_reachedGround = false; // Force player to unragdoll and reach ground first
+
+                        // Copy before set to non-kinematic to reduce stacked forces
+                        foreach(var l_link in m_boneLinks)
+                            l_link.Item2.CopyGlobal(l_link.Item1);
+
+                        foreach(Rigidbody l_body in m_rigidBodies)
+                            l_body.isKinematic = false;
+
+                        Vector3 l_velocity = m_velocity * Mathf.Clamp(Settings.VelocityMultiplier, 1f, (Utils.IsWorldSafe() ? Utils.GetWorldFlyMultiplier() : 1f));
+
+                        foreach(Rigidbody l_body in m_rigidBodies)
+                        {
+                            l_body.velocity = l_velocity;
+                            l_body.angularVelocity = Vector3.zero;
+                        }
+
+                        foreach(Collider l_collider in m_colliders)
+                            l_collider.enabled = true;
+
+                        m_enabled = true;
                     }
                 }
                 else
                 {
-                    if(BodySystem.isCalibratedAsFullBody)
-                        BodySystem.TrackingPositionWeight = 1f;
-
-                    foreach(Rigidbody l_body in m_rigidBodies)
-                        l_body.isKinematic = true;
-
-                    if(m_puppetReferences.hips != null)
+                    if(IsSafeToUnragdoll())
                     {
-                        Vector3 l_hipsPos = m_puppetReferences.hips.position;
+                        MovementSystem.Instance.SetImmobilized(false);
+                        if(BodySystem.isCalibratedAsFullBody)
+                            BodySystem.TrackingPositionWeight = 1f;
 
-                        if(!Settings.RestorePosition)
+                        foreach(Rigidbody l_body in m_rigidBodies)
+                            l_body.isKinematic = true;
+
+                        if(m_puppetReferences.hips != null)
                         {
-                            if(Utils.IsInVR())
+                            Vector3 l_hipsPos = m_puppetReferences.hips.position;
+
+                            if(!Settings.RestorePosition)
                             {
-                                Vector3 l_diff = l_hipsPos - PlayerSetup.Instance._avatar.transform.position;
-                                Vector3 l_playerPos = PlayerSetup.Instance.transform.position;
-                                PlayerSetup.Instance.transform.position = l_playerPos + l_diff;
+                                if(Utils.IsInVR())
+                                {
+                                    Vector3 l_diff = l_hipsPos - PlayerSetup.Instance._avatar.transform.position;
+                                    Vector3 l_playerPos = PlayerSetup.Instance.transform.position;
+                                    PlayerSetup.Instance.transform.position = l_playerPos + l_diff;
+                                }
+                                else
+                                    PlayerSetup.Instance.transform.position = l_hipsPos;
                             }
-                            else
-                                PlayerSetup.Instance.transform.position = l_hipsPos;
                         }
+
+                        foreach(Collider l_collider in m_colliders)
+                            l_collider.enabled = false;
+
+                        m_lastPosition = PlayerSetup.Instance.transform.position;
+                        m_velocity = Vector3.zero;
+
+                        m_enabled = false;
                     }
                 }
-
-                foreach(Collider l_collider in m_colliders)
-                    l_collider.enabled = m_enabled;
             }
         }
 
@@ -370,6 +411,21 @@ namespace ml_prm
             l_target.parent = p_parent;
             p_source.CopyGlobal(l_target);
             return l_target;
+        }
+
+        static bool IsSafeToRagdoll()
+        {
+            bool l_result = true;
+            l_result &= !BodySystem.isCalibrating; // Not calibrating
+            l_result &= ((CombatSystem.Instance == null) || !CombatSystem.Instance.isDown); // Non-combat world or not dead
+            return l_result;
+        }
+
+        static bool IsSafeToUnragdoll()
+        {
+            bool l_result = true;
+            l_result &= ((CombatSystem.Instance == null) || !CombatSystem.Instance.isDown); // Non-combat world or not dead
+            return l_result;
         }
     }
 }

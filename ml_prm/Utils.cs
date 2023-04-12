@@ -1,11 +1,16 @@
 ﻿using ABI.CCK.Components;
+using ABI_RC.Core.Savior;
+using ABI_RC.Systems.MovementSystem;
+using System.Reflection;
 using UnityEngine;
 
 namespace ml_prm
 {
     static class Utils
     {
-        public static bool IsInVR() => ((ABI_RC.Core.Savior.CheckVR.Instance != null) && ABI_RC.Core.Savior.CheckVR.Instance.hasVrDeviceLoaded);
+        static readonly FieldInfo ms_grounded = typeof(MovementSystem).GetField("_isGrounded", BindingFlags.NonPublic | BindingFlags.Instance);
+
+        public static bool IsInVR() => ((CheckVR.Instance != null) && CheckVR.Instance.hasVrDeviceLoaded);
         public static bool IsWorldSafe() => ((CVRWorld.Instance != null) && CVRWorld.Instance.allowFlying);
         public static float GetWorldFlyMultiplier()
         {
@@ -14,6 +19,8 @@ namespace ml_prm
                 l_result = CVRWorld.Instance.flyMultiplier;
             return l_result;
         }
+
+        public static bool IsGrounded(this MovementSystem p_instance) => (bool)ms_grounded.GetValue(p_instance);
 
         public static void CopyGlobal(this Transform p_source, Transform p_target)
         {
