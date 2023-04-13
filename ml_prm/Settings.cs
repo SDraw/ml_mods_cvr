@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace ml_prm
 {
@@ -15,7 +16,9 @@ namespace ml_prm
             AngularDrag,
             Gravity,
             PointersReaction,
-            CombatReaction
+            CombatReaction,
+            AutoRecover,
+            RecoverDelay
         }
 
         enum UiElementIndex
@@ -25,9 +28,11 @@ namespace ml_prm
             Gravity,
             PointersReaction,
             CombatReaction,
+            AutoRecover,
             VelocityMultiplier,
             MovementDrag,
-            AngularDrag
+            AngularDrag,
+            RecoverDelay
         }
 
         public static bool Hotkey { get; private set; } = true;
@@ -38,6 +43,8 @@ namespace ml_prm
         public static bool Gravity { get; private set; } = true;
         public static bool PointersReaction { get; private set; } = true;
         public static bool CombatReaction { get; private set; } = true;
+        public static bool AutoRecover { get; private set; } = false;
+        public static float RecoverDelay { get; private set; } = 3f;
 
         static public event Action SwitchChange;
         static public event Action<bool> HotkeyChange;
@@ -48,6 +55,8 @@ namespace ml_prm
         static public event Action<bool> GravityChange;
         static public event Action<bool> PointersReactionChange;
         static public event Action<bool> CombatReactionChange;
+        static public event Action<bool> AutoRecoverChange;
+        static public event Action<float> RecoverDelayChange;
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
@@ -66,17 +75,21 @@ namespace ml_prm
                 ms_category.CreateEntry(ModSetting.AngularDrag.ToString(), AngularDrag),
                 ms_category.CreateEntry(ModSetting.Gravity.ToString(), Gravity),
                 ms_category.CreateEntry(ModSetting.PointersReaction.ToString(), PointersReaction),
-                ms_category.CreateEntry(ModSetting.CombatReaction.ToString(), CombatReaction)
+                ms_category.CreateEntry(ModSetting.CombatReaction.ToString(), CombatReaction),
+                ms_category.CreateEntry(ModSetting.AutoRecover.ToString(), AutoRecover),
+                ms_category.CreateEntry(ModSetting.RecoverDelay.ToString(), RecoverDelay)
             };
 
             Hotkey = (bool)ms_entries[(int)ModSetting.Hotkey].BoxedValue;
-            VelocityMultiplier = UnityEngine.Mathf.Clamp((float)ms_entries[(int)ModSetting.VelocityMultiplier].BoxedValue, 1f, 50f);
+            VelocityMultiplier = Mathf.Clamp((float)ms_entries[(int)ModSetting.VelocityMultiplier].BoxedValue, 1f, 50f);
             RestorePosition = (bool)ms_entries[(int)ModSetting.RestorePosition].BoxedValue;
-            MovementDrag = UnityEngine.Mathf.Clamp((float)ms_entries[(int)ModSetting.MovementDrag].BoxedValue, 0f, 50f);
-            AngularDrag = UnityEngine.Mathf.Clamp((float)ms_entries[(int)ModSetting.MovementDrag].BoxedValue, 0f, 50f);
+            MovementDrag = Mathf.Clamp((float)ms_entries[(int)ModSetting.MovementDrag].BoxedValue, 0f, 50f);
+            AngularDrag = Mathf.Clamp((float)ms_entries[(int)ModSetting.MovementDrag].BoxedValue, 0f, 50f);
             Gravity = (bool)ms_entries[(int)ModSetting.Gravity].BoxedValue;
             PointersReaction = (bool)ms_entries[(int)ModSetting.PointersReaction].BoxedValue;
             CombatReaction = (bool)ms_entries[(int)ModSetting.CombatReaction].BoxedValue;
+            AutoRecover = (bool)ms_entries[(int)ModSetting.AutoRecover].BoxedValue;
+            RecoverDelay = Mathf.Clamp((float)ms_entries[(int)ModSetting.RecoverDelay].BoxedValue, 1f, 10f);
 
             if(MelonLoader.MelonMod.RegisteredMelons.FirstOrDefault(m => m.Info.Name == "BTKUILib") != null)
             {
@@ -136,6 +149,14 @@ namespace ml_prm
                 CombatReactionChange?.Invoke(state);
             };
 
+            ms_uiElements.Add(l_categoryMod.AddToggle("Auto recover", "Automatically unragdoll after set recover delay", AutoRecover));
+            (ms_uiElements[(int)UiElementIndex.AutoRecover] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) =>
+            {
+                AutoRecover = state;
+                ms_entries[(int)ModSetting.AutoRecover].BoxedValue = state;
+                AutoRecoverChange?.Invoke(state);
+            };
+
             ms_uiElements.Add(l_page.AddSlider("Velocity multiplier", "Velocity multiplier upon entering ragdoll state", VelocityMultiplier, 1f, 50f));
             (ms_uiElements[(int)UiElementIndex.VelocityMultiplier] as BTKUILib.UIObjects.Components.SliderFloat).OnValueUpdated += (value) =>
             {
@@ -157,7 +178,15 @@ namespace ml_prm
             {
                 AngularDrag = value;
                 ms_entries[(int)ModSetting.AngularDrag].BoxedValue = value;
-                AngularDragChange?.Invoke(AngularDrag);
+                AngularDragChange?.Invoke(value);
+            };
+
+            ms_uiElements.Add(l_page.AddSlider("Recover delay (seconds)", "Recover delay for automatic recover", RecoverDelay, 1f, 10f));
+            (ms_uiElements[(int)UiElementIndex.RecoverDelay] as BTKUILib.UIObjects.Components.SliderFloat).OnValueUpdated += (value) =>
+            {
+                RecoverDelay = value;
+                ms_entries[(int)ModSetting.RecoverDelay].BoxedValue = value;
+                RecoverDelayChange?.Invoke(value);
             };
 
             l_categoryMod.AddButton("Reset settings", "", "Reset mod settings to default").OnPress += () =>
@@ -187,6 +216,11 @@ namespace ml_prm
                 (ms_uiElements[(int)UiElementIndex.CombatReaction] as BTKUILib.UIObjects.Components.ToggleButton).ToggleValue = true;
                 CombatReactionChange?.Invoke(true);
 
+                AutoRecover = false;
+                ms_entries[(int)ModSetting.AutoRecover].BoxedValue = false;
+                (ms_uiElements[(int)UiElementIndex.AutoRecover] as BTKUILib.UIObjects.Components.ToggleButton).ToggleValue = false;
+                AutoRecoverChange?.Invoke(false);
+
                 VelocityMultiplier = 2f;
                 ms_entries[(int)ModSetting.VelocityMultiplier].BoxedValue = 2f;
                 (ms_uiElements[(int)UiElementIndex.VelocityMultiplier] as BTKUILib.UIObjects.Components.SliderFloat).SetSliderValue(2f);
@@ -198,9 +232,14 @@ namespace ml_prm
                 MovementDragChange?.Invoke(2f);
 
                 AngularDrag = 2f;
-                ms_entries[(int)ModSetting.MovementDrag].BoxedValue = 2f;
+                ms_entries[(int)ModSetting.AngularDrag].BoxedValue = 2f;
                 (ms_uiElements[(int)UiElementIndex.AngularDrag] as BTKUILib.UIObjects.Components.SliderFloat).SetSliderValue(2f);
                 AngularDragChange?.Invoke(2f);
+
+                RecoverDelay = 3f;
+                ms_entries[(int)ModSetting.RecoverDelay].BoxedValue = 3f;
+                (ms_uiElements[(int)UiElementIndex.RecoverDelay] as BTKUILib.UIObjects.Components.SliderFloat).SetSliderValue(3f);
+                RecoverDelayChange?.Invoke(3f);
             };
         }
     }

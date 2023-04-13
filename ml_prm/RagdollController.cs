@@ -5,6 +5,7 @@ using ABI_RC.Systems.IK.SubSystems;
 using ABI_RC.Systems.MovementSystem;
 using RootMotion.Dynamics;
 using RootMotion.FinalIK;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -34,6 +35,7 @@ namespace ml_prm
         RagdollToggle m_avatarRagdollToggle = null;
         RagdollTrigger m_customTrigger = null;
         AvatarBoolParameter m_ragdolledParameter = null;
+        Coroutine m_recoverTask = null;
 
         bool m_reachedGround = true;
 
@@ -119,6 +121,12 @@ namespace ml_prm
         // Game events
         internal void OnAvatarClear()
         {
+            if(m_recoverTask != null)
+            {
+                StopCoroutine(m_recoverTask);
+                m_recoverTask = null;
+            }
+
             if(m_enabled)
                 MovementSystem.Instance.SetImmobilized(false);
 
@@ -364,6 +372,9 @@ namespace ml_prm
                         foreach(Collider l_collider in m_colliders)
                             l_collider.enabled = true;
 
+                        if(Settings.AutoRecover)
+                            m_recoverTask = StartCoroutine(AutoRecover());
+
                         m_enabled = true;
                     }
                 }
@@ -371,6 +382,12 @@ namespace ml_prm
                 {
                     if(IsSafeToUnragdoll())
                     {
+                        if(m_recoverTask != null)
+                        {
+                            StopCoroutine(m_recoverTask);
+                            m_recoverTask = null;
+                        }
+
                         MovementSystem.Instance.SetImmobilized(false);
                         m_ragdolledParameter.SetValue(false);
                         if(BodySystem.isCalibratedAsFullBody)
@@ -409,6 +426,13 @@ namespace ml_prm
         }
 
         public bool IsRagdolled() => (m_enabled && m_avatarReady);
+
+        IEnumerator AutoRecover()
+        {
+            yield return new WaitForSeconds(Settings.RecoverDelay);
+            m_recoverTask = null;
+            SwitchRagdoll();
+        }
 
         static Transform CloneTransform(Transform p_source, Transform p_parent, string p_name)
         {
