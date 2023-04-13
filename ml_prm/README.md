@@ -17,11 +17,13 @@ Optional mod's settings with [BTKUILib](https://github.com/BTK-Development/BTKUI
   * Note: Forcibly enabled in worlds that don't allow flight.
 * **Pointers reaction:** enables ragdoll state when player collides with CVRPointer colliders of `ragdoll` type (avatars, props and world included); `true` by default.
 * **Combat reaction:** enables ragdoll state upon death in worlds with combat system; `true` by default.
+* **Auto recover:** enables automatic recovering after specific time delay; `false` by default.
 * **Velocity multiplier:** velocity force multiplier based on player's movement direction; `2.0` by default.
   * Note: Limited according to world's fly multiplier.
   * Note: Forcibly set to `1.0` in worlds that don't allow flight.
 * **Movement drag:** movement resistance; `2.0` by default.
 * **Angular movement drag:** angular movement resistance; `2.0` by default.
+* **Recover delay:** time delay for enabled `Auto recover` in seconds; `3.0` by default.
 * **Reset settings:** resets mod settings to default.
 
 Available additional parameters for AAS animator:
