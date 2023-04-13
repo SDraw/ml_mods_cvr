@@ -1,4 +1,6 @@
-﻿using ABI_RC.Core.Player;
+﻿using ABI_RC.Core;
+using System.Text.RegularExpressions;
+using UnityEngine;
 
 namespace ml_amt
 {
@@ -11,24 +13,30 @@ namespace ml_amt
             Moving
         }
 
-        public enum ParameterSyncType
-        {
-            Synced,
-            Local
-        }
+        readonly ParameterType m_type;
+        readonly string m_name;
+        readonly int m_hash = 0;
+        readonly bool m_sync;
+        readonly AnimatorControllerParameterType m_innerType;
+        readonly CVRAnimatorManager m_manager = null;
 
-        public readonly ParameterType m_type;
-        public readonly ParameterSyncType m_sync;
-        public readonly string m_name;
-        public readonly int m_hash; // For local only
-
-
-        public AvatarParameter(ParameterType p_type, string p_name, ParameterSyncType p_sync = ParameterSyncType.Synced, int p_hash = 0)
+        public AvatarParameter(ParameterType p_type, CVRAnimatorManager p_manager)
         {
             m_type = p_type;
-            m_sync = p_sync;
-            m_name = p_name;
-            m_hash = p_hash;
+            m_name = p_type.ToString();
+            m_manager = p_manager;
+
+            Regex l_regex = new Regex("^#?" + m_name + '$');
+            foreach(var l_param in m_manager.animator.parameters)
+            {
+                if(l_regex.IsMatch(l_param.name))
+                {
+                    m_hash = l_param.nameHash;
+                    m_sync = (l_param.name[0] != '#');
+                    m_innerType = l_param.type;
+                    break;
+                }
+            }
         }
 
         public void Update(MotionTweaker p_tweaker)
@@ -49,29 +57,28 @@ namespace ml_amt
             }
         }
 
+        public bool IsValid() => (m_hash != 0);
+        public ParameterType GetParameterType() => m_type;
+
         void SetFloat(float p_value)
         {
-            switch(m_sync)
+            if(m_innerType == AnimatorControllerParameterType.Float)
             {
-                case ParameterSyncType.Local:
-                    PlayerSetup.Instance._animator.SetFloat(m_hash, p_value);
-                    break;
-                case ParameterSyncType.Synced:
-                    PlayerSetup.Instance.animatorManager.SetAnimatorParameterFloat(m_name, p_value);
-                    break;
+                if(m_sync)
+                    m_manager.SetAnimatorParameterFloat(m_name, p_value);
+                else
+                    m_manager.animator.SetFloat(m_hash, p_value);
             }
         }
 
         void SetBoolean(bool p_value)
         {
-            switch(m_sync)
+            if(m_innerType == AnimatorControllerParameterType.Bool)
             {
-                case ParameterSyncType.Local:
-                    PlayerSetup.Instance._animator.SetBool(m_hash, p_value);
-                    break;
-                case ParameterSyncType.Synced:
-                    PlayerSetup.Instance.animatorManager.SetAnimatorParameterBool(m_name, p_value);
-                    break;
+                if(m_sync)
+                    m_manager.SetAnimatorParameterBool(m_name, p_value);
+                else
+                    m_manager.animator.SetBool(m_hash, p_value);
             }
         }
     }

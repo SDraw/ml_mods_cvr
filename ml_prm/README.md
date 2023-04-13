@@ -24,6 +24,10 @@ Optional mod's settings with [BTKUILib](https://github.com/BTK-Development/BTKUI
 * **Angular movement drag:** angular movement resistance; `2.0` by default.
 * **Reset settings:** resets mod settings to default.
 
+Available additional parameters for AAS animator:
+* **`Ragdolled`:** defines current ragdoll state; boolean.
+  * Note: Can be set as local-only (not synced) if starts with `#` character.
+
 # Unity Editor Script
 You can also trigger the ragdoll via animations on your avatar. To do this you need:
 * Download and import the `ml_prm_editor_script.unitypackage` into your unity project

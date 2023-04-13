@@ -38,9 +38,9 @@ Available additional parameters for AAS animator:
   * Note: Can be set as local-only (not synced) if starts with `#` character.
   * Note: Defining this parameter in AAS animator will consider avatar as compatible with mod.
   * Note: Can't be used for transitions between poses in desktop mode. In desktop mode its value is driven by avatar animations. Use `CVR Parameter Stream` for detecting desktop/VR modes and change AAS animator transitions accordingly.
-* **`GroundedRaw`:** defines instant grounding state of player instead of delayed default parameter `Grounded`.
+* **`GroundedRaw`:** defines instant grounding state of player instead of delayed default parameter `Grounded`; boolean.
   * Note: Can be set as local-only (not synced) if starts with `#` character.
-* **`Moving`:** defines movement state of player
+* **`Moving`:** defines movement state of player; boolean.
   * Note: Can be set as local-only (not synced) if starts with `#` character.
 
 Additional mod's behaviour:

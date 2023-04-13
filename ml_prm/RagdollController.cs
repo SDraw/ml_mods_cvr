@@ -33,6 +33,7 @@ namespace ml_prm
 
         RagdollToggle m_avatarRagdollToggle = null;
         RagdollTrigger m_customTrigger = null;
+        AvatarBoolParameter m_ragdolledParameter = null;
 
         bool m_reachedGround = true;
 
@@ -129,6 +130,7 @@ namespace ml_prm
             m_enabled = false;
             m_avatarReady = false;
             m_avatarRagdollToggle = null;
+            m_ragdolledParameter = null;
             m_rigidBodies.Clear();
             m_colliders.Clear();
             m_puppetReferences = new BipedRagdollReferences();
@@ -231,6 +233,7 @@ namespace ml_prm
                 }
 
                 m_avatarRagdollToggle = PlayerSetup.Instance._avatar.GetComponentInChildren<RagdollToggle>(true);
+                m_ragdolledParameter = new AvatarBoolParameter("Ragdolled", PlayerSetup.Instance.animatorManager);
 
                 m_avatarReady = true;
             }
@@ -336,6 +339,7 @@ namespace ml_prm
 
                         MovementSystem.Instance.SetImmobilized(true);
                         PlayerSetup.Instance.animatorManager.SetAnimatorParameterTrigger("CancelEmote");
+                        m_ragdolledParameter.SetValue(true);
                         if(BodySystem.isCalibratedAsFullBody)
                             BodySystem.TrackingPositionWeight = 0f;
 
@@ -368,6 +372,7 @@ namespace ml_prm
                     if(IsSafeToUnragdoll())
                     {
                         MovementSystem.Instance.SetImmobilized(false);
+                        m_ragdolledParameter.SetValue(false);
                         if(BodySystem.isCalibratedAsFullBody)
                             BodySystem.TrackingPositionWeight = 1f;
 

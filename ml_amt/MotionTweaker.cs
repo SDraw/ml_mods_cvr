@@ -208,28 +208,12 @@ namespace ml_amt
             m_viewPointHeight = PlayerSetup.Instance._avatar.GetComponent<ABI.CCK.Components.CVRAvatar>().viewPosition.y;
 
             // Parse animator parameters
-            AnimatorControllerParameter[] l_params = PlayerSetup.Instance._animator.parameters;
-            foreach(var l_param in l_params)
-            {
-                foreach(AvatarParameter.ParameterType l_enumParam in System.Enum.GetValues(typeof(AvatarParameter.ParameterType)))
-                {
-                    if(l_param.name.Contains(l_enumParam.ToString()) && (m_parameters.FindIndex(p => p.m_type == l_enumParam) == -1))
-                    {
-                        bool l_local = (l_param.name[0] == '#');
+            m_parameters.Add(new AvatarParameter(AvatarParameter.ParameterType.Upright, PlayerSetup.Instance.animatorManager));
+            m_parameters.Add(new AvatarParameter(AvatarParameter.ParameterType.GroundedRaw, PlayerSetup.Instance.animatorManager));
+            m_parameters.Add(new AvatarParameter(AvatarParameter.ParameterType.Moving, PlayerSetup.Instance.animatorManager));
+            m_parameters.RemoveAll(p => !p.IsValid());
 
-                        m_parameters.Add(new AvatarParameter(
-                            l_enumParam,
-                            l_param.name,
-                            (l_local ? AvatarParameter.ParameterSyncType.Local : AvatarParameter.ParameterSyncType.Synced),
-                            (l_local ? l_param.nameHash : 0)
-                        ));
-
-                        break;
-                    }
-                }
-            }
-
-            m_compatibleAvatar = m_parameters.Exists(p => p.m_type == AvatarParameter.ParameterType.Upright);
+            m_compatibleAvatar = m_parameters.Exists(p => (p.GetParameterType() == AvatarParameter.ParameterType.Upright));
             m_avatarScale = Mathf.Abs(PlayerSetup.Instance._avatar.transform.localScale.y);
 
             Transform l_customTransform = PlayerSetup.Instance._avatar.transform.Find("CrouchLimit");
