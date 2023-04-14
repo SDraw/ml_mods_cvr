@@ -15,7 +15,7 @@ Optional mod's settings with [BTKUILib](https://github.com/BTK-Development/BTKUI
 * **Restore position:** returns to position of ragdoll state activation upon ragdoll state exit; `false` by default.
 * **Use gravity:** enables/disables gravity for ragdoll; `true` by default.
   * Note: Forcibly enabled in worlds that don't allow flight.
-* **Pointers reaction:** enables ragdoll state when player collides with CVRPointer colliders of `ragdoll` type (avatars, props and world included); `true` by default.
+* **Pointers reaction:** enables ragdoll state when player collides with trigger colliders with CVRPointer component of `ragdoll` type (avatars, props and world included); `true` by default.
 * **Combat reaction:** enables ragdoll state upon death in worlds with combat system; `true` by default.
 * **Auto recover:** enables automatic recovering after specific time delay; `false` by default.
 * **Velocity multiplier:** velocity force multiplier based on player's movement direction; `2.0` by default.

@@ -133,7 +133,7 @@ namespace ml_prm
                 GravityChange?.Invoke(state);
             };
 
-            ms_uiElements.Add(l_categoryMod.AddToggle("Pointers reaction", "React to CVRPointer components with 'ragdoll' type", PointersReaction));
+            ms_uiElements.Add(l_categoryMod.AddToggle("Pointers reaction", "React to trigger colliders with CVRPointer component of 'ragdoll' type", PointersReaction));
             (ms_uiElements[(int)UiElementIndex.PointersReaction] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) =>
             {
                 PointersReaction = state;

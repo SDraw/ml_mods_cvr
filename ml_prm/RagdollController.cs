@@ -35,9 +35,9 @@ namespace ml_prm
         RagdollToggle m_avatarRagdollToggle = null;
         RagdollTrigger m_customTrigger = null;
         AvatarBoolParameter m_ragdolledParameter = null;
-        Coroutine m_recoverTask = null;
 
         bool m_reachedGround = true;
+        float m_downTime = float.MinValue;
 
         internal RagdollController()
         {
@@ -96,6 +96,16 @@ namespace ml_prm
             if(m_enabled && m_avatarReady && BodySystem.isCalibratedAsFullBody)
                 BodySystem.TrackingPositionWeight = 0f;
 
+            if(m_avatarReady && m_enabled && Settings.AutoRecover)
+            {
+                m_downTime += Time.deltaTime;
+                if(m_downTime >= Settings.RecoverDelay)
+                {
+                    SwitchRagdoll();
+                    m_downTime = float.MinValue; // One attepmt to recover
+                }
+            }
+
             if(Settings.Hotkey && Input.GetKeyDown(KeyCode.R) && !ViewManager.Instance.isGameMenuOpen())
                 SwitchRagdoll();
 
@@ -121,12 +131,6 @@ namespace ml_prm
         // Game events
         internal void OnAvatarClear()
         {
-            if(m_recoverTask != null)
-            {
-                StopCoroutine(m_recoverTask);
-                m_recoverTask = null;
-            }
-
             if(m_enabled)
                 MovementSystem.Instance.SetImmobilized(false);
 
@@ -144,6 +148,7 @@ namespace ml_prm
             m_puppetReferences = new BipedRagdollReferences();
             m_boneLinks.Clear();
             m_reachedGround = true;
+            m_downTime = float.MinValue;
         }
 
         internal void OnAvatarSetup()
@@ -372,8 +377,7 @@ namespace ml_prm
                         foreach(Collider l_collider in m_colliders)
                             l_collider.enabled = true;
 
-                        if(Settings.AutoRecover)
-                            m_recoverTask = StartCoroutine(AutoRecover());
+                        m_downTime = 0f;
 
                         m_enabled = true;
                     }
@@ -382,12 +386,6 @@ namespace ml_prm
                 {
                     if(IsSafeToUnragdoll())
                     {
-                        if(m_recoverTask != null)
-                        {
-                            StopCoroutine(m_recoverTask);
-                            m_recoverTask = null;
-                        }
-
                         MovementSystem.Instance.SetImmobilized(false);
                         m_ragdolledParameter.SetValue(false);
                         if(BodySystem.isCalibratedAsFullBody)
@@ -418,6 +416,7 @@ namespace ml_prm
 
                         m_lastPosition = PlayerSetup.Instance.transform.position;
                         m_velocity = Vector3.zero;
+                        m_downTime = float.MinValue;
 
                         m_enabled = false;
                     }
@@ -426,13 +425,6 @@ namespace ml_prm
         }
 
         public bool IsRagdolled() => (m_enabled && m_avatarReady);
-
-        IEnumerator AutoRecover()
-        {
-            yield return new WaitForSeconds(Settings.RecoverDelay);
-            m_recoverTask = null;
-            SwitchRagdoll();
-        }
 
         static Transform CloneTransform(Transform p_source, Transform p_parent, string p_name)
         {
