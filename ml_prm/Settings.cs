@@ -16,6 +16,7 @@ namespace ml_prm
             AngularDrag,
             Gravity,
             PointersReaction,
+            IgnoreLocal,
             CombatReaction,
             AutoRecover,
             RecoverDelay
@@ -27,6 +28,7 @@ namespace ml_prm
             RestorePosition,
             Gravity,
             PointersReaction,
+            IgnoreLocal,
             CombatReaction,
             AutoRecover,
             VelocityMultiplier,
@@ -42,6 +44,7 @@ namespace ml_prm
         public static float AngularDrag { get; private set; } = 2f;
         public static bool Gravity { get; private set; } = true;
         public static bool PointersReaction { get; private set; } = true;
+        public static bool IgnoreLocal { get; private set; } = true;
         public static bool CombatReaction { get; private set; } = true;
         public static bool AutoRecover { get; private set; } = false;
         public static float RecoverDelay { get; private set; } = 3f;
@@ -54,6 +57,7 @@ namespace ml_prm
         static public event Action<float> AngularDragChange;
         static public event Action<bool> GravityChange;
         static public event Action<bool> PointersReactionChange;
+        static public event Action<bool> IgnoreLocalChange;
         static public event Action<bool> CombatReactionChange;
         static public event Action<bool> AutoRecoverChange;
         static public event Action<float> RecoverDelayChange;
@@ -65,7 +69,7 @@ namespace ml_prm
 
         internal static void Init()
         {
-            ms_category = MelonLoader.MelonPreferences.CreateCategory("PRM");
+            ms_category = MelonLoader.MelonPreferences.CreateCategory("PRM", null, true);
             ms_entries = new List<MelonLoader.MelonPreferences_Entry>()
             {
                 ms_category.CreateEntry(ModSetting.Hotkey.ToString(), Hotkey),
@@ -75,6 +79,7 @@ namespace ml_prm
                 ms_category.CreateEntry(ModSetting.AngularDrag.ToString(), AngularDrag),
                 ms_category.CreateEntry(ModSetting.Gravity.ToString(), Gravity),
                 ms_category.CreateEntry(ModSetting.PointersReaction.ToString(), PointersReaction),
+                ms_category.CreateEntry(ModSetting.IgnoreLocal.ToString(), IgnoreLocal),
                 ms_category.CreateEntry(ModSetting.CombatReaction.ToString(), CombatReaction),
                 ms_category.CreateEntry(ModSetting.AutoRecover.ToString(), AutoRecover),
                 ms_category.CreateEntry(ModSetting.RecoverDelay.ToString(), RecoverDelay)
@@ -87,6 +92,7 @@ namespace ml_prm
             AngularDrag = Mathf.Clamp((float)ms_entries[(int)ModSetting.MovementDrag].BoxedValue, 0f, 50f);
             Gravity = (bool)ms_entries[(int)ModSetting.Gravity].BoxedValue;
             PointersReaction = (bool)ms_entries[(int)ModSetting.PointersReaction].BoxedValue;
+            IgnoreLocal = (bool)ms_entries[(int)ModSetting.IgnoreLocal].BoxedValue;
             CombatReaction = (bool)ms_entries[(int)ModSetting.CombatReaction].BoxedValue;
             AutoRecover = (bool)ms_entries[(int)ModSetting.AutoRecover].BoxedValue;
             RecoverDelay = Mathf.Clamp((float)ms_entries[(int)ModSetting.RecoverDelay].BoxedValue, 1f, 10f);
@@ -139,6 +145,14 @@ namespace ml_prm
                 PointersReaction = state;
                 ms_entries[(int)ModSetting.PointersReaction].BoxedValue = state;
                 PointersReactionChange?.Invoke(state);
+            };
+
+            ms_uiElements.Add(l_categoryMod.AddToggle("Ignore local pointers", "Ignore local avatar's CVRPointer components of 'ragdoll' type", IgnoreLocal));
+            (ms_uiElements[(int)UiElementIndex.IgnoreLocal] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) =>
+            {
+                IgnoreLocal = state;
+                ms_entries[(int)ModSetting.IgnoreLocal].BoxedValue = state;
+                IgnoreLocalChange?.Invoke(state);
             };
 
             ms_uiElements.Add(l_categoryMod.AddToggle("Combat reaction", "Ragdoll upon combat system death", CombatReaction));
@@ -210,6 +224,11 @@ namespace ml_prm
                 ms_entries[(int)ModSetting.PointersReaction].BoxedValue = true;
                 (ms_uiElements[(int)UiElementIndex.PointersReaction] as BTKUILib.UIObjects.Components.ToggleButton).ToggleValue = true;
                 PointersReactionChange?.Invoke(true);
+
+                IgnoreLocal = true;
+                ms_entries[(int)ModSetting.IgnoreLocal].BoxedValue = true;
+                (ms_uiElements[(int)UiElementIndex.IgnoreLocal] as BTKUILib.UIObjects.Components.ToggleButton).ToggleValue = true;
+                IgnoreLocalChange?.Invoke(true);
 
                 CombatReaction = true;
                 ms_entries[(int)ModSetting.CombatReaction].BoxedValue = true;

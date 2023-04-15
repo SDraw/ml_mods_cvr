@@ -1,4 +1,5 @@
 ﻿using ABI.CCK.Components;
+using ABI_RC.Core.Player;
 using UnityEngine;
 
 namespace ml_prm
@@ -32,7 +33,7 @@ namespace ml_prm
         void OnTriggerEnter(Collider p_other)
         {
             CVRPointer l_pointer = p_other.GetComponent<CVRPointer>();
-            if((l_pointer != null) && (l_pointer.type == "ragdoll") && (m_lastTrigger != p_other))
+            if((l_pointer != null) && (l_pointer.type == "ragdoll") && !IsIgnored(l_pointer.transform) && (m_lastTrigger != p_other))
             {
                 m_lastTrigger = p_other;
                 m_triggered = true;
@@ -50,6 +51,11 @@ namespace ml_prm
             bool l_state = m_triggered;
             m_triggered = false;
             return l_state;
+        }
+
+        static bool IsIgnored(Transform p_transform)
+        {
+            return (Settings.IgnoreLocal && (p_transform.root == PlayerSetup.Instance.transform));
         }
     }
 }
