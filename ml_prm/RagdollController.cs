@@ -5,7 +5,6 @@ using ABI_RC.Systems.IK.SubSystems;
 using ABI_RC.Systems.MovementSystem;
 using RootMotion.Dynamics;
 using RootMotion.FinalIK;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -35,6 +34,7 @@ namespace ml_prm
         RagdollToggle m_avatarRagdollToggle = null;
         RagdollTrigger m_customTrigger = null;
         AvatarBoolParameter m_ragdolledParameter = null;
+        readonly PhysicMaterial m_physicsMaterial = null;
 
         bool m_reachedGround = true;
         float m_downTime = float.MinValue;
@@ -47,6 +47,13 @@ namespace ml_prm
             m_rigidBodies = new List<Rigidbody>();
             m_colliders = new List<Collider>();
             m_boneLinks = new List<System.Tuple<Transform, Transform>>();
+
+            m_physicsMaterial = new PhysicMaterial("Ragdoll");
+            m_physicsMaterial.dynamicFriction = 0.5f;
+            m_physicsMaterial.staticFriction = 0.5f;
+            m_physicsMaterial.frictionCombine = PhysicMaterialCombine.Average;
+            m_physicsMaterial.bounciness = 0f;
+            m_physicsMaterial.bounceCombine = PhysicMaterialCombine.Average;
         }
         ~RagdollController()
         {
@@ -68,6 +75,8 @@ namespace ml_prm
             Settings.MovementDragChange += this.OnMovementDragChange;
             Settings.AngularDragChange += this.OnAngularDragChange;
             Settings.GravityChange += this.OnGravityChange;
+            Settings.SlipperinessChange += this.OnPhysicsMaterialChange;
+            Settings.BouncinessChange += this.OnPhysicsMaterialChange;
         }
 
         void OnDestroy()
@@ -82,6 +91,8 @@ namespace ml_prm
             Settings.MovementDragChange -= this.OnMovementDragChange;
             Settings.AngularDragChange -= this.OnAngularDragChange;
             Settings.GravityChange -= this.OnGravityChange;
+            Settings.SlipperinessChange -= this.OnPhysicsMaterialChange;
+            Settings.BouncinessChange -= this.OnPhysicsMaterialChange;
         }
 
         void Update()
@@ -230,6 +241,8 @@ namespace ml_prm
                             Physics.IgnoreCollision(l_collider, MovementSystem.Instance.controller, true);
                             Physics.IgnoreCollision(l_collider, MovementSystem.Instance.forceCollider, true);
                             l_collider.enabled = false;
+                            l_collider.sharedMaterial = m_physicsMaterial;
+                            l_collider.material = m_physicsMaterial;
                             m_colliders.Add(l_collider);
                         }
 
@@ -274,6 +287,8 @@ namespace ml_prm
                 foreach(Rigidbody l_body in m_rigidBodies)
                     l_body.useGravity = (!Utils.IsWorldSafe() || Settings.Gravity);
             }
+
+            OnPhysicsMaterialChange(true);
         }
 
         internal void OnCombatDown()
@@ -328,6 +343,19 @@ namespace ml_prm
             {
                 foreach(Rigidbody l_body in m_rigidBodies)
                     l_body.useGravity = (!Utils.IsWorldSafe() || p_state);
+            }
+        }
+        void OnPhysicsMaterialChange(bool p_state)
+        {
+            if(m_physicsMaterial != null)
+            {
+                bool l_slipperiness = (Settings.Slipperiness && Utils.IsWorldSafe());
+                bool l_bounciness = (Settings.Bounciness && Utils.IsWorldSafe());
+                m_physicsMaterial.dynamicFriction = (l_slipperiness ? 0f : 0.5f);
+                m_physicsMaterial.staticFriction = (l_slipperiness ? 0f : 0.5f);
+                m_physicsMaterial.frictionCombine = (l_slipperiness ? PhysicMaterialCombine.Minimum : PhysicMaterialCombine.Average);
+                m_physicsMaterial.bounciness = (l_bounciness ? 1f : 0f);
+                m_physicsMaterial.bounceCombine = (l_bounciness ? PhysicMaterialCombine.Maximum : PhysicMaterialCombine.Average);
             }
         }
 

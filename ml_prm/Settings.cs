@@ -19,7 +19,9 @@ namespace ml_prm
             IgnoreLocal,
             CombatReaction,
             AutoRecover,
-            RecoverDelay
+            RecoverDelay,
+            Slipperiness,
+            Bounciness
         }
 
         enum UiElementIndex
@@ -31,6 +33,8 @@ namespace ml_prm
             IgnoreLocal,
             CombatReaction,
             AutoRecover,
+            Slipperiness,
+            Bounciness,
             VelocityMultiplier,
             MovementDrag,
             AngularDrag,
@@ -48,6 +52,8 @@ namespace ml_prm
         public static bool CombatReaction { get; private set; } = true;
         public static bool AutoRecover { get; private set; } = false;
         public static float RecoverDelay { get; private set; } = 3f;
+        public static bool Slipperiness { get; private set; } = false;
+        public static bool Bounciness { get; private set; } = false;
 
         static public event Action SwitchChange;
         static public event Action<bool> HotkeyChange;
@@ -61,6 +67,8 @@ namespace ml_prm
         static public event Action<bool> CombatReactionChange;
         static public event Action<bool> AutoRecoverChange;
         static public event Action<float> RecoverDelayChange;
+        static public event Action<bool> SlipperinessChange;
+        static public event Action<bool> BouncinessChange;
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
@@ -82,7 +90,9 @@ namespace ml_prm
                 ms_category.CreateEntry(ModSetting.IgnoreLocal.ToString(), IgnoreLocal),
                 ms_category.CreateEntry(ModSetting.CombatReaction.ToString(), CombatReaction),
                 ms_category.CreateEntry(ModSetting.AutoRecover.ToString(), AutoRecover),
-                ms_category.CreateEntry(ModSetting.RecoverDelay.ToString(), RecoverDelay)
+                ms_category.CreateEntry(ModSetting.RecoverDelay.ToString(), RecoverDelay),
+                ms_category.CreateEntry(ModSetting.Slipperiness.ToString(), Slipperiness),
+                ms_category.CreateEntry(ModSetting.Bounciness.ToString(), Bounciness)
             };
 
             Hotkey = (bool)ms_entries[(int)ModSetting.Hotkey].BoxedValue;
@@ -96,6 +106,8 @@ namespace ml_prm
             CombatReaction = (bool)ms_entries[(int)ModSetting.CombatReaction].BoxedValue;
             AutoRecover = (bool)ms_entries[(int)ModSetting.AutoRecover].BoxedValue;
             RecoverDelay = Mathf.Clamp((float)ms_entries[(int)ModSetting.RecoverDelay].BoxedValue, 1f, 10f);
+            Slipperiness = (bool)ms_entries[(int)ModSetting.Slipperiness].BoxedValue;
+            Bounciness = (bool)ms_entries[(int)ModSetting.Bounciness].BoxedValue;
 
             if(MelonLoader.MelonMod.RegisteredMelons.FirstOrDefault(m => m.Info.Name == "BTKUILib") != null)
             {
@@ -171,6 +183,22 @@ namespace ml_prm
                 AutoRecoverChange?.Invoke(state);
             };
 
+            ms_uiElements.Add(l_categoryMod.AddToggle("Slipperiness", "Enables/disables friction of ragdoll", Slipperiness));
+            (ms_uiElements[(int)UiElementIndex.Slipperiness] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) =>
+            {
+                Slipperiness = state;
+                ms_entries[(int)ModSetting.Slipperiness].BoxedValue = state;
+                SlipperinessChange?.Invoke(state);
+            };
+
+            ms_uiElements.Add(l_categoryMod.AddToggle("Bounciness", "Enables/disables bounciness of ragdoll", Bounciness));
+            (ms_uiElements[(int)UiElementIndex.Bounciness] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) =>
+            {
+                Bounciness = state;
+                ms_entries[(int)ModSetting.Bounciness].BoxedValue = state;
+                BouncinessChange?.Invoke(state);
+            };
+
             ms_uiElements.Add(l_page.AddSlider("Velocity multiplier", "Velocity multiplier upon entering ragdoll state", VelocityMultiplier, 1f, 50f));
             (ms_uiElements[(int)UiElementIndex.VelocityMultiplier] as BTKUILib.UIObjects.Components.SliderFloat).OnValueUpdated += (value) =>
             {
@@ -239,6 +267,16 @@ namespace ml_prm
                 ms_entries[(int)ModSetting.AutoRecover].BoxedValue = false;
                 (ms_uiElements[(int)UiElementIndex.AutoRecover] as BTKUILib.UIObjects.Components.ToggleButton).ToggleValue = false;
                 AutoRecoverChange?.Invoke(false);
+
+                Slipperiness = false;
+                ms_entries[(int)ModSetting.Slipperiness].BoxedValue = false;
+                (ms_uiElements[(int)UiElementIndex.Slipperiness] as BTKUILib.UIObjects.Components.ToggleButton).ToggleValue = false;
+                SlipperinessChange?.Invoke(false);
+
+                Bounciness = false;
+                ms_entries[(int)ModSetting.Bounciness].BoxedValue = false;
+                (ms_uiElements[(int)UiElementIndex.Bounciness] as BTKUILib.UIObjects.Components.ToggleButton).ToggleValue = false;
+                BouncinessChange?.Invoke(false);
 
                 VelocityMultiplier = 2f;
                 ms_entries[(int)ModSetting.VelocityMultiplier].BoxedValue = 2f;

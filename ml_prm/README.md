@@ -19,6 +19,10 @@ Optional mod's settings with [BTKUILib](https://github.com/BTK-Development/BTKUI
 * **Ignore local pointers:** enables/disables ignoring of CVRPointer components of `ragdoll` type on local player's avatar; `true` by default.
 * **Combat reaction:** enables ragdoll state upon death in worlds with combat system; `true` by default.
 * **Auto recover:** enables automatic recovering after specific time delay; `false` by default.
+* **Slipperiness:** enables/disable low friction of ragdoll; `false` by default.
+  * Note: Forcibly disabled in worlds that don't allow flight.
+* **Bounciness:** enables/disable bounce force of ragdoll; `false` by default.
+  * Note: Forcibly disabled in worlds that don't allow flight.
 * **Velocity multiplier:** velocity force multiplier based on player's movement direction; `2.0` by default.
   * Note: Limited according to world's fly multiplier.
   * Note: Forcibly set to `1.0` in worlds that don't allow flight.
