@@ -60,7 +60,7 @@ namespace ml_amt
 
         internal static void Init()
         {
-            ms_category = MelonLoader.MelonPreferences.CreateCategory("AMT");
+            ms_category = MelonLoader.MelonPreferences.CreateCategory("AMT", null, true);
 
             ms_entries = new List<MelonLoader.MelonPreferences_Entry>()
             {

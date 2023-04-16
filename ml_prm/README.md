@@ -53,7 +53,6 @@ Available methods:
 * ```void SwitchRagdoll()```
 
 # Notes
-* Slightly incompatible with `Follow hips on IK override` option in AvatarMotionTweaker.
 * Not suggested to activate fly mode with enabled ragdoll state.
 * If ragdoll state is enabled during emote, remote players see whole emote playing while local player sees ragdolling. It's tied to how game handles remote players, currently can be prevented with (choose one):
   * Renaming avatar emote animations to not have default name or containing `Emote` substring.

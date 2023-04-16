@@ -39,7 +39,7 @@ namespace ml_dht
 
         internal static void Init()
         {
-            ms_category = MelonLoader.MelonPreferences.CreateCategory("DHT");
+            ms_category = MelonLoader.MelonPreferences.CreateCategory("DHT", null, true);
 
             ms_entries = new List<MelonLoader.MelonPreferences_Entry>()
             {

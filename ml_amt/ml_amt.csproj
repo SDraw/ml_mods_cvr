@@ -54,6 +54,10 @@
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
     </Reference>
+    <Reference Include="ml_prm">
+      <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\Mods\ml_prm.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -77,6 +81,7 @@
   <ItemGroup>
     <Compile Include="AnimatorAnalyzer.cs" />
     <Compile Include="AvatarParameter.cs" />
+    <Compile Include="ModSupporter.cs" />
     <Compile Include="MotionTweaker.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

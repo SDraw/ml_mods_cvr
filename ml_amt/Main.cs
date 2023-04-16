@@ -87,6 +87,7 @@ namespace ml_amt
                 new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnOverride_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
 
+            ModSupporter.Init();
             MelonLoader.MelonCoroutines.Start(WaitForLocalPlayer());
         }
 

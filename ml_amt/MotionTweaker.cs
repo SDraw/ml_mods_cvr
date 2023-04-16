@@ -331,7 +331,7 @@ namespace ml_amt
             }
 
             bool l_solverActive = !Mathf.Approximately(m_vrIk.solver.IKPositionWeight, 0f);
-            if(l_locomotionOverride && l_solverActive && m_followHips && (!m_moving || (m_poseState == PoseState.Proning)) && m_inVR && !BodySystem.isCalibratedAsFullBody)
+            if(l_locomotionOverride && l_solverActive && m_followHips && (!m_moving || (m_poseState == PoseState.Proning)) && m_inVR && !BodySystem.isCalibratedAsFullBody && !ModSupporter.SkipHipsOverride())
             {
                 m_vrIk.solver.plantFeet = false;
                 IKSystem.VrikRootController.enabled = false;

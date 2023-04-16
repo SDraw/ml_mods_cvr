@@ -68,7 +68,7 @@ namespace ml_lme
 
         internal static void Init()
         {
-            ms_category = MelonLoader.MelonPreferences.CreateCategory("LME");
+            ms_category = MelonLoader.MelonPreferences.CreateCategory("LME", null, true);
 
             ms_entries = new List<MelonLoader.MelonPreferences_Entry>()
             {
