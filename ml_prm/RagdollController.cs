@@ -1,7 +1,7 @@
 ﻿using ABI.CCK.Components;
 using ABI_RC.Core.InteractionSystem;
 using ABI_RC.Core.Player;
-using ABI_RC.Core.Player.AvatarTracking.Local;
+using ABI_RC.Core.Savior;
 using ABI_RC.Systems.IK.SubSystems;
 using ABI_RC.Systems.MovementSystem;
 using RootMotion.Dynamics;
@@ -18,7 +18,6 @@ namespace ml_prm
 
         VRIK m_vrIK = null;
         float m_vrIkWeight = 1f;
-        LocalHeadPoint m_headPoint = null;
         bool m_inVr = false;
 
         bool m_enabled = false;
@@ -33,6 +32,7 @@ namespace ml_prm
         bool m_avatarReady = false;
         Vector3 m_lastPosition = Vector3.zero;
         Vector3 m_velocity = Vector3.zero;
+        Vector3 m_ragdollLastPos = Vector3.zero;
 
         RagdollToggle m_avatarRagdollToggle = null;
         RagdollTrigger m_customTrigger = null;
@@ -68,7 +68,6 @@ namespace ml_prm
         void Start()
         {
             m_inVr = Utils.IsInVR();
-            m_headPoint = this.GetComponent<LocalHeadPoint>();
 
             m_puppetRoot = new GameObject("[PlayerAvatarPuppet]").transform;
             m_puppetRoot.parent = PlayerSetup.Instance.transform;
@@ -103,9 +102,20 @@ namespace ml_prm
 
         void Update()
         {
-            Vector3 l_pos = PlayerSetup.Instance.transform.position;
-            m_velocity = (m_velocity + (l_pos - m_lastPosition) / Time.deltaTime) * 0.5f;
-            m_lastPosition = l_pos;
+            if(m_enabled && m_avatarReady)
+            {
+                Vector3 l_dif = m_puppetReferences.hips.position - m_ragdollLastPos;
+                PlayerSetup.Instance.transform.position += l_dif;
+                m_puppetReferences.hips.position -= l_dif;
+                m_ragdollLastPos = m_puppetReferences.hips.position;
+            }
+
+            if(!m_enabled && m_avatarReady)
+            {
+                Vector3 l_pos = PlayerSetup.Instance.transform.position;
+                m_velocity = (m_velocity + (l_pos - m_lastPosition) / Time.deltaTime) * 0.5f;
+                m_lastPosition = l_pos;
+            }
 
             if(m_avatarReady && !m_reachedGround && MovementSystem.Instance.IsGrounded())
                 m_reachedGround = true;
@@ -142,12 +152,6 @@ namespace ml_prm
 
                 foreach(var l_link in m_boneLinks)
                     l_link.Item1.CopyGlobal(l_link.Item2);
-
-                if(m_inVr && Settings.VrFollow)
-                {
-                    Transform l_camera = PlayerSetup.Instance.GetActiveCamera().transform;
-                    l_camera.position = m_headPoint.GetPointPosition();
-                }
             }
         }
 
@@ -382,7 +386,16 @@ namespace ml_prm
                         {
                             Vector3 l_pos = PlayerSetup.Instance.transform.position;
                             Quaternion l_rot = PlayerSetup.Instance.transform.rotation;
-                            MovementSystem.Instance.lastSeat.ExitSeat();
+
+                            if(MetaPort.Instance.isUsingVr)
+                            {
+                                MetaPort.Instance.isUsingVr = false;
+                                MovementSystem.Instance.lastSeat.ExitSeat();
+                                MetaPort.Instance.isUsingVr = true;
+                            }
+                            else
+                                MovementSystem.Instance.lastSeat.ExitSeat();
+
                             PlayerSetup.Instance.transform.position = l_pos;
                             PlayerSetup.Instance.transform.rotation = Quaternion.Euler(0f, l_rot.eulerAngles.y, 0f);
                         }
@@ -419,6 +432,7 @@ namespace ml_prm
                         foreach(Collider l_collider in m_colliders)
                             l_collider.enabled = true;
 
+                        m_ragdollLastPos = m_puppetReferences.hips.position;
                         m_downTime = 0f;
 
                         m_enabled = true;
@@ -436,22 +450,8 @@ namespace ml_prm
                         foreach(Rigidbody l_body in m_rigidBodies)
                             l_body.isKinematic = true;
 
-                        if(m_puppetReferences.hips != null)
-                        {
-                            Vector3 l_hipsPos = m_puppetReferences.hips.position;
-
-                            if(!Settings.RestorePosition)
-                            {
-                                if(m_inVr)
-                                {
-                                    Vector3 l_diff = l_hipsPos - PlayerSetup.Instance._avatar.transform.position;
-                                    Vector3 l_playerPos = PlayerSetup.Instance.transform.position;
-                                    PlayerSetup.Instance.transform.position = l_playerPos + l_diff;
-                                }
-                                else
-                                    PlayerSetup.Instance.transform.position = l_hipsPos;
-                            }
-                        }
+                        PlayerSetup.Instance.transform.position = m_puppetReferences.hips.position;
+                        PlayerSetup.Instance.transform.position -= (PlayerSetup.Instance.transform.rotation * PlayerSetup.Instance._avatar.transform.localPosition);
 
                         foreach(Collider l_collider in m_colliders)
                             l_collider.enabled = false;

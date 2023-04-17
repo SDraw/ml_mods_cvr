@@ -11,7 +11,6 @@ namespace ml_prm
         {
             Hotkey = 0,
             VelocityMultiplier,
-            RestorePosition,
             MovementDrag,
             AngularDrag,
             Gravity,
@@ -22,14 +21,12 @@ namespace ml_prm
             RecoverDelay,
             Slipperiness,
             Bounciness,
-            ViewVelocity,
-            VrFollow,
+            ViewVelocity
         }
 
         enum UiElementIndex
         {
             Hotkey = 0,
-            RestorePosition,
             Gravity,
             PointersReaction,
             IgnoreLocal,
@@ -38,7 +35,6 @@ namespace ml_prm
             Slipperiness,
             Bounciness,
             ViewVelocity,
-            VrFollow,
             VelocityMultiplier,
             MovementDrag,
             AngularDrag,
@@ -49,7 +45,6 @@ namespace ml_prm
 
         public static bool Hotkey { get; private set; } = true;
         public static float VelocityMultiplier { get; private set; } = 2f;
-        public static bool RestorePosition { get; private set; } = false;
         public static float MovementDrag { get; private set; } = 2f;
         public static float AngularDrag { get; private set; } = 2f;
         public static bool Gravity { get; private set; } = true;
@@ -61,11 +56,9 @@ namespace ml_prm
         public static bool Slipperiness { get; private set; } = false;
         public static bool Bounciness { get; private set; } = false;
         public static bool ViewVelocity { get; private set; } = false;
-        public static bool VrFollow { get; private set; } = true;
 
         static public event Action SwitchChange;
         static public event Action<bool> HotkeyChange;
-        static public event Action<bool> RestorePositionChange;
         static public event Action<float> VelocityMultiplierChange;
         static public event Action<float> MovementDragChange;
         static public event Action<float> AngularDragChange;
@@ -78,7 +71,6 @@ namespace ml_prm
         static public event Action<bool> SlipperinessChange;
         static public event Action<bool> BouncinessChange;
         static public event Action<bool> ViewVelocityChange;
-        static public event Action<bool> VrFollowChange;
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
@@ -92,7 +84,6 @@ namespace ml_prm
             {
                 ms_category.CreateEntry(ModSetting.Hotkey.ToString(), Hotkey),
                 ms_category.CreateEntry(ModSetting.VelocityMultiplier.ToString(), VelocityMultiplier),
-                ms_category.CreateEntry(ModSetting.RestorePosition.ToString(), RestorePosition),
                 ms_category.CreateEntry(ModSetting.MovementDrag.ToString(), MovementDrag),
                 ms_category.CreateEntry(ModSetting.AngularDrag.ToString(), AngularDrag),
                 ms_category.CreateEntry(ModSetting.Gravity.ToString(), Gravity),
@@ -103,13 +94,11 @@ namespace ml_prm
                 ms_category.CreateEntry(ModSetting.RecoverDelay.ToString(), RecoverDelay),
                 ms_category.CreateEntry(ModSetting.Slipperiness.ToString(), Slipperiness),
                 ms_category.CreateEntry(ModSetting.Bounciness.ToString(), Bounciness),
-                ms_category.CreateEntry(ModSetting.ViewVelocity.ToString(), ViewVelocity),
-                ms_category.CreateEntry(ModSetting.VrFollow.ToString(), VrFollow)
+                ms_category.CreateEntry(ModSetting.ViewVelocity.ToString(), ViewVelocity)
             };
 
             Hotkey = (bool)ms_entries[(int)ModSetting.Hotkey].BoxedValue;
             VelocityMultiplier = Mathf.Clamp((float)ms_entries[(int)ModSetting.VelocityMultiplier].BoxedValue, 1f, 50f);
-            RestorePosition = (bool)ms_entries[(int)ModSetting.RestorePosition].BoxedValue;
             MovementDrag = Mathf.Clamp((float)ms_entries[(int)ModSetting.MovementDrag].BoxedValue, 0f, 50f);
             AngularDrag = Mathf.Clamp((float)ms_entries[(int)ModSetting.MovementDrag].BoxedValue, 0f, 50f);
             Gravity = (bool)ms_entries[(int)ModSetting.Gravity].BoxedValue;
@@ -121,7 +110,6 @@ namespace ml_prm
             Slipperiness = (bool)ms_entries[(int)ModSetting.Slipperiness].BoxedValue;
             Bounciness = (bool)ms_entries[(int)ModSetting.Bounciness].BoxedValue;
             ViewVelocity = (bool)ms_entries[(int)ModSetting.ViewVelocity].BoxedValue;
-            VrFollow = (bool)ms_entries[(int)ModSetting.VrFollow].BoxedValue;
 
             if(MelonLoader.MelonMod.RegisteredMelons.FirstOrDefault(m => m.Info.Name == "BTKUILib") != null)
             {
@@ -140,9 +128,6 @@ namespace ml_prm
 
             ms_uiElements.Add(l_categoryMod.AddToggle("Use hotkey", "Switch ragdoll mode with 'R' key", Hotkey));
             (ms_uiElements[(int)UiElementIndex.Hotkey] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate(ModSetting.Hotkey, state);
-
-            ms_uiElements.Add(l_categoryMod.AddToggle("Restore position", "Bring avatar back where ragdoll state was activated", RestorePosition));
-            (ms_uiElements[(int)UiElementIndex.RestorePosition] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate(ModSetting.RestorePosition, state);
 
             ms_uiElements.Add(l_categoryMod.AddToggle("Use gravity", "Apply gravity to ragdoll", Gravity));
             (ms_uiElements[(int)UiElementIndex.Gravity] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate(ModSetting.Gravity, state);
@@ -168,9 +153,6 @@ namespace ml_prm
             ms_uiElements.Add(l_categoryMod.AddToggle("View direction velocity", "Apply velocity to camera view direction", ViewVelocity));
             (ms_uiElements[(int)UiElementIndex.ViewVelocity] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate(ModSetting.ViewVelocity, state);
 
-            ms_uiElements.Add(l_categoryMod.AddToggle("VR camera follow", "Forces VR camera to follow ragdoll", VrFollow));
-            (ms_uiElements[(int)UiElementIndex.VrFollow] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate( ModSetting.VrFollow, state);
-
             ms_uiElements.Add(l_page.AddSlider("Velocity multiplier", "Velocity multiplier upon entering ragdoll state", VelocityMultiplier, 1f, 50f));
             (ms_uiElements[(int)UiElementIndex.VelocityMultiplier] as BTKUILib.UIObjects.Components.SliderFloat).OnValueUpdated += (value) => OnSliderUpdate(ModSetting.VelocityMultiplier, value);
 
@@ -194,13 +176,6 @@ namespace ml_prm
                 {
                     Hotkey = p_state;
                     HotkeyChange?.Invoke(p_state);
-                }
-                break;
-
-                case ModSetting.RestorePosition:
-                {
-                    RestorePosition = p_state;
-                    RestorePositionChange?.Invoke(p_state);
                 }
                 break;
 
@@ -252,12 +227,6 @@ namespace ml_prm
                     ViewVelocity = p_state;
                     ViewVelocityChange?.Invoke(p_state);
                 } break;
-
-                case ModSetting.VrFollow:
-                {
-                    VrFollow = p_state;
-                    VrFollowChange?.Invoke(p_state);
-                } break;
             }
 
             ms_entries[(int)p_setting].BoxedValue = p_state;
@@ -302,7 +271,6 @@ namespace ml_prm
         static void Reset()
         {
             OnToggleUpdate(ModSetting.Hotkey, true, UiElementIndex.Hotkey);
-            OnToggleUpdate(ModSetting.RestorePosition, false, UiElementIndex.RestorePosition);
             OnToggleUpdate(ModSetting.Gravity, true, UiElementIndex.Gravity);
             OnToggleUpdate(ModSetting.PointersReaction, true, UiElementIndex.PointersReaction);
             OnToggleUpdate(ModSetting.IgnoreLocal, true, UiElementIndex.IgnoreLocal);
@@ -311,7 +279,6 @@ namespace ml_prm
             OnToggleUpdate(ModSetting.Slipperiness, false, UiElementIndex.Slipperiness);
             OnToggleUpdate(ModSetting.Bounciness, false, UiElementIndex.Bounciness);
             OnToggleUpdate(ModSetting.ViewVelocity, false, UiElementIndex.ViewVelocity);
-            OnToggleUpdate(ModSetting.VrFollow, true, UiElementIndex.VrFollow);
             OnSliderUpdate(ModSetting.VelocityMultiplier, 2f, UiElementIndex.VelocityMultiplier);
             OnSliderUpdate(ModSetting.MovementDrag, 2f, UiElementIndex.MovementDrag);
             OnSliderUpdate(ModSetting.AngularDrag, 2f, UiElementIndex.AngularDrag);
