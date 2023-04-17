@@ -12,11 +12,16 @@ namespace ml_prm
 
         public static bool IsInVR() => ((CheckVR.Instance != null) && CheckVR.Instance.hasVrDeviceLoaded);
         public static bool IsWorldSafe() => ((CVRWorld.Instance != null) && CVRWorld.Instance.allowFlying);
-        public static float GetWorldFlyMultiplier()
+        public static float GetWorldMovementLimit()
         {
             float l_result = 1f;
             if(CVRWorld.Instance != null)
-                l_result = CVRWorld.Instance.flyMultiplier;
+            {
+                l_result = CVRWorld.Instance.baseMovementSpeed;
+                l_result *= CVRWorld.Instance.sprintMultiplier;
+                l_result *= CVRWorld.Instance.inAirMovementMultiplier;
+                l_result *= CVRWorld.Instance.flyMultiplier;
+            }
             return l_result;
         }
 

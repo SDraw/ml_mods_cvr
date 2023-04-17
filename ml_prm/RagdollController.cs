@@ -1,6 +1,7 @@
 ﻿using ABI.CCK.Components;
 using ABI_RC.Core.InteractionSystem;
 using ABI_RC.Core.Player;
+using ABI_RC.Core.Player.AvatarTracking.Local;
 using ABI_RC.Systems.IK.SubSystems;
 using ABI_RC.Systems.MovementSystem;
 using RootMotion.Dynamics;
@@ -17,6 +18,8 @@ namespace ml_prm
 
         VRIK m_vrIK = null;
         float m_vrIkWeight = 1f;
+        LocalHeadPoint m_headPoint = null;
+        bool m_inVr = false;
 
         bool m_enabled = false;
 
@@ -64,6 +67,9 @@ namespace ml_prm
         // Unity events
         void Start()
         {
+            m_inVr = Utils.IsInVR();
+            m_headPoint = this.GetComponent<LocalHeadPoint>();
+
             m_puppetRoot = new GameObject("[PlayerAvatarPuppet]").transform;
             m_puppetRoot.parent = PlayerSetup.Instance.transform;
             m_puppetRoot.localPosition = Vector3.zero;
@@ -136,6 +142,12 @@ namespace ml_prm
 
                 foreach(var l_link in m_boneLinks)
                     l_link.Item1.CopyGlobal(l_link.Item2);
+
+                if(m_inVr && Settings.VrFollow)
+                {
+                    Transform l_camera = PlayerSetup.Instance.GetActiveCamera().transform;
+                    l_camera.position = m_headPoint.GetPointPosition();
+                }
             }
         }
 
@@ -164,6 +176,8 @@ namespace ml_prm
 
         internal void OnAvatarSetup()
         {
+            m_inVr = Utils.IsInVR();
+
             if(PlayerSetup.Instance._animator.isHuman)
             {
                 BipedRagdollReferences l_avatarReferences = BipedRagdollReferences.FromAvatar(PlayerSetup.Instance._animator);
@@ -282,12 +296,7 @@ namespace ml_prm
             if(m_enabled && m_avatarReady)
                 SwitchRagdoll();
 
-            if(m_avatarReady)
-            {
-                foreach(Rigidbody l_body in m_rigidBodies)
-                    l_body.useGravity = (!Utils.IsWorldSafe() || Settings.Gravity);
-            }
-
+            OnGravityChange(Settings.Gravity);
             OnPhysicsMaterialChange(true);
         }
 
@@ -394,7 +403,12 @@ namespace ml_prm
                         foreach(Rigidbody l_body in m_rigidBodies)
                             l_body.isKinematic = false;
 
-                        Vector3 l_velocity = m_velocity * Mathf.Clamp(Settings.VelocityMultiplier, 1f, (Utils.IsWorldSafe() ? Utils.GetWorldFlyMultiplier() : 1f));
+                        Vector3 l_velocity = Vector3.ClampMagnitude(m_velocity * (Utils.IsWorldSafe() ? Settings.VelocityMultiplier : 1f), Utils.GetWorldMovementLimit());
+                        if(Settings.ViewVelocity && Utils.IsWorldSafe())
+                        {
+                            float l_mag = l_velocity.magnitude;
+                            l_velocity = PlayerSetup.Instance.GetActiveCamera().transform.forward * l_mag;
+                        }
 
                         foreach(Rigidbody l_body in m_rigidBodies)
                         {
@@ -428,7 +442,7 @@ namespace ml_prm
 
                             if(!Settings.RestorePosition)
                             {
-                                if(Utils.IsInVR())
+                                if(m_inVr)
                                 {
                                     Vector3 l_diff = l_hipsPos - PlayerSetup.Instance._avatar.transform.position;
                                     Vector3 l_playerPos = PlayerSetup.Instance.transform.position;
