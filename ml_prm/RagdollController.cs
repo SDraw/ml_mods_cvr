@@ -240,7 +240,7 @@ namespace ml_prm
                             m_rigidBodies.Add(l_body);
                             l_body.isKinematic = true;
                             l_body.angularDrag = Settings.AngularDrag;
-                            l_body.drag = Settings.MovementDrag;
+                            l_body.drag = (Utils.IsWorldSafe() ? Settings.MovementDrag : 1f);
                             l_body.useGravity = (!Utils.IsWorldSafe() || Settings.Gravity);
                             l_body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
                         }
@@ -337,7 +337,7 @@ namespace ml_prm
         {
             if(m_avatarReady)
             {
-                float l_drag = (Utils.IsWorldSafe() ? p_value : 0f);
+                float l_drag = (Utils.IsWorldSafe() ? p_value : 1f);
                 foreach(Rigidbody l_body in m_rigidBodies)
                 {
                     l_body.drag = l_drag;

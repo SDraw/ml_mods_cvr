@@ -28,7 +28,7 @@ Optional mod's settings with [BTKUILib](https://github.com/BTK-Development/BTKUI
   * Note: Limited according to world's fly multiplier.
   * Note: Forcibly set to `1.0` in worlds that don't allow flight.
 * **Movement drag:** movement resistance; `2.0` by default.
-  * Note: Forcibly set to `0.0` in worlds that don't allow flight.
+  * Note: Forcibly set to `1.0` in worlds that don't allow flight.
 * **Angular movement drag:** angular movement resistance; `2.0` by default.
 * **Recover delay:** time delay for enabled `Auto recover` in seconds; `3.0` by default.
 * **Reset settings:** resets mod settings to default.
