@@ -190,43 +190,50 @@ namespace ml_prm
                 {
                     PointersReaction = p_state;
                     PointersReactionChange?.Invoke(p_state);
-                } break;
+                }
+                break;
 
                 case ModSetting.IgnoreLocal:
                 {
                     IgnoreLocal = p_state;
                     IgnoreLocalChange?.Invoke(p_state);
-                } break;
+                }
+                break;
 
                 case ModSetting.CombatReaction:
                 {
                     CombatReaction = p_state;
                     CombatReactionChange?.Invoke(p_state);
-                } break;
+                }
+                break;
 
                 case ModSetting.AutoRecover:
                 {
                     AutoRecover = p_state;
                     AutoRecoverChange?.Invoke(p_state);
-                } break;
+                }
+                break;
 
                 case ModSetting.Slipperiness:
                 {
                     Slipperiness = p_state;
                     SlipperinessChange?.Invoke(p_state);
-                } break;
+                }
+                break;
 
                 case ModSetting.Bounciness:
                 {
                     Bounciness = p_state;
                     BouncinessChange?.Invoke(p_state);
-                } break;
+                }
+                break;
 
                 case ModSetting.ViewVelocity:
                 {
                     ViewVelocity = p_state;
                     ViewVelocityChange?.Invoke(p_state);
-                } break;
+                }
+                break;
             }
 
             ms_entries[(int)p_setting].BoxedValue = p_state;
@@ -242,25 +249,29 @@ namespace ml_prm
                 {
                     VelocityMultiplier = p_value;
                     VelocityMultiplierChange?.Invoke(p_value);
-                } break;
+                }
+                break;
 
                 case ModSetting.MovementDrag:
                 {
                     MovementDrag = p_value;
                     MovementDragChange?.Invoke(p_value);
-                } break;
+                }
+                break;
 
                 case ModSetting.AngularDrag:
                 {
                     AngularDrag = p_value;
                     AngularDragChange?.Invoke(p_value);
-                } break;
+                }
+                break;
 
                 case ModSetting.RecoverDelay:
                 {
                     RecoverDelay = p_value;
                     RecoverDelayChange?.Invoke(p_value);
-                } break;
+                }
+                break;
             }
 
             ms_entries[(int)p_setting].BoxedValue = p_value;

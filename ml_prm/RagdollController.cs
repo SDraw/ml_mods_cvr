@@ -302,6 +302,7 @@ namespace ml_prm
 
             OnGravityChange(Settings.Gravity);
             OnPhysicsMaterialChange(true);
+            OnMovementDragChange(Settings.MovementDrag);
         }
 
         internal void OnCombatDown()
@@ -336,9 +337,10 @@ namespace ml_prm
         {
             if(m_avatarReady)
             {
+                float l_drag = (Utils.IsWorldSafe() ? p_value : 0f);
                 foreach(Rigidbody l_body in m_rigidBodies)
                 {
-                    l_body.drag = p_value;
+                    l_body.drag = l_drag;
                     if(m_enabled)
                         l_body.WakeUp();
                 }
