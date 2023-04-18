@@ -145,19 +145,13 @@ namespace ml_prm
 
         void LateUpdate()
         {
-            if(m_avatarReady && m_enabled)
+            if(m_avatarReady && m_enabled && !BodySystem.isCalibrating)
             {
-                if(BodySystem.isCalibratedAsFullBody && !BodySystem.isCalibrating)
+                if(BodySystem.isCalibratedAsFullBody)
                     BodySystem.TrackingPositionWeight = 0f;
 
                 foreach(var l_link in m_boneLinks)
                     l_link.Item1.CopyGlobal(l_link.Item2);
-            }
-
-            if(m_avatarReady && !m_enabled && (m_vrIK != null))
-            {
-                foreach(var l_link in m_boneLinks)
-                    l_link.Item2.CopyGlobal(l_link.Item1);
             }
         }
 
@@ -426,11 +420,8 @@ namespace ml_prm
                             m_reachedGround = false; // Force player to unragdoll and reach ground first
 
                         // Copy before set to non-kinematic to reduce stacked forces
-                        if(m_vrIK == null)
-                        {
-                            foreach(var l_link in m_boneLinks)
-                                l_link.Item2.CopyGlobal(l_link.Item1);
-                        }
+                        foreach(var l_link in m_boneLinks)
+                            l_link.Item2.CopyGlobal(l_link.Item1);
 
                         foreach(Rigidbody l_body in m_rigidBodies)
                             l_body.isKinematic = false;
