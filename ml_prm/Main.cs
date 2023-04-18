@@ -1,13 +1,14 @@
-﻿using ABI_RC.Core;
+﻿using ABI.CCK.Components;
+using ABI_RC.Core;
 using ABI_RC.Core.InteractionSystem;
 using ABI_RC.Core.Player;
+using ABI_RC.Core.Util.AssetFiltering;
 using ABI_RC.Systems.IK.SubSystems;
+using ABI_RC.Systems.MovementSystem;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
-using ABI_RC.Core.Util.AssetFiltering;
-using ABI.CCK.Components;
 using System.Linq;
+using System.Reflection;
 
 namespace ml_prm
 {
@@ -54,6 +55,11 @@ namespace ml_prm
                 new HarmonyLib.HarmonyMethod(typeof(PlayerRagdollMod).GetMethod(nameof(OnCombatDown_Prefix), BindingFlags.Static | BindingFlags.NonPublic)),
                 null
             );
+            HarmonyInstance.Patch(
+                typeof(MovementSystem).GetMethod(nameof(MovementSystem.ToggleFlight)),
+                null,
+                new HarmonyLib.HarmonyMethod(typeof(PlayerRagdollMod).GetMethod(nameof(OnToggleFlight_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
+            );
 
             // Whitelist the toggle script
             (typeof(SharedFilter).GetField("_localComponentWhitelist", BindingFlags.NonPublic | BindingFlags.Static)?.GetValue(null) as HashSet<Type>)?.Add(typeof(RagdollToggle));
@@ -77,6 +83,7 @@ namespace ml_prm
             m_localController = PlayerSetup.Instance.gameObject.AddComponent<RagdollController>();
         }
 
+        // Patches
         static void OnAvatarClear_Postfix() => ms_instance?.OnAvatarClear();
         void OnAvatarClear()
         {
@@ -158,6 +165,20 @@ namespace ml_prm
             {
                 if(m_localController != null)
                     m_localController.OnCombatDown();
+            }
+            catch(Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
+        }
+
+        static void OnToggleFlight_Postfix() => ms_instance?.OnToggleFlight();
+        void OnToggleFlight()
+        {
+            try
+            {
+                if(m_localController != null)
+                    m_localController.OnToggleFlight();
             }
             catch(Exception e)
             {

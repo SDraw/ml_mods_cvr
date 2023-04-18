@@ -102,7 +102,7 @@ namespace ml_prm
 
         void Update()
         {
-            if(m_enabled && m_avatarReady)
+            if(m_avatarReady && m_enabled)
             {
                 Vector3 l_dif = m_puppetReferences.hips.position - m_ragdollLastPos;
                 PlayerSetup.Instance.transform.position += l_dif;
@@ -110,17 +110,17 @@ namespace ml_prm
                 m_ragdollLastPos = m_puppetReferences.hips.position;
             }
 
-            if(!m_enabled && m_avatarReady)
+            if(m_avatarReady && !m_enabled)
             {
                 Vector3 l_pos = PlayerSetup.Instance.transform.position;
                 m_velocity = (m_velocity + (l_pos - m_lastPosition) / Time.deltaTime) * 0.5f;
                 m_lastPosition = l_pos;
             }
 
-            if(m_avatarReady && !m_reachedGround && MovementSystem.Instance.IsGrounded())
-                m_reachedGround = true;
+            if(m_avatarReady && !m_reachedGround)
+                m_reachedGround = MovementSystem.Instance.IsGrounded();
 
-            if(m_enabled && m_avatarReady && BodySystem.isCalibratedAsFullBody)
+            if(m_avatarReady && m_enabled && BodySystem.isCalibratedAsFullBody && !BodySystem.isCalibrating)
                 BodySystem.TrackingPositionWeight = 0f;
 
             if(m_avatarReady && m_enabled && Settings.AutoRecover)
@@ -139,19 +139,25 @@ namespace ml_prm
             if((m_avatarRagdollToggle != null) && m_avatarRagdollToggle.isActiveAndEnabled && m_avatarRagdollToggle.shouldOverride && (m_enabled != m_avatarRagdollToggle.isOn))
                 SwitchRagdoll();
 
-            if((m_customTrigger != null) && m_customTrigger.GetStateWithReset() && !m_enabled && m_avatarReady && Settings.PointersReaction)
+            if((m_customTrigger != null) && m_customTrigger.GetStateWithReset() && m_avatarReady && !m_enabled && Settings.PointersReaction)
                 SwitchRagdoll();
         }
 
         void LateUpdate()
         {
-            if(m_enabled && m_avatarReady)
+            if(m_avatarReady && m_enabled)
             {
-                if(BodySystem.isCalibratedAsFullBody)
+                if(BodySystem.isCalibratedAsFullBody && !BodySystem.isCalibrating)
                     BodySystem.TrackingPositionWeight = 0f;
 
                 foreach(var l_link in m_boneLinks)
                     l_link.Item1.CopyGlobal(l_link.Item2);
+            }
+
+            if(m_avatarReady && !m_enabled && (m_vrIK != null))
+            {
+                foreach(var l_link in m_boneLinks)
+                    l_link.Item2.CopyGlobal(l_link.Item1);
             }
         }
 
@@ -285,19 +291,19 @@ namespace ml_prm
 
         internal void OnSeatSitDown(CVRSeat p_seat)
         {
-            if(m_enabled && m_avatarReady && !p_seat.occupied)
+            if(m_avatarReady && m_enabled && !p_seat.occupied)
                 SwitchRagdoll();
         }
 
         internal void OnStartCalibration()
         {
-            if(m_enabled && m_avatarReady)
+            if(m_avatarReady && m_enabled)
                 SwitchRagdoll();
         }
 
         internal void OnWorldSpawn()
         {
-            if(m_enabled && m_avatarReady)
+            if(m_avatarReady && m_enabled)
                 SwitchRagdoll();
 
             OnGravityChange(Settings.Gravity);
@@ -306,7 +312,13 @@ namespace ml_prm
 
         internal void OnCombatDown()
         {
-            if(!m_enabled && m_avatarReady && Settings.CombatReaction)
+            if(m_avatarReady && !m_enabled && Settings.CombatReaction)
+                SwitchRagdoll();
+        }
+
+        internal void OnToggleFlight()
+        {
+            if(m_avatarReady && m_enabled && MovementSystem.Instance.flying)
                 SwitchRagdoll();
         }
 
@@ -354,8 +366,9 @@ namespace ml_prm
         {
             if(m_avatarReady)
             {
+                bool l_gravity = (!Utils.IsWorldSafe() || p_state);
                 foreach(Rigidbody l_body in m_rigidBodies)
-                    l_body.useGravity = (!Utils.IsWorldSafe() || p_state);
+                    l_body.useGravity = l_gravity;
             }
         }
         void OnPhysicsMaterialChange(bool p_state)
@@ -400,6 +413,9 @@ namespace ml_prm
                             PlayerSetup.Instance.transform.rotation = Quaternion.Euler(0f, l_rot.eulerAngles.y, 0f);
                         }
 
+                        if(MovementSystem.Instance.flying)
+                            MovementSystem.Instance.ChangeFlight(false);
+
                         MovementSystem.Instance.SetImmobilized(true);
                         PlayerSetup.Instance.animatorManager.SetAnimatorParameterTrigger("CancelEmote");
                         m_ragdolledParameter.SetValue(true);
@@ -410,8 +426,11 @@ namespace ml_prm
                             m_reachedGround = false; // Force player to unragdoll and reach ground first
 
                         // Copy before set to non-kinematic to reduce stacked forces
-                        foreach(var l_link in m_boneLinks)
-                            l_link.Item2.CopyGlobal(l_link.Item1);
+                        if(m_vrIK == null)
+                        {
+                            foreach(var l_link in m_boneLinks)
+                                l_link.Item2.CopyGlobal(l_link.Item1);
+                        }
 
                         foreach(Rigidbody l_body in m_rigidBodies)
                             l_body.isKinematic = false;
@@ -451,7 +470,8 @@ namespace ml_prm
                             l_body.isKinematic = true;
 
                         PlayerSetup.Instance.transform.position = m_puppetReferences.hips.position;
-                        PlayerSetup.Instance.transform.position -= (PlayerSetup.Instance.transform.rotation * PlayerSetup.Instance._avatar.transform.localPosition);
+                        if(m_inVr)
+                            PlayerSetup.Instance.transform.position -= (PlayerSetup.Instance.transform.rotation * PlayerSetup.Instance._avatar.transform.localPosition);
 
                         foreach(Collider l_collider in m_colliders)
                             l_collider.enabled = false;
@@ -466,7 +486,7 @@ namespace ml_prm
             }
         }
 
-        public bool IsRagdolled() => (m_enabled && m_avatarReady);
+        public bool IsRagdolled() => (m_avatarReady && m_enabled);
 
         static Transform CloneTransform(Transform p_source, Transform p_parent, string p_name)
         {

@@ -58,7 +58,6 @@ Available methods:
 * ```void SwitchRagdoll()```
 
 # Notes
-* Not suggested to activate fly mode with enabled ragdoll state.
 * If ragdoll state is enabled during emote, remote players see whole emote playing while local player sees ragdolling. It's tied to how game handles remote players, currently can be prevented with (choose one):
   * Renaming avatar emote animations to not have default name or containing `Emote` substring.
   * Holding any movement key right after activating ragdoll state.
