@@ -100,7 +100,7 @@ namespace ml_prm
             Hotkey = (bool)ms_entries[(int)ModSetting.Hotkey].BoxedValue;
             VelocityMultiplier = Mathf.Clamp((float)ms_entries[(int)ModSetting.VelocityMultiplier].BoxedValue, 1f, 50f);
             MovementDrag = Mathf.Clamp((float)ms_entries[(int)ModSetting.MovementDrag].BoxedValue, 0f, 50f);
-            AngularDrag = Mathf.Clamp((float)ms_entries[(int)ModSetting.MovementDrag].BoxedValue, 0f, 50f);
+            AngularDrag = Mathf.Clamp((float)ms_entries[(int)ModSetting.AngularDrag].BoxedValue, 0f, 50f);
             Gravity = (bool)ms_entries[(int)ModSetting.Gravity].BoxedValue;
             PointersReaction = (bool)ms_entries[(int)ModSetting.PointersReaction].BoxedValue;
             IgnoreLocal = (bool)ms_entries[(int)ModSetting.IgnoreLocal].BoxedValue;

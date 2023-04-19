@@ -1,7 +1,6 @@
 ﻿using ABI.CCK.Components;
 using ABI_RC.Core.Player;
 using RootMotion.FinalIK;
-using System.Reflection;
 using UnityEngine;
 using ViveSR.anipal.Lip;
 
@@ -10,8 +9,6 @@ namespace ml_dht
     [DisallowMultipleComponent]
     class HeadTracked : MonoBehaviour
     {
-        static FieldInfo ms_emotePlaying = typeof(PlayerSetup).GetField("_emotePlaying", BindingFlags.NonPublic | BindingFlags.Instance);
-
         bool m_enabled = false;
         bool m_headTracking = true;
         bool m_blinking = true;
@@ -74,7 +71,7 @@ namespace ml_dht
             {
                 m_lastHeadRotation = Quaternion.Slerp(m_lastHeadRotation, m_avatarDescriptor.transform.rotation * (m_headRotation * m_bindRotation), m_smoothing);
 
-                if(!(bool)ms_emotePlaying.GetValue(PlayerSetup.Instance))
+                if(!PlayerSetup.Instance.IsEmotePlaying())
                     m_headBone.rotation = m_lastHeadRotation;
             }
         }

@@ -5,7 +5,6 @@ using ABI_RC.Systems.IK.SubSystems;
 using ABI_RC.Systems.MovementSystem;
 using RootMotion.FinalIK;
 using System.Collections.Generic;
-using System.Reflection;
 using UnityEngine;
 
 namespace ml_amt
@@ -14,9 +13,6 @@ namespace ml_amt
     class MotionTweaker : MonoBehaviour
     {
         static readonly Vector4 ms_pointVector = new Vector4(0f, 0f, 0f, 1f);
-        static readonly FieldInfo ms_grounded = typeof(MovementSystem).GetField("_isGrounded", BindingFlags.NonPublic | BindingFlags.Instance);
-        static readonly FieldInfo ms_groundedRaw = typeof(MovementSystem).GetField("_isGroundedRaw", BindingFlags.NonPublic | BindingFlags.Instance);
-        static readonly FieldInfo ms_hasToes = typeof(IKSolverVR).GetField("hasToes", BindingFlags.NonPublic | BindingFlags.Instance);
         static readonly int ms_emoteHash = Animator.StringToHash("Emote");
 
         enum PoseState
@@ -121,8 +117,8 @@ namespace ml_amt
         {
             if(m_avatarReady)
             {
-                m_grounded = (bool)ms_grounded.GetValue(MovementSystem.Instance);
-                m_groundedRaw = (bool)ms_groundedRaw.GetValue(MovementSystem.Instance);
+                m_grounded = MovementSystem.Instance.IsGrounded();
+                m_groundedRaw = MovementSystem.Instance.IsGroundedRaw();
                 m_moving = !Mathf.Approximately(MovementSystem.Instance.movementVector.magnitude, 0f);
 
                 // Update upright
@@ -230,7 +226,7 @@ namespace ml_amt
                 m_locomotionOffset = m_vrIk.solver.locomotion.offset;
                 m_massCenter = m_locomotionOffset;
 
-                if((bool)ms_hasToes.GetValue(m_vrIk.solver))
+                if(m_vrIk.solver.HasToes())
                 {
                     Transform l_foot = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftFoot);
                     if(l_foot == null)
