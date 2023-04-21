@@ -31,7 +31,7 @@ Available mod's settings in `Settings - IK - Avatar Motion Tweaker`:
 * **Scaled locomotion steps:** scales VRIK locomotion steps according to avatar height and scale; default value - `true`.
 * **Alternative avatar collider scale:** applies slightly different approach to avatar collider size change; default value - `true`.
 * **Fix animation overrides (chairs, etc.):** fixes animations overriding for avatars with AAS; default value - `true`.
-  * Note: This options is made to address [broken animator in chairs and combat worlds issue](https://feedback.abinteractive.net/p/gestures-getting-stuck-locally-upon-entering-vehicles-chairs).
+  * Note: This option is made to address [broken animator in chairs and combat worlds issue](https://feedback.abinteractive.net/p/gestures-getting-stuck-locally-upon-entering-vehicles-chairs).
 
 Available additional parameters for AAS animator:
 * **`Upright`:** defines linear coefficient between current viewpoint height and avatar's viewpoint height; float, range - [0.0, 1.0].
@@ -44,4 +44,8 @@ Available additional parameters for AAS animator:
   * Note: Can be set as local-only (not synced) if starts with `#` character.
 
 Additional mod's behaviour:
-* Overrides FBT behaviour in 4PT mode (head, hands, hips). Be sure to disable legs and knees tracking in `Settings - IK tab`.
+* Overrides and fixes IK behaviour in 4PT mode (head, hands, hips). Be sure to disable legs and knees tracking in `Settings - IK tab`.
+
+https://user-images.githubusercontent.com/4295751/233663668-adf5eaa6-8195-4fd2-90d5-78d61fe3fe58.mp4
+
+https://user-images.githubusercontent.com/4295751/233663726-80a05323-aed2-41fb-9b00-7d5024ebf247.mp4
