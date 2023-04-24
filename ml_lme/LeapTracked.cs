@@ -232,7 +232,14 @@ namespace ml_lme
 
             if(PlayerSetup.Instance._animator.isHuman)
             {
+                Vector3 l_hipsPos = Vector3.zero;
+                Quaternion l_hipsRot = Quaternion.identity;
                 m_hips = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.Hips);
+                if(m_hips != null)
+                {
+                    l_hipsPos = m_hips.localPosition;
+                    l_hipsRot = m_hips.localRotation;
+                }
 
                 if(!m_inVR)
                 {
@@ -307,6 +314,12 @@ namespace ml_lme
                     m_origRightElbow = m_vrIK.solver.rightArm.bendGoal;
                     m_vrIK.solver.OnPreUpdate += this.OnIKPreUpdate;
                     m_vrIK.solver.OnPostUpdate += this.OnIKPostUpdate;
+                }
+
+                if(m_hips != null)
+                {
+                    m_hips.localPosition = l_hipsPos;
+                    m_hips.localRotation = l_hipsRot;
                 }
             }
         }

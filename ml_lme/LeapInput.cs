@@ -15,6 +15,8 @@ namespace ml_lme
         bool m_inVR = false;
         bool m_gripToGrab = true;
 
+        bool m_handVisibleLeft = false;
+        bool m_handVisibleRight = false;
         ControllerRay m_handRayLeft = null;
         ControllerRay m_handRayRight = null;
         LineRenderer m_lineLeft = null;
@@ -121,10 +123,32 @@ namespace ml_lme
             if(Settings.Enabled)
             {
                 if(l_data.m_leftHand.m_present)
+                {
                     SetFingersInput(l_data.m_leftHand, true);
+                    m_handVisibleLeft = true;
+                }
+                else
+                {
+                    if(m_handVisibleLeft)
+                    {
+                        ResetFingers(true);
+                        m_handVisibleLeft = false;
+                    }
+                }
 
                 if(l_data.m_rightHand.m_present)
+                {
                     SetFingersInput(l_data.m_rightHand, false);
+                    m_handVisibleRight = true;
+                }
+                else
+                {
+                    if(m_handVisibleRight)
+                    {
+                        ResetFingers(false);
+                        m_handVisibleRight = false;
+                    }
+                }
 
                 if(m_inVR)
                 {
@@ -209,6 +233,8 @@ namespace ml_lme
         {
             OnInputChange(p_state && Settings.Input);
             UpdateFingerTracking();
+            m_handVisibleLeft &= p_state;
+            m_handVisibleRight &= p_state;
         }
 
         void OnInputChange(bool p_state)
@@ -251,6 +277,12 @@ namespace ml_lme
         {
             m_inputManager.individualFingerTracking = (Settings.Enabled || (m_inVR && Utils.AreKnucklesInUse() && !m_steamVrModule.GetIndexGestureToggle()));
             IKSystem.Instance.FingerSystem.controlActive = m_inputManager.individualFingerTracking;
+
+            if(!Settings.Enabled)
+            {
+                ResetFingers(true);
+                ResetFingers(false);
+            }
         }
 
         void SetFingersInput(GestureMatcher.HandData p_hand, bool p_left)
@@ -280,6 +312,36 @@ namespace ml_lme
                 IKSystem.Instance.FingerSystem.rightMiddleCurl = p_hand.m_bends[2];
                 IKSystem.Instance.FingerSystem.rightRingCurl = p_hand.m_bends[3];
                 IKSystem.Instance.FingerSystem.rightPinkyCurl = p_hand.m_bends[4];
+            }
+        }
+
+        void ResetFingers(bool p_left)
+        {
+            if(p_left)
+            {
+                m_inputManager.fingerCurlLeftThumb = 0f;
+                m_inputManager.fingerCurlLeftIndex = 0f;
+                m_inputManager.fingerCurlLeftMiddle = 0f;
+                m_inputManager.fingerCurlLeftRing = 0f;
+                m_inputManager.fingerCurlLeftPinky = 0f;
+                IKSystem.Instance.FingerSystem.leftThumbCurl = 0f;
+                IKSystem.Instance.FingerSystem.leftIndexCurl = 0f;
+                IKSystem.Instance.FingerSystem.leftMiddleCurl = 0f;
+                IKSystem.Instance.FingerSystem.leftRingCurl = 0f;
+                IKSystem.Instance.FingerSystem.leftPinkyCurl = 0f;
+            }
+            else
+            {
+                m_inputManager.fingerCurlRightThumb = 0f;
+                m_inputManager.fingerCurlRightIndex = 0f;
+                m_inputManager.fingerCurlRightMiddle = 0f;
+                m_inputManager.fingerCurlRightRing = 0f;
+                m_inputManager.fingerCurlRightPinky = 0f;
+                IKSystem.Instance.FingerSystem.rightThumbCurl = 0f;
+                IKSystem.Instance.FingerSystem.rightIndexCurl = 0f;
+                IKSystem.Instance.FingerSystem.rightMiddleCurl = 0f;
+                IKSystem.Instance.FingerSystem.rightRingCurl = 0f;
+                IKSystem.Instance.FingerSystem.rightPinkyCurl = 0f;
             }
         }
 
