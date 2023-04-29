@@ -7,7 +7,7 @@ namespace ml_prm
 {
     static class Settings
     {
-        enum ModSetting
+        public enum ModSetting
         {
             Hotkey = 0,
             VelocityMultiplier,
@@ -24,25 +24,6 @@ namespace ml_prm
             ViewVelocity
         }
 
-        enum UiElementIndex
-        {
-            Hotkey = 0,
-            Gravity,
-            PointersReaction,
-            IgnoreLocal,
-            CombatReaction,
-            AutoRecover,
-            Slipperiness,
-            Bounciness,
-            ViewVelocity,
-            VelocityMultiplier,
-            MovementDrag,
-            AngularDrag,
-            RecoverDelay,
-
-            Count
-        }
-
         public static bool Hotkey { get; private set; } = true;
         public static float VelocityMultiplier { get; private set; } = 2f;
         public static float MovementDrag { get; private set; } = 2f;
@@ -57,7 +38,6 @@ namespace ml_prm
         public static bool Bounciness { get; private set; } = false;
         public static bool ViewVelocity { get; private set; } = false;
 
-        static public event Action SwitchChange;
         static public event Action<bool> HotkeyChange;
         static public event Action<float> VelocityMultiplierChange;
         static public event Action<float> MovementDragChange;
@@ -74,8 +54,6 @@ namespace ml_prm
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
-
-        static List<object> ms_uiElements = new List<object>();
 
         internal static void Init()
         {
@@ -110,190 +88,108 @@ namespace ml_prm
             Slipperiness = (bool)ms_entries[(int)ModSetting.Slipperiness].BoxedValue;
             Bounciness = (bool)ms_entries[(int)ModSetting.Bounciness].BoxedValue;
             ViewVelocity = (bool)ms_entries[(int)ModSetting.ViewVelocity].BoxedValue;
-
-            if(MelonLoader.MelonMod.RegisteredMelons.FirstOrDefault(m => m.Info.Name == "BTKUILib") != null)
-            {
-                CreateBtkUi();
-            }
         }
 
-        static void CreateBtkUi()
+        public static void SetSetting(ModSetting p_settings, object p_value)
         {
-            var l_categoryMain = BTKUILib.QuickMenuAPI.MiscTabPage.AddCategory("PlayerRagdollMod");
-            var l_page = l_categoryMain.AddPage("Player Ragdoll Settings", "", "PlayerRagdollMod settings", "PlayerRagdollMod");
-            l_page.MenuTitle = "Ragdoll settings";
-            var l_categoryMod = l_page.AddCategory("Settings");
-
-            l_categoryMod.AddButton("Switch ragdoll", "", "Switch between normal and ragdoll state").OnPress += () => SwitchChange?.Invoke();
-
-            ms_uiElements.Add(l_categoryMod.AddToggle("Use hotkey", "Switch ragdoll mode with 'R' key", Hotkey));
-            (ms_uiElements[(int)UiElementIndex.Hotkey] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate(ModSetting.Hotkey, state);
-
-            ms_uiElements.Add(l_categoryMod.AddToggle("Use gravity", "Apply gravity to ragdoll", Gravity));
-            (ms_uiElements[(int)UiElementIndex.Gravity] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate(ModSetting.Gravity, state);
-
-            ms_uiElements.Add(l_categoryMod.AddToggle("Pointers reaction", "React to trigger colliders with CVRPointer component of 'ragdoll' type", PointersReaction));
-            (ms_uiElements[(int)UiElementIndex.PointersReaction] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate(ModSetting.PointersReaction, state);
-
-            ms_uiElements.Add(l_categoryMod.AddToggle("Ignore local pointers", "Ignore local avatar's CVRPointer components of 'ragdoll' type", IgnoreLocal));
-            (ms_uiElements[(int)UiElementIndex.IgnoreLocal] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate(ModSetting.IgnoreLocal, state);
-
-            ms_uiElements.Add(l_categoryMod.AddToggle("Combat reaction", "Ragdoll upon combat system death", CombatReaction));
-            (ms_uiElements[(int)UiElementIndex.CombatReaction] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate(ModSetting.CombatReaction, state);
-
-            ms_uiElements.Add(l_categoryMod.AddToggle("Auto recover", "Automatically unragdoll after set recover delay", AutoRecover));
-            (ms_uiElements[(int)UiElementIndex.AutoRecover] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate(ModSetting.AutoRecover, state);
-
-            ms_uiElements.Add(l_categoryMod.AddToggle("Slipperiness", "Enables/disables friction of ragdoll", Slipperiness));
-            (ms_uiElements[(int)UiElementIndex.Slipperiness] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate(ModSetting.Slipperiness, state);
-
-            ms_uiElements.Add(l_categoryMod.AddToggle("Bounciness", "Enables/disables bounciness of ragdoll", Bounciness));
-            (ms_uiElements[(int)UiElementIndex.Bounciness] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate(ModSetting.Bounciness, state);
-
-            ms_uiElements.Add(l_categoryMod.AddToggle("View direction velocity", "Apply velocity to camera view direction", ViewVelocity));
-            (ms_uiElements[(int)UiElementIndex.ViewVelocity] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate(ModSetting.ViewVelocity, state);
-
-            ms_uiElements.Add(l_page.AddSlider("Velocity multiplier", "Velocity multiplier upon entering ragdoll state", VelocityMultiplier, 1f, 50f));
-            (ms_uiElements[(int)UiElementIndex.VelocityMultiplier] as BTKUILib.UIObjects.Components.SliderFloat).OnValueUpdated += (value) => OnSliderUpdate(ModSetting.VelocityMultiplier, value);
-
-            ms_uiElements.Add(l_page.AddSlider("Movement drag", "Movement resistance", MovementDrag, 0f, 50f));
-            (ms_uiElements[(int)UiElementIndex.MovementDrag] as BTKUILib.UIObjects.Components.SliderFloat).OnValueUpdated += (value) => OnSliderUpdate(ModSetting.MovementDrag, value);
-
-            ms_uiElements.Add(l_page.AddSlider("Angular movement drag", "Rotation movement resistance", AngularDrag, 0f, 50f));
-            (ms_uiElements[(int)UiElementIndex.AngularDrag] as BTKUILib.UIObjects.Components.SliderFloat).OnValueUpdated += (value) => OnSliderUpdate(ModSetting.AngularDrag, value);
-
-            ms_uiElements.Add(l_page.AddSlider("Recover delay (seconds)", "Recover delay for automatic recover", RecoverDelay, 1f, 10f));
-            (ms_uiElements[(int)UiElementIndex.RecoverDelay] as BTKUILib.UIObjects.Components.SliderFloat).OnValueUpdated += (value) => OnSliderUpdate(ModSetting.RecoverDelay, value);
-
-            l_categoryMod.AddButton("Reset settings", "", "Reset mod settings to default").OnPress += Reset;
-        }
-
-        static void OnToggleUpdate(ModSetting p_setting, bool p_state, UiElementIndex p_uiIndex = UiElementIndex.Count)
-        {
-            switch(p_setting)
+            switch(p_settings)
             {
+                // Booleans
                 case ModSetting.Hotkey:
                 {
-                    Hotkey = p_state;
-                    HotkeyChange?.Invoke(p_state);
+                    Hotkey = (bool)p_value;
+                    HotkeyChange?.Invoke((bool)p_value);
                 }
                 break;
 
                 case ModSetting.Gravity:
                 {
-                    Gravity = p_state;
-                    GravityChange?.Invoke(p_state);
+                    Gravity = (bool)p_value;
+                    GravityChange?.Invoke((bool)p_value);
                 }
                 break;
 
                 case ModSetting.PointersReaction:
                 {
-                    PointersReaction = p_state;
-                    PointersReactionChange?.Invoke(p_state);
+                    PointersReaction = (bool)p_value;
+                    PointersReactionChange?.Invoke((bool)p_value);
                 }
                 break;
 
                 case ModSetting.IgnoreLocal:
                 {
-                    IgnoreLocal = p_state;
-                    IgnoreLocalChange?.Invoke(p_state);
+                    IgnoreLocal = (bool)p_value;
+                    IgnoreLocalChange?.Invoke((bool)p_value);
                 }
                 break;
 
                 case ModSetting.CombatReaction:
                 {
-                    CombatReaction = p_state;
-                    CombatReactionChange?.Invoke(p_state);
+                    CombatReaction = (bool)p_value;
+                    CombatReactionChange?.Invoke((bool)p_value);
                 }
                 break;
 
                 case ModSetting.AutoRecover:
                 {
-                    AutoRecover = p_state;
-                    AutoRecoverChange?.Invoke(p_state);
+                    AutoRecover = (bool)p_value;
+                    AutoRecoverChange?.Invoke((bool)p_value);
                 }
                 break;
 
                 case ModSetting.Slipperiness:
                 {
-                    Slipperiness = p_state;
-                    SlipperinessChange?.Invoke(p_state);
+                    Slipperiness = (bool)p_value;
+                    SlipperinessChange?.Invoke((bool)p_value);
                 }
                 break;
 
                 case ModSetting.Bounciness:
                 {
-                    Bounciness = p_state;
-                    BouncinessChange?.Invoke(p_state);
+                    Bounciness = (bool)p_value;
+                    BouncinessChange?.Invoke((bool)p_value);
                 }
                 break;
 
                 case ModSetting.ViewVelocity:
                 {
-                    ViewVelocity = p_state;
-                    ViewVelocityChange?.Invoke(p_state);
+                    ViewVelocity = (bool)p_value;
+                    ViewVelocityChange?.Invoke((bool)p_value);
                 }
                 break;
-            }
 
-            ms_entries[(int)p_setting].BoxedValue = p_state;
-            if(p_uiIndex != UiElementIndex.Count)
-                (ms_uiElements[(int)p_uiIndex] as BTKUILib.UIObjects.Components.ToggleButton).ToggleValue = p_state;
-        }
-
-        static void OnSliderUpdate(ModSetting p_setting, float p_value, UiElementIndex p_uiIndex = UiElementIndex.Count)
-        {
-            switch(p_setting)
-            {
+                // Floats
                 case ModSetting.VelocityMultiplier:
                 {
-                    VelocityMultiplier = p_value;
-                    VelocityMultiplierChange?.Invoke(p_value);
+                    VelocityMultiplier = (float)p_value;
+                    VelocityMultiplierChange?.Invoke((float)p_value);
                 }
                 break;
 
                 case ModSetting.MovementDrag:
                 {
-                    MovementDrag = p_value;
-                    MovementDragChange?.Invoke(p_value);
+                    MovementDrag = (float)p_value;
+                    MovementDragChange?.Invoke((float)p_value);
                 }
                 break;
 
                 case ModSetting.AngularDrag:
                 {
-                    AngularDrag = p_value;
-                    AngularDragChange?.Invoke(p_value);
+                    AngularDrag = (float)p_value;
+                    AngularDragChange?.Invoke((float)p_value);
                 }
                 break;
 
                 case ModSetting.RecoverDelay:
                 {
-                    RecoverDelay = p_value;
-                    RecoverDelayChange?.Invoke(p_value);
+                    RecoverDelay = (float)p_value;
+                    RecoverDelayChange?.Invoke((float)p_value);
                 }
                 break;
             }
 
-            ms_entries[(int)p_setting].BoxedValue = p_value;
-            if(p_uiIndex != UiElementIndex.Count)
-                (ms_uiElements[(int)p_uiIndex] as BTKUILib.UIObjects.Components.SliderFloat).SetSliderValue(p_value);
-        }
-
-        static void Reset()
-        {
-            OnToggleUpdate(ModSetting.Hotkey, true, UiElementIndex.Hotkey);
-            OnToggleUpdate(ModSetting.Gravity, true, UiElementIndex.Gravity);
-            OnToggleUpdate(ModSetting.PointersReaction, true, UiElementIndex.PointersReaction);
-            OnToggleUpdate(ModSetting.IgnoreLocal, true, UiElementIndex.IgnoreLocal);
-            OnToggleUpdate(ModSetting.CombatReaction, true, UiElementIndex.CombatReaction);
-            OnToggleUpdate(ModSetting.AutoRecover, false, UiElementIndex.AutoRecover);
-            OnToggleUpdate(ModSetting.Slipperiness, false, UiElementIndex.Slipperiness);
-            OnToggleUpdate(ModSetting.Bounciness, false, UiElementIndex.Bounciness);
-            OnToggleUpdate(ModSetting.ViewVelocity, false, UiElementIndex.ViewVelocity);
-            OnSliderUpdate(ModSetting.VelocityMultiplier, 2f, UiElementIndex.VelocityMultiplier);
-            OnSliderUpdate(ModSetting.MovementDrag, 2f, UiElementIndex.MovementDrag);
-            OnSliderUpdate(ModSetting.AngularDrag, 2f, UiElementIndex.AngularDrag);
-            OnSliderUpdate(ModSetting.RecoverDelay, 3f, UiElementIndex.RecoverDelay);
+            if(ms_entries != null)
+                ms_entries[(int)p_settings].BoxedValue = p_value;
         }
     }
 }

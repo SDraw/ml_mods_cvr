@@ -76,7 +76,6 @@ namespace ml_prm
 
             m_customTrigger = MovementSystem.Instance.proxyCollider.gameObject.AddComponent<RagdollTrigger>();
 
-            Settings.SwitchChange += this.SwitchRagdoll;
             Settings.MovementDragChange += this.OnMovementDragChange;
             Settings.AngularDragChange += this.OnAngularDragChange;
             Settings.GravityChange += this.OnGravityChange;
@@ -92,7 +91,6 @@ namespace ml_prm
                 m_customTrigger = null;
             }
 
-            Settings.SwitchChange -= this.SwitchRagdoll;
             Settings.MovementDragChange -= this.OnMovementDragChange;
             Settings.AngularDragChange -= this.OnAngularDragChange;
             Settings.GravityChange -= this.OnGravityChange;
@@ -224,10 +222,6 @@ namespace ml_prm
                 l_options.joints = RagdollCreator.JointType.Character;
                 BipedRagdollCreator.Create(m_puppetReferences, l_options);
 
-                // And return back
-                m_puppetRoot.localPosition = Vector3.zero;
-                m_puppetRoot.localRotation = Quaternion.identity;
-
                 Transform[] l_puppetTransforms = m_puppetReferences.GetRagdollTransforms();
                 Transform[] l_avatarTransforms = l_avatarReferences.GetRagdollTransforms();
                 for(int i = 0; i < l_puppetTransforms.Length; i++)
@@ -268,6 +262,10 @@ namespace ml_prm
                             m_boneLinks.Add(System.Tuple.Create(l_puppetTransforms[i], l_avatarTransforms[i]));
                     }
                 }
+
+                // And return back
+                m_puppetRoot.localPosition = Vector3.zero;
+                m_puppetRoot.localRotation = Quaternion.identity;
 
                 m_vrIK = PlayerSetup.Instance._avatar.GetComponent<VRIK>();
                 if(m_vrIK != null)

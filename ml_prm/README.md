@@ -9,7 +9,7 @@ This mod turns player's avatar into ragdoll puppet.
 # Usage
 * Press `R` to turn into ragdoll and back.
 
-Optional mod's settings with [BTKUILib](https://github.com/BTK-Development/BTKUILib):
+Optional mod's settings page with [BTKUILib](https://github.com/BTK-Development/BTKUILib):
 * **Switch ragdoll:** turns into ragdoll state and back, made for VR usage primarily.
 * **Use hotkey:** enables/disables ragdoll state switch with `R` key; `true` by default.
 * **Use gravity:** enables/disables gravity for ragdoll; `true` by default.

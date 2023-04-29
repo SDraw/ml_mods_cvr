@@ -24,6 +24,7 @@ namespace ml_prm
                 ms_instance = this;
 
             Settings.Init();
+            ModUi.Init();
 
             HarmonyInstance.Patch(
                 typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.ClearAvatar)),
@@ -81,6 +82,13 @@ namespace ml_prm
                 yield return null;
 
             m_localController = PlayerSetup.Instance.gameObject.AddComponent<RagdollController>();
+            ModUi.SwitchChange += this.OnSwitchActivation;
+        }
+
+        void OnSwitchActivation()
+        {
+            if(m_localController != null)
+                m_localController.SwitchRagdoll();
         }
 
         // Patches

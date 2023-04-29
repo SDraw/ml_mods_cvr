@@ -87,6 +87,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AvatarBoolParameter.cs" />
+    <Compile Include="ModUi.cs" />
     <Compile Include="RagdollTrigger.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -135,7 +136,9 @@
     <Compile Include="vendor\RootMotion\RagdollManager\Scripts\RagdollCreator.cs" />
     <Compile Include="vendor\RootMotion\RagdollManager\Scripts\RagdollEditor.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="resources\person.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy /y "$(TargetPath)" "D:\Games\Steam\steamapps\common\ChilloutVR\Mods\"</PostBuildEvent>

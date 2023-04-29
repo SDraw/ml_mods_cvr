@@ -54,6 +54,10 @@
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
     </Reference>
+    <Reference Include="ml_pmc">
+      <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\Mods\ml_pmc.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="ml_prm">
       <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\Mods\ml_prm.dll</HintPath>
       <Private>False</Private>
