@@ -266,6 +266,7 @@ namespace ml_prm
                 // And return back
                 m_puppetRoot.localPosition = Vector3.zero;
                 m_puppetRoot.localRotation = Quaternion.identity;
+                m_puppetRoot.gameObject.SetActive(false);
 
                 m_vrIK = PlayerSetup.Instance._avatar.GetComponent<VRIK>();
                 if(m_vrIK != null)
@@ -423,6 +424,8 @@ namespace ml_prm
                         foreach(var l_link in m_boneLinks)
                             l_link.Item2.CopyGlobal(l_link.Item1);
 
+                        m_puppetRoot.gameObject.SetActive(true);
+
                         foreach(Rigidbody l_body in m_rigidBodies)
                             l_body.isKinematic = false;
 
@@ -456,6 +459,8 @@ namespace ml_prm
                         m_ragdolledParameter.SetValue(false);
                         if(BodySystem.isCalibratedAsFullBody)
                             BodySystem.TrackingPositionWeight = 1f;
+
+                        m_puppetRoot.gameObject.SetActive(false);
 
                         foreach(Rigidbody l_body in m_rigidBodies)
                             l_body.isKinematic = true;
