@@ -1,10 +1,10 @@
 ﻿using System.Reflection;
 
 [assembly: AssemblyTitle("PlayerRagdollMod")]
-[assembly: AssemblyVersion("1.0.2")]
-[assembly: AssemblyFileVersion("1.0.2")]
+[assembly: AssemblyVersion("1.0.3")]
+[assembly: AssemblyFileVersion("1.0.3")]
 
-[assembly: MelonLoader.MelonInfo(typeof(ml_prm.PlayerRagdollMod), "PlayerRagdollMod", "1.0.2", "SDraw", "https://github.com/SDraw/ml_mods_cvr")]
+[assembly: MelonLoader.MelonInfo(typeof(ml_prm.PlayerRagdollMod), "PlayerRagdollMod", "1.0.3", "SDraw", "https://github.com/SDraw/ml_mods_cvr")]
 [assembly: MelonLoader.MelonGame(null, "ChilloutVR")]
 [assembly: MelonLoader.MelonPriority(2)]
 [assembly: MelonLoader.MelonOptionalDependencies("BTKUILib")]
