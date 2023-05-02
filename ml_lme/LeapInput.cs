@@ -150,14 +150,17 @@ namespace ml_lme
                     }
                 }
 
-                if(m_inVR)
+                if(!ModSupporter.SkipFingersOverride())
                 {
-                    m_inputManager.individualFingerTracking = !m_steamVrModule.GetIndexGestureToggle();
-                    m_inputManager.individualFingerTracking |= (l_data.m_leftHand.m_present || l_data.m_rightHand.m_present);
+                    if(m_inVR)
+                    {
+                        m_inputManager.individualFingerTracking = !m_steamVrModule.GetIndexGestureToggle();
+                        m_inputManager.individualFingerTracking |= (l_data.m_leftHand.m_present || l_data.m_rightHand.m_present);
+                    }
+                    else
+                        m_inputManager.individualFingerTracking = (l_data.m_leftHand.m_present || l_data.m_rightHand.m_present);
+                    IKSystem.Instance.FingerSystem.controlActive = m_inputManager.individualFingerTracking;
                 }
-                else
-                    m_inputManager.individualFingerTracking = (l_data.m_leftHand.m_present || l_data.m_rightHand.m_present);
-                IKSystem.Instance.FingerSystem.controlActive = m_inputManager.individualFingerTracking;
             }
 
             m_handRayLeft.enabled = (l_data.m_leftHand.m_present && (!m_inVR || !Utils.IsLeftHandTracked() || !Settings.FingersOnly));

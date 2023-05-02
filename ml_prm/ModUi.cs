@@ -19,6 +19,7 @@ namespace ml_prm
             Slipperiness,
             Bounciness,
             ViewVelocity,
+            JumpRecover,
             VelocityMultiplier,
             MovementDrag,
             AngularDrag,
@@ -77,6 +78,9 @@ namespace ml_prm
             ms_uiElements.Add(l_modCategory.AddToggle("View direction velocity", "Apply velocity to camera view direction", Settings.ViewVelocity));
             (ms_uiElements[(int)UiIndex.ViewVelocity] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate(UiIndex.ViewVelocity, state);
 
+            ms_uiElements.Add(l_modCategory.AddToggle("Jump recover", "Recover from ragdoll state by jumping", Settings.JumpRecover));
+            (ms_uiElements[(int)UiIndex.JumpRecover] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate(UiIndex.JumpRecover, state);
+
             ms_uiElements.Add(l_modRoot.AddSlider("Velocity multiplier", "Velocity multiplier upon entering ragdoll state", Settings.VelocityMultiplier, 1f, 50f));
             (ms_uiElements[(int)UiIndex.VelocityMultiplier] as BTKUILib.UIObjects.Components.SliderFloat).OnValueUpdated += (value) => OnSliderUpdate(UiIndex.VelocityMultiplier, value);
 
@@ -131,6 +135,10 @@ namespace ml_prm
                 case UiIndex.ViewVelocity:
                     Settings.SetSetting(Settings.ModSetting.ViewVelocity, p_state);
                     break;
+
+                case UiIndex.JumpRecover:
+                    Settings.SetSetting(Settings.ModSetting.JumpRecover, p_state);
+                    break;
             }
 
             if(p_force)
@@ -173,6 +181,7 @@ namespace ml_prm
             OnToggleUpdate(UiIndex.Slipperiness, false, true);
             OnToggleUpdate(UiIndex.Bounciness, false, true);
             OnToggleUpdate(UiIndex.ViewVelocity, false, true);
+            OnToggleUpdate(UiIndex.JumpRecover, false, true);
             OnSliderUpdate(UiIndex.VelocityMultiplier, 2f, true);
             OnSliderUpdate(UiIndex.MovementDrag, 2f, true);
             OnSliderUpdate(UiIndex.AngularDrag, 2f, true);

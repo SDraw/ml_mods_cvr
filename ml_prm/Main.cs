@@ -126,12 +126,12 @@ namespace ml_prm
         }
 
         static void OnSetupIKScaling_Postfix(ref UnityEngine.Vector3 ___scaleDifference) => ms_instance?.OnSetupIKScaling(___scaleDifference.y);
-        void OnSetupIKScaling(float scaleDifference)
+        void OnSetupIKScaling(float p_scaleDifference)
         {
             try
             {
                 if (m_localController != null)
-                    m_localController.OnAvatarScaling(1f + scaleDifference);
+                    m_localController.OnAvatarScaling(1f + p_scaleDifference);
             }
             catch (Exception e)
             {

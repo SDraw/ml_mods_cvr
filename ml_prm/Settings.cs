@@ -21,7 +21,8 @@ namespace ml_prm
             RecoverDelay,
             Slipperiness,
             Bounciness,
-            ViewVelocity
+            ViewVelocity,
+            JumpRecover
         }
 
         public static bool Hotkey { get; private set; } = true;
@@ -37,6 +38,7 @@ namespace ml_prm
         public static bool Slipperiness { get; private set; } = false;
         public static bool Bounciness { get; private set; } = false;
         public static bool ViewVelocity { get; private set; } = false;
+        public static bool JumpRecover { get; private set; } = false;
 
         static public event Action<bool> HotkeyChange;
         static public event Action<float> VelocityMultiplierChange;
@@ -51,6 +53,7 @@ namespace ml_prm
         static public event Action<bool> SlipperinessChange;
         static public event Action<bool> BouncinessChange;
         static public event Action<bool> ViewVelocityChange;
+        static public event Action<bool> JumpRecoverChange;
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
@@ -72,7 +75,8 @@ namespace ml_prm
                 ms_category.CreateEntry(ModSetting.RecoverDelay.ToString(), RecoverDelay),
                 ms_category.CreateEntry(ModSetting.Slipperiness.ToString(), Slipperiness),
                 ms_category.CreateEntry(ModSetting.Bounciness.ToString(), Bounciness),
-                ms_category.CreateEntry(ModSetting.ViewVelocity.ToString(), ViewVelocity)
+                ms_category.CreateEntry(ModSetting.ViewVelocity.ToString(), ViewVelocity),
+                ms_category.CreateEntry(ModSetting.JumpRecover.ToString(), JumpRecover)
             };
 
             Hotkey = (bool)ms_entries[(int)ModSetting.Hotkey].BoxedValue;
@@ -88,6 +92,7 @@ namespace ml_prm
             Slipperiness = (bool)ms_entries[(int)ModSetting.Slipperiness].BoxedValue;
             Bounciness = (bool)ms_entries[(int)ModSetting.Bounciness].BoxedValue;
             ViewVelocity = (bool)ms_entries[(int)ModSetting.ViewVelocity].BoxedValue;
+            JumpRecover = (bool)ms_entries[(int)ModSetting.JumpRecover].BoxedValue;
         }
 
         public static void SetSetting(ModSetting p_settings, object p_value)
@@ -155,6 +160,13 @@ namespace ml_prm
                 {
                     ViewVelocity = (bool)p_value;
                     ViewVelocityChange?.Invoke((bool)p_value);
+                }
+                break;
+
+                case ModSetting.JumpRecover:
+                {
+                    JumpRecover = (bool)p_value;
+                    JumpRecoverChange?.Invoke((bool)p_value);
                 }
                 break;
 

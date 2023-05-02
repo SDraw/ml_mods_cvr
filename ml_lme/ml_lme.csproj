@@ -55,6 +55,10 @@
       <HintPath>C:\Games\Steam\steamapps\common\ChilloutVR\MelonLoader\MelonLoader.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="ml_pmc">
+      <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\Mods\ml_pmc.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -89,6 +93,7 @@
     <Compile Include="LeapTracked.cs" />
     <Compile Include="LeapTracking.cs" />
     <Compile Include="Main.cs" />
+    <Compile Include="ModSupporter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Scripts.cs" />
     <Compile Include="Settings.cs" />

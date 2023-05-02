@@ -133,25 +133,39 @@ namespace ml_prm
                 }
             }
 
-            if(Settings.Hotkey && Input.GetKeyDown(KeyCode.R) && !ViewManager.Instance.isGameMenuOpen())
-                SwitchRagdoll();
-
             if((m_avatarRagdollToggle != null) && m_avatarRagdollToggle.isActiveAndEnabled && m_avatarRagdollToggle.shouldOverride && (m_enabled != m_avatarRagdollToggle.isOn))
                 SwitchRagdoll();
 
             if((m_customTrigger != null) && m_customTrigger.GetStateWithReset() && m_avatarReady && !m_enabled && Settings.PointersReaction)
                 SwitchRagdoll();
+
+            if(Settings.Hotkey && Input.GetKeyDown(KeyCode.R) && !ViewManager.Instance.isGameMenuOpen())
+                SwitchRagdoll();
+
+            if(m_avatarReady && m_enabled && CVRInputManager.Instance.jump && Settings.JumpRecover)
+                SwitchRagdoll();
         }
 
         void LateUpdate()
         {
-            if(m_avatarReady && m_enabled && !BodySystem.isCalibrating)
+            if(m_avatarReady)
             {
-                if(BodySystem.isCalibratedAsFullBody)
-                    BodySystem.TrackingPositionWeight = 0f;
+                if(m_enabled)
+                {
+                    if(!BodySystem.isCalibrating)
+                    {
+                        if(BodySystem.isCalibratedAsFullBody)
+                            BodySystem.TrackingPositionWeight = 0f;
 
-                foreach(var l_link in m_boneLinks)
-                    l_link.Item1.CopyGlobal(l_link.Item2);
+                        foreach(var l_link in m_boneLinks)
+                            l_link.Item1.CopyGlobal(l_link.Item2);
+                    }
+                }
+                else
+                {
+                    foreach(var l_link in m_boneLinks)
+                        l_link.Item2.CopyGlobal(l_link.Item1);
+                }
             }
         }
 
@@ -287,15 +301,13 @@ namespace ml_prm
             }
         }
 
-        internal void OnAvatarScaling(float scaleDifference)
+        internal void OnAvatarScaling(float p_scaleDifference)
         {
             if(m_avatarReady)
             {
-                m_puppetRoot.localScale = Vector3.one * scaleDifference;
-                for(int i = 0; i < m_jointAnchors.Count; i++)
-                {
-                    m_jointAnchors[i].Item1.connectedAnchor = m_jointAnchors[i].Item2 * scaleDifference;
-                }
+                m_puppetRoot.localScale = Vector3.one * p_scaleDifference;
+                foreach(var l_pair in m_jointAnchors)
+                    l_pair.Item1.connectedAnchor = l_pair.Item2 * p_scaleDifference;
             }
         }
 
@@ -436,10 +448,6 @@ namespace ml_prm
 
                         if(!Utils.IsWorldSafe())
                             m_reachedGround = false; // Force player to unragdoll and reach ground first
-
-                        // Copy before set to non-kinematic to reduce stacked forces
-                        foreach(var l_link in m_boneLinks)
-                            l_link.Item2.CopyGlobal(l_link.Item1);
 
                         m_puppetRoot.gameObject.SetActive(true);
 
