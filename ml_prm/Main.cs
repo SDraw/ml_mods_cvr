@@ -37,6 +37,11 @@ namespace ml_prm
                 new HarmonyLib.HarmonyMethod(typeof(PlayerRagdollMod).GetMethod(nameof(OnSetupAvatar_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
             HarmonyInstance.Patch(
+                typeof(PlayerSetup).GetMethod("SetupIKScaling", BindingFlags.NonPublic | BindingFlags.Instance),
+                null,
+                new HarmonyLib.HarmonyMethod(typeof(PlayerRagdollMod).GetMethod(nameof(OnSetupIKScaling_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
+            );
+            HarmonyInstance.Patch(
                 typeof(CVRSeat).GetMethod(nameof(CVRSeat.SitDown)),
                 new HarmonyLib.HarmonyMethod(typeof(PlayerRagdollMod).GetMethod(nameof(OnCVRSeatSitDown_Prefix), BindingFlags.Static | BindingFlags.NonPublic)),
                 null
@@ -115,6 +120,20 @@ namespace ml_prm
                     m_localController.OnAvatarSetup();
             }
             catch(Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
+        }
+
+        static void OnSetupIKScaling_Postfix(ref UnityEngine.Vector3 ___scaleDifference) => ms_instance?.OnSetupIKScaling(___scaleDifference.y);
+        void OnSetupIKScaling(float scaleDifference)
+        {
+            try
+            {
+                if (m_localController != null)
+                    m_localController.OnAvatarScaling(1f + scaleDifference);
+            }
+            catch (Exception e)
             {
                 MelonLoader.MelonLogger.Error(e);
             }

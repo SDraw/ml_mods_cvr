@@ -28,6 +28,7 @@ namespace ml_prm
         Transform m_puppet = null;
         BipedRagdollReferences m_puppetReferences;
         readonly List<System.Tuple<Transform, Transform>> m_boneLinks = null;
+        readonly List<System.Tuple<CharacterJoint, Vector3>> m_jointAnchors = null;
 
         bool m_avatarReady = false;
         Vector3 m_lastPosition = Vector3.zero;
@@ -50,6 +51,7 @@ namespace ml_prm
             m_rigidBodies = new List<Rigidbody>();
             m_colliders = new List<Collider>();
             m_boneLinks = new List<System.Tuple<Transform, Transform>>();
+            m_jointAnchors = new List<System.Tuple<CharacterJoint, Vector3>>();
 
             m_physicsMaterial = new PhysicMaterial("Ragdoll");
             m_physicsMaterial.dynamicFriction = 0.5f;
@@ -172,8 +174,10 @@ namespace ml_prm
             m_colliders.Clear();
             m_puppetReferences = new BipedRagdollReferences();
             m_boneLinks.Clear();
+            m_jointAnchors.Clear();
             m_reachedGround = true;
             m_downTime = float.MinValue;
+            m_puppetRoot.localScale = Vector3.one;
         }
 
         internal void OnAvatarSetup()
@@ -244,6 +248,7 @@ namespace ml_prm
                         {
                             l_joint.enablePreprocessing = false;
                             l_joint.enableProjection = true;
+                            m_jointAnchors.Add(System.Tuple.Create(l_joint, l_joint.connectedAnchor));
                         }
 
                         Collider l_collider = l_puppetTransforms[i].GetComponent<Collider>();
@@ -279,6 +284,18 @@ namespace ml_prm
                 m_ragdolledParameter = new AvatarBoolParameter("Ragdolled", PlayerSetup.Instance.animatorManager);
 
                 m_avatarReady = true;
+            }
+        }
+
+        internal void OnAvatarScaling(float scaleDifference)
+        {
+            if(m_avatarReady)
+            {
+                m_puppetRoot.localScale = Vector3.one * scaleDifference;
+                for(int i = 0; i < m_jointAnchors.Count; i++)
+                {
+                    m_jointAnchors[i].Item1.connectedAnchor = m_jointAnchors[i].Item2 * scaleDifference;
+                }
             }
         }
 
