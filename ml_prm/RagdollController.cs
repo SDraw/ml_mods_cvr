@@ -358,6 +358,11 @@ namespace ml_prm
         {
             if(m_enabled)
                 m_vrIK.solver.IKPositionWeight = m_vrIkWeight;
+            else
+            {
+                foreach(var l_link in m_boneLinks)
+                    l_link.Item2.CopyGlobal(l_link.Item1);
+            }
         }
 
         // Settings
