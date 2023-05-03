@@ -120,7 +120,7 @@ namespace ml_prm
             if(m_avatarReady && !m_reachedGround)
                 m_reachedGround = MovementSystem.Instance.IsGrounded();
 
-            if(m_avatarReady && m_enabled && BodySystem.isCalibratedAsFullBody && !BodySystem.isCalibrating)
+            if(m_avatarReady && m_enabled && !BodySystem.isCalibrating)
                 BodySystem.TrackingPositionWeight = 0f;
 
             if(m_avatarReady && m_enabled && Settings.AutoRecover)
@@ -154,8 +154,7 @@ namespace ml_prm
                 {
                     if(!BodySystem.isCalibrating)
                     {
-                        if(BodySystem.isCalibratedAsFullBody)
-                            BodySystem.TrackingPositionWeight = 0f;
+                        BodySystem.TrackingPositionWeight = 0f;
 
                         foreach(var l_link in m_boneLinks)
                             l_link.Item1.CopyGlobal(l_link.Item2);
@@ -448,7 +447,7 @@ namespace ml_prm
                         MovementSystem.Instance.SetImmobilized(true);
                         PlayerSetup.Instance.animatorManager.SetAnimatorParameterTrigger("CancelEmote");
                         m_ragdolledParameter.SetValue(true);
-                        if(BodySystem.isCalibratedAsFullBody)
+                        if(!BodySystem.isCalibrating)
                             BodySystem.TrackingPositionWeight = 0f;
 
                         if(!Utils.IsWorldSafe())
@@ -487,7 +486,7 @@ namespace ml_prm
                     {
                         MovementSystem.Instance.SetImmobilized(false);
                         m_ragdolledParameter.SetValue(false);
-                        if(BodySystem.isCalibratedAsFullBody)
+                        if(!BodySystem.isCalibrating)
                             BodySystem.TrackingPositionWeight = 1f;
 
                         m_puppetRoot.gameObject.SetActive(false);
@@ -501,6 +500,9 @@ namespace ml_prm
 
                         foreach(Collider l_collider in m_colliders)
                             l_collider.enabled = false;
+
+                        if(m_vrIK != null)
+                            m_vrIK.solver.Reset();
 
                         m_lastPosition = PlayerSetup.Instance.transform.position;
                         m_velocity = Vector3.zero;
