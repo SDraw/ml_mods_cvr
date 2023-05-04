@@ -68,11 +68,16 @@ namespace ml_amt
                 );
             }
 
-            // Alternative collider height
+            // Alternative collider height and radius
             HarmonyInstance.Patch(
                 typeof(MovementSystem).GetMethod("UpdateCollider", BindingFlags.NonPublic | BindingFlags.Instance),
                 new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnUpdateCollider_Prefix), BindingFlags.Static | BindingFlags.NonPublic)),
                 null
+            );
+            HarmonyInstance.Patch(
+                typeof(PlayerSetup).GetMethod("SetupIKScaling", BindingFlags.NonPublic | BindingFlags.Instance),
+                null,
+                new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnSetupIKScaling_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
 
             // AAS overriding fix
@@ -252,7 +257,25 @@ namespace ml_amt
 
             return false;
         }
+        static void OnSetupIKScaling_Postfix(
+            ref PlayerSetup __instance,
+            float ____avatarHeight
+        )
+        {
+            if(!Settings.CollisionScale)
+                return;
 
+            try
+            {
+                __instance._movementSystem.UpdateAvatarHeight(Mathf.Clamp(____avatarHeight, 0.05f, float.MaxValue), true);
+            }
+            catch(System.Exception l_exception)
+            {
+                MelonLoader.MelonLogger.Error(l_exception);
+            }
+        }
+
+        // AnimatorOverrideController runtime animation replacement fix
         static void OnOverride_Prefix(ref CVRAnimatorManager __instance, out AnimatorAnalyzer __state)
         {
             __state = new AnimatorAnalyzer();

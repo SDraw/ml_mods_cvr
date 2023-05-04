@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ml_pam", "ml_pam\ml_pam.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ml_prm", "ml_prm\ml_prm.csproj", "{ABD2A720-2DE8-4EB3-BFC2-8F1C3D2ADA15}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ml_pmc", "ml_pmc\ml_pmc.csproj", "{758514D3-6E1A-4E05-A156-B4E5C74AB5C4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -51,6 +53,10 @@ Global
 		{ABD2A720-2DE8-4EB3-BFC2-8F1C3D2ADA15}.Debug|x64.Build.0 = Debug|x64
 		{ABD2A720-2DE8-4EB3-BFC2-8F1C3D2ADA15}.Release|x64.ActiveCfg = Release|x64
 		{ABD2A720-2DE8-4EB3-BFC2-8F1C3D2ADA15}.Release|x64.Build.0 = Release|x64
+		{758514D3-6E1A-4E05-A156-B4E5C74AB5C4}.Debug|x64.ActiveCfg = Debug|x64
+		{758514D3-6E1A-4E05-A156-B4E5C74AB5C4}.Debug|x64.Build.0 = Debug|x64
+		{758514D3-6E1A-4E05-A156-B4E5C74AB5C4}.Release|x64.ActiveCfg = Release|x64
+		{758514D3-6E1A-4E05-A156-B4E5C74AB5C4}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
