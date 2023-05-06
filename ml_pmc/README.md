@@ -19,3 +19,7 @@ Available options in BTKUILib players list upon player selection:
 * **Mirror pose:** enables/disables pose and gestures mirroring; `false` by default.
 * **Mirror position:** enables/disables mirroring of position changes of selected player along 0XZ plane; `false` by default.
 * **Mirror rotation:** enables/disables mirroring of rotation changes of selected player along 0XZ plane; `false` by default.
+
+# Notes
+* Some avatars can have unordinary avatar hierarchy (scaled, rotated or with offset armature/parent objects). Possible fixes are being made upon reports or own findings.
+* Currently misbehaves with FBT, fix in progress.
