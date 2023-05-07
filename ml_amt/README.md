@@ -29,6 +29,9 @@ Available mod's settings in `Settings - IK - Avatar Motion Tweaker`:
 * **Adjusted locomotion mass center:** automatically changes IK locomotion center if avatar has toe bones; default value - `true`.
   * Note: Compatible with [DesktopVRIK](https://github.com/NotAKidOnSteam/DesktopVRIK) and [FuckToes](https://github.com/NotAKidOnSteam/FuckToes).
 * **Scaled locomotion steps:** scales VRIK locomotion steps according to avatar height and scale; default value - `true`.
+#### Fixes/overhauls options
+* **Scaled locomotion jump:** scales locomotion jump according to relation between your player settings height and current avatar height (includes avatar scale); default value - `false`.
+  * Note: Disabled in worlds that don't allow flight.
 * **Alternative avatar collider scale:** applies slightly different approach to avatar collider size change; default value - `true`.
 * **Fix animation overrides (chairs, etc.):** fixes animations overriding for avatars with AAS; default value - `true`.
   * Note: This option is made to address [broken animator in chairs and combat worlds issue](https://feedback.abinteractive.net/p/gestures-getting-stuck-locally-upon-entering-vehicles-chairs).
