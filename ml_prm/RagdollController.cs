@@ -171,7 +171,7 @@ namespace ml_prm
         // Game events
         internal void OnAvatarClear()
         {
-            if(m_enabled)
+            if(m_enabled && (MovementSystem.Instance != null))
                 MovementSystem.Instance.SetImmobilized(false);
 
             if(m_puppet != null)
