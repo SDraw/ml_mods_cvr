@@ -32,7 +32,7 @@ namespace ml_amt
         bool m_bendNormalLeft = false;
         bool m_bendNormalRight = false;
         Transform m_avatarHips = null;
-        float m_viewPointHeight = 1f;
+        float m_avatarHeight = 1f; // Initial avatar view height
         bool m_inVR = false;
         bool m_fbtAnimations = true;
 
@@ -124,7 +124,7 @@ namespace ml_amt
                 // Update upright
                 Matrix4x4 l_hmdMatrix = PlayerSetup.Instance.transform.GetMatrix().inverse * PlayerSetup.Instance.GetActiveCamera().transform.GetMatrix();
                 float l_currentHeight = Mathf.Clamp((l_hmdMatrix * ms_pointVector).y, 0f, float.MaxValue);
-                float l_avatarViewHeight = Mathf.Clamp(m_viewPointHeight * GetRelativeScale(), 0f, float.MaxValue);
+                float l_avatarViewHeight = Mathf.Clamp(m_avatarHeight * GetRelativeScale(), 0f, float.MaxValue);
                 m_upright = Mathf.Clamp01((l_avatarViewHeight > 0f) ? (l_currentHeight / l_avatarViewHeight) : 0f);
                 m_poseState = (m_upright <= Mathf.Min(m_proneLimit, m_crouchLimit)) ? PoseState.Proning : ((m_upright <= Mathf.Max(m_proneLimit, m_crouchLimit)) ? PoseState.Crouching : PoseState.Standing);
 
@@ -189,7 +189,7 @@ namespace ml_amt
             m_locomotionOverride = false;
             m_hipsToPlayer = Vector3.zero;
             m_avatarHips = null;
-            m_viewPointHeight = 1f;
+            m_avatarHeight = 1f;
             m_massCenter = Vector3.zero;
             m_stepDistance = Vector2.zero;
             m_parameters.Clear();
@@ -201,7 +201,7 @@ namespace ml_amt
             m_vrIk = PlayerSetup.Instance._avatar.GetComponent<VRIK>();
             m_locomotionLayer = PlayerSetup.Instance._animator.GetLayerIndex("Locomotion/Emotes");
             m_avatarHips = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.Hips);
-            m_viewPointHeight = PlayerSetup.Instance._avatar.GetComponent<ABI.CCK.Components.CVRAvatar>().viewPosition.y;
+            m_avatarHeight = PlayerSetup.Instance._avatar.GetComponent<ABI.CCK.Components.CVRAvatar>().viewPosition.y;
 
             // Parse animator parameters
             m_parameters.Add(new AvatarParameter(AvatarParameter.ParameterType.Upright, PlayerSetup.Instance.animatorManager));

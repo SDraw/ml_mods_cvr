@@ -83,8 +83,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AnimatorAnalyzer.cs" />
+    <Compile Include="Fixes\AnimatorAnalyzer.cs" />
     <Compile Include="AvatarParameter.cs" />
+    <Compile Include="Fixes\AnimatorOverrideControllerFix.cs" />
+    <Compile Include="Fixes\FBTDetectionFix.cs" />
+    <Compile Include="Fixes\MovementJumpFix.cs" />
+    <Compile Include="Fixes\PlayerColliderFix.cs" />
     <Compile Include="ModSupporter.cs" />
     <Compile Include="MotionTweaker.cs" />
     <Compile Include="Main.cs" />

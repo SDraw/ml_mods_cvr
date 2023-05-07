@@ -263,16 +263,25 @@ function inp_toggle_mod_amt(_obj, _callbackName) {
                 <div id="ScaledSteps" class ="inp_toggle no-scroll" data-current="true"></div>
             </div>
         </div>
+
+        <h4><p style="color: #7F7F7F">Avatar independent game fixes/overhauls</p></h4><br>
+
+        <div class ="row-wrapper">
+            <div class ="option-caption">Scaled locomotion jump: </div>
+            <div class ="option-input">
+                <div id="ScaledJump" class ="inp_toggle no-scroll" data-current="false"></div>
+            </div>
+        </div>
         
         <div class ="row-wrapper">
-            <div class ="option-caption">Alternative avatar collider scale: </div>
+            <div class ="option-caption">Alternative avatar collider: </div>
             <div class ="option-input">
                 <div id="CollisionScale" class ="inp_toggle no-scroll" data-current="true"></div>
             </div>
         </div>
 
         <div class ="row-wrapper">
-            <div class ="option-caption">Fix animation overrides (chairs, etc.): </div>
+            <div class ="option-caption">Fix animator overrides (chairs, etc.): </div>
             <div class ="option-input">
                 <div id="OverrideFix" class ="inp_toggle no-scroll" data-current="true"></div>
             </div>

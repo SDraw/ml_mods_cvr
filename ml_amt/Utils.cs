@@ -1,4 +1,5 @@
-﻿using ABI_RC.Systems.MovementSystem;
+﻿using ABI.CCK.Components;
+using ABI_RC.Systems.MovementSystem;
 using RootMotion.FinalIK;
 using System.Reflection;
 using UnityEngine;
@@ -21,6 +22,27 @@ namespace ml_amt
         public static Keyframe[] GetSineKeyframes(float p_mag)
         {
             return (Keyframe[])ms_getSineKeyframes.Invoke(null, new object[] { p_mag });
+        }
+
+        public static bool IsWorldSafe() => ((CVRWorld.Instance != null) && CVRWorld.Instance.allowFlying);
+        public static float GetWorldJumpHeight()
+        {
+            float l_result = 1f;
+            if(CVRWorld.Instance != null)
+                l_result = CVRWorld.Instance.jumpHeight;
+            return l_result;
+        }
+        public static float GetWorldMovementLimit()
+        {
+            float l_result = 1f;
+            if(CVRWorld.Instance != null)
+            {
+                l_result = CVRWorld.Instance.baseMovementSpeed;
+                l_result *= CVRWorld.Instance.sprintMultiplier;
+                l_result *= CVRWorld.Instance.inAirMovementMultiplier;
+                l_result *= CVRWorld.Instance.flyMultiplier;
+            }
+            return l_result;
         }
 
         // Engine extensions
