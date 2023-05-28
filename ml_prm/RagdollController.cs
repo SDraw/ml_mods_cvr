@@ -41,6 +41,7 @@ namespace ml_prm
         readonly PhysicMaterial m_physicsMaterial = null;
 
         bool m_reachedGround = true;
+        float m_groundedTime = 0f;
         float m_downTime = float.MinValue;
 
         internal RagdollController()
@@ -115,10 +116,14 @@ namespace ml_prm
                 Vector3 l_pos = PlayerSetup.Instance.transform.position;
                 m_velocity = (m_velocity + (l_pos - m_lastPosition) / Time.deltaTime) * 0.5f;
                 m_lastPosition = l_pos;
-            }
 
-            if(m_avatarReady && !m_reachedGround)
-                m_reachedGround = MovementSystem.Instance.IsGrounded();
+                if(!m_reachedGround && MovementSystem.Instance.IsGrounded())
+                {
+                    m_groundedTime += Time.deltaTime;
+                    if(m_groundedTime >= 0.25f)
+                        m_reachedGround = true;
+                }
+            }
 
             if(m_avatarReady && m_enabled && !BodySystem.isCalibrating)
                 BodySystem.TrackingPositionWeight = 0f;
@@ -189,6 +194,7 @@ namespace ml_prm
             m_boneLinks.Clear();
             m_jointAnchors.Clear();
             m_reachedGround = true;
+            m_groundedTime = 0f;
             m_downTime = float.MinValue;
             m_puppetRoot.localScale = Vector3.one;
         }
@@ -335,7 +341,10 @@ namespace ml_prm
         internal void OnCombatDown()
         {
             if(m_avatarReady && !m_enabled && Settings.CombatReaction)
+            {
+                m_reachedGround = true;
                 SwitchRagdoll();
+            }
         }
 
         internal void OnToggleFlight()
@@ -451,7 +460,10 @@ namespace ml_prm
                             BodySystem.TrackingPositionWeight = 0f;
 
                         if(!Utils.IsWorldSafe())
+                        {
                             m_reachedGround = false; // Force player to unragdoll and reach ground first
+                            m_groundedTime = 0f;
+                        }
 
                         m_puppetRoot.gameObject.SetActive(true);
 
@@ -485,6 +497,13 @@ namespace ml_prm
                     if(IsSafeToUnragdoll())
                     {
                         MovementSystem.Instance.SetImmobilized(false);
+                        if(!Utils.IsWorldSafe())
+                        {
+                            Vector3 l_vec = MovementSystem.Instance.GetAppliedGravity();
+                            l_vec.y = Mathf.Clamp(l_vec.y, float.MinValue, 0f);
+                            MovementSystem.Instance.SetAppliedGravity(l_vec);
+                        }
+
                         m_ragdolledParameter.SetValue(false);
                         if(!BodySystem.isCalibrating)
                             BodySystem.TrackingPositionWeight = 1f;

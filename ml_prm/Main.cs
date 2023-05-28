@@ -130,10 +130,10 @@ namespace ml_prm
         {
             try
             {
-                if (m_localController != null)
+                if(m_localController != null)
                     m_localController.OnAvatarScaling(1f + p_scaleDifference);
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 MelonLoader.MelonLogger.Error(e);
             }
