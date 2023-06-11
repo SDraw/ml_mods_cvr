@@ -9,8 +9,8 @@ Merged set of MelonLoader mods for ChilloutVR.
 | Desktop Reticle Switch | ml_drs | 1.0.0 | ✔ Yes |
 | Extended Game Notifications | ml_egn | 1.0.2 | ✔ Yes |
 | Four Point Tracking | ml_fpt | 1.0.9 | ✔ Yes<br>⭕ **Retired** | In-game feature since 2022r170 update
-| Leap Motion Extension | ml_lme | 1.3.7 | ✔ Yes<br>⏱ Update review |
-| Pickup Arm Movement | ml_pam | 1.0.5 | ✔ Yes<br>⏱ Update review |
+| Leap Motion Extension | ml_lme | 1.3.7 | ✔ Yes |
+| Pickup Arm Movement | ml_pam | 1.0.5 | ✔ Yes |
 | Player Movement Copycat | ml_pmc | 1.0.0 | ✔ Yes |
-| Player Ragdoll Mod | ml_prm | 1.0.5 | ✔ Yes<br>⏱ Update review |
+| Player Ragdoll Mod | ml_prm | 1.0.5 | ✔ Yes |
 | Server Connection Info | ml_sci | 1.0.2 | ✔ Yes<br>⭕ **Retired** | Superseded by `Extended Game Notifications`
