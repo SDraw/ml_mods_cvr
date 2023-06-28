@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <Platforms>x64</Platforms>
     <PackageId>ExtendedGameNotifications</PackageId>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Authors>SDraw</Authors>
     <Company>None</Company>
     <Product>ExtendedGameNotifications</Product>
@@ -21,8 +21,7 @@
 
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\MelonLoader\0Harmony.dll</HintPath>
-      <Private>false</Private>
+      <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\MelonLoader\net35\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\Assembly-CSharp.dll</HintPath>
@@ -41,8 +40,7 @@
       <Private>false</Private>
     </Reference>
     <Reference Include="MelonLoader">
-      <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\MelonLoader\MelonLoader.dll</HintPath>
-      <Private>false</Private>
+      <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\MelonLoader\net35\MelonLoader.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\UnityEngine.CoreModule.dll</HintPath>

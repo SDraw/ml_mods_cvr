@@ -1,5 +1,4 @@
 ﻿using ABI_RC.Core.EventSystem;
-using ABI_RC.Core.InteractionSystem;
 using ABI_RC.Core.IO;
 using ABI_RC.Core.Networking;
 using ABI_RC.Core.Util;
@@ -57,6 +56,7 @@ namespace ml_egn
                     Utils.ShowMenuNotification("Avatar changed", 1f);
                 else
                     Utils.ShowHUDNotification("(Synced) Client", "Avatar changed");
+
             }
             catch(System.Exception e)
             {
@@ -68,19 +68,37 @@ namespace ml_egn
         {
             try
             {
-                if(Utils.IsConnected())
+                if(Utils.ArePropsEnabled())
                 {
-                    if(Utils.IsMenuOpened())
-                        Utils.ShowMenuNotification("Prop spawned", 1f);
+                    if(Utils.ArePropsAllowed())
+                    {
+                        if(Utils.IsConnected())
+                        {
+                            if(Utils.IsMenuOpened())
+                                Utils.ShowMenuNotification("Prop spawned", 1f);
+                            else
+                                Utils.ShowHUDNotification("(Synced) Client", "Prop spawned");
+                        }
+                        else
+                        {
+                            if(Utils.IsMenuOpened())
+                                Utils.ShowMenuAlert("Prop Error", "Not connected to live instance");
+                            else
+                                Utils.ShowHUDNotification("(Local) Client", "Unable to spawn prop", "Not connected to live instance");
+                        }
+                    }
                     else
-                        Utils.ShowHUDNotification("(Synced) Client", "Prop spawned");
+                    {
+                        if(Utils.IsMenuOpened())
+                            Utils.ShowMenuAlert("Prop Error", "Props are not allowed in this world");
+                    }
                 }
                 else
                 {
                     if(Utils.IsMenuOpened())
-                        Utils.ShowMenuAlert("Prop Error", "Not connected to live instance");
+                        Utils.ShowMenuAlert("Prop Error", "Props are disabled in game settings");
                     else
-                        Utils.ShowHUDNotification("(Local) Client", "Unable to spawn prop", "Not connected to live instance");
+                        Utils.ShowHUDNotification("(Local) Client", "Unable to spawn prop", "Props are disabled in game settings");
                 }
             }
             catch(System.Exception e)

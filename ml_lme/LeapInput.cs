@@ -2,20 +2,19 @@
 using ABI_RC.Core.Player;
 using ABI_RC.Core.Savior;
 using ABI_RC.Systems.IK;
+using ABI_RC.Systems.InputManagement;
 using System.Collections;
-using System.Reflection;
 using UnityEngine;
 
 namespace ml_lme
 {
-    [DisallowMultipleComponent]
     class LeapInput : CVRInputModule
     {
-        CVRInputManager m_inputManager = null;
-        InputModuleOpenXR m_openXrModule = null;
         bool m_inVR = false;
         bool m_gripToGrab = true;
 
+        bool m_handVisibleLeft = false;
+        bool m_handVisibleRight = false;
         ControllerRay m_handRayLeft = null;
         ControllerRay m_handRayRight = null;
         LineRenderer m_lineLeft = null;
@@ -25,22 +24,31 @@ namespace ml_lme
         bool m_gripLeft = false;
         bool m_gripRight = false;
 
-        public new void Start()
+        ~LeapInput()
         {
-            base.Start();
+            Settings.EnabledChange -= this.OnEnableChange;
+            Settings.InputChange -= this.OnInputChange;
 
-            m_inputManager = CVRInputManager.Instance; // _inputManager is stripped out, cool beans
-            m_openXrModule = m_inputManager.GetComponent<InputModuleOpenXR>();
+            MetaPort.Instance.settings.settingBoolChanged.RemoveListener(this.OnGameSettingBoolChange);
+        }
+
+        public override void ModuleAdded()
+        {
+            base.ModuleAdded();
+
+            InputEnabled = Settings.Enabled;
+            HapticFeedback = false;
+
             m_inVR = Utils.IsInVR();
 
-            m_handRayLeft = LeapTracking.GetInstance().GetLeftHand().gameObject.AddComponent<ControllerRay>();
+            m_handRayLeft = LeapTracking.Instance.GetLeftHand().gameObject.AddComponent<ControllerRay>();
             m_handRayLeft.hand = true;
             m_handRayLeft.generalMask = -1485;
             m_handRayLeft.isInteractionRay = true;
             m_handRayLeft.triggerGazeEvents = false;
             m_handRayLeft.holderRoot = m_handRayLeft.gameObject;
 
-            m_handRayRight = LeapTracking.GetInstance().GetRightHand().gameObject.AddComponent<ControllerRay>();
+            m_handRayRight = LeapTracking.Instance.GetRightHand().gameObject.AddComponent<ControllerRay>();
             m_handRayRight.hand = false;
             m_handRayRight.generalMask = -1485;
             m_handRayRight.isInteractionRay = true;
@@ -107,43 +115,64 @@ namespace ml_lme
             m_lineRight.gameObject.layer = PlayerSetup.Instance.leftRay.gameObject.layer;
         }
 
-        void OnDestroy()
-        {
-            Settings.EnabledChange -= this.OnEnableChange;
-            Settings.InputChange -= this.OnInputChange;
-        }
-
-        void Update()
-        {
-            GestureMatcher.LeapData l_data = LeapManager.GetInstance().GetLatestData();
-
-            if(Settings.Enabled)
-            {
-                if(l_data.m_leftHand.m_present)
-                    SetFingersInput(l_data.m_leftHand, true);
-
-                if(l_data.m_rightHand.m_present)
-                    SetFingersInput(l_data.m_rightHand, false);
-
-                if(m_inVR)
-                {
-                    m_inputManager.individualFingerTracking = !m_openXrModule.GetIndexGestureToggle();
-                    m_inputManager.individualFingerTracking |= (l_data.m_leftHand.m_present || l_data.m_rightHand.m_present);
-                }
-                else
-                    m_inputManager.individualFingerTracking = (l_data.m_leftHand.m_present || l_data.m_rightHand.m_present);
-                IKSystem.Instance.FingerSystem.controlActive = m_inputManager.individualFingerTracking;
-            }
-
-            m_handRayLeft.enabled = (l_data.m_leftHand.m_present && (!m_inVR || !Utils.IsLeftHandTracked() || !Settings.FingersOnly));
-            m_handRayRight.enabled = (l_data.m_rightHand.m_present && (!m_inVR || !Utils.IsRightHandTracked() || !Settings.FingersOnly));
-        }
-
         public override void UpdateInput()
         {
-            if(Settings.Enabled && Settings.Input)
+            if(InputEnabled)
             {
-                GestureMatcher.LeapData l_data = LeapManager.GetInstance().GetLatestData();
+                GestureMatcher.LeapData l_data = LeapManager.Instance.GetLatestData();
+
+                if(l_data.m_leftHand.m_present)
+                {
+                    SetFingersInput(l_data.m_leftHand, true);
+                    m_handVisibleLeft = true;
+                }
+                else
+                {
+                    if(m_handVisibleLeft)
+                    {
+                        ResetFingers(true);
+                        m_handVisibleLeft = false;
+                    }
+                }
+
+                if(l_data.m_rightHand.m_present)
+                {
+                    SetFingersInput(l_data.m_rightHand, false);
+                    m_handVisibleRight = true;
+                }
+                else
+                {
+                    if(m_handVisibleRight)
+                    {
+                        ResetFingers(false);
+                        m_handVisibleRight = false;
+                    }
+                }
+
+                if(!ModSupporter.SkipFingersOverride())
+                {
+                    if(m_inVR)
+                    {
+                        _inputManager.individualFingerTracking = !CVRInputManager._moduleXR.GestureToggleValue;
+                        _inputManager.individualFingerTracking |= (l_data.m_leftHand.m_present || l_data.m_rightHand.m_present);
+                    }
+                    else
+                        _inputManager.individualFingerTracking = (l_data.m_leftHand.m_present || l_data.m_rightHand.m_present);
+                    IKSystem.Instance.FingerSystem.controlActive = _inputManager.individualFingerTracking;
+                }
+
+                m_handRayLeft.enabled = (l_data.m_leftHand.m_present && (!m_inVR || !Utils.IsLeftHandTracked() || !Settings.FingersOnly));
+                m_handRayRight.enabled = (l_data.m_rightHand.m_present && (!m_inVR || !Utils.IsRightHandTracked() || !Settings.FingersOnly));
+
+                base.UpdateInput();
+            }
+        }
+
+        public override void Update_Interaction()
+        {
+            if(Settings.Input)
+            {
+                GestureMatcher.LeapData l_data = LeapManager.Instance.GetLatestData();
 
                 if(l_data.m_leftHand.m_present && (!m_inVR || !Utils.IsLeftHandTracked() || !Settings.FingersOnly))
                 {
@@ -154,22 +183,22 @@ namespace ml_lme
                         l_interactValue = Mathf.Clamp01(Mathf.InverseLerp(Mathf.Min(Settings.GripThreadhold, Settings.InteractThreadhold), Mathf.Max(Settings.GripThreadhold, Settings.InteractThreadhold), l_strength));
                     else
                         l_interactValue = Mathf.Clamp01(Mathf.InverseLerp(0f, Settings.InteractThreadhold, l_strength));
-                    m_inputManager.interactLeftValue = Mathf.Max(l_interactValue, m_inputManager.interactLeftValue);
+                    _inputManager.interactLeftValue = Mathf.Max(l_interactValue, _inputManager.interactLeftValue);
 
                     if(m_interactLeft != (l_strength > Settings.InteractThreadhold))
                     {
                         m_interactLeft = (l_strength > Settings.InteractThreadhold);
-                        m_inputManager.interactLeftDown |= m_interactLeft;
-                        m_inputManager.interactLeftUp |= !m_interactLeft;
+                        _inputManager.interactLeftDown |= m_interactLeft;
+                        _inputManager.interactLeftUp |= !m_interactLeft;
                     }
 
                     float l_gripValue = Mathf.Clamp01(Mathf.InverseLerp(0f, Settings.GripThreadhold, l_strength));
-                    m_inputManager.gripLeftValue = Mathf.Max(l_gripValue, m_inputManager.gripLeftValue);
+                    _inputManager.gripLeftValue = Mathf.Max(l_gripValue, _inputManager.gripLeftValue);
                     if(m_gripLeft != (l_strength > Settings.GripThreadhold))
                     {
                         m_gripLeft = (l_strength > Settings.GripThreadhold);
-                        m_inputManager.gripLeftDown |= m_gripLeft;
-                        m_inputManager.gripLeftUp |= !m_gripLeft;
+                        _inputManager.gripLeftDown |= m_gripLeft;
+                        _inputManager.gripLeftUp |= !m_gripLeft;
                     }
                 }
 
@@ -182,22 +211,22 @@ namespace ml_lme
                         l_interactValue = Mathf.Clamp01(Mathf.InverseLerp(Mathf.Min(Settings.GripThreadhold, Settings.InteractThreadhold), Mathf.Max(Settings.GripThreadhold, Settings.InteractThreadhold), l_strength));
                     else
                         l_interactValue = Mathf.Clamp01(Mathf.InverseLerp(0f, Settings.InteractThreadhold, l_strength));
-                    m_inputManager.interactRightValue = Mathf.Max(l_interactValue, m_inputManager.interactRightValue);
+                    _inputManager.interactRightValue = Mathf.Max(l_interactValue, _inputManager.interactRightValue);
 
                     if(m_interactRight != (l_strength > Settings.InteractThreadhold))
                     {
                         m_interactRight = (l_strength > Settings.InteractThreadhold);
-                        m_inputManager.interactRightDown |= m_interactRight;
-                        m_inputManager.interactRightUp |= !m_interactRight;
+                        _inputManager.interactRightDown |= m_interactRight;
+                        _inputManager.interactRightUp |= !m_interactRight;
                     }
 
                     float l_gripValue = Mathf.Clamp01(Mathf.InverseLerp(0f, Settings.GripThreadhold, l_strength));
-                    m_inputManager.gripRightValue = Mathf.Max(l_gripValue, m_inputManager.gripRightValue);
+                    _inputManager.gripRightValue = Mathf.Max(l_gripValue, _inputManager.gripRightValue);
                     if(m_gripRight != (l_strength > Settings.GripThreadhold))
                     {
                         m_gripRight = (l_strength > Settings.GripThreadhold);
-                        m_inputManager.gripRightDown |= m_gripRight;
-                        m_inputManager.gripRightUp |= !m_gripRight;
+                        _inputManager.gripRightDown |= m_gripRight;
+                        _inputManager.gripRightUp |= !m_gripRight;
                     }
                 }
             }
@@ -206,8 +235,12 @@ namespace ml_lme
         // Settings changes
         void OnEnableChange(bool p_state)
         {
+            InputEnabled = p_state;
+
             OnInputChange(p_state && Settings.Input);
             UpdateFingerTracking();
+            m_handVisibleLeft &= p_state;
+            m_handVisibleRight &= p_state;
         }
 
         void OnInputChange(bool p_state)
@@ -248,27 +281,73 @@ namespace ml_lme
         // Arbitrary
         void UpdateFingerTracking()
         {
-            m_inputManager.individualFingerTracking = (Settings.Enabled || (m_inVR && m_openXrModule.AreKnucklesInUse() && !m_openXrModule.GetIndexGestureToggle()));
-            IKSystem.Instance.FingerSystem.controlActive = m_inputManager.individualFingerTracking;
+            _inputManager.individualFingerTracking = (Settings.Enabled || (m_inVR && Utils.AreKnucklesInUse() && !CVRInputManager._moduleXR.GestureToggleValue));
+            IKSystem.Instance.FingerSystem.controlActive = _inputManager.individualFingerTracking;
+
+            if(!Settings.Enabled)
+            {
+                ResetFingers(true);
+                ResetFingers(false);
+            }
         }
 
         void SetFingersInput(GestureMatcher.HandData p_hand, bool p_left)
         {
             if(p_left)
             {
-                m_inputManager.fingerCurlLeftThumb = p_hand.m_bends[0];
-                m_inputManager.fingerCurlLeftIndex = p_hand.m_bends[1];
-                m_inputManager.fingerCurlLeftMiddle = p_hand.m_bends[2];
-                m_inputManager.fingerCurlLeftRing = p_hand.m_bends[3];
-                m_inputManager.fingerCurlLeftPinky = p_hand.m_bends[4];
+                _inputManager.fingerCurlLeftThumb = p_hand.m_bends[0];
+                _inputManager.fingerCurlLeftIndex = p_hand.m_bends[1];
+                _inputManager.fingerCurlLeftMiddle = p_hand.m_bends[2];
+                _inputManager.fingerCurlLeftRing = p_hand.m_bends[3];
+                _inputManager.fingerCurlLeftPinky = p_hand.m_bends[4];
+                _inputManager.fingerSpreadLeftThumb = p_hand.m_spreads[0];
+                _inputManager.fingerSpreadLeftIndex = p_hand.m_spreads[1];
+                _inputManager.fingerSpreadLeftMiddle = p_hand.m_spreads[2];
+                _inputManager.fingerSpreadLeftRing = p_hand.m_spreads[3];
+                _inputManager.fingerSpreadLeftPinky = p_hand.m_spreads[4];
             }
             else
             {
-                m_inputManager.fingerCurlRightThumb = p_hand.m_bends[0];
-                m_inputManager.fingerCurlRightIndex = p_hand.m_bends[1];
-                m_inputManager.fingerCurlRightMiddle = p_hand.m_bends[2];
-                m_inputManager.fingerCurlRightRing = p_hand.m_bends[3];
-                m_inputManager.fingerCurlRightPinky = p_hand.m_bends[4];
+                _inputManager.fingerCurlRightThumb = p_hand.m_bends[0];
+                _inputManager.fingerCurlRightIndex = p_hand.m_bends[1];
+                _inputManager.fingerCurlRightMiddle = p_hand.m_bends[2];
+                _inputManager.fingerCurlRightRing = p_hand.m_bends[3];
+                _inputManager.fingerCurlRightPinky = p_hand.m_bends[4];
+                _inputManager.fingerSpreadRightThumb = p_hand.m_spreads[0];
+                _inputManager.fingerSpreadRightIndex = p_hand.m_spreads[1];
+                _inputManager.fingerSpreadRightMiddle = p_hand.m_spreads[2];
+                _inputManager.fingerSpreadRightRing = p_hand.m_spreads[3];
+                _inputManager.fingerSpreadRightPinky = p_hand.m_spreads[4];
+            }
+        }
+
+        void ResetFingers(bool p_left)
+        {
+            if(p_left)
+            {
+                _inputManager.fingerCurlLeftThumb = 0f;
+                _inputManager.fingerCurlLeftIndex = 0f;
+                _inputManager.fingerCurlLeftMiddle = 0f;
+                _inputManager.fingerCurlLeftRing = 0f;
+                _inputManager.fingerCurlLeftPinky = 0f;
+                _inputManager.fingerSpreadLeftThumb = 0f;
+                _inputManager.fingerSpreadLeftIndex = 0f;
+                _inputManager.fingerSpreadLeftMiddle = 0f;
+                _inputManager.fingerSpreadLeftRing = 0f;
+                _inputManager.fingerSpreadLeftPinky = 0f;
+            }
+            else
+            {
+                _inputManager.fingerCurlRightThumb = 0f;
+                _inputManager.fingerCurlRightIndex = 0f;
+                _inputManager.fingerCurlRightMiddle = 0f;
+                _inputManager.fingerCurlRightRing = 0f;
+                _inputManager.fingerCurlRightPinky = 0f;
+                _inputManager.fingerSpreadRightThumb = 0f;
+                _inputManager.fingerSpreadRightIndex = 0f;
+                _inputManager.fingerSpreadRightMiddle = 0f;
+                _inputManager.fingerSpreadRightRing = 0f;
+                _inputManager.fingerSpreadRightPinky = 0f;
             }
         }
 

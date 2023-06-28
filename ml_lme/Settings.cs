@@ -1,4 +1,5 @@
 ﻿using ABI_RC.Core.InteractionSystem;
+using cohtml;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -67,7 +68,7 @@ namespace ml_lme
 
         internal static void Init()
         {
-            ms_category = MelonLoader.MelonPreferences.CreateCategory("LME");
+            ms_category = MelonLoader.MelonPreferences.CreateCategory("LME", null, true);
 
             ms_entries = new List<MelonLoader.MelonPreferences_Entry>()
             {

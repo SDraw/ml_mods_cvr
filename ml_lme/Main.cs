@@ -49,6 +49,7 @@ namespace ml_lme
                 new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnPlayspaceScale_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
 
+            ModSupporter.Init();
             MelonLoader.MelonCoroutines.Start(WaitForRootLogic());
         }
 

@@ -1,4 +1,5 @@
 ﻿using ABI_RC.Core.InteractionSystem;
+using cohtml;
 using System;
 using System.Collections.Generic;
 
@@ -23,7 +24,7 @@ namespace ml_pam
 
         internal static void Init()
         {
-            ms_category = MelonLoader.MelonPreferences.CreateCategory("PAM");
+            ms_category = MelonLoader.MelonPreferences.CreateCategory("PAM", null, true);
 
             ms_entries = new List<MelonLoader.MelonPreferences_Entry>()
             {

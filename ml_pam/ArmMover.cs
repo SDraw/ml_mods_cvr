@@ -132,6 +132,11 @@ namespace ml_pam
 
             if(PlayerSetup.Instance._animator.isHuman)
             {
+                Vector3 l_hipsPos = Vector3.zero;
+                Transform l_hips = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.Hips);
+                if(l_hips != null)
+                    l_hipsPos = l_hips.localPosition;
+                
                 HumanPose l_currentPose = new HumanPose();
                 HumanPoseHandler l_poseHandler = null;
 
@@ -190,6 +195,9 @@ namespace ml_pam
 
                 l_poseHandler?.SetHumanPose(ref l_currentPose);
                 l_poseHandler?.Dispose();
+
+                if(l_hips != null)
+                    l_hips.localPosition = l_hipsPos;
             }
 
             if(m_enabled)

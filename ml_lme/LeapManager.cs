@@ -1,5 +1,6 @@
 ﻿using ABI_RC.Core.Player;
 using ABI_RC.Core.Savior;
+using ABI_RC.Systems.InputManagement;
 using System.Collections;
 using UnityEngine;
 
@@ -8,32 +9,22 @@ namespace ml_lme
     [DisallowMultipleComponent]
     class LeapManager : MonoBehaviour
     {
-        static LeapManager ms_instance = null;
+        public static LeapManager Instance { get; private set; } = null;
 
-        readonly Leap.Controller m_leapController = null;
-        readonly GestureMatcher.LeapData m_leapData = null;
+        Leap.Controller m_leapController = null;
+        GestureMatcher.LeapData m_leapData = null;
 
         LeapTracking m_leapTracking = null;
         LeapTracked m_leapTracked = null;
         LeapInput m_leapInput = null;
 
-        public static LeapManager GetInstance() => ms_instance;
-
-        internal LeapManager()
+        void Awake()
         {
+            if(Instance == null)
+                Instance = this;
+
             m_leapController = new Leap.Controller();
             m_leapData = new GestureMatcher.LeapData();
-        }
-        ~LeapManager()
-        {
-            m_leapController.StopConnection();
-            m_leapController.Dispose();
-        }
-
-        void Start()
-        {
-            if(ms_instance == null)
-                ms_instance = this;
 
             DontDestroyOnLoad(this);
 
@@ -49,40 +40,43 @@ namespace ml_lme
             m_leapTracking = new GameObject("[LeapTrackingRoot]").AddComponent<LeapTracking>();
             m_leapTracking.transform.parent = this.transform;
 
-            MelonLoader.MelonCoroutines.Start(WaitForInputManager());
-            MelonLoader.MelonCoroutines.Start(WaitForLocalPlayer());
-
             OnEnableChange(Settings.Enabled);
             OnTrackingModeChange(Settings.TrackingMode);
+
+            MelonLoader.MelonCoroutines.Start(WaitForObjects());
         }
 
         void OnDestroy()
         {
-            if(ms_instance == this)
-                ms_instance = null;
+            if(Instance == this)
+                Instance = null;
 
+            m_leapController.StopConnection();
             m_leapController.Device -= this.OnLeapDeviceInitialized;
             m_leapController.DeviceFailure -= this.OnLeapDeviceFailure;
             m_leapController.DeviceLost -= this.OnLeapDeviceLost;
             m_leapController.Connect -= this.OnLeapServiceConnect;
             m_leapController.Disconnect -= this.OnLeapServiceDisconnect;
+            m_leapController.Dispose();
+            m_leapController = null;
 
             Settings.EnabledChange -= this.OnEnableChange;
             Settings.TrackingModeChange -= this.OnTrackingModeChange;
         }
 
-        IEnumerator WaitForInputManager()
+        IEnumerator WaitForObjects()
         {
             while(CVRInputManager.Instance == null)
                 yield return null;
 
-            m_leapInput = CVRInputManager.Instance.gameObject.AddComponent<LeapInput>();
-        }
-
-        IEnumerator WaitForLocalPlayer()
-        {
             while(PlayerSetup.Instance == null)
                 yield return null;
+
+            while(LeapTracking.Instance == null)
+                yield return null;
+
+            m_leapInput = new LeapInput();
+            CVRInputManager.Instance.AddInputModule(m_leapInput);
 
             m_leapTracked = PlayerSetup.Instance.gameObject.AddComponent<LeapTracked>();
         }
@@ -168,8 +162,9 @@ namespace ml_lme
         {
             if(m_leapTracking != null)
                 m_leapTracking.OnAvatarSetup();
-            if(m_leapInput != null)
-                m_leapInput.OnAvatarSetup();
+
+            m_leapInput?.OnAvatarSetup();
+
             if(m_leapTracked != null)
                 m_leapTracked.OnAvatarSetup();
         }
@@ -182,8 +177,7 @@ namespace ml_lme
 
         internal void OnRayScale(float p_scale)
         {
-            if(m_leapInput != null)
-                m_leapInput.OnRayScale(p_scale);
+            m_leapInput?.OnRayScale(p_scale);
         }
 
         internal void OnPlayspaceScale(float p_relation)
