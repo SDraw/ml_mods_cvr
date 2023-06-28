@@ -30,6 +30,7 @@
     </Reference>
     <Reference Include="MelonLoader">
       <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\MelonLoader\net35\MelonLoader.dll</HintPath>
+      <Private>false</Private>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
