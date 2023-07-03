@@ -9,7 +9,8 @@ namespace ml_lme
     {
         static readonly List<string> ms_assets = new List<string>()
         {
-            "leapmotion_controller.asset"
+            "leapmotion_controller.asset",
+            "leapmotion_hands.asset"
         };
 
         static Dictionary<string, AssetBundle> ms_loadedAssets = new Dictionary<string, AssetBundle>();

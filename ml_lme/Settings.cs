@@ -34,7 +34,8 @@ namespace ml_lme
             TrackElbows,
             Input,
             InteractThreadhold,
-            GripThreadhold
+            GripThreadhold,
+            VisualHands
         };
 
         public static bool Enabled { get; private set; } = false;
@@ -49,6 +50,7 @@ namespace ml_lme
         public static bool Input { get; private set; } = true;
         public static float InteractThreadhold { get; private set; } = 0.8f;
         public static float GripThreadhold { get; private set; } = 0.4f;
+        public static bool VisualHands { get; private set; } = false;
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
@@ -65,6 +67,7 @@ namespace ml_lme
         static public event Action<bool> InputChange;
         static public event Action<float> InteractThreadholdChange;
         static public event Action<float> GripThreadholdChange;
+        static public event Action<bool> VisualHandsChange;
 
         internal static void Init()
         {
@@ -90,6 +93,7 @@ namespace ml_lme
                 ms_category.CreateEntry(ModSetting.Input.ToString(), Input),
                 ms_category.CreateEntry(ModSetting.InteractThreadhold.ToString(), (int)(InteractThreadhold * 100f)),
                 ms_category.CreateEntry(ModSetting.GripThreadhold.ToString(), (int)(GripThreadhold * 100f)),
+                ms_category.CreateEntry(ModSetting.VisualHands.ToString(), VisualHands)
             };
 
             Load();
@@ -146,6 +150,7 @@ namespace ml_lme
             Input = (bool)ms_entries[(int)ModSetting.Input].BoxedValue;
             InteractThreadhold = (int)ms_entries[(int)ModSetting.InteractThreadhold].BoxedValue * 0.01f;
             GripThreadhold = (int)ms_entries[(int)ModSetting.GripThreadhold].BoxedValue * 0.01f;
+            VisualHands = (bool)ms_entries[(int)ModSetting.VisualHands].BoxedValue;
         }
 
         static void OnToggleUpdate(string p_name, string p_value)
@@ -193,6 +198,13 @@ namespace ml_lme
                     {
                         Input = bool.Parse(p_value);
                         InputChange?.Invoke(Input);
+                    }
+                    break;
+
+                    case ModSetting.VisualHands:
+                    {
+                        VisualHands = bool.Parse(p_value);
+                        VisualHandsChange?.Invoke(VisualHands);
                     }
                     break;
                 }

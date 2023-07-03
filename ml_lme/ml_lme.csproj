@@ -83,6 +83,14 @@
       <HintPath>C:\Games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.PhysicsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssetsHandler.cs" />
@@ -130,6 +138,7 @@
     <Compile Include="vendor\LeapCSharp\StructMarshal.cs" />
     <Compile Include="vendor\LeapCSharp\TransformExtensions.cs" />
     <Compile Include="vendor\LeapCSharp\Vector.cs" />
+    <Compile Include="VisualHand.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="vendor\LeapSDK\lib\x64\LeapC.dll">
@@ -141,6 +150,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="resources\menu.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="resources\leapmotion_hands.asset" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

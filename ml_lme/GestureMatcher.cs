@@ -22,11 +22,15 @@ namespace ml_lme
             public readonly float[] m_spreads = null;
             public readonly float[] m_bends = null;
             public float m_grabStrength = 0f;
+            public Vector3[] m_fingerPosition;
+            public Quaternion[] m_fingerRotation;
 
             public HandData()
             {
                 m_spreads = new float[5];
                 m_bends = new float[5];
+                m_fingerPosition = new Vector3[20];
+                m_fingerRotation = new Quaternion[20];
             }
 
             public void Reset()
@@ -36,6 +40,11 @@ namespace ml_lme
                 {
                     m_bends[i] = 0f;
                     m_spreads[i] = 0f;
+                }
+                for(int i = 0; i < 20; i++)
+                {
+                    m_fingerPosition[i].Set(0f, 0f, 0f);
+                    m_fingerRotation[i].Set(0f, 0f, 0f, 1f);
                 }
                 m_grabStrength = 0f;
             }
@@ -89,6 +98,9 @@ namespace ml_lme
                 float l_angle = 0f;
                 foreach(Leap.Bone l_bone in l_finger.bones)
                 {
+                    p_data.m_fingerPosition[(int)l_finger.Type * 4 + (int)l_bone.Type].Set(l_bone.PrevJoint.x, l_bone.PrevJoint.y, l_bone.PrevJoint.z);
+                    p_data.m_fingerRotation[(int)l_finger.Type * 4 + (int)l_bone.Type].Set(l_bone.Rotation.x, l_bone.Rotation.y, l_bone.Rotation.z, l_bone.Rotation.w);
+
                     if(l_bone.Type == Leap.Bone.BoneType.TYPE_METACARPAL)
                     {
                         l_prevSegment = new Quaternion(l_bone.Rotation.x, l_bone.Rotation.y, l_bone.Rotation.z, l_bone.Rotation.w);

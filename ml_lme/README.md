@@ -21,6 +21,7 @@ Available mod's settings in `Settings - Implementation - Leap Motion Tracking`:
 * **Track elbows:** elbows tracking, works best in `Screentop` and `HMD` tracking modes, `true` by default.
 * **Fingers tracking only:** applies only fingers tracking, disabled by default.
 * **Model visibility:** shows Leap Motion controller model, useful for tracking visualizing, disabled by default.
+* **Visualize hands:** shows overlayed hands model, disabled by default.
 * **Interaction input:** enables in-game interactions (props, menu and etc.); `true` by default.
 * **Interact gesture threadhold:** activation limit for interaction based on hand gesture; 80 by default.
 * **Grip gesture threadhold:** activation limit for grip based on hand gesture; 40 by default.
