@@ -7,7 +7,7 @@ Merged set of MelonLoader mods for ChilloutVR.
 | Desktop Head Tracking | ml_dht | 1.1.3 | ✔ Yes |
 | Desktop Reticle Switch | ml_drs | 1.0.0 | ✔ Yes |
 | Extended Game Notifications | ml_egn | 1.0.2 | ✔ Yes |
-| Leap Motion Extension | ml_lme | 1.3.7 | ✔ Yes |
+| Leap Motion Extension | ml_lme | 1.3.8 | ✔ Yes<br>⏳ Update review |
 | Pickup Arm Movement | ml_pam | 1.0.5 | ✔ Yes |
 | Player Movement Copycat | ml_pmc | 1.0.0 | ✔ Yes |
 | Player Ragdoll Mod | ml_prm | 1.0.5 | ✔ Yes |
