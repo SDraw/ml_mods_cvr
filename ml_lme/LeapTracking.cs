@@ -8,7 +8,9 @@ namespace ml_lme
     class LeapTracking : MonoBehaviour
     {
         public static LeapTracking Instance { get; private set; } = null;
-        static Quaternion ms_identityRotation = Quaternion.identity;
+        static Quaternion ms_dummyRotation = Quaternion.identity;
+        static readonly Quaternion ms_hmdRotation = new Quaternion(0f, 0.7071068f, 0.7071068f, 0f);
+        static readonly Quaternion ms_screentopRotation = new Quaternion(0f, 0f, -1f, 0f);
 
         bool m_inVR = false;
 
@@ -17,6 +19,9 @@ namespace ml_lme
         GameObject m_leapElbowLeft = null;
         GameObject m_leapElbowRight = null;
         GameObject m_leapControllerModel = null;
+        GameObject m_visualHands = null;
+        VisualHand m_visualHandLeft = null;
+        VisualHand m_visualHandRight = null;
 
         float m_scaleRelation = 1f;
 
@@ -56,8 +61,21 @@ namespace ml_lme
                 m_leapControllerModel.transform.localRotation = Quaternion.identity;
             }
 
+            m_visualHands = AssetsHandler.GetAsset("assets/models/hands/leaphands.prefab");
+            if(m_visualHands != null)
+            {
+                m_visualHands.name = "VisualHands";
+                m_visualHands.transform.parent = this.transform;
+                m_visualHands.transform.localPosition = Vector3.zero;
+                m_visualHands.transform.localRotation = Quaternion.identity;
+
+                m_visualHandLeft = new VisualHand(m_visualHands.transform.Find("HandL"), true);
+                m_visualHandRight = new VisualHand(m_visualHands.transform.Find("HandR"), false);
+            }
+
             Settings.DesktopOffsetChange += this.OnDesktopOffsetChange;
             Settings.ModelVisibilityChange += this.OnModelVisibilityChange;
+            Settings.VisualHandsChange += this.OnVisualHandsChange;
             Settings.TrackingModeChange += this.OnTrackingModeChange;
             Settings.RootAngleChange += this.OnRootAngleChange;
             Settings.HeadAttachChange += this.OnHeadAttachChange;
@@ -66,6 +84,7 @@ namespace ml_lme
             MelonLoader.MelonCoroutines.Start(WaitForLocalPlayer());
 
             OnModelVisibilityChange(Settings.ModelVisibility);
+            OnVisualHandsChange(Settings.VisualHands);
             OnTrackingModeChange(Settings.TrackingMode);
             OnRootAngleChange(Settings.RootAngle);
         }
@@ -99,22 +118,34 @@ namespace ml_lme
 
                 if(l_data.m_leftHand.m_present)
                 {
-                    Utils.LeapToUnity(ref l_data.m_leftHand.m_position, ref l_data.m_leftHand.m_rotation, Settings.TrackingMode);
+                    OrientationAdjustment(ref l_data.m_leftHand.m_position, ref l_data.m_leftHand.m_rotation, Settings.TrackingMode);
+                    for(int i = 0; i < 20; i++)
+                        OrientationAdjustment(ref l_data.m_leftHand.m_fingerPosition[i], ref l_data.m_leftHand.m_fingerRotation[i], Settings.TrackingMode);
+
                     m_leapHandLeft.transform.localPosition = l_data.m_leftHand.m_position;
                     m_leapHandLeft.transform.localRotation = l_data.m_leftHand.m_rotation;
 
-                    Utils.LeapToUnity(ref l_data.m_leftHand.m_elbowPosition, ref ms_identityRotation, Settings.TrackingMode);
+                    OrientationAdjustment(ref l_data.m_leftHand.m_elbowPosition, ref ms_dummyRotation, Settings.TrackingMode);
                     m_leapElbowLeft.transform.localPosition = l_data.m_leftHand.m_elbowPosition;
+
+                    if(Settings.VisualHands)
+                        m_visualHandLeft?.Update(l_data.m_leftHand);
                 }
 
                 if(l_data.m_rightHand.m_present)
                 {
-                    Utils.LeapToUnity(ref l_data.m_rightHand.m_position, ref l_data.m_rightHand.m_rotation, Settings.TrackingMode);
+                    OrientationAdjustment(ref l_data.m_rightHand.m_position, ref l_data.m_rightHand.m_rotation, Settings.TrackingMode);
+                    for(int i = 0; i < 20; i++)
+                        OrientationAdjustment(ref l_data.m_rightHand.m_fingerPosition[i], ref l_data.m_rightHand.m_fingerRotation[i], Settings.TrackingMode);
+
                     m_leapHandRight.transform.localPosition = l_data.m_rightHand.m_position;
                     m_leapHandRight.transform.localRotation = l_data.m_rightHand.m_rotation;
 
-                    Utils.LeapToUnity(ref l_data.m_rightHand.m_elbowPosition, ref ms_identityRotation, Settings.TrackingMode);
+                    OrientationAdjustment(ref l_data.m_rightHand.m_elbowPosition, ref ms_dummyRotation, Settings.TrackingMode);
                     m_leapElbowRight.transform.localPosition = l_data.m_rightHand.m_elbowPosition;
+
+                    if(Settings.VisualHands)
+                        m_visualHandRight?.Update(l_data.m_rightHand);
                 }
             }
         }
@@ -134,6 +165,11 @@ namespace ml_lme
         void OnModelVisibilityChange(bool p_state)
         {
             m_leapControllerModel.SetActive(p_state);
+        }
+
+        void OnVisualHandsChange(bool p_state)
+        {
+            m_visualHands.SetActive(p_state);
         }
 
         void OnTrackingModeChange(Settings.LeapTrackingMode p_mode)
@@ -197,6 +233,28 @@ namespace ml_lme
         {
             m_scaleRelation = p_relation;
             OnHeadAttachChange(Settings.HeadAttach);
+        }
+
+        static void OrientationAdjustment(ref Vector3 p_pos, ref Quaternion p_rot, Settings.LeapTrackingMode p_mode)
+        {
+            switch(p_mode)
+            {
+                case Settings.LeapTrackingMode.Screentop:
+                {
+                    p_pos.x *= -1f;
+                    p_pos.y *= -1f;
+                    p_rot = (ms_screentopRotation * p_rot);
+                }
+                break;
+
+                case Settings.LeapTrackingMode.HMD:
+                {
+                    p_pos.x *= -1f;
+                    Utils.Swap(ref p_pos.y, ref p_pos.z);
+                    p_rot = (ms_hmdRotation * p_rot);
+                }
+                break;
+            }
         }
     }
 }

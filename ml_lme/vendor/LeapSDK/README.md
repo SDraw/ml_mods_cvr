@@ -5,8 +5,6 @@
 ## Package contents:
 
 LeapSDK
-- docs
-	* API reference documentation & guidelines.
 - include
 	* API headers.
 - lib
@@ -14,9 +12,11 @@ LeapSDK
 - samples
 	* Various samples demonstrating several different usages.
 - LICENSE.md
-	* Ultraleap Tracking SDK license.
-- Uninstall.exe
-	* Program to uninstall the LeapSDK application (Windows only).
+    * Ultraleap Tracking SDK license.
+- README.md
+    * Ultraleap Tracking SDK readme.
+- ThirdPartyNotices.md
+    * Ultraleap Tracking SDK third party licenses.
 
 ## Requirements:
 
@@ -75,7 +75,7 @@ cmake --build $env:REPOS_BUILD_ROOT/$env:BUILD_TYPE/LeapSDK/leapc_example -j --c
 
 ### x64 Linux
 
-1. Open CMake using /usr/share/doc/ultraleap-tracking/samples as the source directory    
+1. Open CMake using /usr/share/doc/ultraleap-hand-tracking-service/samples as the source directory    
     
 2. Select a build directory (eg. ~/ultraleap-tracking-samples/build) to use    
     
@@ -84,7 +84,7 @@ cmake --build $env:REPOS_BUILD_ROOT/$env:BUILD_TYPE/LeapSDK/leapc_example -j --c
 4. Open and build the CMake generated project files. For more help, see the CMake documentation.
     * An example script would be :    
 ```bash    
-SRC_DIR=/usr/share/doc/ultraleap-tracking/samples    
+SRC_DIR=/usr/share/doc/ultraleap-hand-tracking-service/samples    
 BUILD_TYPE='Release'    
 REPOS_BUILD_ROOT=~/ultraleap-tracking-samples/build     
 REPOS_INSTALL_ROOT=/usr/bin/ultraleap-tracking-samples    
@@ -94,6 +94,29 @@ cmake -S ${SRC_DIR} -B ${REPOS_BUILD_ROOT}/${BUILD_TYPE}/LeapSDK/leapc_example `
         -DCMAKE_BUILD_TYPE="${BUILD_TYPE}"    
     
 cmake --build ${REPOS_BUILD_ROOT}/${BUILD_TYPE}/LeapSDK/leapc_example -j --config ${BUILD_TYPE}    
+``` 
+
+### MacOS
+
+1. Open CMake using /Library/Application Support/Ultraleap/LeapSDK/samples as the source directory
+
+2. Select a build directory (eg. ~/ultraleap-tracking-samples/build) to use
+
+3. Configure & Generate CMake with the generator of your choice
+
+4. Open and build the CMake generated project files. For more help, see the CMake documentation.
+    * An example script would be :
+```bash    
+SRC_DIR='/Library/Application Support/Ultraleap/LeapSDK/samples'
+BUILD_TYPE='Release'
+REPOS_BUILD_ROOT=~/ultraleap-tracking-samples/build
+REPOS_INSTALL_ROOT=~/ultraleap-tracking-samples/bin
+
+cmake -S ${SRC_DIR} -B ${REPOS_BUILD_ROOT}/${BUILD_TYPE}/LeapSDK/leapc_example `
+-DCMAKE_INSTALL_PREFIX="${REPOS_INSTALL_ROOT}/leapc_example" `
+-DCMAKE_BUILD_TYPE="${BUILD_TYPE}"
+
+cmake --build ${REPOS_BUILD_ROOT}/${BUILD_TYPE}/LeapSDK/leapc_example -j --config ${BUILD_TYPE}   
 ``` 
 
 ## Resources:

@@ -22,11 +22,15 @@ namespace ml_lme
             public readonly float[] m_spreads = null;
             public readonly float[] m_bends = null;
             public float m_grabStrength = 0f;
+            public Vector3[] m_fingerPosition;
+            public Quaternion[] m_fingerRotation;
 
             public HandData()
             {
                 m_spreads = new float[5];
                 m_bends = new float[5];
+                m_fingerPosition = new Vector3[20];
+                m_fingerRotation = new Quaternion[20];
             }
 
             public void Reset()
@@ -36,6 +40,11 @@ namespace ml_lme
                 {
                     m_bends[i] = 0f;
                     m_spreads[i] = 0f;
+                }
+                for(int i = 0; i < 20; i++)
+                {
+                    m_fingerPosition[i].Set(0f, 0f, 0f);
+                    m_fingerRotation[i].Set(0f, 0f, 0f, 1f);
                 }
                 m_grabStrength = 0f;
             }
@@ -77,9 +86,9 @@ namespace ml_lme
         {
             // Unity's IK and FinalIK move hand bones to target, therefore - wrist
             p_data.m_present = true;
-            p_data.m_position.Set(p_hand.WristPosition.x, p_hand.WristPosition.y, p_hand.WristPosition.z);
-            p_data.m_rotation.Set(p_hand.Rotation.x, p_hand.Rotation.y, p_hand.Rotation.z, p_hand.Rotation.w);
-            p_data.m_elbowPosition.Set(p_hand.Arm.ElbowPosition.x, p_hand.Arm.ElbowPosition.y, p_hand.Arm.ElbowPosition.z);
+            p_data.m_position = p_hand.WristPosition;
+            p_data.m_rotation = p_hand.Rotation;
+            p_data.m_elbowPosition = p_hand.Arm.ElbowPosition;
 
             // Bends
             foreach(Leap.Finger l_finger in p_hand.Fingers)
@@ -89,41 +98,36 @@ namespace ml_lme
                 float l_angle = 0f;
                 foreach(Leap.Bone l_bone in l_finger.bones)
                 {
+                    p_data.m_fingerPosition[(int)l_finger.Type * 4 + (int)l_bone.Type] = l_bone.PrevJoint;
+                    p_data.m_fingerRotation[(int)l_finger.Type * 4 + (int)l_bone.Type] = l_bone.Rotation;
+
                     if(l_bone.Type == Leap.Bone.BoneType.TYPE_METACARPAL)
                     {
-                        l_prevSegment = new Quaternion(l_bone.Rotation.x, l_bone.Rotation.y, l_bone.Rotation.z, l_bone.Rotation.w);
+                        l_prevSegment = l_bone.Rotation;
                         continue;
                     }
 
-                    Quaternion l_curSegment = new Quaternion(l_bone.Rotation.x, l_bone.Rotation.y, l_bone.Rotation.z, l_bone.Rotation.w);
-                    Quaternion l_diff = Quaternion.Inverse(l_prevSegment) * l_curSegment;
-                    l_prevSegment = l_curSegment;
+                    Quaternion l_diff = Quaternion.Inverse(l_prevSegment) * l_bone.Rotation;
+                    l_prevSegment = l_bone.Rotation;
 
-                    // Bend - local X rotation
-                    float l_curAngle = 360f - l_diff.eulerAngles.x;
-                    if(l_curAngle > 180f)
-                        l_curAngle -= 360f;
-                    l_angle += l_curAngle;
+                    float l_angleDiff = l_diff.eulerAngles.x;
+                    if(l_angleDiff > 180f)
+                        l_angleDiff -= 360f;
+                    l_angle += l_angleDiff;
                 }
 
-                p_data.m_bends[(int)l_finger.Type] = Mathf.InverseLerp(0f, (l_finger.Type == Leap.Finger.FingerType.TYPE_THUMB) ? 90f : 180f, l_angle);
+                p_data.m_bends[(int)l_finger.Type] = Utils.InverseLerpUnclamped(0f, (l_finger.Type == Leap.Finger.FingerType.TYPE_THUMB) ? 90f : 180f, l_angle);
             }
 
             // Spreads
             foreach(Leap.Finger l_finger in p_hand.Fingers)
             {
-                float l_angle = 0f;
-
                 Leap.Bone l_parent = l_finger.Bone(Leap.Bone.BoneType.TYPE_METACARPAL);
                 Leap.Bone l_child = l_finger.Bone(Leap.Bone.BoneType.TYPE_PROXIMAL);
-
-                Quaternion l_parentRot = new Quaternion(l_parent.Rotation.x, l_parent.Rotation.y, l_parent.Rotation.z, l_parent.Rotation.w);
-                Quaternion l_childRot = new Quaternion(l_child.Rotation.x, l_child.Rotation.y, l_child.Rotation.z, l_child.Rotation.w);
-
-                Quaternion l_diff = Quaternion.Inverse(l_parentRot) * l_childRot;
+                Quaternion l_diff = Quaternion.Inverse(l_parent.Rotation) * l_child.Rotation;
 
                 // Spread - local Y rotation, but thumb is obnoxious
-                l_angle = l_diff.eulerAngles.y;
+                float l_angle = 360f - l_diff.eulerAngles.y;
                 if(l_angle > 180f)
                     l_angle -= 360f;
 
@@ -134,15 +138,15 @@ namespace ml_lme
                 if(l_finger.Type != Leap.Finger.FingerType.TYPE_THUMB)
                 {
                     if(l_angle < 0f)
-                        p_data.m_spreads[(int)l_finger.Type] = 0.5f * Mathf.InverseLerp(ms_fingerLimits[(int)l_finger.Type].x, 0f, l_angle);
+                        p_data.m_spreads[(int)l_finger.Type] = 0.5f * Utils.InverseLerpUnclamped(ms_fingerLimits[(int)l_finger.Type].x, 0f, l_angle);
                     else
-                        p_data.m_spreads[(int)l_finger.Type] = 0.5f + 0.5f * Mathf.InverseLerp(0f, ms_fingerLimits[(int)l_finger.Type].y, l_angle);
+                        p_data.m_spreads[(int)l_finger.Type] = 0.5f + 0.5f * Utils.InverseLerpUnclamped(0f, ms_fingerLimits[(int)l_finger.Type].y, l_angle);
                 }
                 else
-                    p_data.m_spreads[(int)l_finger.Type] = Mathf.InverseLerp(ms_fingerLimits[(int)l_finger.Type].x, ms_fingerLimits[(int)l_finger.Type].y, l_angle);
+                    p_data.m_spreads[(int)l_finger.Type] = Utils.InverseLerpUnclamped(ms_fingerLimits[(int)l_finger.Type].x, ms_fingerLimits[(int)l_finger.Type].y, l_angle);
             }
 
-            p_data.m_grabStrength = (p_data.m_bends[1] + p_data.m_bends[2] + p_data.m_bends[3] + p_data.m_bends[4]) * 0.25f;
+            p_data.m_grabStrength = Mathf.Clamp01((p_data.m_bends[1] + p_data.m_bends[2] + p_data.m_bends[3] + p_data.m_bends[4]) * 0.25f);
         }
     }
 }

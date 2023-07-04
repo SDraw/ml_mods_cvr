@@ -10,9 +10,6 @@ namespace ml_lme
 {
     static class Utils
     {
-        static readonly Quaternion ms_hmdRotationFix = new Quaternion(0f, 0.7071068f, 0.7071068f, 0f);
-        static readonly Quaternion ms_screentopRotationFix = new Quaternion(0f, 0f, -1f, 0f);
-
         static FieldInfo ms_cohtmlView = typeof(CohtmlControlledViewDisposable).GetField("_view", BindingFlags.NonPublic | BindingFlags.Instance);
 
         public static bool IsInVR() => ((CheckVR.Instance != null) && CheckVR.Instance.hasVrDeviceLoaded);
@@ -38,38 +35,18 @@ namespace ml_lme
 
         public static void ExecuteScript(this CohtmlControlledViewDisposable p_instance, string p_script) => ((cohtml.Net.View)ms_cohtmlView.GetValue(p_instance))?.ExecuteScript(p_script);
 
-        public static void LeapToUnity(ref Vector3 p_pos, ref Quaternion p_rot, Settings.LeapTrackingMode p_mode)
-        {
-            p_pos *= 0.001f;
-            p_pos.z *= -1f;
-            p_rot.x *= -1f;
-            p_rot.y *= -1f;
-
-            switch(p_mode)
-            {
-                case Settings.LeapTrackingMode.Screentop:
-                {
-                    p_pos.x *= -1f;
-                    p_pos.y *= -1f;
-                    p_rot = (ms_screentopRotationFix * p_rot);
-                }
-                break;
-
-                case Settings.LeapTrackingMode.HMD:
-                {
-                    p_pos.x *= -1f;
-                    Swap(ref p_pos.y, ref p_pos.z);
-                    p_rot = (ms_hmdRotationFix * p_rot);
-                }
-                break;
-            }
-        }
-
         public static void Swap<T>(ref T lhs, ref T rhs)
         {
             T temp = lhs;
             lhs = rhs;
             rhs = temp;
+        }
+
+        public static float InverseLerpUnclamped(float a, float b, float value)
+        {
+            if(a != b)
+                return (value - a) / (b - a);
+            return 0f;
         }
     }
 }
