@@ -8,7 +8,9 @@ namespace ml_lme
     class LeapTracking : MonoBehaviour
     {
         static LeapTracking ms_instance = null;
-        static Quaternion ms_identityRotation = Quaternion.identity;
+        static Quaternion ms_dummyRotation = Quaternion.identity;
+        static readonly Quaternion ms_hmdRotation = new Quaternion(0f, 0.7071068f, 0.7071068f, 0f);
+        static readonly Quaternion ms_screentopRotation = new Quaternion(0f, 0f, -1f, 0f);
 
         bool m_inVR = false;
 
@@ -118,14 +120,14 @@ namespace ml_lme
 
                 if(l_data.m_leftHand.m_present)
                 {
-                    Utils.LeapToUnity(ref l_data.m_leftHand.m_position, ref l_data.m_leftHand.m_rotation, Settings.TrackingMode);
+                    OrientationAdjustment(ref l_data.m_leftHand.m_position, ref l_data.m_leftHand.m_rotation, Settings.TrackingMode);
                     for(int i = 0; i < 20; i++)
-                        Utils.LeapToUnity(ref l_data.m_leftHand.m_fingerPosition[i], ref l_data.m_leftHand.m_fingerRotation[i], Settings.TrackingMode);
+                        OrientationAdjustment(ref l_data.m_leftHand.m_fingerPosition[i], ref l_data.m_leftHand.m_fingerRotation[i], Settings.TrackingMode);
 
                     m_leapHandLeft.transform.localPosition = l_data.m_leftHand.m_position;
                     m_leapHandLeft.transform.localRotation = l_data.m_leftHand.m_rotation;
 
-                    Utils.LeapToUnity(ref l_data.m_leftHand.m_elbowPosition, ref ms_identityRotation, Settings.TrackingMode);
+                    OrientationAdjustment(ref l_data.m_leftHand.m_elbowPosition, ref ms_dummyRotation, Settings.TrackingMode);
                     m_leapElbowLeft.transform.localPosition = l_data.m_leftHand.m_elbowPosition;
 
                     if(Settings.VisualHands)
@@ -134,14 +136,14 @@ namespace ml_lme
 
                 if(l_data.m_rightHand.m_present)
                 {
-                    Utils.LeapToUnity(ref l_data.m_rightHand.m_position, ref l_data.m_rightHand.m_rotation, Settings.TrackingMode);
+                    OrientationAdjustment(ref l_data.m_rightHand.m_position, ref l_data.m_rightHand.m_rotation, Settings.TrackingMode);
                     for(int i = 0; i < 20; i++)
-                        Utils.LeapToUnity(ref l_data.m_rightHand.m_fingerPosition[i], ref l_data.m_rightHand.m_fingerRotation[i], Settings.TrackingMode);
+                        OrientationAdjustment(ref l_data.m_rightHand.m_fingerPosition[i], ref l_data.m_rightHand.m_fingerRotation[i], Settings.TrackingMode);
 
                     m_leapHandRight.transform.localPosition = l_data.m_rightHand.m_position;
                     m_leapHandRight.transform.localRotation = l_data.m_rightHand.m_rotation;
 
-                    Utils.LeapToUnity(ref l_data.m_rightHand.m_elbowPosition, ref ms_identityRotation, Settings.TrackingMode);
+                    OrientationAdjustment(ref l_data.m_rightHand.m_elbowPosition, ref ms_dummyRotation, Settings.TrackingMode);
                     m_leapElbowRight.transform.localPosition = l_data.m_rightHand.m_elbowPosition;
 
                     if(Settings.VisualHands)
@@ -233,6 +235,28 @@ namespace ml_lme
         {
             m_scaleRelation = p_relation;
             OnHeadAttachChange(Settings.HeadAttach);
+        }
+
+        static void OrientationAdjustment(ref Vector3 p_pos, ref Quaternion p_rot, Settings.LeapTrackingMode p_mode)
+        {
+            switch(p_mode)
+            {
+                case Settings.LeapTrackingMode.Screentop:
+                {
+                    p_pos.x *= -1f;
+                    p_pos.y *= -1f;
+                    p_rot = (ms_screentopRotation * p_rot);
+                }
+                break;
+
+                case Settings.LeapTrackingMode.HMD:
+                {
+                    p_pos.x *= -1f;
+                    Utils.Swap(ref p_pos.y, ref p_pos.z);
+                    p_rot = (ms_hmdRotation * p_rot);
+                }
+                break;
+            }
         }
     }
 }

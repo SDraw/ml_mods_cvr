@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) Ultraleap, Inc. 2011-2021.                                   *
+ * Copyright (C) Ultraleap, Inc. 2011-2023.                                   *
  *                                                                            *
  * Use subject to the terms of the Apache License 2.0 available at            *
  * http://www.apache.org/licenses/LICENSE-2.0, or another agreement           *
@@ -151,14 +151,10 @@ namespace Leap
             if (camera != CameraType.LEFT && camera != CameraType.RIGHT)
                 return null;
 
-            return imageData(camera).DistortionData.Data;
+            // We return the FlippedData, not the Data member as this corrects for a Y flip in the distortion matrix coming from the service.
+            return imageData(camera).DistortionData.FlippedData;
         }
 
-        [System.Obsolete("This signature will be removed in the next major version of the plugin. Use the one with Vector3 instead.")]
-        public Vector PixelToRectilinear(CameraType camera, Vector pixel)
-        {
-            return Connection.GetConnection().PixelToRectilinear(camera, pixel);
-        }
         /// <summary>
         /// Provides the corrected camera ray intercepting the specified point on the image.
         /// 
@@ -183,11 +179,6 @@ namespace Leap
             return Connection.GetConnection().PixelToRectilinear(camera, pixel);
         }
 
-        [System.Obsolete("This signature will be removed in the next major version of the plugin. Use the one with Vector3 instead.")]
-        public Vector RectilinearToPixel(CameraType camera, Vector ray)
-        {
-            return Connection.GetConnection().RectilinearToPixel(camera, ray);
-        }
         /// <summary>
         /// Provides the point in the image corresponding to a ray projecting
         /// from the camera.
@@ -214,7 +205,11 @@ namespace Leap
         /// </summary>
         public UnityEngine.Vector3 RectilinearToPixel(CameraType camera, UnityEngine.Vector3 ray)
         {
-            return Connection.GetConnection().RectilinearToPixel(camera, ray);
+            return Connection.GetConnection().RectilinearToPixelEx(
+                Connection.GetConnection().Devices.FindDeviceByID(deviceId).Handle,
+                camera,
+                ray
+            );
         }
 
         /// <summary>

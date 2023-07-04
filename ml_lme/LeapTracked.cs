@@ -145,58 +145,58 @@ namespace ml_lme
         {
             if(p_data.m_leftHand.m_present)
             {
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftThumb1Stretched, Mathf.Lerp(0.85f, -0.85f, p_data.m_leftHand.m_bends[0]));
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftThumb2Stretched, Mathf.Lerp(0.85f, -0.85f, p_data.m_leftHand.m_bends[0]));
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftThumb3Stretched, Mathf.Lerp(0.85f, -0.85f, p_data.m_leftHand.m_bends[0]));
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftThumbSpread, Mathf.Lerp(-1.5f, 1.0f, p_data.m_leftHand.m_spreads[0])); // Ok
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftThumb1Stretched, Mathf.LerpUnclamped(0.85f, -0.85f, p_data.m_leftHand.m_bends[0]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftThumb2Stretched, Mathf.LerpUnclamped(0.85f, -0.85f, p_data.m_leftHand.m_bends[0]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftThumb3Stretched, Mathf.LerpUnclamped(0.85f, -0.85f, p_data.m_leftHand.m_bends[0]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftThumbSpread, Mathf.LerpUnclamped(-1.5f, 1.0f, p_data.m_leftHand.m_spreads[0])); // Ok
 
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftIndex1Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_leftHand.m_bends[1]));
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftIndex2Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_leftHand.m_bends[1]));
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftIndex3Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_leftHand.m_bends[1]));
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftIndexSpread, Mathf.Lerp(1f, -1f, p_data.m_leftHand.m_spreads[1])); // Ok
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftIndex1Stretched, Mathf.LerpUnclamped(0.7f, -1f, p_data.m_leftHand.m_bends[1]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftIndex2Stretched, Mathf.LerpUnclamped(0.7f, -1f, p_data.m_leftHand.m_bends[1]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftIndex3Stretched, Mathf.LerpUnclamped(0.7f, -1f, p_data.m_leftHand.m_bends[1]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftIndexSpread, Mathf.LerpUnclamped(1f, -1f, p_data.m_leftHand.m_spreads[1])); // Ok
 
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftMiddle1Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_leftHand.m_bends[2]));
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftMiddle2Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_leftHand.m_bends[2]));
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftMiddle3Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_leftHand.m_bends[2]));
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftMiddleSpread, Mathf.Lerp(2f, -2f, p_data.m_leftHand.m_spreads[2]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftMiddle1Stretched, Mathf.LerpUnclamped(0.7f, -1f, p_data.m_leftHand.m_bends[2]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftMiddle2Stretched, Mathf.LerpUnclamped(0.7f, -1f, p_data.m_leftHand.m_bends[2]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftMiddle3Stretched, Mathf.LerpUnclamped(0.7f, -1f, p_data.m_leftHand.m_bends[2]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftMiddleSpread, Mathf.LerpUnclamped(2f, -2f, p_data.m_leftHand.m_spreads[2]));
 
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftRing1Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_leftHand.m_bends[3]));
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftRing2Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_leftHand.m_bends[3]));
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftRing3Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_leftHand.m_bends[3]));
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftRingSpread, Mathf.Lerp(-2f, 2f, p_data.m_leftHand.m_spreads[3]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftRing1Stretched, Mathf.LerpUnclamped(0.7f, -1f, p_data.m_leftHand.m_bends[3]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftRing2Stretched, Mathf.LerpUnclamped(0.7f, -1f, p_data.m_leftHand.m_bends[3]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftRing3Stretched, Mathf.LerpUnclamped(0.7f, -1f, p_data.m_leftHand.m_bends[3]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftRingSpread, Mathf.LerpUnclamped(-2f, 2f, p_data.m_leftHand.m_spreads[3]));
 
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftLittle1Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_leftHand.m_bends[4]));
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftLittle2Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_leftHand.m_bends[4]));
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftLittle3Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_leftHand.m_bends[4]));
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftLittleSpread, Mathf.Lerp(-0.5f, 1f, p_data.m_leftHand.m_spreads[4]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftLittle1Stretched, Mathf.LerpUnclamped(0.7f, -1f, p_data.m_leftHand.m_bends[4]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftLittle2Stretched, Mathf.LerpUnclamped(0.7f, -1f, p_data.m_leftHand.m_bends[4]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftLittle3Stretched, Mathf.LerpUnclamped(0.7f, -1f, p_data.m_leftHand.m_bends[4]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftLittleSpread, Mathf.LerpUnclamped(-0.5f, 1f, p_data.m_leftHand.m_spreads[4]));
             }
 
             if(p_data.m_rightHand.m_present)
             {
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightThumb1Stretched, Mathf.Lerp(0.85f, -0.85f, p_data.m_rightHand.m_bends[0]));
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightThumb2Stretched, Mathf.Lerp(0.85f, -0.85f, p_data.m_rightHand.m_bends[0]));
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightThumb3Stretched, Mathf.Lerp(0.85f, -0.85f, p_data.m_rightHand.m_bends[0]));
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightThumbSpread, Mathf.Lerp(-1.5f, 1.0f, p_data.m_rightHand.m_spreads[0])); // Ok
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightThumb1Stretched, Mathf.LerpUnclamped(0.85f, -0.85f, p_data.m_rightHand.m_bends[0]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightThumb2Stretched, Mathf.LerpUnclamped(0.85f, -0.85f, p_data.m_rightHand.m_bends[0]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightThumb3Stretched, Mathf.LerpUnclamped(0.85f, -0.85f, p_data.m_rightHand.m_bends[0]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightThumbSpread, Mathf.LerpUnclamped(-1.5f, 1.0f, p_data.m_rightHand.m_spreads[0])); // Ok
 
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightIndex1Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_rightHand.m_bends[1]));
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightIndex2Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_rightHand.m_bends[1]));
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightIndex3Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_rightHand.m_bends[1]));
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightIndexSpread, Mathf.Lerp(1f, -1f, p_data.m_rightHand.m_spreads[1])); // Ok
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightIndex1Stretched, Mathf.LerpUnclamped(0.7f, -1f, p_data.m_rightHand.m_bends[1]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightIndex2Stretched, Mathf.LerpUnclamped(0.7f, -1f, p_data.m_rightHand.m_bends[1]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightIndex3Stretched, Mathf.LerpUnclamped(0.7f, -1f, p_data.m_rightHand.m_bends[1]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightIndexSpread, Mathf.LerpUnclamped(1f, -1f, p_data.m_rightHand.m_spreads[1])); // Ok
 
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightMiddle1Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_rightHand.m_bends[2]));
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightMiddle2Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_rightHand.m_bends[2]));
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightMiddle3Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_rightHand.m_bends[2]));
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightMiddleSpread, Mathf.Lerp(2f, -2f, p_data.m_rightHand.m_spreads[2]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightMiddle1Stretched, Mathf.LerpUnclamped(0.7f, -1f, p_data.m_rightHand.m_bends[2]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightMiddle2Stretched, Mathf.LerpUnclamped(0.7f, -1f, p_data.m_rightHand.m_bends[2]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightMiddle3Stretched, Mathf.LerpUnclamped(0.7f, -1f, p_data.m_rightHand.m_bends[2]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightMiddleSpread, Mathf.LerpUnclamped(2f, -2f, p_data.m_rightHand.m_spreads[2]));
 
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightRing1Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_rightHand.m_bends[3]));
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightRing2Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_rightHand.m_bends[3]));
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightRing3Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_rightHand.m_bends[3]));
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightRingSpread, Mathf.Lerp(-2f, 2f, p_data.m_rightHand.m_spreads[3]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightRing1Stretched, Mathf.LerpUnclamped(0.7f, -1f, p_data.m_rightHand.m_bends[3]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightRing2Stretched, Mathf.LerpUnclamped(0.7f, -1f, p_data.m_rightHand.m_bends[3]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightRing3Stretched, Mathf.LerpUnclamped(0.7f, -1f, p_data.m_rightHand.m_bends[3]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightRingSpread, Mathf.LerpUnclamped(-2f, 2f, p_data.m_rightHand.m_spreads[3]));
 
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightLittle1Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_rightHand.m_bends[4]));
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightLittle2Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_rightHand.m_bends[4]));
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightLittle3Stretched, Mathf.Lerp(0.7f, -1f, p_data.m_rightHand.m_bends[4]));
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightLittleSpread, Mathf.Lerp(-0.5f, 1f, p_data.m_rightHand.m_spreads[4]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightLittle1Stretched, Mathf.LerpUnclamped(0.7f, -1f, p_data.m_rightHand.m_bends[4]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightLittle2Stretched, Mathf.LerpUnclamped(0.7f, -1f, p_data.m_rightHand.m_bends[4]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightLittle3Stretched, Mathf.LerpUnclamped(0.7f, -1f, p_data.m_rightHand.m_bends[4]));
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightLittleSpread, Mathf.LerpUnclamped(-0.5f, 1f, p_data.m_rightHand.m_spreads[4]));
             }
         }
 
