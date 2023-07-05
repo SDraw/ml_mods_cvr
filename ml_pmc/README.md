@@ -22,4 +22,3 @@ Available options in BTKUILib players list upon player selection:
 
 # Notes
 * Some avatars can have unordinary avatar hierarchy (scaled, rotated or with offset armature/parent objects). Possible fixes are being made upon reports or own findings.
-* Currently misbehaves with FBT, fix in progress.
