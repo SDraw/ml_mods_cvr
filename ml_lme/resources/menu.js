@@ -400,6 +400,13 @@ function inp_dropdown_mod_lme(_obj, _callbackName) {
         </div>
 
         <div class ="row-wrapper">
+            <div class ="option-caption">Recognize Gestures: </div>
+            <div class ="option-input">
+                <div id="Gestures" class ="inp_toggle no-scroll" data-current="false"></div>
+            </div>
+        </div>
+
+        <div class ="row-wrapper">
             <div class ="option-caption">Interact gesture threadhold: </div>
             <div class ="option-input">
                 <div id="InteractThreadhold" class ="inp_slider no-scroll" data-min="0" data-max="100" data-current="80"></div>
