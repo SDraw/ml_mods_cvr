@@ -246,76 +246,116 @@ namespace ml_lme
                 // Left hand gestures
                 if (l_data.m_leftHand.m_present && (!m_inVR || !Utils.IsLeftHandTracked() || !Settings.FingersOnly))
                 {
-                    if (m_inputManager.fingerCurlLeftThumb < 0.5f && m_inputManager.fingerCurlLeftIndex < 0.5f && m_inputManager.fingerCurlLeftMiddle < 0.5f && m_inputManager.fingerCurlLeftRing < 0.5f && m_inputManager.fingerCurlLeftPinky < 0.5f)
+                    // Finger Point & Finger Gun
+                    if (m_inputManager.fingerCurlLeftIndex < 0.2f && m_inputManager.fingerCurlLeftMiddle > 0.75f &&
+                        m_inputManager.fingerCurlLeftRing > 0.75f && m_inputManager.fingerCurlLeftPinky > 0.75f)
                     {
-                        m_inputManager.gestureLeftRaw = -1f;
+                        m_inputManager.gestureLeftRaw = m_inputManager.fingerCurlLeftThumb >= 0.5f ? 4f : 3f;
                     }
-                    if (m_inputManager.fingerCurlLeftThumb >= 0.75f || m_inputManager.fingerCurlLeftIndex >= 0.75f || m_inputManager.fingerCurlLeftMiddle >= 0.75f || m_inputManager.fingerCurlLeftRing >= 0.75f || m_inputManager.fingerCurlLeftPinky >= 0.75f)
-                    {
-                        m_inputManager.gestureLeftRaw = Settings.Input ? m_inputManager.gripLeftValue : 1f;
-                    }
-                    if (m_inputManager.fingerCurlLeftIndex >= 0.75f && m_inputManager.fingerCurlLeftMiddle >= 0.75f && m_inputManager.fingerCurlLeftRing >= 0.75f && m_inputManager.fingerCurlLeftPinky >= 0.75f)
-                    {
-                        m_inputManager.gestureLeftRaw = 2f;
-                    }
-                    if (m_inputManager.fingerCurlLeftMiddle >= 0.75f && m_inputManager.fingerCurlLeftRing >= 0.75f && m_inputManager.fingerCurlLeftPinky >= 0.75f)
-                    {
-                        m_inputManager.gestureLeftRaw = 3f;
-                    }
-                    if (m_inputManager.fingerCurlLeftThumb >= 0.75f && m_inputManager.fingerCurlLeftMiddle >= 0.75f && m_inputManager.fingerCurlLeftRing >= 0.75f && m_inputManager.fingerCurlLeftPinky >= 0.75f)
-                    {
-                        m_inputManager.gestureLeftRaw = 4f;
-                    }
-                    if (m_inputManager.fingerCurlLeftThumb >= 0.75f && m_inputManager.fingerCurlLeftRing >= 0.75f && m_inputManager.fingerCurlLeftPinky >= 0.75f)
+
+                    // Peace Sign
+                    if (m_inputManager.fingerCurlLeftIndex < 0.2f && m_inputManager.fingerCurlLeftMiddle < 0.2f &&
+                        m_inputManager.fingerCurlLeftRing > 0.75f && m_inputManager.fingerCurlLeftPinky > 0.75f)
                     {
                         m_inputManager.gestureLeftRaw = 5f;
                     }
-                    if (m_inputManager.fingerCurlLeftIndex >= 0.75f && m_inputManager.fingerCurlLeftRing >= 0.75f && m_inputManager.fingerCurlLeftPinky >= 0.75f)
+
+                    // Rock and Roll
+                    if (m_inputManager.fingerCurlLeftIndex < 0.2f && m_inputManager.fingerCurlLeftMiddle > 0.75f &&
+                        m_inputManager.fingerCurlLeftRing > 0.75f && m_inputManager.fingerCurlLeftPinky < 0.5f)
                     {
                         m_inputManager.gestureLeftRaw = 6f;
                     }
-                    if (m_inputManager.fingerCurlLeftThumb >= 0.75f && m_inputManager.fingerCurlLeftMiddle >= 0.5f && m_inputManager.fingerCurlLeftRing >= 0.75f)
+
+                    // Rock and Roll (Middle Finger)
+                    if (m_inputManager.fingerCurlLeftIndex > 0.75f && m_inputManager.fingerCurlLeftMiddle < 0.2f &&
+                        m_inputManager.fingerCurlLeftRing > 0.75f && m_inputManager.fingerCurlLeftPinky > 0.75f)
                     {
                         m_inputManager.gestureLeftRaw = 6f;
                     }
+
+                    // Fist & Thumbs Up
+                    if (m_inputManager.fingerCurlLeftIndex > 0.5f && m_inputManager.fingerCurlLeftMiddle > 0.5f &&
+                        m_inputManager.fingerCurlLeftRing > 0.5f && m_inputManager.fingerCurlLeftPinky > 0.5f)
+                    {
+                        m_inputManager.gestureLeftRaw = m_inputManager.fingerCurlLeftThumb >= 0.5f
+                            ? Mathf.Clamp01((l_data.m_leftHand.m_grabStrength - 0.4f) / 0.6f)
+                            : 2f;
+                    }
+
+                    // Relaxed Hand
+                    if (m_inputManager.fingerCurlLeftIndex < 0.5f && m_inputManager.fingerCurlLeftMiddle < 0.5f &&
+                        m_inputManager.fingerCurlLeftRing < 0.5f && m_inputManager.fingerCurlLeftPinky < 0.5f)
+                    {
+                        m_inputManager.gestureLeftRaw = Mathf.Clamp01(
+                            (l_data.m_leftHand.m_grabStrength - 0.4f) / 0.6f);
+                    }
+                    
+                    // Open Hand
+                    if (m_inputManager.fingerCurlLeftIndex < 0.2f && m_inputManager.fingerCurlLeftMiddle < 0.2f &&
+                        m_inputManager.fingerCurlLeftRing < 0.2f && m_inputManager.fingerCurlLeftPinky < 0.2f)
+                    {
+                        m_inputManager.gestureLeftRaw = -1f;
+                    }
+
                     m_inputManager.gestureLeft = m_inputManager.gestureLeftRaw;
                 }
 
                 // Right hand gestures
                 if (l_data.m_rightHand.m_present && (!m_inVR || !Utils.IsRightHandTracked() || !Settings.FingersOnly))
                 {
-                    if (m_inputManager.fingerCurlRightThumb < 0.5f && m_inputManager.fingerCurlRightIndex < 0.5f && m_inputManager.fingerCurlRightMiddle < 0.5f && m_inputManager.fingerCurlRightRing < 0.5f && m_inputManager.fingerCurlRightPinky < 0.5f)
+                    // Finger Point & Finger Gun
+                    if (m_inputManager.fingerCurlRightIndex < 0.2f && m_inputManager.fingerCurlRightMiddle > 0.75f &&
+                        m_inputManager.fingerCurlRightRing > 0.75f && m_inputManager.fingerCurlRightPinky > 0.75f)
                     {
-                        m_inputManager.gestureRightRaw = -1f;
+                        m_inputManager.gestureRightRaw = m_inputManager.fingerCurlRightThumb >= 0.5f ? 4f : 3f;
                     }
-                    if (m_inputManager.fingerCurlRightThumb >= 0.75f || m_inputManager.fingerCurlRightIndex >= 0.75f || m_inputManager.fingerCurlRightMiddle >= 0.75f || m_inputManager.fingerCurlRightRing >= 0.75f || m_inputManager.fingerCurlRightPinky >= 0.75f)
-                    {
-                        m_inputManager.gestureRightRaw = Settings.Input ? m_inputManager.gripRightValue : 1f;
-                    }
-                    if (m_inputManager.fingerCurlRightIndex >= 0.75f && m_inputManager.fingerCurlRightMiddle >= 0.75f && m_inputManager.fingerCurlRightRing >= 0.75f && m_inputManager.fingerCurlRightPinky >= 0.75f)
-                    {
-                        m_inputManager.gestureRightRaw = 2f;
-                    }
-                    if (m_inputManager.fingerCurlRightMiddle >= 0.75f && m_inputManager.fingerCurlRightRing >= 0.75f && m_inputManager.fingerCurlRightPinky >= 0.75f)
-                    {
-                        m_inputManager.gestureRightRaw = 3f;
-                    }
-                    if (m_inputManager.fingerCurlRightThumb >= 0.75f && m_inputManager.fingerCurlRightMiddle >= 0.75f && m_inputManager.fingerCurlRightRing >= 0.75f && m_inputManager.fingerCurlRightPinky >= 0.75f)
-                    {
-                        m_inputManager.gestureRightRaw = 4f;
-                    }
-                    if (m_inputManager.fingerCurlRightThumb >= 0.75f && m_inputManager.fingerCurlRightRing >= 0.75f && m_inputManager.fingerCurlRightPinky >= 0.75f)
+
+                    // Peace Sign
+                    if (m_inputManager.fingerCurlRightIndex < 0.2f && m_inputManager.fingerCurlRightMiddle < 0.2f &&
+                        m_inputManager.fingerCurlRightRing > 0.75f && m_inputManager.fingerCurlRightPinky > 0.75f)
                     {
                         m_inputManager.gestureRightRaw = 5f;
                     }
-                    if (m_inputManager.fingerCurlRightIndex >= 0.75f && m_inputManager.fingerCurlRightRing >= 0.75f && m_inputManager.fingerCurlRightPinky >= 0.75f)
+
+                    // Rock and Roll
+                    if (m_inputManager.fingerCurlRightIndex < 0.2f && m_inputManager.fingerCurlRightMiddle > 0.75f &&
+                        m_inputManager.fingerCurlRightRing > 0.75f && m_inputManager.fingerCurlRightPinky < 0.5f)
                     {
                         m_inputManager.gestureRightRaw = 6f;
                     }
-                    if (m_inputManager.fingerCurlRightThumb >= 0.75f && m_inputManager.fingerCurlRightMiddle >= 0.5f && m_inputManager.fingerCurlRightRing >= 0.75f)
+
+                    // Rock and Roll (Middle Finger)
+                    if (m_inputManager.fingerCurlRightIndex > 0.75f && m_inputManager.fingerCurlRightMiddle < 0.2f &&
+                        m_inputManager.fingerCurlRightRing > 0.75f && m_inputManager.fingerCurlRightPinky > 0.75f)
                     {
                         m_inputManager.gestureRightRaw = 6f;
                     }
+
+                    // Fist & Thumbs Up
+                    if (m_inputManager.fingerCurlRightIndex > 0.5f && m_inputManager.fingerCurlRightMiddle > 0.5f &&
+                        m_inputManager.fingerCurlRightRing > 0.5f && m_inputManager.fingerCurlRightPinky > 0.5f)
+                    {
+                        m_inputManager.gestureRightRaw = m_inputManager.fingerCurlRightThumb >= 0.5f
+                            ? Mathf.Clamp01((l_data.m_rightHand.m_grabStrength - 0.4f) / 0.6f)
+                            : 2f;
+                    }
+
+                    // Relaxed Hand
+                    if (m_inputManager.fingerCurlRightIndex < 0.5f && m_inputManager.fingerCurlRightMiddle < 0.5f &&
+                        m_inputManager.fingerCurlRightRing < 0.5f && m_inputManager.fingerCurlRightPinky < 0.5f)
+                    {
+                        m_inputManager.gestureRightRaw = Mathf.Clamp01(
+                            (l_data.m_rightHand.m_grabStrength - 0.4f) / 0.6f);
+                    }
+
+                    // Open Hand
+                    if (m_inputManager.fingerCurlRightIndex < 0.2f && m_inputManager.fingerCurlRightMiddle < 0.2f &&
+                        m_inputManager.fingerCurlRightRing < 0.2f && m_inputManager.fingerCurlRightPinky < 0.2f)
+                    {
+                        m_inputManager.gestureRightRaw = -1f;
+                    }
+
                     m_inputManager.gestureRight = m_inputManager.gestureRightRaw;
                 }
             }
