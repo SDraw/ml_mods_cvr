@@ -40,6 +40,7 @@ namespace ml_lme
             m_handRayLeft.isInteractionRay = true;
             m_handRayLeft.triggerGazeEvents = false;
             m_handRayLeft.holderRoot = m_handRayLeft.gameObject;
+            m_handRayLeft.attachmentDistance = 0f;
 
             m_handRayRight = LeapTracking.GetInstance().GetRightHand().gameObject.AddComponent<ControllerRay>();
             m_handRayRight.hand = false;
@@ -47,6 +48,7 @@ namespace ml_lme
             m_handRayRight.isInteractionRay = true;
             m_handRayRight.triggerGazeEvents = false;
             m_handRayRight.holderRoot = m_handRayRight.gameObject;
+            m_handRayRight.attachmentDistance = 0f;
 
             m_lineLeft = m_handRayLeft.gameObject.AddComponent<LineRenderer>();
             m_lineLeft.endWidth = 1f;
@@ -74,9 +76,11 @@ namespace ml_lme
 
             Settings.EnabledChange += this.OnEnableChange;
             Settings.InputChange += this.OnInputChange;
+            Settings.GesturesChange += this.OnGesturesChange;
 
             OnEnableChange(Settings.Enabled);
             OnInputChange(Settings.Input);
+            OnGesturesChange(Settings.Gestures);
 
             MelonLoader.MelonCoroutines.Start(WaitForSettings());
             MelonLoader.MelonCoroutines.Start(WaitForMaterial());
@@ -133,6 +137,8 @@ namespace ml_lme
                     {
                         ResetFingers(true);
                         m_handVisibleLeft = false;
+                        if (Settings.Gestures)
+                            ResetGestures(true);
                     }
                 }
 
@@ -147,6 +153,8 @@ namespace ml_lme
                     {
                         ResetFingers(false);
                         m_handVisibleRight = false;
+                        if (Settings.Gestures)
+                            ResetGestures(false);
                     }
                 }
 
@@ -166,13 +174,16 @@ namespace ml_lme
             m_handRayLeft.enabled = (l_data.m_leftHand.m_present && (!m_inVR || !Utils.IsLeftHandTracked() || !Settings.FingersOnly));
             m_handRayRight.enabled = (l_data.m_rightHand.m_present && (!m_inVR || !Utils.IsRightHandTracked() || !Settings.FingersOnly));
         }
-
+        
         public override void UpdateInput()
         {
-            if(Settings.Enabled && Settings.Input)
-            {
-                GestureMatcher.LeapData l_data = LeapManager.GetInstance().GetLatestData();
+            if (!Settings.Enabled)
+                return;
 
+            GestureMatcher.LeapData l_data = LeapManager.GetInstance().GetLatestData();
+
+            if(Settings.Input)
+            {
                 if(l_data.m_leftHand.m_present && (!m_inVR || !Utils.IsLeftHandTracked() || !Settings.FingersOnly))
                 {
                     float l_strength = l_data.m_leftHand.m_grabStrength;
@@ -229,6 +240,99 @@ namespace ml_lme
                     }
                 }
             }
+
+            if (Settings.Gestures)
+            {
+                // Left hand gestures
+                if (l_data.m_leftHand.m_present && (!m_inVR || !Utils.IsLeftHandTracked() || !Settings.FingersOnly))
+                {
+                    m_inputManager.gestureLeftRaw = 0f;
+
+                    // Finger Point & Finger Gun
+                    if (m_inputManager.fingerCurlLeftIndex < 0.2f && m_inputManager.fingerCurlLeftMiddle > 0.75f &&
+                        m_inputManager.fingerCurlLeftRing > 0.75f && m_inputManager.fingerCurlLeftPinky > 0.75f)
+                    {
+                        m_inputManager.gestureLeftRaw = m_inputManager.fingerCurlLeftThumb >= 0.5f ? 4f : 3f;
+                    }
+
+                    // Peace Sign
+                    if (m_inputManager.fingerCurlLeftIndex < 0.2f && m_inputManager.fingerCurlLeftMiddle < 0.2f &&
+                        m_inputManager.fingerCurlLeftRing > 0.75f && m_inputManager.fingerCurlLeftPinky > 0.75f)
+                    {
+                        m_inputManager.gestureLeftRaw = 5f;
+                    }
+
+                    // Rock and Roll
+                    if (m_inputManager.fingerCurlLeftIndex < 0.2f && m_inputManager.fingerCurlLeftMiddle > 0.75f &&
+                        m_inputManager.fingerCurlLeftRing > 0.75f && m_inputManager.fingerCurlLeftPinky < 0.5f)
+                    {
+                        m_inputManager.gestureLeftRaw = 6f;
+                    }
+
+                    // Fist & Thumbs Up
+                    if (m_inputManager.fingerCurlLeftIndex > 0.5f && m_inputManager.fingerCurlLeftMiddle > 0.5f &&
+                        m_inputManager.fingerCurlLeftRing > 0.5f && m_inputManager.fingerCurlLeftPinky > 0.5f)
+                    {
+                        m_inputManager.gestureLeftRaw = m_inputManager.fingerCurlLeftThumb >= 0.5f
+                            ? (l_data.m_rightHand.m_grabStrength - 0.5f) * 2f
+                            : 2f;
+                    }
+                    
+                    // Open Hand
+                    if (m_inputManager.fingerCurlLeftIndex < 0.2f && m_inputManager.fingerCurlLeftMiddle < 0.2f &&
+                        m_inputManager.fingerCurlLeftRing < 0.2f && m_inputManager.fingerCurlLeftPinky < 0.2f)
+                    {
+                        m_inputManager.gestureLeftRaw = -1f;
+                    }
+
+                    m_inputManager.gestureLeft = m_inputManager.gestureLeftRaw;
+                }
+
+                // Right hand gestures
+                if (l_data.m_rightHand.m_present && (!m_inVR || !Utils.IsRightHandTracked() || !Settings.FingersOnly))
+                {
+                    m_inputManager.gestureRightRaw = 0f;
+
+                    // Finger Point & Finger Gun
+                    if (m_inputManager.fingerCurlRightIndex < 0.2f && m_inputManager.fingerCurlRightMiddle > 0.75f &&
+                        m_inputManager.fingerCurlRightRing > 0.75f && m_inputManager.fingerCurlRightPinky > 0.75f)
+                    {
+                        m_inputManager.gestureRightRaw = m_inputManager.fingerCurlRightThumb >= 0.5f ? 4f : 3f;
+                    }
+
+                    // Peace Sign
+                    if (m_inputManager.fingerCurlRightIndex < 0.2f && m_inputManager.fingerCurlRightMiddle < 0.2f &&
+                        m_inputManager.fingerCurlRightRing > 0.75f && m_inputManager.fingerCurlRightPinky > 0.75f)
+                    {
+                        m_inputManager.gestureRightRaw = 5f;
+                    }
+
+                    // Rock and Roll
+                    if (m_inputManager.fingerCurlRightIndex < 0.2f && m_inputManager.fingerCurlRightMiddle > 0.75f &&
+                        m_inputManager.fingerCurlRightRing > 0.75f && m_inputManager.fingerCurlRightPinky < 0.5f)
+                    {
+                        m_inputManager.gestureRightRaw = 6f;
+                    }
+
+                    // Fist & Thumbs Up
+                    if (m_inputManager.fingerCurlRightIndex > 0.5f && m_inputManager.fingerCurlRightMiddle > 0.5f &&
+                        m_inputManager.fingerCurlRightRing > 0.5f && m_inputManager.fingerCurlRightPinky > 0.5f)
+                    {
+                        m_inputManager.gestureRightRaw = m_inputManager.fingerCurlRightThumb >= 0.5f
+                            ? (l_data.m_rightHand.m_grabStrength - 0.5f) * 2f
+                            : 2f;
+                    }
+
+                    // Open Hand
+                    if (m_inputManager.fingerCurlRightIndex < 0.2f && m_inputManager.fingerCurlRightMiddle < 0.2f &&
+                        m_inputManager.fingerCurlRightRing < 0.2f && m_inputManager.fingerCurlRightPinky < 0.2f)
+                    {
+                        m_inputManager.gestureRightRaw = -1f;
+                    }
+
+                    m_inputManager.gestureRight = m_inputManager.gestureRightRaw;
+                }
+            }
         }
 
         // Settings changes
@@ -260,6 +364,14 @@ namespace ml_lme
                 m_gripLeft = false;
                 m_gripRight = false;
             }
+        }
+
+        void OnGesturesChange(bool p_state)
+        {
+            m_inputManager.gestureLeft = 0f;
+            m_inputManager.gestureLeftRaw = 0f;
+            m_inputManager.gestureRight = 0f;
+            m_inputManager.gestureRightRaw = 0f;
         }
 
         // Game events
@@ -348,8 +460,22 @@ namespace ml_lme
             }
         }
 
+        void ResetGestures(bool p_left)
+        {
+            if (p_left)
+            {
+                m_inputManager.gestureLeft = 0f;
+                m_inputManager.gestureLeftRaw = 0f;
+            }
+            else
+            {
+                m_inputManager.gestureRight = 0f;
+                m_inputManager.gestureRightRaw = 0f;
+            }
+        }
+
         // Game settings
-        void OnGameSettingBoolChange(string p_name, bool p_state)
+            void OnGameSettingBoolChange(string p_name, bool p_state)
         {
             if(p_name == "ControlUseGripToGrab")
                 m_gripToGrab = p_state;
