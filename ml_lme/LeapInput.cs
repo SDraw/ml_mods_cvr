@@ -274,10 +274,10 @@ namespace ml_lme
                         m_inputManager.fingerCurlLeftRing > 0.5f && m_inputManager.fingerCurlLeftPinky > 0.5f)
                     {
                         m_inputManager.gestureLeftRaw = m_inputManager.fingerCurlLeftThumb >= 0.5f
-                            ? Mathf.Clamp01((l_data.m_leftHand.m_grabStrength - 0.4f) / 0.6f)
+                            ? (l_data.m_rightHand.m_grabStrength - 0.5f) * 2f
                             : 2f;
                     }
-
+                    
                     // Open Hand
                     if (m_inputManager.fingerCurlLeftIndex < 0.2f && m_inputManager.fingerCurlLeftMiddle < 0.2f &&
                         m_inputManager.fingerCurlLeftRing < 0.2f && m_inputManager.fingerCurlLeftPinky < 0.2f)
@@ -319,7 +319,7 @@ namespace ml_lme
                         m_inputManager.fingerCurlRightRing > 0.5f && m_inputManager.fingerCurlRightPinky > 0.5f)
                     {
                         m_inputManager.gestureRightRaw = m_inputManager.fingerCurlRightThumb >= 0.5f
-                            ? Mathf.Clamp01((l_data.m_rightHand.m_grabStrength - 0.4f) / 0.6f)
+                            ? (l_data.m_rightHand.m_grabStrength - 0.5f) * 2f
                             : 2f;
                     }
 
