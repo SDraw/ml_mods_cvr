@@ -36,7 +36,7 @@ namespace ml_lme
         {
             base.ModuleAdded();
 
-            InputEnabled = Settings.Enabled;
+            base.InputEnabled = Settings.Enabled;
             HapticFeedback = false;
 
             m_inVR = Utils.IsInVR();
@@ -121,21 +121,63 @@ namespace ml_lme
 
         public override void UpdateInput()
         {
-            if(InputEnabled)
+            if(base.InputEnabled)
             {
                 GestureMatcher.LeapData l_data = LeapManager.Instance.GetLatestData();
 
                 if(l_data.m_leftHand.m_present)
                 {
-                    SetFingersInput(l_data.m_leftHand, true);
                     m_handVisibleLeft = true;
+                    SetFingersInput(l_data.m_leftHand, true);
+
+                    if(Settings.Gestures)
+                    {
+                        _inputManager.gestureLeftRaw = 0f;
+
+                        // Finger Point & Finger Gun
+                        if((_inputManager.fingerCurlLeftIndex < 0.2f) && (_inputManager.fingerCurlLeftMiddle > 0.75f) &&
+                            (_inputManager.fingerCurlLeftRing > 0.75f) && (_inputManager.fingerCurlLeftPinky > 0.75f))
+                        {
+                            _inputManager.gestureLeftRaw = (_inputManager.fingerCurlLeftThumb >= 0.5f) ? 4f : 3f;
+                        }
+
+                        // Peace Sign
+                        if((_inputManager.fingerCurlLeftIndex < 0.2f) && (_inputManager.fingerCurlLeftMiddle < 0.2f) &&
+                            (_inputManager.fingerCurlLeftRing > 0.75f) && (_inputManager.fingerCurlLeftPinky > 0.75f))
+                        {
+                            _inputManager.gestureLeftRaw = 5f;
+                        }
+
+                        // Rock and Roll
+                        if((_inputManager.fingerCurlLeftIndex < 0.2f) && (_inputManager.fingerCurlLeftMiddle > 0.75f) &&
+                            (_inputManager.fingerCurlLeftRing > 0.75f) && (_inputManager.fingerCurlLeftPinky < 0.5f))
+                        {
+                            _inputManager.gestureLeftRaw = 6f;
+                        }
+
+                        // Fist & Thumbs Up
+                        if((_inputManager.fingerCurlLeftIndex > 0.5f) && (_inputManager.fingerCurlLeftMiddle > 0.5f) &&
+                            (_inputManager.fingerCurlLeftRing > 0.5f) && (_inputManager.fingerCurlLeftPinky > 0.5f))
+                        {
+                            _inputManager.gestureLeftRaw = (_inputManager.fingerCurlLeftThumb >= 0.5f) ? ((l_data.m_leftHand.m_grabStrength - 0.5f) * 2f) : 2f;
+                        }
+
+                        // Open Hand
+                        if((_inputManager.fingerCurlLeftIndex < 0.2f) && (_inputManager.fingerCurlLeftMiddle < 0.2f) &&
+                            (_inputManager.fingerCurlLeftRing < 0.2f) && (_inputManager.fingerCurlLeftPinky < 0.2f))
+                        {
+                            _inputManager.gestureLeftRaw = -1f;
+                        }
+
+                        _inputManager.gestureLeft = _inputManager.gestureLeftRaw;
+                    }
                 }
                 else
                 {
                     if(m_handVisibleLeft)
                     {
-                        ResetFingers(true);
                         m_handVisibleLeft = false;
+                        ResetFingers(true);
                         if(Settings.Gestures)
                             ResetGestures(true);
                     }
@@ -143,15 +185,57 @@ namespace ml_lme
 
                 if(l_data.m_rightHand.m_present)
                 {
-                    SetFingersInput(l_data.m_rightHand, false);
                     m_handVisibleRight = true;
+                    SetFingersInput(l_data.m_rightHand, false);
+
+                    if(Settings.Gestures)
+                    {
+                        _inputManager.gestureRightRaw = 0f;
+
+                        // Finger Point & Finger Gun
+                        if((_inputManager.fingerCurlRightIndex < 0.2f) && (_inputManager.fingerCurlRightMiddle > 0.75f) &&
+                            (_inputManager.fingerCurlRightRing > 0.75f) && (_inputManager.fingerCurlRightPinky > 0.75f))
+                        {
+                            _inputManager.gestureRightRaw = (_inputManager.fingerCurlRightThumb >= 0.5f) ? 4f : 3f;
+                        }
+
+                        // Peace Sign
+                        if((_inputManager.fingerCurlRightIndex < 0.2f) && (_inputManager.fingerCurlRightMiddle < 0.2f) &&
+                            (_inputManager.fingerCurlRightRing > 0.75f) && (_inputManager.fingerCurlRightPinky > 0.75f))
+                        {
+                            _inputManager.gestureRightRaw = 5f;
+                        }
+
+                        // Rock and Roll
+                        if((_inputManager.fingerCurlRightIndex < 0.2f) && (_inputManager.fingerCurlRightMiddle > 0.75f) &&
+                            (_inputManager.fingerCurlRightRing > 0.75f) && (_inputManager.fingerCurlRightPinky < 0.5f))
+                        {
+                            _inputManager.gestureRightRaw = 6f;
+                        }
+
+                        // Fist & Thumbs Up
+                        if((_inputManager.fingerCurlRightIndex > 0.5f) && (_inputManager.fingerCurlRightMiddle > 0.5f) &&
+                            (_inputManager.fingerCurlRightRing > 0.5f) && (_inputManager.fingerCurlRightPinky > 0.5f))
+                        {
+                            _inputManager.gestureRightRaw = (_inputManager.fingerCurlRightThumb >= 0.5f) ? ((l_data.m_rightHand.m_grabStrength - 0.5f) * 2f) : 2f;
+                        }
+
+                        // Open Hand
+                        if((_inputManager.fingerCurlRightIndex < 0.2f) && (_inputManager.fingerCurlRightMiddle < 0.2f) &&
+                            (_inputManager.fingerCurlRightRing < 0.2f) && (_inputManager.fingerCurlRightPinky < 0.2f))
+                        {
+                            _inputManager.gestureRightRaw = -1f;
+                        }
+
+                        _inputManager.gestureRight = _inputManager.gestureRightRaw;
+                    }
                 }
                 else
                 {
                     if(m_handVisibleRight)
                     {
-                        ResetFingers(false);
                         m_handVisibleRight = false;
+                        ResetFingers(false);
                         if(Settings.Gestures)
                             ResetGestures(false);
                     }
@@ -166,6 +250,7 @@ namespace ml_lme
                     }
                     else
                         _inputManager.individualFingerTracking = (l_data.m_leftHand.m_present || l_data.m_rightHand.m_present);
+
                     IKSystem.Instance.FingerSystem.controlActive = _inputManager.individualFingerTracking;
                 }
 
@@ -178,10 +263,10 @@ namespace ml_lme
 
         public override void Update_Interaction()
         {
-            GestureMatcher.LeapData l_data = LeapManager.Instance.GetLatestData();
-
             if(Settings.Input)
             {
+                GestureMatcher.LeapData l_data = LeapManager.Instance.GetLatestData();
+
                 if(l_data.m_leftHand.m_present && (!m_inVR || !Utils.IsLeftHandTracked() || !Settings.FingersOnly))
                 {
                     float l_strength = l_data.m_leftHand.m_grabStrength;
@@ -238,110 +323,17 @@ namespace ml_lme
                     }
                 }
             }
-
-            if(Settings.Gestures)
-            {
-                // Left hand gestures
-                if(l_data.m_leftHand.m_present)
-                {
-                    _inputManager.gestureLeftRaw = 0f;
-
-                    // Finger Point & Finger Gun
-                    if(_inputManager.fingerCurlLeftIndex < 0.2f && _inputManager.fingerCurlLeftMiddle > 0.75f &&
-                        _inputManager.fingerCurlLeftRing > 0.75f && _inputManager.fingerCurlLeftPinky > 0.75f)
-                    {
-                        _inputManager.gestureLeftRaw = _inputManager.fingerCurlLeftThumb >= 0.5f ? 4f : 3f;
-                    }
-
-                    // Peace Sign
-                    if(_inputManager.fingerCurlLeftIndex < 0.2f && _inputManager.fingerCurlLeftMiddle < 0.2f &&
-                        _inputManager.fingerCurlLeftRing > 0.75f && _inputManager.fingerCurlLeftPinky > 0.75f)
-                    {
-                        _inputManager.gestureLeftRaw = 5f;
-                    }
-
-                    // Rock and Roll
-                    if(_inputManager.fingerCurlLeftIndex < 0.2f && _inputManager.fingerCurlLeftMiddle > 0.75f &&
-                        _inputManager.fingerCurlLeftRing > 0.75f && _inputManager.fingerCurlLeftPinky < 0.5f)
-                    {
-                        _inputManager.gestureLeftRaw = 6f;
-                    }
-
-                    // Fist & Thumbs Up
-                    if(_inputManager.fingerCurlLeftIndex > 0.5f && _inputManager.fingerCurlLeftMiddle > 0.5f &&
-                        _inputManager.fingerCurlLeftRing > 0.5f && _inputManager.fingerCurlLeftPinky > 0.5f)
-                    {
-                        _inputManager.gestureLeftRaw = _inputManager.fingerCurlLeftThumb >= 0.5f
-                            ? (l_data.m_rightHand.m_grabStrength - 0.5f) * 2f
-                            : 2f;
-                    }
-
-                    // Open Hand
-                    if(_inputManager.fingerCurlLeftIndex < 0.2f && _inputManager.fingerCurlLeftMiddle < 0.2f &&
-                        _inputManager.fingerCurlLeftRing < 0.2f && _inputManager.fingerCurlLeftPinky < 0.2f)
-                    {
-                        _inputManager.gestureLeftRaw = -1f;
-                    }
-
-                    _inputManager.gestureLeft = _inputManager.gestureLeftRaw;
-                }
-
-                // Right hand gestures
-                if(l_data.m_rightHand.m_present)
-                {
-                    _inputManager.gestureRightRaw = 0f;
-
-                    // Finger Point & Finger Gun
-                    if(_inputManager.fingerCurlRightIndex < 0.2f && _inputManager.fingerCurlRightMiddle > 0.75f &&
-                        _inputManager.fingerCurlRightRing > 0.75f && _inputManager.fingerCurlRightPinky > 0.75f)
-                    {
-                        _inputManager.gestureRightRaw = _inputManager.fingerCurlRightThumb >= 0.5f ? 4f : 3f;
-                    }
-
-                    // Peace Sign
-                    if(_inputManager.fingerCurlRightIndex < 0.2f && _inputManager.fingerCurlRightMiddle < 0.2f &&
-                        _inputManager.fingerCurlRightRing > 0.75f && _inputManager.fingerCurlRightPinky > 0.75f)
-                    {
-                        _inputManager.gestureRightRaw = 5f;
-                    }
-
-                    // Rock and Roll
-                    if(_inputManager.fingerCurlRightIndex < 0.2f && _inputManager.fingerCurlRightMiddle > 0.75f &&
-                        _inputManager.fingerCurlRightRing > 0.75f && _inputManager.fingerCurlRightPinky < 0.5f)
-                    {
-                        _inputManager.gestureRightRaw = 6f;
-                    }
-
-                    // Fist & Thumbs Up
-                    if(_inputManager.fingerCurlRightIndex > 0.5f && _inputManager.fingerCurlRightMiddle > 0.5f &&
-                        _inputManager.fingerCurlRightRing > 0.5f && _inputManager.fingerCurlRightPinky > 0.5f)
-                    {
-                        _inputManager.gestureRightRaw = _inputManager.fingerCurlRightThumb >= 0.5f
-                            ? (l_data.m_rightHand.m_grabStrength - 0.5f) * 2f
-                            : 2f;
-                    }
-
-                    // Open Hand
-                    if(_inputManager.fingerCurlRightIndex < 0.2f && _inputManager.fingerCurlRightMiddle < 0.2f &&
-                        _inputManager.fingerCurlRightRing < 0.2f && _inputManager.fingerCurlRightPinky < 0.2f)
-                    {
-                        _inputManager.gestureRightRaw = -1f;
-                    }
-
-                    _inputManager.gestureRight = _inputManager.gestureRightRaw;
-                }
-            }
         }
 
         // Settings changes
         void OnEnableChange(bool p_state)
         {
-            InputEnabled = p_state;
+            base.InputEnabled = p_state;
+            m_handVisibleLeft &= p_state;
+            m_handVisibleRight &= p_state;
 
             OnInputChange(p_state && Settings.Input);
             UpdateFingerTracking();
-            m_handVisibleLeft &= p_state;
-            m_handVisibleRight &= p_state;
         }
 
         void OnInputChange(bool p_state)
@@ -378,7 +370,6 @@ namespace ml_lme
         internal void OnAvatarSetup()
         {
             m_inVR = Utils.IsInVR();
-            UpdateFingerTracking();
         }
 
         internal void OnRayScale(float p_scale)
