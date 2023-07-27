@@ -2,6 +2,7 @@
 using ABI_RC.Core.Savior;
 using ABI_RC.Systems.IK;
 using ABI_RC.Systems.IK.SubSystems;
+using ABI_RC.Systems.InputManagement;
 using ABI_RC.Systems.MovementSystem;
 using RootMotion.FinalIK;
 using UnityEngine;
@@ -81,17 +82,6 @@ namespace ml_pmc
                         CVRInputManager.Instance.fingerCurlRightMiddle = l_curls[l_mirror ? 2 : 7];
                         CVRInputManager.Instance.fingerCurlRightRing = l_curls[l_mirror ? 3 : 8];
                         CVRInputManager.Instance.fingerCurlRightPinky = l_curls[l_mirror ? 4 : 9];
-
-                        IKSystem.Instance.FingerSystem.leftThumbCurl = l_curls[l_mirror ? 5 : 0];
-                        IKSystem.Instance.FingerSystem.leftIndexCurl = l_curls[l_mirror ? 6 : 1];
-                        IKSystem.Instance.FingerSystem.leftMiddleCurl = l_curls[l_mirror ? 7 : 2];
-                        IKSystem.Instance.FingerSystem.leftRingCurl = l_curls[l_mirror ? 8 : 3];
-                        IKSystem.Instance.FingerSystem.leftPinkyCurl = l_curls[l_mirror ? 9 : 4];
-                        IKSystem.Instance.FingerSystem.rightThumbCurl = l_curls[l_mirror ? 0 : 5];
-                        IKSystem.Instance.FingerSystem.rightIndexCurl = l_curls[l_mirror ? 1 : 6];
-                        IKSystem.Instance.FingerSystem.rightMiddleCurl = l_curls[l_mirror ? 2 : 7];
-                        IKSystem.Instance.FingerSystem.rightRingCurl = l_curls[l_mirror ? 3 : 8];
-                        IKSystem.Instance.FingerSystem.rightPinkyCurl = l_curls[l_mirror ? 4 : 9];
                     }
                     else
                     {
@@ -290,7 +280,7 @@ namespace ml_pmc
         }
         void RestoreFingerTracking()
         {
-            CVRInputManager.Instance.individualFingerTracking = (m_inVr && Utils.AreKnucklesInUse() && !Utils.GetIndexGestureToggle());
+            CVRInputManager.Instance.individualFingerTracking = (m_inVr && Utils.AreKnucklesInUse() && !CVRInputManager._moduleXR.GestureToggleValue);
             IKSystem.Instance.FingerSystem.controlActive = CVRInputManager.Instance.individualFingerTracking;
 
             if(!CVRInputManager.Instance.individualFingerTracking)
@@ -305,17 +295,6 @@ namespace ml_pmc
                 CVRInputManager.Instance.fingerCurlRightMiddle = 0f;
                 CVRInputManager.Instance.fingerCurlRightRing = 0f;
                 CVRInputManager.Instance.fingerCurlRightPinky = 0f;
-
-                IKSystem.Instance.FingerSystem.leftThumbCurl = 0f;
-                IKSystem.Instance.FingerSystem.leftIndexCurl = 0f;
-                IKSystem.Instance.FingerSystem.leftMiddleCurl = 0f;
-                IKSystem.Instance.FingerSystem.leftRingCurl = 0f;
-                IKSystem.Instance.FingerSystem.leftPinkyCurl = 0f;
-                IKSystem.Instance.FingerSystem.rightThumbCurl = 0f;
-                IKSystem.Instance.FingerSystem.rightIndexCurl = 0f;
-                IKSystem.Instance.FingerSystem.rightMiddleCurl = 0f;
-                IKSystem.Instance.FingerSystem.rightRingCurl = 0f;
-                IKSystem.Instance.FingerSystem.rightPinkyCurl = 0f;
             }
         }
     }

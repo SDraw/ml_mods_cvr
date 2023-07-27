@@ -1,6 +1,7 @@
 ﻿using ABI_RC.Core.Player;
 using ABI_RC.Core.Savior;
 using ABI_RC.Core.UI;
+using ABI_RC.Systems.InputManagement;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
@@ -9,15 +10,10 @@ namespace ml_lme
 {
     static class Utils
     {
-        static readonly Quaternion ms_hmdRotationFix = new Quaternion(0f, 0.7071068f, 0.7071068f, 0f);
-        static readonly Quaternion ms_screentopRotationFix = new Quaternion(0f, 0f, -1f, 0f);
-        static readonly FieldInfo ms_indexGestureToggle = typeof(InputModuleSteamVR).GetField("_steamVrIndexGestureToggleValue", BindingFlags.Instance | BindingFlags.NonPublic);
-
         public static bool IsInVR() => ((CheckVR.Instance != null) && CheckVR.Instance.hasVrDeviceLoaded);
-        public static bool AreKnucklesInUse() => PlayerSetup.Instance._trackerManager.trackerNames.Contains("knuckles");
-        public static bool GetIndexGestureToggle(this InputModuleSteamVR p_module) => (bool)ms_indexGestureToggle.GetValue(p_module);
-        public static bool IsLeftHandTracked() => ((VRTrackerManager.Instance.leftHand != null) && VRTrackerManager.Instance.leftHand.active);
-        public static bool IsRightHandTracked() => ((VRTrackerManager.Instance.rightHand != null) && VRTrackerManager.Instance.rightHand.active);
+        public static bool AreKnucklesInUse() => ((CVRInputManager.Instance._leftController == ABI_RC.Systems.InputManagement.XR.EXRControllerType.Index) || (CVRInputManager.Instance._rightController == ABI_RC.Systems.InputManagement.XR.EXRControllerType.Index));
+        public static bool IsLeftHandTracked() => (CVRInputManager.Instance._leftController != ABI_RC.Systems.InputManagement.XR.EXRControllerType.None);
+        public static bool IsRightHandTracked() => (CVRInputManager.Instance._rightController != ABI_RC.Systems.InputManagement.XR.EXRControllerType.None);
 
         public static Matrix4x4 GetMatrix(this Transform p_transform, bool p_pos = true, bool p_rot = true, bool p_scl = false)
         {

@@ -7,7 +7,7 @@ namespace ml_lme
     [DisallowMultipleComponent]
     class LeapTracking : MonoBehaviour
     {
-        static LeapTracking ms_instance = null;
+        public static LeapTracking Instance { get; private set; } = null;
         static Quaternion ms_dummyRotation = Quaternion.identity;
         static readonly Quaternion ms_hmdRotation = new Quaternion(0f, 0.7071068f, 0.7071068f, 0f);
         static readonly Quaternion ms_screentopRotation = new Quaternion(0f, 0f, -1f, 0f);
@@ -25,12 +25,10 @@ namespace ml_lme
 
         float m_scaleRelation = 1f;
 
-        public static LeapTracking GetInstance() => ms_instance;
-
         void Start()
         {
-            if(ms_instance == null)
-                ms_instance = this;
+            if(Instance == null)
+                Instance = this;
 
             m_inVR = Utils.IsInVR();
 
@@ -101,8 +99,8 @@ namespace ml_lme
 
         void OnDestroy()
         {
-            if(ms_instance == this)
-                ms_instance = null;
+            if(Instance == this)
+                Instance = null;
 
             Settings.DesktopOffsetChange -= this.OnDesktopOffsetChange;
             Settings.ModelVisibilityChange -= this.OnModelVisibilityChange;
@@ -116,7 +114,7 @@ namespace ml_lme
         {
             if(Settings.Enabled)
             {
-                GestureMatcher.LeapData l_data = LeapManager.GetInstance().GetLatestData();
+                GestureMatcher.LeapData l_data = LeapManager.Instance.GetLatestData();
 
                 if(l_data.m_leftHand.m_present)
                 {

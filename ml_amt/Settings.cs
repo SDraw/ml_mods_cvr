@@ -9,56 +9,38 @@ namespace ml_amt
     {
         enum ModSetting
         {
-            IKOverrideCrouch = 0,
             CrouchLimit,
-            IKOverrideProne,
             ProneLimit,
-            PoseTransitions,
-            AdjustedMovement,
             IKOverrideFly,
             IKOverrideJump,
             DetectEmotes,
             FollowHips,
-            CollisionScale,
-            ScaledSteps,
             ScaledJump,
             MassCenter,
             OverrideFix
         };
 
-        public static bool IKOverrideCrouch { get; private set; } = true;
-        public static float CrouchLimit { get; private set; } = 0.65f;
-        public static bool IKOverrideProne { get; private set; } = true;
-        public static float ProneLimit { get; private set; } = 0.3f;
-        public static bool PoseTransitions { get; private set; } = true;
-        public static bool AdjustedMovement { get; private set; } = true;
+        public static float CrouchLimit { get; private set; } = 0.75f;
+        public static float ProneLimit { get; private set; } = 0.4f;
         public static bool IKOverrideFly { get; private set; } = true;
         public static bool IKOverrideJump { get; private set; } = true;
         public static bool DetectEmotes { get; private set; } = true;
         public static bool FollowHips { get; private set; } = true;
         public static bool MassCenter { get; private set; } = true;
-        public static bool ScaledSteps { get; private set; } = true;
         public static bool ScaledJump { get; private set; } = false;
-        public static bool CollisionScale { get; private set; } = true;
         public static bool OverrideFix { get; private set; } = true;
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
 
-        static public event Action<bool> IKOverrideCrouchChange;
         static public event Action<float> CrouchLimitChange;
-        static public event Action<bool> IKOverrideProneChange;
         static public event Action<float> ProneLimitChange;
-        static public event Action<bool> PoseTransitionsChange;
-        static public event Action<bool> AdjustedMovementChange;
         static public event Action<bool> IKOverrideFlyChange;
         static public event Action<bool> IKOverrideJumpChange;
         static public event Action<bool> DetectEmotesChange;
         static public event Action<bool> FollowHipsChange;
         static public event Action<bool> MassCenterChange;
-        static public event Action<bool> ScaledStepsChange;
         static public event Action<bool> ScaledJumpChange;
-        static public event Action<bool> CollisionScaleChange;
         static public event Action<bool> OverrideFixChange;
 
         internal static void Init()
@@ -67,37 +49,25 @@ namespace ml_amt
 
             ms_entries = new List<MelonLoader.MelonPreferences_Entry>()
             {
-                ms_category.CreateEntry(ModSetting.IKOverrideCrouch.ToString(), IKOverrideCrouch),
                 ms_category.CreateEntry(ModSetting.CrouchLimit.ToString(), (int)(CrouchLimit * 100f)),
-                ms_category.CreateEntry(ModSetting.IKOverrideProne.ToString(), IKOverrideProne),
                 ms_category.CreateEntry(ModSetting.ProneLimit.ToString(), (int)(ProneLimit * 100f)),
-                ms_category.CreateEntry(ModSetting.PoseTransitions.ToString(), PoseTransitions),
-                ms_category.CreateEntry(ModSetting.AdjustedMovement.ToString(), AdjustedMovement),
                 ms_category.CreateEntry(ModSetting.IKOverrideFly.ToString(), IKOverrideFly),
                 ms_category.CreateEntry(ModSetting.IKOverrideJump.ToString(), IKOverrideJump),
                 ms_category.CreateEntry(ModSetting.DetectEmotes.ToString(), DetectEmotes),
                 ms_category.CreateEntry(ModSetting.FollowHips.ToString(), FollowHips),
                 ms_category.CreateEntry(ModSetting.MassCenter.ToString(), MassCenter),
-                ms_category.CreateEntry(ModSetting.ScaledSteps.ToString(), ScaledSteps),
                 ms_category.CreateEntry(ModSetting.ScaledJump.ToString(), ScaledJump),
-                ms_category.CreateEntry(ModSetting.CollisionScale.ToString(), CollisionScale),
                 ms_category.CreateEntry(ModSetting.OverrideFix.ToString(), OverrideFix)
             };
 
-            IKOverrideCrouch = (bool)ms_entries[(int)ModSetting.IKOverrideCrouch].BoxedValue;
             CrouchLimit = ((int)ms_entries[(int)ModSetting.CrouchLimit].BoxedValue) * 0.01f;
-            IKOverrideProne = (bool)ms_entries[(int)ModSetting.IKOverrideProne].BoxedValue;
             ProneLimit = ((int)ms_entries[(int)ModSetting.ProneLimit].BoxedValue) * 0.01f;
-            PoseTransitions = (bool)ms_entries[(int)ModSetting.PoseTransitions].BoxedValue;
-            AdjustedMovement = (bool)ms_entries[(int)ModSetting.AdjustedMovement].BoxedValue;
             IKOverrideFly = (bool)ms_entries[(int)ModSetting.IKOverrideFly].BoxedValue;
             IKOverrideJump = (bool)ms_entries[(int)ModSetting.IKOverrideJump].BoxedValue;
             DetectEmotes = (bool)ms_entries[(int)ModSetting.DetectEmotes].BoxedValue;
             FollowHips = (bool)ms_entries[(int)ModSetting.FollowHips].BoxedValue;
             MassCenter = (bool)ms_entries[(int)ModSetting.MassCenter].BoxedValue;
-            ScaledSteps = (bool)ms_entries[(int)ModSetting.ScaledSteps].BoxedValue;
             ScaledJump = (bool)ms_entries[(int)ModSetting.ScaledJump].BoxedValue;
-            CollisionScale = (bool)ms_entries[(int)ModSetting.CollisionScale].BoxedValue;
             OverrideFix = (bool)ms_entries[(int)ModSetting.OverrideFix].BoxedValue;
 
             MelonLoader.MelonCoroutines.Start(WaitMainMenuUi());
@@ -156,34 +126,6 @@ namespace ml_amt
             {
                 switch(l_setting)
                 {
-                    case ModSetting.IKOverrideCrouch:
-                    {
-                        IKOverrideCrouch = bool.Parse(p_value);
-                        IKOverrideCrouchChange?.Invoke(IKOverrideCrouch);
-                    }
-                    break;
-
-                    case ModSetting.IKOverrideProne:
-                    {
-                        IKOverrideProne = bool.Parse(p_value);
-                        IKOverrideProneChange?.Invoke(IKOverrideProne);
-                    }
-                    break;
-
-                    case ModSetting.PoseTransitions:
-                    {
-                        PoseTransitions = bool.Parse(p_value);
-                        PoseTransitionsChange?.Invoke(PoseTransitions);
-                    }
-                    break;
-
-                    case ModSetting.AdjustedMovement:
-                    {
-                        AdjustedMovement = bool.Parse(p_value);
-                        AdjustedMovementChange?.Invoke(AdjustedMovement);
-                    }
-                    break;
-
                     case ModSetting.IKOverrideFly:
                     {
                         IKOverrideFly = bool.Parse(p_value);
@@ -219,24 +161,10 @@ namespace ml_amt
                     }
                     break;
 
-                    case ModSetting.ScaledSteps:
-                    {
-                        ScaledSteps = bool.Parse(p_value);
-                        ScaledStepsChange?.Invoke(ScaledSteps);
-                    }
-                    break;
-
                     case ModSetting.ScaledJump:
                     {
                         ScaledJump = bool.Parse(p_value);
                         ScaledJumpChange?.Invoke(ScaledJump);
-                    }
-                    break;
-
-                    case ModSetting.CollisionScale:
-                    {
-                        CollisionScale = bool.Parse(p_value);
-                        CollisionScaleChange?.Invoke(CollisionScale);
                     }
                     break;
 

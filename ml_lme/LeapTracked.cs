@@ -43,12 +43,12 @@ namespace ml_lme
             m_inVR = Utils.IsInVR();
 
             m_leftHandTarget = new GameObject("RotationTarget").transform;
-            m_leftHandTarget.parent = LeapTracking.GetInstance().GetLeftHand();
+            m_leftHandTarget.parent = LeapTracking.Instance.GetLeftHand();
             m_leftHandTarget.localPosition = Vector3.zero;
             m_leftHandTarget.localRotation = Quaternion.identity;
 
             m_rightHandTarget = new GameObject("RotationTarget").transform;
-            m_rightHandTarget.parent = LeapTracking.GetInstance().GetRightHand();
+            m_rightHandTarget.parent = LeapTracking.Instance.GetRightHand();
             m_rightHandTarget.localPosition = Vector3.zero;
             m_rightHandTarget.localRotation = Quaternion.identity;
 
@@ -72,7 +72,7 @@ namespace ml_lme
         {
             if(m_enabled)
             {
-                GestureMatcher.LeapData l_data = LeapManager.GetInstance().GetLatestData();
+                GestureMatcher.LeapData l_data = LeapManager.Instance.GetLatestData();
 
                 if((m_leftArmIK != null) && (m_rightArmIK != null))
                 {
@@ -92,7 +92,7 @@ namespace ml_lme
                     if(l_data.m_leftHand.m_present && !m_leftTargetActive)
                     {
                         m_vrIK.solver.leftArm.target = m_leftHandTarget;
-                        m_vrIK.solver.leftArm.bendGoal = LeapTracking.GetInstance().GetLeftElbow();
+                        m_vrIK.solver.leftArm.bendGoal = LeapTracking.Instance.GetLeftElbow();
                         m_vrIK.solver.leftArm.bendGoalWeight = (m_trackElbows ? 1f : 0f);
                         m_leftTargetActive = true;
                     }
@@ -107,7 +107,7 @@ namespace ml_lme
                     if(l_data.m_rightHand.m_present && !m_rightTargetActive)
                     {
                         m_vrIK.solver.rightArm.target = m_rightHandTarget;
-                        m_vrIK.solver.rightArm.bendGoal = LeapTracking.GetInstance().GetRightElbow();
+                        m_vrIK.solver.rightArm.bendGoal = LeapTracking.Instance.GetRightElbow();
                         m_vrIK.solver.rightArm.bendGoalWeight = (m_trackElbows ? 1f : 0f);
                         m_rightTargetActive = true;
                     }
@@ -126,7 +126,7 @@ namespace ml_lme
         {
             if(m_enabled && !m_inVR && (m_poseHandler != null))
             {
-                GestureMatcher.LeapData l_data = LeapManager.GetInstance().GetLatestData();
+                GestureMatcher.LeapData l_data = LeapManager.Instance.GetLatestData();
 
                 Vector3 l_hipsLocalPos = m_hips.localPosition;
                 Quaternion l_hipsLocalRot = m_hips.localRotation;
@@ -281,7 +281,7 @@ namespace ml_lme
                         PlayerSetup.Instance._animator.transform
                     );
                     m_leftArmIK.solver.arm.target = m_leftHandTarget;
-                    m_leftArmIK.solver.arm.bendGoal = LeapTracking.GetInstance().GetLeftElbow();
+                    m_leftArmIK.solver.arm.bendGoal = LeapTracking.Instance.GetLeftElbow();
                     m_leftArmIK.solver.arm.bendGoalWeight = (m_trackElbows ? 1f : 0f);
                     m_leftArmIK.enabled = (m_enabled && !m_fingersOnly);
 
@@ -296,7 +296,7 @@ namespace ml_lme
                         PlayerSetup.Instance._animator.transform
                     );
                     m_rightArmIK.solver.arm.target = m_rightHandTarget;
-                    m_rightArmIK.solver.arm.bendGoal = LeapTracking.GetInstance().GetRightElbow();
+                    m_rightArmIK.solver.arm.bendGoal = LeapTracking.Instance.GetRightElbow();
                     m_rightArmIK.solver.arm.bendGoalWeight = (m_trackElbows ? 1f : 0f);
                     m_rightArmIK.enabled = (m_enabled && !m_fingersOnly);
 
