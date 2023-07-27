@@ -38,6 +38,3 @@ Available additional parameters for AAS animator:
 
 Additional mod's behaviour:
 * Overrides and fixes IK behaviour in 4PT mode (head, hands and hips).
-
-# NOTE
-This is testing update for game build r171, not ready for massive usage yet!

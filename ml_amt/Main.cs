@@ -35,6 +35,11 @@ namespace ml_amt
                 null,
                 new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnCalibrate_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
+            HarmonyInstance.Patch(
+                typeof(PlayerSetup).GetMethod("SetPlaySpaceScale", BindingFlags.NonPublic | BindingFlags.Instance),
+                null,
+                new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnPlayspaceScale_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
+            );
 
             // Fixes
             Fixes.AnimatorOverrideControllerFix.Init(HarmonyInstance);
@@ -101,6 +106,20 @@ namespace ml_amt
             {
                 if(m_localTweaker != null)
                     m_localTweaker.OnCalibrate();
+            }
+            catch(Exception l_exception)
+            {
+                MelonLoader.MelonLogger.Error(l_exception);
+            }
+        }
+
+        static void OnPlayspaceScale_Postfix() => ms_instance?.OnPlayspaceScale();
+        void OnPlayspaceScale()
+        {
+            try
+            {
+                if(m_localTweaker != null)
+                    m_localTweaker.OnPlayspaceScale();
             }
             catch(Exception l_exception)
             {

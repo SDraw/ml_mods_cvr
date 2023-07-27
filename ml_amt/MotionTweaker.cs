@@ -196,7 +196,15 @@ namespace ml_amt
                 BodySystem.TrackingLeftLegEnabled = false;
                 BodySystem.TrackingRightLegEnabled = false;
                 BodySystem.TrackingLocomotionEnabled = true;
+
+                IKSystem.Instance.applyOriginalHipRotation = true;
             }
+        }
+
+        internal void OnPlayspaceScale()
+        {
+            if((m_vrIk != null) && Settings.MassCenter)
+                m_vrIk.solver.locomotion.offset = m_massCenter * GetRelativeScale();
         }
 
         // IK events
@@ -239,15 +247,20 @@ namespace ml_amt
             }
 
             bool l_solverActive = !Mathf.Approximately(m_vrIk.solver.IKPositionWeight, 0f);
-            if(l_locomotionOverride && l_solverActive && m_followHips && (!m_moving || (PlayerSetup.Instance.avatarUpright <= PlayerSetup.Instance.avatarProneLimit)) && m_inVR && !BodySystem.isCalibratedAsFullBody && !ModSupporter.SkipHipsOverride())
+            if(l_locomotionOverride && l_solverActive && m_followHips && (!m_moving || (PlayerSetup.Instance.avatarUpright <= PlayerSetup.Instance.avatarCrouchLimit)) && m_inVR && !BodySystem.isCalibratedAsFullBody && !ModSupporter.SkipHipsOverride())
             {
                 m_vrIk.solver.plantFeet = false;
-                IKSystem.VrikRootController.enabled = false;
+                if(IKSystem.VrikRootController != null)
+                    IKSystem.VrikRootController.enabled = false;
                 PlayerSetup.Instance._avatar.transform.localPosition = m_hipsToPlayer;
             }
 
             if(m_locomotionOverride && !l_locomotionOverride)
+            {
                 m_vrIk.solver.Reset();
+                if(IKSystem.VrikRootController != null)
+                    IKSystem.VrikRootController.enabled = true;
+            }
             m_locomotionOverride = l_locomotionOverride;
         }
 
