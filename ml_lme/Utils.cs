@@ -10,8 +10,6 @@ namespace ml_lme
 {
     static class Utils
     {
-        static FieldInfo ms_cohtmlView = typeof(CohtmlControlledViewDisposable).GetField("_view", BindingFlags.NonPublic | BindingFlags.Instance);
-
         public static bool IsInVR() => ((CheckVR.Instance != null) && CheckVR.Instance.hasVrDeviceLoaded);
         public static bool AreKnucklesInUse() => ((CVRInputManager.Instance._leftController == ABI_RC.Systems.InputManagement.XR.EXRControllerType.Index) || (CVRInputManager.Instance._rightController == ABI_RC.Systems.InputManagement.XR.EXRControllerType.Index));
         public static bool IsLeftHandTracked() => (CVRInputManager.Instance._leftController != ABI_RC.Systems.InputManagement.XR.EXRControllerType.None);
@@ -32,8 +30,6 @@ namespace ml_lme
                     CohtmlHud.Instance.ViewDropText(p_title, p_message, p_small);
             }
         }
-
-        public static void ExecuteScript(this CohtmlControlledViewDisposable p_instance, string p_script) => ((cohtml.Net.View)ms_cohtmlView.GetValue(p_instance))?.ExecuteScript(p_script);
 
         public static void Swap<T>(ref T lhs, ref T rhs)
         {

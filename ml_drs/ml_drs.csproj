@@ -7,7 +7,7 @@
     <Product>DesktopReticleSwitch</Product>
     <Authors>SDraw</Authors>
     <Company>None</Company>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

@@ -1,0 +1,1 @@
+Put `PuppetMaster` and `RagdollMaster` folders from [PuppetMaster asset](https://assetstore.unity.com/packages/tools/physics/puppetmaster-48977) here.

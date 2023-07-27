@@ -181,30 +181,16 @@ function inp_toggle_mod_amt(_obj, _callbackName) {
         </div>
 
         <div class ="row-wrapper">
-            <div class ="option-caption">IK override while crouching: </div>
-            <div class ="option-input">
-                <div id="IKOverrideCrouch" class ="inp_toggle no-scroll" data-current="true"></div>
-            </div>
-        </div>
-
-        <div class ="row-wrapper">
             <div class ="option-caption">Crouch limit: </div>
             <div class ="option-input">
-                <div id="CrouchLimit" class ="inp_slider no-scroll" data-min="0" data-max="100" data-current="65"></div>
-            </div>
-        </div>
-        
-        <div class ="row-wrapper">
-            <div class ="option-caption">IK override while proning: </div>
-            <div class ="option-input">
-                <div id="IKOverrideProne" class ="inp_toggle no-scroll" data-current="true"></div>
+                <div id="CrouchLimit" class ="inp_slider no-scroll" data-min="0" data-max="100" data-current="75"></div>
             </div>
         </div>
         
         <div class ="row-wrapper">
             <div class ="option-caption">Prone limit: </div>
             <div class ="option-input">
-                <div id="ProneLimit" class ="inp_slider no-scroll" data-min="0" data-max="100" data-current="30"></div>
+                <div id="ProneLimit" class ="inp_slider no-scroll" data-min="0" data-max="100" data-current="40"></div>
             </div>
         </div>
 
@@ -230,20 +216,6 @@ function inp_toggle_mod_amt(_obj, _callbackName) {
         </div>
         
         <div class ="row-wrapper">
-            <div class ="option-caption">Pose transitions: </div>
-            <div class ="option-input">
-                <div id="PoseTransitions" class ="inp_toggle no-scroll" data-current="true"></div>
-            </div>
-        </div>
-        
-        <div class ="row-wrapper">
-            <div class ="option-caption">Adjusted pose movement speed: </div>
-            <div class ="option-input">
-                <div id="AdjustedMovement" class ="inp_toggle no-scroll" data-current="true"></div>
-            </div>
-        </div>
-        
-        <div class ="row-wrapper">
             <div class ="option-caption">Detect animations emote tag: </div>
             <div class ="option-input">
                 <div id="DetectEmotes" class ="inp_toggle no-scroll" data-current="true"></div>
@@ -257,26 +229,12 @@ function inp_toggle_mod_amt(_obj, _callbackName) {
             </div>
         </div>
 
-        <div class ="row-wrapper">
-            <div class ="option-caption">Scaled locomotion steps: </div>
-            <div class ="option-input">
-                <div id="ScaledSteps" class ="inp_toggle no-scroll" data-current="true"></div>
-            </div>
-        </div>
-
         <h4><p style="color: #7F7F7F">Avatar independent game fixes/overhauls</p></h4><br>
 
         <div class ="row-wrapper">
             <div class ="option-caption">Scaled locomotion jump: </div>
             <div class ="option-input">
                 <div id="ScaledJump" class ="inp_toggle no-scroll" data-current="false"></div>
-            </div>
-        </div>
-        
-        <div class ="row-wrapper">
-            <div class ="option-caption">Alternative avatar collider: </div>
-            <div class ="option-input">
-                <div id="CollisionScale" class ="inp_toggle no-scroll" data-current="true"></div>
             </div>
         </div>
 

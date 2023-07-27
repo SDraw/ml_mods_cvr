@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-[assembly: MelonLoader.MelonInfo(typeof(ml_prm.PlayerRagdollMod), "PlayerRagdollMod", "1.0.5", "SDraw", "https://github.com/SDraw/ml_mods_cvr")]
+[assembly: MelonLoader.MelonInfo(typeof(ml_prm.PlayerRagdollMod), "PlayerRagdollMod", "1.0.6", "SDraw", "https://github.com/SDraw/ml_mods_cvr")]
 [assembly: MelonLoader.MelonGame(null, "ChilloutVR")]
 [assembly: MelonLoader.MelonPriority(2)]
 [assembly: MelonLoader.MelonOptionalDependencies("BTKUILib")]
