@@ -134,6 +134,9 @@ namespace ml_amt
             m_massCenter = Vector3.zero;
             m_ikLimits = null;
             m_parameters.Clear();
+
+            PlayerSetup.Instance.avatarCrouchLimit = Mathf.Max(Mathf.Clamp01(Settings.CrouchLimit), Mathf.Clamp01(Settings.CrouchLimit));
+            PlayerSetup.Instance.avatarProneLimit = Mathf.Min(Mathf.Clamp01(Settings.CrouchLimit), Mathf.Clamp01(Settings.CrouchLimit));
         }
 
         internal void OnSetupAvatar()
