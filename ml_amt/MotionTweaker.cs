@@ -1,5 +1,4 @@
 ﻿using ABI_RC.Core.Player;
-using ABI_RC.Core.Savior;
 using ABI_RC.Systems.IK;
 using ABI_RC.Systems.IK.SubSystems;
 using ABI_RC.Systems.MovementSystem;
@@ -49,6 +48,8 @@ namespace ml_amt
 
         Vector3 m_massCenter = Vector3.zero;
 
+        Transform m_ikLimits = null;
+
         readonly List<AvatarParameter> m_parameters = null;
 
         internal MotionTweaker()
@@ -92,6 +93,8 @@ namespace ml_amt
                 m_groundedRaw = MovementSystem.Instance.IsGroundedRaw();
                 m_moving = !Mathf.Approximately(MovementSystem.Instance.movementVector.magnitude, 0f);
 
+                UpdateIKLimits();
+
                 if(m_avatarHips != null)
                 {
                     Vector4 l_hipsToPoint = (PlayerSetup.Instance.transform.GetMatrix().inverse * m_avatarHips.GetMatrix()) * ms_pointVector;
@@ -129,6 +132,7 @@ namespace ml_amt
             m_hipsToPlayer = Vector3.zero;
             m_avatarHips = null;
             m_massCenter = Vector3.zero;
+            m_ikLimits = null;
             m_parameters.Clear();
         }
 
@@ -145,6 +149,10 @@ namespace ml_amt
             m_parameters.Add(new AvatarParameter(AvatarParameter.ParameterType.GroundedRaw, PlayerSetup.Instance.animatorManager));
             m_parameters.Add(new AvatarParameter(AvatarParameter.ParameterType.Moving, PlayerSetup.Instance.animatorManager));
             m_parameters.RemoveAll(p => !p.IsValid());
+
+            // Avatar custom IK limits
+            m_ikLimits = PlayerSetup.Instance._avatar.transform.Find("[IKLimits]");
+            UpdateIKLimits();
 
             // Apply VRIK tweaks
             if(m_vrIk != null)
@@ -276,11 +284,13 @@ namespace ml_amt
         // Settings
         internal void SetCrouchLimit(float p_value)
         {
-            PlayerSetup.Instance.avatarCrouchLimit = Mathf.Max(Mathf.Clamp01(p_value), PlayerSetup.Instance.avatarProneLimit);
+            if(m_ikLimits == null)
+                PlayerSetup.Instance.avatarCrouchLimit = Mathf.Max(Mathf.Clamp01(p_value), PlayerSetup.Instance.avatarProneLimit);
         }
         internal void SetProneLimit(float p_value)
         {
-            PlayerSetup.Instance.avatarProneLimit = Mathf.Min(Mathf.Clamp01(p_value), PlayerSetup.Instance.avatarCrouchLimit);
+            if(m_ikLimits == null)
+                PlayerSetup.Instance.avatarProneLimit = Mathf.Min(Mathf.Clamp01(p_value), PlayerSetup.Instance.avatarCrouchLimit);
         }
         internal void SetIKOverrideFly(bool p_state)
         {
@@ -308,6 +318,16 @@ namespace ml_amt
         float GetRelativeScale()
         {
             return ((m_avatarScale > 0f) ? (PlayerSetup.Instance._avatar.transform.localScale.y / m_avatarScale) : 0f);
+        }
+
+        void UpdateIKLimits()
+        {
+            if(m_ikLimits != null)
+            {
+                Vector3 l_values = m_ikLimits.localPosition;
+                PlayerSetup.Instance.avatarCrouchLimit = Mathf.Max(Mathf.Clamp01(l_values.x), Mathf.Clamp01(l_values.y));
+                PlayerSetup.Instance.avatarProneLimit = Mathf.Min(Mathf.Clamp01(l_values.x), Mathf.Clamp01(l_values.y));
+            }
         }
 
         // Parameters access

@@ -38,3 +38,4 @@ Available additional parameters for AAS animator:
 
 Additional mod's behaviour:
 * Overrides and fixes IK behaviour in 4PT mode (head, hands and hips).
+* Avatars can have controlled IK crouch and prone limits. For that create `[IKLimits]` GameObject parented to avatar's root. Its local X and Y positions will be used as crouch and prone limits respectively and can be changed via animations. Values should be in range of [0;1].
