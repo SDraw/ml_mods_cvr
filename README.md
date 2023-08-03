@@ -8,7 +8,7 @@ Merged set of MelonLoader mods for ChilloutVR.
 | [Desktop Reticle Switch](/ml_drs/README.md)| ml_drs | 1.0.1 [:arrow_down:](../../releases/latest/download/ml_drs.dll)| ✔ Yes |
 | [Extended Game Notifications](/ml_egn/README.md) | ml_egn | 1.0.3 [:arrow_down:](../../releases/latest/download/ml_egn.dll)| ✔ Yes |
 | [Leap Motion Extension](/ml_lme/README.md)| ml_lme | 1.4.0 [:arrow_down:](../../releases/latest/download/ml_lme.dll)| ✔ Yes |
-| [Pickup Arm Movement](/ml_pam/README.md)| ml_pam | 1.0.6 [:arrow_down:](../../releases/latest/download/ml_pam.dll)| ✔ Yes< |
+| [Pickup Arm Movement](/ml_pam/README.md)| ml_pam | 1.0.6 [:arrow_down:](../../releases/latest/download/ml_pam.dll)| ✔ Yes |
 | [Player Movement Copycat](/ml_pmc/README.md)| ml_pmc | 1.0.1 [:arrow_down:](../../releases/latest/download/ml_pmc.dll)| ✔ Yes |
 | [Player Ragdoll Mod](/ml_prm/README.md)| ml_prm | 1.0.6 [:arrow_down:](../../releases/latest/download/ml_prm.dll)| ✔ Yes |
 
