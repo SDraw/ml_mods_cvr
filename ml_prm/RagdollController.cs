@@ -454,7 +454,12 @@ namespace ml_prm
                         if(MovementSystem.Instance.flying)
                             MovementSystem.Instance.ChangeFlight(false);
 
+                        bool l_crouch = MovementSystem.Instance.crouching;
+                        bool l_prone = MovementSystem.Instance.prone;
                         MovementSystem.Instance.SetImmobilized(true);
+                        MovementSystem.Instance.ChangeCrouch(l_crouch);
+                        MovementSystem.Instance.ChangeProne(l_prone);
+
                         PlayerSetup.Instance.animatorManager.SetAnimatorParameterTrigger("CancelEmote");
                         m_ragdolledParameter.SetValue(true);
                         if(!BodySystem.isCalibrating)

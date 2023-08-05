@@ -49,12 +49,12 @@ namespace ml_pmc
         {
             m_sitting = (MovementSystem.Instance.lastSeat != null);
 
-            if(m_active && (m_puppetParser != null))
+            if(m_active)
             {
-                OverrideIK();
-
-                if(m_puppetParser.HasAnimator())
+                if(m_puppetParser != null)
                 {
+                    OverrideIK();
+
                     bool l_mirror = Settings.MirrorPose;
 
                     if(Settings.Gestures)
@@ -71,6 +71,7 @@ namespace ml_pmc
                         IKSystem.Instance.FingerSystem.controlActive = true;
 
                         ref float[] l_curls = ref m_puppetParser.GetFingerCurls();
+                        ref float[] l_spreads = ref m_puppetParser.GetFingerSpreads();
 
                         CVRInputManager.Instance.fingerCurlLeftThumb = l_curls[l_mirror ? 5 : 0];
                         CVRInputManager.Instance.fingerCurlLeftIndex = l_curls[l_mirror ? 6 : 1];
@@ -82,6 +83,17 @@ namespace ml_pmc
                         CVRInputManager.Instance.fingerCurlRightMiddle = l_curls[l_mirror ? 2 : 7];
                         CVRInputManager.Instance.fingerCurlRightRing = l_curls[l_mirror ? 3 : 8];
                         CVRInputManager.Instance.fingerCurlRightPinky = l_curls[l_mirror ? 4 : 9];
+
+                        CVRInputManager.Instance.fingerSpreadLeftThumb = l_spreads[l_mirror ? 5 : 0];
+                        CVRInputManager.Instance.fingerSpreadLeftIndex = l_spreads[l_mirror ? 6 : 1];
+                        CVRInputManager.Instance.fingerSpreadLeftMiddle = l_spreads[l_mirror ? 7 : 2];
+                        CVRInputManager.Instance.fingerSpreadLeftRing = l_spreads[l_mirror ? 8 : 3];
+                        CVRInputManager.Instance.fingerSpreadLeftPinky = l_spreads[l_mirror ? 9 : 4];
+                        CVRInputManager.Instance.fingerSpreadRightThumb = l_spreads[l_mirror ? 0 : 5];
+                        CVRInputManager.Instance.fingerSpreadRightIndex = l_spreads[l_mirror ? 1 : 6];
+                        CVRInputManager.Instance.fingerSpreadRightMiddle = l_spreads[l_mirror ? 2 : 7];
+                        CVRInputManager.Instance.fingerSpreadRightRing = l_spreads[l_mirror ? 3 : 8];
+                        CVRInputManager.Instance.fingerSpreadRightPinky = l_spreads[l_mirror ? 4 : 9];
                     }
                     else
                     {
@@ -92,7 +104,7 @@ namespace ml_pmc
                         }
                     }
 
-                    Matrix4x4 l_offset = m_puppetParser.GetOffset();
+                    Matrix4x4 l_offset = m_puppetParser.GetLastOffset();
                     Vector3 l_pos = l_offset * ms_pointVector;
                     Quaternion l_rot = l_offset.rotation;
 
@@ -120,27 +132,26 @@ namespace ml_pmc
                         else
                             PlayerSetup.Instance.transform.rotation = l_result.rotation;
                     }
-                }
-                else
-                {
-                    if(!m_puppetParser.IsWaitingAnimator())
+
+                    if(Vector3.Distance(this.transform.position, m_puppetParser.transform.position) > m_distanceLimit)
                         SetTarget(null);
                 }
-
-                if(Vector3.Distance(this.transform.position, m_puppetParser.transform.position) > m_distanceLimit)
+                else
                     SetTarget(null);
             }
         }
 
         void LateUpdate()
         {
-            if(m_active && (m_animator != null) && (m_puppetParser != null) && m_puppetParser.IsPoseParsed())
+            if(m_active && (m_animator != null) && (m_puppetParser != null))
             {
                 OverrideIK();
 
                 m_puppetParser.GetPose().CopyTo(ref m_pose);
+
                 if(Settings.MirrorPose)
                     Utils.MirrorPose(ref m_pose);
+
                 m_poseHandler.SetHumanPose(ref m_pose);
             }
         }
@@ -160,7 +171,11 @@ namespace ml_pmc
 
             m_poseHandler?.Dispose();
             m_poseHandler = null;
+
+            if(m_active)
+                OnActivityChange?.Invoke(false);
             m_active = false;
+
             m_distanceLimit = float.MaxValue;
             m_fingerTracking = false;
             m_pose = new HumanPose();
@@ -222,15 +237,16 @@ namespace ml_pmc
         }
 
         // Arbitrary
-        public void SetTarget(GameObject p_target)
+        public void SetTarget(PuppetMaster p_target)
         {
             if(m_animator != null)
             {
                 if(!m_active)
                 {
-                    if(p_target != null)
+                    if((p_target != null) && (p_target.animatorManager != null) && (p_target.animatorManager.animator != null) && p_target.animatorManager.animator.isHuman)
                     {
-                        m_puppetParser = p_target.AddComponent<PuppetParser>();
+                        m_puppetParser = p_target.animatorManager.animator.gameObject.AddComponent<PuppetParser>();
+                        m_puppetParser.m_puppetMaster = p_target;
                         m_distanceLimit = Utils.GetWorldMovementLimit();
 
                         m_active = true;
@@ -295,6 +311,17 @@ namespace ml_pmc
                 CVRInputManager.Instance.fingerCurlRightMiddle = 0f;
                 CVRInputManager.Instance.fingerCurlRightRing = 0f;
                 CVRInputManager.Instance.fingerCurlRightPinky = 0f;
+
+                CVRInputManager.Instance.fingerSpreadLeftThumb = 0.5f;
+                CVRInputManager.Instance.fingerSpreadLeftIndex = 0.5f;
+                CVRInputManager.Instance.fingerSpreadLeftMiddle = 0.5f;
+                CVRInputManager.Instance.fingerSpreadLeftRing = 0.5f;
+                CVRInputManager.Instance.fingerSpreadLeftPinky = 0.5f;
+                CVRInputManager.Instance.fingerSpreadRightThumb = 0.5f;
+                CVRInputManager.Instance.fingerSpreadRightIndex = 0.5f;
+                CVRInputManager.Instance.fingerSpreadRightMiddle = 0.5f;
+                CVRInputManager.Instance.fingerSpreadRightRing = 0.5f;
+                CVRInputManager.Instance.fingerSpreadRightPinky = 0.5f;
             }
         }
     }

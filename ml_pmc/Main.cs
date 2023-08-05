@@ -67,7 +67,7 @@ namespace ml_pmc
                         if(CVRPlayerManager.Instance.GetPlayerPuppetMaster(p_id, out PuppetMaster l_puppetMaster))
                         {
                             if(IsInSight(MovementSystem.Instance.proxyCollider, l_puppetMaster.GetComponent<CapsuleCollider>(), Utils.GetWorldMovementLimit()))
-                                m_localCopycat.SetTarget(l_puppetMaster.gameObject);
+                                m_localCopycat.SetTarget(l_puppetMaster);
                             else
                                 ModUi.ShowAlert("Selected player is too far away or obstructed");
                         }

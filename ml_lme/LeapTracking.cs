@@ -114,7 +114,7 @@ namespace ml_lme
         {
             if(Settings.Enabled)
             {
-                GestureMatcher.LeapData l_data = LeapManager.Instance.GetLatestData();
+                LeapParser.LeapData l_data = LeapManager.Instance.GetLatestData();
 
                 if(l_data.m_leftHand.m_present)
                 {

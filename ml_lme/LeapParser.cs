@@ -2,15 +2,24 @@
 
 namespace ml_lme
 {
-    static class GestureMatcher
+    static class LeapParser
     {
-        readonly static Vector2[] ms_fingerLimits =
+        readonly static Vector2[] ms_bendLimits =
         {
-            new Vector2(-50f, 0f),
-            new Vector2(-20f, 30f),
-            new Vector2(-15f, 15f),
-            new Vector2(-10f, 20f),
-            new Vector2(-10f, 25f)
+            new Vector2(0f, 90f),
+            new Vector2(0f, 180f),
+            new Vector2(0f, 180f),
+            new Vector2(0f, 180f),
+            new Vector2(0f, 180f)
+        };
+
+        readonly static Vector2[] ms_spreadLimits =
+        {
+            new Vector2(-25f, 25f), // Unity's default limits 
+            new Vector2(-20f, 20f),
+            new Vector2(-7.5f, 7.5f),
+            new Vector2(-7.5f, 7.5f),
+            new Vector2(-20f, 20f)
         };
 
         public class HandData
@@ -68,7 +77,7 @@ namespace ml_lme
             }
         }
 
-        public static void GetFrameData(Leap.Frame p_frame, LeapData p_data)
+        public static void ParseFrame(Leap.Frame p_frame, LeapData p_data)
         {
             p_data.Reset();
 
@@ -93,30 +102,31 @@ namespace ml_lme
             // Bends
             foreach(Leap.Finger l_finger in p_hand.Fingers)
             {
-                Quaternion l_prevSegment = Quaternion.identity;
+                Quaternion l_parentRot = Quaternion.identity;
 
                 float l_angle = 0f;
                 foreach(Leap.Bone l_bone in l_finger.bones)
                 {
-                    p_data.m_fingerPosition[(int)l_finger.Type * 4 + (int)l_bone.Type] = l_bone.PrevJoint;
-                    p_data.m_fingerRotation[(int)l_finger.Type * 4 + (int)l_bone.Type] = l_bone.Rotation;
+                    int l_index = (int)l_finger.Type * 4 + (int)l_bone.Type;
+                    p_data.m_fingerPosition[l_index] = l_bone.PrevJoint;
+                    p_data.m_fingerRotation[l_index] = l_bone.Rotation;
 
                     if(l_bone.Type == Leap.Bone.BoneType.TYPE_METACARPAL)
                     {
-                        l_prevSegment = l_bone.Rotation;
+                        l_parentRot = l_bone.Rotation;
                         continue;
                     }
 
-                    Quaternion l_diff = Quaternion.Inverse(l_prevSegment) * l_bone.Rotation;
-                    l_prevSegment = l_bone.Rotation;
-
-                    float l_angleDiff = l_diff.eulerAngles.x;
+                    Quaternion l_localRot = Quaternion.Inverse(l_parentRot) * l_bone.Rotation;
+                    float l_angleDiff = l_localRot.eulerAngles.x;
                     if(l_angleDiff > 180f)
                         l_angleDiff -= 360f;
                     l_angle += l_angleDiff;
+
+                    l_parentRot = l_bone.Rotation;
                 }
 
-                p_data.m_bends[(int)l_finger.Type] = Utils.InverseLerpUnclamped(0f, (l_finger.Type == Leap.Finger.FingerType.TYPE_THUMB) ? 90f : 180f, l_angle);
+                p_data.m_bends[(int)l_finger.Type] = Utils.InverseLerpUnclamped(ms_bendLimits[(int)l_finger.Type].x, ms_bendLimits[(int)l_finger.Type].y, l_angle);
             }
 
             // Spreads
@@ -126,24 +136,17 @@ namespace ml_lme
                 Leap.Bone l_child = l_finger.Bone(Leap.Bone.BoneType.TYPE_PROXIMAL);
                 Quaternion l_diff = Quaternion.Inverse(l_parent.Rotation) * l_child.Rotation;
 
-                // Spread - local Y rotation, but thumb is obnoxious
-                float l_angle = 360f - l_diff.eulerAngles.y;
+                // Spread - local Y rotation
+                float l_angle = l_diff.eulerAngles.y;
                 if(l_angle > 180f)
                     l_angle -= 360f;
 
-                // Pain
                 if(p_hand.IsRight)
                     l_angle *= -1f;
 
-                if(l_finger.Type != Leap.Finger.FingerType.TYPE_THUMB)
-                {
-                    if(l_angle < 0f)
-                        p_data.m_spreads[(int)l_finger.Type] = 0.5f * Utils.InverseLerpUnclamped(ms_fingerLimits[(int)l_finger.Type].x, 0f, l_angle);
-                    else
-                        p_data.m_spreads[(int)l_finger.Type] = 0.5f + 0.5f * Utils.InverseLerpUnclamped(0f, ms_fingerLimits[(int)l_finger.Type].y, l_angle);
-                }
-                else
-                    p_data.m_spreads[(int)l_finger.Type] = Utils.InverseLerpUnclamped(ms_fingerLimits[(int)l_finger.Type].x, ms_fingerLimits[(int)l_finger.Type].y, l_angle);
+                p_data.m_spreads[(int)l_finger.Type] = Utils.InverseLerpUnclamped(ms_spreadLimits[(int)l_finger.Type].x, ms_spreadLimits[(int)l_finger.Type].y, l_angle) * 2f - 1f;
+                if((l_finger.Type != Leap.Finger.FingerType.TYPE_THUMB) && (p_data.m_bends[(int)l_finger.Type] >= 0.8f))
+                    p_data.m_spreads[(int)l_finger.Type] = Mathf.Lerp(p_data.m_spreads[(int)l_finger.Type], 0f, (p_data.m_bends[(int)l_finger.Type] - 0.8f) * 5f);
             }
 
             p_data.m_grabStrength = Mathf.Clamp01((p_data.m_bends[1] + p_data.m_bends[2] + p_data.m_bends[3] + p_data.m_bends[4]) * 0.25f);

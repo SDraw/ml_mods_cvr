@@ -123,7 +123,7 @@ namespace ml_lme
         {
             if(base.InputEnabled)
             {
-                GestureMatcher.LeapData l_data = LeapManager.Instance.GetLatestData();
+                LeapParser.LeapData l_data = LeapManager.Instance.GetLatestData();
 
                 if(l_data.m_leftHand.m_present)
                 {
@@ -265,7 +265,7 @@ namespace ml_lme
         {
             if(Settings.Input)
             {
-                GestureMatcher.LeapData l_data = LeapManager.Instance.GetLatestData();
+                LeapParser.LeapData l_data = LeapManager.Instance.GetLatestData();
 
                 if(l_data.m_leftHand.m_present && (!m_inVR || !Utils.IsLeftHandTracked() || !Settings.FingersOnly))
                 {
@@ -391,8 +391,10 @@ namespace ml_lme
             }
         }
 
-        void SetFingersInput(GestureMatcher.HandData p_hand, bool p_left)
+        void SetFingersInput(LeapParser.HandData p_hand, bool p_left)
         {
+            // Game has spreads in range of [0;1], but mod now operates in range of [-1;1]
+            // So spreads will be normalized towards game's range
             if(p_left)
             {
                 _inputManager.fingerCurlLeftThumb = p_hand.m_bends[0];
@@ -400,11 +402,11 @@ namespace ml_lme
                 _inputManager.fingerCurlLeftMiddle = p_hand.m_bends[2];
                 _inputManager.fingerCurlLeftRing = p_hand.m_bends[3];
                 _inputManager.fingerCurlLeftPinky = p_hand.m_bends[4];
-                _inputManager.fingerSpreadLeftThumb = p_hand.m_spreads[0];
-                _inputManager.fingerSpreadLeftIndex = p_hand.m_spreads[1];
-                _inputManager.fingerSpreadLeftMiddle = p_hand.m_spreads[2];
-                _inputManager.fingerSpreadLeftRing = p_hand.m_spreads[3];
-                _inputManager.fingerSpreadLeftPinky = p_hand.m_spreads[4];
+                _inputManager.fingerSpreadLeftThumb = 1f - (p_hand.m_spreads[0] * 0.5f + 0.5f);
+                _inputManager.fingerSpreadLeftIndex = 1f - (p_hand.m_spreads[1] * 0.5f + 0.5f);
+                _inputManager.fingerSpreadLeftMiddle = 1f - (p_hand.m_spreads[2] * 0.5f + 0.5f);
+                _inputManager.fingerSpreadLeftRing = 1f - (p_hand.m_spreads[3] * 0.5f + 0.5f);
+                _inputManager.fingerSpreadLeftPinky = 1f - (p_hand.m_spreads[4] * 0.5f + 0.5f);
             }
             else
             {
@@ -413,11 +415,11 @@ namespace ml_lme
                 _inputManager.fingerCurlRightMiddle = p_hand.m_bends[2];
                 _inputManager.fingerCurlRightRing = p_hand.m_bends[3];
                 _inputManager.fingerCurlRightPinky = p_hand.m_bends[4];
-                _inputManager.fingerSpreadRightThumb = p_hand.m_spreads[0];
-                _inputManager.fingerSpreadRightIndex = p_hand.m_spreads[1];
-                _inputManager.fingerSpreadRightMiddle = p_hand.m_spreads[2];
-                _inputManager.fingerSpreadRightRing = p_hand.m_spreads[3];
-                _inputManager.fingerSpreadRightPinky = p_hand.m_spreads[4];
+                _inputManager.fingerSpreadRightThumb = 1f - (p_hand.m_spreads[0] * 0.5f + 0.5f);
+                _inputManager.fingerSpreadRightIndex = 1f - (p_hand.m_spreads[1] * 0.5f + 0.5f);
+                _inputManager.fingerSpreadRightMiddle = 1f - (p_hand.m_spreads[2] * 0.5f + 0.5f);
+                _inputManager.fingerSpreadRightRing = 1f - (p_hand.m_spreads[3] * 0.5f + 0.5f);
+                _inputManager.fingerSpreadRightPinky = 1f - (p_hand.m_spreads[4] * 0.5f + 0.5f);
             }
         }
 
@@ -430,11 +432,11 @@ namespace ml_lme
                 _inputManager.fingerCurlLeftMiddle = 0f;
                 _inputManager.fingerCurlLeftRing = 0f;
                 _inputManager.fingerCurlLeftPinky = 0f;
-                _inputManager.fingerSpreadLeftThumb = 0f;
-                _inputManager.fingerSpreadLeftIndex = 0f;
-                _inputManager.fingerSpreadLeftMiddle = 0f;
-                _inputManager.fingerSpreadLeftRing = 0f;
-                _inputManager.fingerSpreadLeftPinky = 0f;
+                _inputManager.fingerSpreadLeftThumb = 0.5f;
+                _inputManager.fingerSpreadLeftIndex = 0.5f;
+                _inputManager.fingerSpreadLeftMiddle = 0.5f;
+                _inputManager.fingerSpreadLeftRing = 0.5f;
+                _inputManager.fingerSpreadLeftPinky = 0.5f;
             }
             else
             {
@@ -443,11 +445,11 @@ namespace ml_lme
                 _inputManager.fingerCurlRightMiddle = 0f;
                 _inputManager.fingerCurlRightRing = 0f;
                 _inputManager.fingerCurlRightPinky = 0f;
-                _inputManager.fingerSpreadRightThumb = 0f;
-                _inputManager.fingerSpreadRightIndex = 0f;
-                _inputManager.fingerSpreadRightMiddle = 0f;
-                _inputManager.fingerSpreadRightRing = 0f;
-                _inputManager.fingerSpreadRightPinky = 0f;
+                _inputManager.fingerSpreadRightThumb = 0.5f;
+                _inputManager.fingerSpreadRightIndex = 0.5f;
+                _inputManager.fingerSpreadRightMiddle = 0.5f;
+                _inputManager.fingerSpreadRightRing = 0.5f;
+                _inputManager.fingerSpreadRightPinky = 0.5f;
             }
         }
 

@@ -47,7 +47,7 @@ namespace ml_lme
             }
         }
 
-        public void Update(GestureMatcher.HandData p_data)
+        public void Update(LeapParser.HandData p_data)
         {
             if(m_wrist != null)
             {

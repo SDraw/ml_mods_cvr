@@ -12,7 +12,7 @@ namespace ml_lme
         public static LeapManager Instance { get; private set; } = null;
 
         Leap.Controller m_leapController = null;
-        GestureMatcher.LeapData m_leapData = null;
+        LeapParser.LeapData m_leapData = null;
 
         LeapTracking m_leapTracking = null;
         LeapTracked m_leapTracked = null;
@@ -24,7 +24,7 @@ namespace ml_lme
                 Instance = this;
 
             m_leapController = new Leap.Controller();
-            m_leapData = new GestureMatcher.LeapData();
+            m_leapData = new LeapParser.LeapData();
 
             DontDestroyOnLoad(this);
 
@@ -90,12 +90,12 @@ namespace ml_lme
                 if(m_leapController.IsConnected)
                 {
                     Leap.Frame l_frame = m_leapController.Frame();
-                    GestureMatcher.GetFrameData(l_frame, m_leapData);
+                    LeapParser.ParseFrame(l_frame, m_leapData);
                 }
             }
         }
 
-        public GestureMatcher.LeapData GetLatestData() => m_leapData;
+        public LeapParser.LeapData GetLatestData() => m_leapData;
 
         // Device events
         void OnLeapDeviceInitialized(object p_sender, Leap.DeviceEventArgs p_args)
