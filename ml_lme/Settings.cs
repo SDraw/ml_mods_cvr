@@ -32,7 +32,7 @@ namespace ml_lme
             HeadY,
             HeadZ,
             TrackElbows,
-            Input,
+            Interaction,
             Gestures,
             InteractThreadhold,
             GripThreadhold,
@@ -48,7 +48,7 @@ namespace ml_lme
         public static bool HeadAttach { get; private set; } = false;
         public static Vector3 HeadOffset { get; private set; } = new Vector3(0f, -0.3f, 0.15f);
         public static bool TrackElbows { get; private set; } = true;
-        public static bool Input { get; private set; } = true;
+        public static bool Interaction { get; private set; } = true;
         public static bool Gestures { get; private set; } = false;
         public static float InteractThreadhold { get; private set; } = 0.8f;
         public static float GripThreadhold { get; private set; } = 0.4f;
@@ -66,7 +66,7 @@ namespace ml_lme
         static public event Action<bool> HeadAttachChange;
         static public event Action<Vector3> HeadOffsetChange;
         static public event Action<bool> TrackElbowsChange;
-        static public event Action<bool> InputChange;
+        static public event Action<bool> InteractionChange;
         static public event Action<bool> GesturesChange;
         static public event Action<float> InteractThreadholdChange;
         static public event Action<float> GripThreadholdChange;
@@ -93,7 +93,7 @@ namespace ml_lme
                 ms_category.CreateEntry(ModSetting.HeadY.ToString(), (int)(HeadOffset.y * 100f)),
                 ms_category.CreateEntry(ModSetting.HeadZ.ToString(), (int)(HeadOffset.z * 100f)),
                 ms_category.CreateEntry(ModSetting.TrackElbows.ToString(), TrackElbows),
-                ms_category.CreateEntry(ModSetting.Input.ToString(), Input),
+                ms_category.CreateEntry(ModSetting.Interaction.ToString(), Interaction),
                 ms_category.CreateEntry(ModSetting.Gestures.ToString(), Gestures),
                 ms_category.CreateEntry(ModSetting.InteractThreadhold.ToString(), (int)(InteractThreadhold * 100f)),
                 ms_category.CreateEntry(ModSetting.GripThreadhold.ToString(), (int)(GripThreadhold * 100f)),
@@ -151,7 +151,7 @@ namespace ml_lme
                 (int)ms_entries[(int)ModSetting.HeadZ].BoxedValue
             ) * 0.01f;
             TrackElbows = (bool)ms_entries[(int)ModSetting.TrackElbows].BoxedValue;
-            Input = (bool)ms_entries[(int)ModSetting.Input].BoxedValue;
+            Interaction = (bool)ms_entries[(int)ModSetting.Interaction].BoxedValue;
             Gestures = (bool)ms_entries[(int)ModSetting.Gestures].BoxedValue;
             InteractThreadhold = (int)ms_entries[(int)ModSetting.InteractThreadhold].BoxedValue * 0.01f;
             GripThreadhold = (int)ms_entries[(int)ModSetting.GripThreadhold].BoxedValue * 0.01f;
@@ -199,10 +199,10 @@ namespace ml_lme
                     }
                     break;
 
-                    case ModSetting.Input:
+                    case ModSetting.Interaction:
                     {
-                        Input = bool.Parse(p_value);
-                        InputChange?.Invoke(Input);
+                        Interaction = bool.Parse(p_value);
+                        InteractionChange?.Invoke(Interaction);
                     }
                     break;
 

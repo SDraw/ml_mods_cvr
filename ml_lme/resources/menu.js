@@ -395,7 +395,7 @@ function inp_dropdown_mod_lme(_obj, _callbackName) {
         <div class ="row-wrapper">
             <div class ="option-caption">Interaction input: </div>
             <div class ="option-input">
-                <div id="Input" class ="inp_toggle no-scroll" data-current="false"></div>
+                <div id="Interaction" class ="inp_toggle no-scroll" data-current="false"></div>
             </div>
         </div>
 

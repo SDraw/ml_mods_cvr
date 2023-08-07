@@ -10,10 +10,8 @@ namespace ml_lme
     class LeapTracked : MonoBehaviour
     {
         static readonly float[] ms_tposeMuscles = typeof(ABI_RC.Systems.IK.SubSystems.BodySystem).GetField("TPoseMuscles", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null) as float[];
-        static readonly Quaternion ms_offsetLeft = Quaternion.Euler(0f, 0f, 270f);
-        static readonly Quaternion ms_offsetRight = Quaternion.Euler(0f, 0f, 90f);
-        static readonly Quaternion ms_offsetLeftDesktop = Quaternion.Euler(0f, 90f, 0f);
-        static readonly Quaternion ms_offsetRightDesktop = Quaternion.Euler(0f, 270f, 0f);
+        static readonly Quaternion ms_offsetLeft = Quaternion.Euler(0f, 90f, 0f);
+        static readonly Quaternion ms_offsetRight = Quaternion.Euler(0f, 270f, 0f);
 
         VRIK m_vrIK = null;
         Vector4 m_armsWeights = Vector2.zero;
@@ -145,7 +143,7 @@ namespace ml_lme
         {
             if(p_data.m_leftHand.m_present)
             {
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftThumb1Stretched, -0.5f-p_data.m_leftHand.m_bends[0]);
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftThumb1Stretched, -0.5f - p_data.m_leftHand.m_bends[0]);
                 UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftThumb2Stretched, 0.7f - p_data.m_leftHand.m_bends[0] * 2f);
                 UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftThumb3Stretched, 0.7f - p_data.m_leftHand.m_bends[0] * 2f);
                 UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftThumbSpread, -p_data.m_leftHand.m_spreads[0]);
@@ -173,7 +171,7 @@ namespace ml_lme
 
             if(p_data.m_rightHand.m_present)
             {
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightThumb1Stretched, -0.5f-p_data.m_rightHand.m_bends[0]);
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightThumb1Stretched, -0.5f - p_data.m_rightHand.m_bends[0]);
                 UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightThumb2Stretched, 0.7f - p_data.m_rightHand.m_bends[0] * 2f);
                 UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightThumb3Stretched, 0.7f - p_data.m_rightHand.m_bends[0] * 2f);
                 UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightThumbSpread, -p_data.m_rightHand.m_spreads[0]);
@@ -256,11 +254,11 @@ namespace ml_lme
 
                 Transform l_hand = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftHand);
                 if(l_hand != null)
-                    m_leftHandTarget.localRotation = (m_inVR ? ms_offsetLeft : ms_offsetLeftDesktop) * (PlayerSetup.Instance._avatar.transform.GetMatrix().inverse * l_hand.GetMatrix()).rotation;
+                    m_leftHandTarget.localRotation = ms_offsetLeft * (PlayerSetup.Instance._avatar.transform.GetMatrix().inverse * l_hand.GetMatrix()).rotation;
 
                 l_hand = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightHand);
                 if(l_hand != null)
-                    m_rightHandTarget.localRotation = (m_inVR ? ms_offsetRight : ms_offsetRightDesktop) * (PlayerSetup.Instance._avatar.transform.GetMatrix().inverse * l_hand.GetMatrix()).rotation;
+                    m_rightHandTarget.localRotation = ms_offsetRight * (PlayerSetup.Instance._avatar.transform.GetMatrix().inverse * l_hand.GetMatrix()).rotation;
 
                 if(m_vrIK == null)
                 {
@@ -424,8 +422,6 @@ namespace ml_lme
         {
             if(p_pose.muscles.Length > p_index)
                 p_pose.muscles[p_index] = p_value;
-
-            //p_pose.muscles[p_index] = (p_clamped ? Mathf.Lerp(ms_muscleLimits[p_index].x, ms_muscleLimits[p_index].y, p_value) : Mathf.LerpUnclamped(ms_muscleLimits[p_index].x, ms_muscleLimits[p_index].y, p_value));
         }
     }
 }
