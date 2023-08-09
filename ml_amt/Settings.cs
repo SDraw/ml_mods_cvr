@@ -55,8 +55,8 @@ namespace ml_amt
                 ms_category.CreateEntry(ModSetting.IKOverrideJump.ToString(), IKOverrideJump),
                 ms_category.CreateEntry(ModSetting.DetectEmotes.ToString(), DetectEmotes),
                 ms_category.CreateEntry(ModSetting.FollowHips.ToString(), FollowHips),
-                ms_category.CreateEntry(ModSetting.MassCenter.ToString(), MassCenter),
                 ms_category.CreateEntry(ModSetting.ScaledJump.ToString(), ScaledJump),
+                ms_category.CreateEntry(ModSetting.MassCenter.ToString(), MassCenter),
                 ms_category.CreateEntry(ModSetting.OverrideFix.ToString(), OverrideFix)
             };
 

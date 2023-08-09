@@ -6,7 +6,7 @@
     <Company>None</Company>
     <Product>AvatarMotionTweaker</Product>
     <PackageId>AvatarMotionTweaker</PackageId>
-    <Version>1.2.9</Version>
+    <Version>1.3.0</Version>
     <Platforms>x64</Platforms>
     <AssemblyName>ml_amt</AssemblyName>
   </PropertyGroup>

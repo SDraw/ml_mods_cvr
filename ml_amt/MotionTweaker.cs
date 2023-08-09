@@ -62,6 +62,13 @@ namespace ml_amt
         {
             m_inVR = Utils.IsInVR();
 
+            SetCrouchLimit(Settings.CrouchLimit);
+            SetProneLimit(Settings.ProneLimit);
+            SetIKOverrideFly(Settings.IKOverrideFly);
+            SetIKOverrideJump(Settings.IKOverrideJump);
+            SetDetectEmotes(Settings.DetectEmotes);
+            SetFollowHips(Settings.FollowHips);
+
             Settings.CrouchLimitChange += this.SetCrouchLimit;
             Settings.ProneLimitChange += this.SetProneLimit;
             Settings.IKOverrideFlyChange += this.SetIKOverrideFly;
@@ -69,9 +76,6 @@ namespace ml_amt
             Settings.DetectEmotesChange += this.SetDetectEmotes;
             Settings.FollowHipsChange += this.SetFollowHips;
             Settings.MassCenterChange += this.OnMassCenterChange;
-
-            SetCrouchLimit(Settings.CrouchLimit);
-            SetProneLimit(Settings.ProneLimit);
         }
 
         void OnDestroy()
@@ -135,8 +139,8 @@ namespace ml_amt
             m_ikLimits = null;
             m_parameters.Clear();
 
-            PlayerSetup.Instance.avatarCrouchLimit = Mathf.Max(Mathf.Clamp01(Settings.CrouchLimit), Mathf.Clamp01(Settings.CrouchLimit));
-            PlayerSetup.Instance.avatarProneLimit = Mathf.Min(Mathf.Clamp01(Settings.CrouchLimit), Mathf.Clamp01(Settings.CrouchLimit));
+            PlayerSetup.Instance.avatarCrouchLimit = Mathf.Clamp01(Settings.CrouchLimit);
+            PlayerSetup.Instance.avatarProneLimit = Mathf.Clamp01(Settings.ProneLimit);
         }
 
         internal void OnSetupAvatar()
@@ -288,12 +292,12 @@ namespace ml_amt
         internal void SetCrouchLimit(float p_value)
         {
             if(m_ikLimits == null)
-                PlayerSetup.Instance.avatarCrouchLimit = Mathf.Max(Mathf.Clamp01(p_value), PlayerSetup.Instance.avatarProneLimit);
+                PlayerSetup.Instance.avatarCrouchLimit = Mathf.Clamp01(p_value);
         }
         internal void SetProneLimit(float p_value)
         {
             if(m_ikLimits == null)
-                PlayerSetup.Instance.avatarProneLimit = Mathf.Min(Mathf.Clamp01(p_value), PlayerSetup.Instance.avatarCrouchLimit);
+                PlayerSetup.Instance.avatarProneLimit = Mathf.Clamp01(p_value);
         }
         internal void SetIKOverrideFly(bool p_state)
         {
@@ -328,8 +332,8 @@ namespace ml_amt
             if(m_ikLimits != null)
             {
                 Vector3 l_values = m_ikLimits.localPosition;
-                PlayerSetup.Instance.avatarCrouchLimit = Mathf.Max(Mathf.Clamp01(l_values.x), Mathf.Clamp01(l_values.y));
-                PlayerSetup.Instance.avatarProneLimit = Mathf.Min(Mathf.Clamp01(l_values.x), Mathf.Clamp01(l_values.y));
+                PlayerSetup.Instance.avatarCrouchLimit = Mathf.Clamp01(l_values.x);
+                PlayerSetup.Instance.avatarProneLimit = Mathf.Clamp01(l_values.y);
             }
         }
 

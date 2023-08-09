@@ -159,6 +159,14 @@ namespace ml_pmc
         // Patches
         internal void OnAvatarClear()
         {
+            if(m_active)
+            {
+                RestoreIK();
+                RestoreFingerTracking();
+                OnActivityChange?.Invoke(false);
+            }
+            m_active = false;
+
             m_inVr = Utils.IsInVR();
 
             if(m_puppetParser != null)
@@ -171,10 +179,6 @@ namespace ml_pmc
 
             m_poseHandler?.Dispose();
             m_poseHandler = null;
-
-            if(m_active)
-                OnActivityChange?.Invoke(false);
-            m_active = false;
 
             m_distanceLimit = float.MaxValue;
             m_fingerTracking = false;
@@ -283,16 +287,16 @@ namespace ml_pmc
 
         void OverrideIK()
         {
-            if((m_vrIk != null) && !BodySystem.isCalibrating)
+            if(!BodySystem.isCalibrating)
                 BodySystem.TrackingPositionWeight = 0f;
         }
         void RestoreIK()
         {
-            if((m_vrIk != null) && !BodySystem.isCalibrating)
-            {
+            if(!BodySystem.isCalibrating)
                 BodySystem.TrackingPositionWeight = 1f;
+
+            if(m_vrIk != null)
                 m_vrIk.solver.Reset();
-            }
         }
         void RestoreFingerTracking()
         {

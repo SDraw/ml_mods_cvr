@@ -55,12 +55,6 @@ namespace ml_amt
                 yield return null;
 
             m_localTweaker = PlayerSetup.Instance.gameObject.AddComponent<MotionTweaker>();
-            m_localTweaker.SetCrouchLimit(Settings.CrouchLimit);
-            m_localTweaker.SetProneLimit(Settings.ProneLimit);
-            m_localTweaker.SetIKOverrideFly(Settings.IKOverrideFly);
-            m_localTweaker.SetIKOverrideJump(Settings.IKOverrideJump);
-            m_localTweaker.SetDetectEmotes(Settings.DetectEmotes);
-            m_localTweaker.SetFollowHips(Settings.FollowHips);
         }
 
         public override void OnDeinitializeMelon()
