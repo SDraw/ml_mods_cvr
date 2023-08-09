@@ -3,7 +3,7 @@ Merged set of MelonLoader mods for ChilloutVR.
 **Table for game build 2022r171p2:**
 | Full name | Short name | Latest version | Available in [CVRMA](https://github.com/knah/CVRMelonAssistant) |
 |:---------:|:----------:|:--------------:| :----------------------------------------------------------------|
-| [Avatar Motion Tweaker](/ml_amt/README.md) | ml_amt | 1.2.9 [:arrow_down:](../../releases/latest/download/ml_amt.dll)| ✔ Yes |
+| [Avatar Motion Tweaker](/ml_amt/README.md) | ml_amt | 1.3.0 [:arrow_down:](../../releases/latest/download/ml_amt.dll)| ✔ Yes<br>:hourglass_flowing_sand: Update review |
 | [Desktop Head Tracking](/ml_dht/README.md)| ml_dht | - | ✔ Yes<br>:warning:Broken |
 | [Desktop Reticle Switch](/ml_drs/README.md)| ml_drs | 1.0.1 [:arrow_down:](../../releases/latest/download/ml_drs.dll)| ✔ Yes |
 | [Extended Game Notifications](/ml_egn/README.md) | ml_egn | 1.0.3 [:arrow_down:](../../releases/latest/download/ml_egn.dll)| ✔ Yes |
