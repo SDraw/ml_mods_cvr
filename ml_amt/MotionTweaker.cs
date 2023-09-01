@@ -262,10 +262,10 @@ namespace ml_amt
             }
 
             bool l_solverActive = !Mathf.Approximately(m_vrIk.solver.IKPositionWeight, 0f);
-            if(l_locomotionOverride && l_solverActive && m_followHips && (!m_moving || (PlayerSetup.Instance.avatarUpright <= PlayerSetup.Instance.avatarCrouchLimit)) && m_inVR && !BodySystem.isCalibratedAsFullBody && !ModSupporter.SkipHipsOverride())
+            if(l_locomotionOverride && l_solverActive && (m_followHips && !MovementSystem.Instance.sitting) && (!m_moving || (PlayerSetup.Instance.avatarUpright <= PlayerSetup.Instance.avatarCrouchLimit)) && m_inVR && !BodySystem.isCalibratedAsFullBody && !ModSupporter.SkipHipsOverride())
             {
                 m_vrIk.solver.plantFeet = false;
-                if(IKSystem.VrikRootController != null)
+                if((IKSystem.VrikRootController != null) && !MovementSystem.Instance.sitting)
                     IKSystem.VrikRootController.enabled = false;
                 PlayerSetup.Instance._avatar.transform.localPosition = m_hipsToPlayer;
             }
@@ -273,7 +273,7 @@ namespace ml_amt
             if(m_locomotionOverride && !l_locomotionOverride)
             {
                 m_vrIk.solver.Reset();
-                if(IKSystem.VrikRootController != null)
+                if((IKSystem.VrikRootController != null) && !MovementSystem.Instance.sitting)
                     IKSystem.VrikRootController.enabled = true;
             }
             m_locomotionOverride = l_locomotionOverride;

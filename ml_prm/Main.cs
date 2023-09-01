@@ -62,9 +62,9 @@ namespace ml_prm
                 null
             );
             HarmonyInstance.Patch(
-                typeof(MovementSystem).GetMethod(nameof(MovementSystem.ToggleFlight)),
+                typeof(MovementSystem).GetMethod(nameof(MovementSystem.ChangeFlight)),
                 null,
-                new HarmonyLib.HarmonyMethod(typeof(PlayerRagdollMod).GetMethod(nameof(OnToggleFlight_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
+                new HarmonyLib.HarmonyMethod(typeof(PlayerRagdollMod).GetMethod(nameof(OnChangeFlight_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
 
             // Whitelist the toggle script
@@ -199,13 +199,13 @@ namespace ml_prm
             }
         }
 
-        static void OnToggleFlight_Postfix() => ms_instance?.OnToggleFlight();
-        void OnToggleFlight()
+        static void OnChangeFlight_Postfix() => ms_instance?.OnChangeFlight();
+        void OnChangeFlight()
         {
             try
             {
                 if(m_localController != null)
-                    m_localController.OnToggleFlight();
+                    m_localController.OnChangeFlight();
             }
             catch(Exception e)
             {

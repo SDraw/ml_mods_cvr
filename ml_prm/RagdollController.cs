@@ -348,7 +348,7 @@ namespace ml_prm
             }
         }
 
-        internal void OnToggleFlight()
+        internal void OnChangeFlight()
         {
             if(m_avatarReady && m_enabled && MovementSystem.Instance.flying)
                 SwitchRagdoll();
