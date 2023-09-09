@@ -1,16 +1,16 @@
-﻿using System.Collections;
-using ABI_RC.Core.Player;
+﻿using ABI_RC.Core.Player;
+using System.Collections;
 
-namespace ml_pvf
+namespace ml_gmf.Fixes
 {
-    public class PostprocessVolumeFix : MelonLoader.MelonMod
+    static class PostProccesVolumes
     {
-        public override void OnInitializeMelon()
+        internal static void Init()
         {
             MelonLoader.MelonCoroutines.Start(FixVRCameraVolumeTarget());
         }
 
-        IEnumerator FixVRCameraVolumeTarget()
+        static IEnumerator FixVRCameraVolumeTarget()
         {
             while(PlayerSetup.Instance == null)
                 yield return null;

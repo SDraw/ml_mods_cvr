@@ -1,23 +1,23 @@
-﻿using System;
-using System.Reflection;
-using ABI_RC.Systems.InputManagement;
+﻿using ABI_RC.Systems.InputManagement;
 using ABI_RC.Systems.InputManagement.XR;
+using System;
+using System.Reflection;
 
-namespace ml_vgm
+namespace ml_gmf.Fixes
 {
-    public class ViveGesturesMovement : MelonLoader.MelonMod
+    static class ViveControls
     {
-        public override void OnInitializeMelon()
+        internal static void Init(HarmonyLib.Harmony p_instance)
         {
-            HarmonyInstance.Patch(
+            p_instance.Patch(
                 typeof(CVRXRModule).GetMethod("Update_Gestures_Vive", BindingFlags.NonPublic | BindingFlags.Instance),
                 null,
-                new HarmonyLib.HarmonyMethod(typeof(ViveGesturesMovement).GetMethod(nameof(OnViveGesturesUpdate_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
+                new HarmonyLib.HarmonyMethod(typeof(ViveControls).GetMethod(nameof(OnViveGesturesUpdate_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
-            HarmonyInstance.Patch(
+            p_instance.Patch(
                 typeof(CVRXRModule).GetMethod(nameof(CVRXRModule.Reset), BindingFlags.Public | BindingFlags.Instance),
-                new HarmonyLib.HarmonyMethod(typeof(ViveGesturesMovement).GetMethod(nameof(OnCVRXRModuleReset_Prefix), BindingFlags.NonPublic | BindingFlags.Static)),
-                new HarmonyLib.HarmonyMethod(typeof(ViveGesturesMovement).GetMethod(nameof(OnCVRXRModuleReset_Postfix), BindingFlags.NonPublic | BindingFlags.Static))
+                new HarmonyLib.HarmonyMethod(typeof(ViveControls).GetMethod(nameof(OnCVRXRModuleReset_Prefix), BindingFlags.NonPublic | BindingFlags.Static)),
+                new HarmonyLib.HarmonyMethod(typeof(ViveControls).GetMethod(nameof(OnCVRXRModuleReset_Postfix), BindingFlags.NonPublic | BindingFlags.Static))
             );
         }
 
