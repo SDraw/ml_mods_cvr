@@ -237,13 +237,6 @@ function inp_toggle_mod_amt(_obj, _callbackName) {
                 <div id="ScaledJump" class ="inp_toggle no-scroll" data-current="false"></div>
             </div>
         </div>
-
-        <div class ="row-wrapper">
-            <div class ="option-caption">Fix animator overrides (chairs, etc.): </div>
-            <div class ="option-input">
-                <div id="OverrideFix" class ="inp_toggle no-scroll" data-current="true"></div>
-            </div>
-        </div>
     `;
     document.getElementById('settings-ik').appendChild(l_block);
 

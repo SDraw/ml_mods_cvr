@@ -16,8 +16,7 @@ namespace ml_amt
             DetectEmotes,
             FollowHips,
             ScaledJump,
-            MassCenter,
-            OverrideFix
+            MassCenter
         };
 
         public static float CrouchLimit { get; private set; } = 0.75f;
@@ -28,7 +27,6 @@ namespace ml_amt
         public static bool FollowHips { get; private set; } = true;
         public static bool MassCenter { get; private set; } = true;
         public static bool ScaledJump { get; private set; } = false;
-        public static bool OverrideFix { get; private set; } = true;
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
@@ -56,8 +54,7 @@ namespace ml_amt
                 ms_category.CreateEntry(ModSetting.DetectEmotes.ToString(), DetectEmotes),
                 ms_category.CreateEntry(ModSetting.FollowHips.ToString(), FollowHips),
                 ms_category.CreateEntry(ModSetting.ScaledJump.ToString(), ScaledJump),
-                ms_category.CreateEntry(ModSetting.MassCenter.ToString(), MassCenter),
-                ms_category.CreateEntry(ModSetting.OverrideFix.ToString(), OverrideFix)
+                ms_category.CreateEntry(ModSetting.MassCenter.ToString(), MassCenter)
             };
 
             CrouchLimit = ((int)ms_entries[(int)ModSetting.CrouchLimit].BoxedValue) * 0.01f;
@@ -68,7 +65,6 @@ namespace ml_amt
             FollowHips = (bool)ms_entries[(int)ModSetting.FollowHips].BoxedValue;
             MassCenter = (bool)ms_entries[(int)ModSetting.MassCenter].BoxedValue;
             ScaledJump = (bool)ms_entries[(int)ModSetting.ScaledJump].BoxedValue;
-            OverrideFix = (bool)ms_entries[(int)ModSetting.OverrideFix].BoxedValue;
 
             MelonLoader.MelonCoroutines.Start(WaitMainMenuUi());
         }
@@ -165,13 +161,6 @@ namespace ml_amt
                     {
                         ScaledJump = bool.Parse(p_value);
                         ScaledJumpChange?.Invoke(ScaledJump);
-                    }
-                    break;
-
-                    case ModSetting.OverrideFix:
-                    {
-                        OverrideFix = bool.Parse(p_value);
-                        OverrideFixChange?.Invoke(OverrideFix);
                     }
                     break;
                 }

@@ -7,9 +7,9 @@ using System.Collections;
 using System.Reflection;
 using UnityEngine;
 
-namespace ml_amt.Fixes
+namespace ml_amt.Overhauls
 {
-    static class MovementJumpFix
+    static class JumpHeight
     {
         static FieldInfo ms_avatarHeight = typeof(PlayerSetup).GetField("_avatarHeight", BindingFlags.NonPublic | BindingFlags.Instance);
 
@@ -20,17 +20,17 @@ namespace ml_amt.Fixes
             p_instance.Patch(
                 typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.SetupAvatar)),
                 null,
-                new HarmonyLib.HarmonyMethod(typeof(MovementJumpFix).GetMethod(nameof(OnSetupAvatar_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
+                new HarmonyLib.HarmonyMethod(typeof(JumpHeight).GetMethod(nameof(OnSetupAvatar_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
             p_instance.Patch(
                 typeof(CVRWorld).GetMethod("SetupWorldRules", BindingFlags.NonPublic | BindingFlags.Instance),
                 null,
-                new HarmonyLib.HarmonyMethod(typeof(MovementJumpFix).GetMethod(nameof(OnWorldRulesSetup_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
+                new HarmonyLib.HarmonyMethod(typeof(JumpHeight).GetMethod(nameof(OnWorldRulesSetup_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
             p_instance.Patch(
                 typeof(PlayerSetup).GetMethod("SetupIKScaling", BindingFlags.NonPublic | BindingFlags.Instance),
                 null,
-                new HarmonyLib.HarmonyMethod(typeof(MovementJumpFix).GetMethod(nameof(OnSetupIKScaling_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
+                new HarmonyLib.HarmonyMethod(typeof(JumpHeight).GetMethod(nameof(OnSetupIKScaling_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
 
             Settings.ScaledJumpChange += OnScaledJumpChange;

@@ -41,9 +41,8 @@ namespace ml_amt
                 new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnPlayspaceScale_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
 
-            // Fixes
-            Fixes.AnimatorOverrideControllerFix.Init(HarmonyInstance);
-            Fixes.MovementJumpFix.Init(HarmonyInstance);
+            // Overhauls
+            Overhauls.JumpHeight.Init(HarmonyInstance);
 
             ModSupporter.Init();
             MelonLoader.MelonCoroutines.Start(WaitForLocalPlayer());

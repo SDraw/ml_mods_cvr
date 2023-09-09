@@ -7,6 +7,7 @@
             Fixes.ViveControls.Init(HarmonyInstance);
             Fixes.AvatarOverrides.Init(HarmonyInstance);
             Fixes.PostProccesVolumes.Init();
+            Fixes.AnimationOverrides.Init(HarmonyInstance);
         }
     }
 }

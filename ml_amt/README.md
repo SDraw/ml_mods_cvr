@@ -24,8 +24,6 @@ Available mod's settings in `Settings - IK - Avatar Motion Tweaker`:
 #### Fixes/overhauls options
 * **Scaled locomotion jump:** scales locomotion jump according to relation between your player settings height and current avatar height (includes avatar scale); default value - `false`.
   * Note: Disabled in worlds that don't allow flight.
-* **Fix animation overrides (chairs, etc.):** fixes animations overriding for avatars with AAS; default value - `true`.
-  * Note: This option is made to address [broken animator in chairs and combat worlds issue](https://feedback.abinteractive.net/p/gestures-getting-stuck-locally-upon-entering-vehicles-chairs).
 
 Available additional parameters for AAS animator:
 * **`Upright`:** defines linear coefficient between current viewpoint height and avatar's viewpoint height; float, range - [0.0, 1.0].

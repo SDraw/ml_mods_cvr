@@ -2,7 +2,7 @@
 using System.Linq;
 using UnityEngine;
 
-namespace ml_amt.Fixes
+namespace ml_gmf
 {
     class AnimatorAnalyzer
     {

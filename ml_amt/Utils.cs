@@ -12,7 +12,6 @@ namespace ml_amt
         static readonly FieldInfo ms_grounded = typeof(MovementSystem).GetField("_isGrounded", BindingFlags.NonPublic | BindingFlags.Instance);
         static readonly FieldInfo ms_groundedRaw = typeof(MovementSystem).GetField("_isGroundedRaw", BindingFlags.NonPublic | BindingFlags.Instance);
         static readonly FieldInfo ms_hasToes = typeof(IKSolverVR).GetField("hasToes", BindingFlags.NonPublic | BindingFlags.Instance);
-        static MethodInfo ms_getSineKeyframes = typeof(IKSolverVR).GetMethod("GetSineKeyframes", BindingFlags.NonPublic | BindingFlags.Static);
 
         public static bool IsInVR() => ((ABI_RC.Core.Savior.CheckVR.Instance != null) && ABI_RC.Core.Savior.CheckVR.Instance.hasVrDeviceLoaded);
 
@@ -20,10 +19,6 @@ namespace ml_amt
         public static bool IsGroundedRaw(this MovementSystem p_instance) => (bool)ms_groundedRaw.GetValue(MovementSystem.Instance);
 
         public static bool HasToes(this IKSolverVR p_instance) => (bool)ms_hasToes.GetValue(p_instance);
-        public static Keyframe[] GetSineKeyframes(float p_mag)
-        {
-            return (Keyframe[])ms_getSineKeyframes.Invoke(null, new object[] { p_mag });
-        }
 
         public static bool IsWorldSafe() => ((CVRWorld.Instance != null) && CVRWorld.Instance.allowFlying);
         public static float GetWorldJumpHeight()
