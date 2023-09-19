@@ -14,4 +14,4 @@ This mod fixes some issues that are present in game
 * Fix of animation replacement (chairs, etc.) that leads to broken avatar animator ([feedback post](https://feedback.abinteractive.net/p/gestures-getting-stuck-locally-upon-entering-vehicles-chairs))
 
 # Notes
-Some of fixes will be implemented natively in game after 2023r172ex3
+All these fixes are implemented natively in 2023r172ex4 build.

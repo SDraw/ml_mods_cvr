@@ -228,15 +228,6 @@ function inp_toggle_mod_amt(_obj, _callbackName) {
                 <div id="MassCenter" class ="inp_toggle no-scroll" data-current="true"></div>
             </div>
         </div>
-
-        <h4><p style="color: #7F7F7F">Avatar independent game fixes/overhauls</p></h4><br>
-
-        <div class ="row-wrapper">
-            <div class ="option-caption">Scaled locomotion jump: </div>
-            <div class ="option-input">
-                <div id="ScaledJump" class ="inp_toggle no-scroll" data-current="false"></div>
-            </div>
-        </div>
     `;
     document.getElementById('settings-ik').appendChild(l_block);
 

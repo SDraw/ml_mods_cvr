@@ -21,13 +21,6 @@ namespace ml_amt
         public static bool HasToes(this IKSolverVR p_instance) => (bool)ms_hasToes.GetValue(p_instance);
 
         public static bool IsWorldSafe() => ((CVRWorld.Instance != null) && CVRWorld.Instance.allowFlying);
-        public static float GetWorldJumpHeight()
-        {
-            float l_result = 1f;
-            if(CVRWorld.Instance != null)
-                l_result = CVRWorld.Instance.jumpHeight;
-            return l_result;
-        }
         public static float GetWorldMovementLimit()
         {
             float l_result = 1f;

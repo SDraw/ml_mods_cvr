@@ -34,6 +34,9 @@ Optional mod's settings page with [BTKUILib](https://github.com/BTK-Development/
 * **Recover delay:** time delay for enabled `Auto recover` in seconds; `3.0` by default.
 * **Reset settings:** resets mod settings to default.
 
+Optional mod's settings in [UIExpansionKit](https://github.com/ddakebono/ChilloutMods):
+* **Hotkey:** system key that is used to switch ragdoll state; `R` by default.
+
 Available additional parameters for AAS animator:
 * **`Ragdolled`:** defines current ragdoll state; boolean.
   * Note: Can be set as local-only (not synced) if starts with `#` character.

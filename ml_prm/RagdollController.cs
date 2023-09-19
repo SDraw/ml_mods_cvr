@@ -15,6 +15,8 @@ namespace ml_prm
     [DisallowMultipleComponent]
     public class RagdollController : MonoBehaviour
     {
+        const float c_defaultFriction = 0.6f;
+
         public static RagdollController Instance { get; private set; } = null;
 
         VRIK m_vrIK = null;
@@ -56,8 +58,8 @@ namespace ml_prm
             m_jointAnchors = new List<System.Tuple<CharacterJoint, Vector3>>();
 
             m_physicsMaterial = new PhysicMaterial("Ragdoll");
-            m_physicsMaterial.dynamicFriction = 0.5f;
-            m_physicsMaterial.staticFriction = 0.5f;
+            m_physicsMaterial.dynamicFriction = c_defaultFriction;
+            m_physicsMaterial.staticFriction = c_defaultFriction;
             m_physicsMaterial.frictionCombine = PhysicMaterialCombine.Average;
             m_physicsMaterial.bounciness = 0f;
             m_physicsMaterial.bounceCombine = PhysicMaterialCombine.Average;
@@ -145,7 +147,7 @@ namespace ml_prm
             if((m_customTrigger != null) && m_customTrigger.GetStateWithReset() && m_avatarReady && !m_enabled && Settings.PointersReaction)
                 SwitchRagdoll();
 
-            if(Settings.Hotkey && Input.GetKeyDown(KeyCode.R) && !ViewManager.Instance.isGameMenuOpen())
+            if(Settings.Hotkey && Input.GetKeyDown(Settings.HotkeyKey) && !ViewManager.Instance.isGameMenuOpen())
                 SwitchRagdoll();
 
             if(m_avatarReady && m_enabled && CVRInputManager.Instance.jump && Settings.JumpRecover)
@@ -415,8 +417,8 @@ namespace ml_prm
             {
                 bool l_slipperiness = (Settings.Slipperiness && Utils.IsWorldSafe());
                 bool l_bounciness = (Settings.Bounciness && Utils.IsWorldSafe());
-                m_physicsMaterial.dynamicFriction = (l_slipperiness ? 0f : 0.5f);
-                m_physicsMaterial.staticFriction = (l_slipperiness ? 0f : 0.5f);
+                m_physicsMaterial.dynamicFriction = (l_slipperiness ? 0f : c_defaultFriction);
+                m_physicsMaterial.staticFriction = (l_slipperiness ? 0f : c_defaultFriction);
                 m_physicsMaterial.frictionCombine = (l_slipperiness ? PhysicMaterialCombine.Minimum : PhysicMaterialCombine.Average);
                 m_physicsMaterial.bounciness = (l_bounciness ? 1f : 0f);
                 m_physicsMaterial.bounceCombine = (l_bounciness ? PhysicMaterialCombine.Maximum : PhysicMaterialCombine.Average);

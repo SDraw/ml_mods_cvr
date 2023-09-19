@@ -1,5 +1,4 @@
 ﻿using ABI_RC.Core.InteractionSystem;
-using cohtml;
 using System;
 using System.Collections.Generic;
 
@@ -15,7 +14,6 @@ namespace ml_amt
             IKOverrideJump,
             DetectEmotes,
             FollowHips,
-            ScaledJump,
             MassCenter
         };
 
@@ -26,7 +24,6 @@ namespace ml_amt
         public static bool DetectEmotes { get; private set; } = true;
         public static bool FollowHips { get; private set; } = true;
         public static bool MassCenter { get; private set; } = true;
-        public static bool ScaledJump { get; private set; } = false;
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
@@ -38,8 +35,6 @@ namespace ml_amt
         static public event Action<bool> DetectEmotesChange;
         static public event Action<bool> FollowHipsChange;
         static public event Action<bool> MassCenterChange;
-        static public event Action<bool> ScaledJumpChange;
-        static public event Action<bool> OverrideFixChange;
 
         internal static void Init()
         {
@@ -53,7 +48,6 @@ namespace ml_amt
                 ms_category.CreateEntry(ModSetting.IKOverrideJump.ToString(), IKOverrideJump),
                 ms_category.CreateEntry(ModSetting.DetectEmotes.ToString(), DetectEmotes),
                 ms_category.CreateEntry(ModSetting.FollowHips.ToString(), FollowHips),
-                ms_category.CreateEntry(ModSetting.ScaledJump.ToString(), ScaledJump),
                 ms_category.CreateEntry(ModSetting.MassCenter.ToString(), MassCenter)
             };
 
@@ -64,7 +58,6 @@ namespace ml_amt
             DetectEmotes = (bool)ms_entries[(int)ModSetting.DetectEmotes].BoxedValue;
             FollowHips = (bool)ms_entries[(int)ModSetting.FollowHips].BoxedValue;
             MassCenter = (bool)ms_entries[(int)ModSetting.MassCenter].BoxedValue;
-            ScaledJump = (bool)ms_entries[(int)ModSetting.ScaledJump].BoxedValue;
 
             MelonLoader.MelonCoroutines.Start(WaitMainMenuUi());
         }
@@ -154,13 +147,6 @@ namespace ml_amt
                     {
                         MassCenter = bool.Parse(p_value);
                         MassCenterChange?.Invoke(MassCenter);
-                    }
-                    break;
-
-                    case ModSetting.ScaledJump:
-                    {
-                        ScaledJump = bool.Parse(p_value);
-                        ScaledJumpChange?.Invoke(ScaledJump);
                     }
                     break;
                 }

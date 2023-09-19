@@ -33,7 +33,7 @@
     <EmbeddedResource Include="resources\leapmotion_hands.asset" />
     <EmbeddedResource Include="resources\menu.js" />
     <EmbeddedResource Include="vendor\LeapSDK\lib\x64\LeapC.dll">
-      <Link>LeapC.dll</Link>
+      <Link>resources/LeapC.dll</Link>
     </EmbeddedResource>
   </ItemGroup>
   

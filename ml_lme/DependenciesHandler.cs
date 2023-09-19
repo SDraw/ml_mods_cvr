@@ -20,7 +20,7 @@ namespace ml_lme
 
             foreach(string l_library in ms_libraries)
             {
-                Stream l_libraryStream = l_assembly.GetManifestResourceStream(l_assemblyName + "." + l_library);
+                Stream l_libraryStream = l_assembly.GetManifestResourceStream(l_assemblyName + ".resources." + l_library);
 
                 if(!File.Exists(l_library))
                 {
