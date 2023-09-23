@@ -1,8 +1,6 @@
-﻿using ABI_RC.Core.Player;
-using ABI_RC.Core.Savior;
+﻿using ABI_RC.Core.Savior;
 using ABI_RC.Core.UI;
 using ABI_RC.Systems.InputManagement;
-using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
@@ -10,6 +8,8 @@ namespace ml_lme
 {
     static class Utils
     {
+        static readonly FieldInfo ms_view = typeof(CohtmlControlledViewWrapper).GetField("_view", BindingFlags.NonPublic | BindingFlags.Instance);
+
         public static bool IsInVR() => ((CheckVR.Instance != null) && CheckVR.Instance.hasVrDeviceLoaded);
         public static bool AreKnucklesInUse() => ((CVRInputManager.Instance._leftController == ABI_RC.Systems.InputManagement.XR.EXRControllerType.Index) || (CVRInputManager.Instance._rightController == ABI_RC.Systems.InputManagement.XR.EXRControllerType.Index));
         public static bool IsLeftHandTracked() => (CVRInputManager.Instance._leftController != ABI_RC.Systems.InputManagement.XR.EXRControllerType.None);
@@ -30,6 +30,8 @@ namespace ml_lme
                     CohtmlHud.Instance.ViewDropText(p_title, p_message, p_small);
             }
         }
+
+        static public void ExecuteScript(this CohtmlControlledViewWrapper p_instance, string p_script) => ((cohtml.Net.View)ms_view.GetValue(p_instance)).ExecuteScript(p_script);
 
         public static void Swap<T>(ref T lhs, ref T rhs)
         {
