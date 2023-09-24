@@ -263,6 +263,7 @@ namespace ml_prm
                             l_body.drag = (Utils.IsWorldSafe() ? Settings.MovementDrag : 1f);
                             l_body.useGravity = (!Utils.IsWorldSafe() || Settings.Gravity);
                             l_body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+                            l_body.gameObject.layer = LayerMask.NameToLayer("PlayerLocal");
                         }
 
                         CharacterJoint l_joint = l_puppetTransforms[i].GetComponent<CharacterJoint>();

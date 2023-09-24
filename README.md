@@ -8,7 +8,7 @@ Merged set of MelonLoader mods for ChilloutVR.
 | [Leap Motion Extension](/ml_lme/README.md)| ml_lme | 1.4.2 [:arrow_down:](../../releases/latest/download/ml_lme.dll)| ✔ Yes |
 | [Pickup Arm Movement](/ml_pam/README.md)| ml_pam | 1.0.7 [:arrow_down:](../../releases/latest/download/ml_pam.dll)| ✔ Yes |
 | [Player Movement Copycat](/ml_pmc/README.md)| ml_pmc | 1.0.3 [:arrow_down:](../../releases/latest/download/ml_pmc.dll)| ✔ Yes |
-| [Player Ragdoll Mod](/ml_prm/README.md)| ml_prm | 1.0.9 [:arrow_down:](../../releases/latest/download/ml_prm.dll)| ✔ Yes |
+| [Player Ragdoll Mod](/ml_prm/README.md)| ml_prm | 1.0.10 [:arrow_down:](../../releases/latest/download/ml_prm.dll)| ✔ Yes<br>:hourglass_flowing_sand: Update review |
 
 **Archived mods:**
 | Full name | Short name | Notes |
