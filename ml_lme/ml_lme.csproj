@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <Platforms>x64</Platforms>
     <PackageId>LeapMotionExtension</PackageId>
-    <Version>1.4.2</Version>
+    <Version>1.4.3</Version>
     <Authors>SDraw</Authors>
     <Company>None</Company>
     <Product>LeapMotionExtension</Product>
@@ -25,13 +25,13 @@
     <None Remove="LeapMotionExtension.json" />
     <None Remove="resources\leapmotion_controller.asset" />
     <None Remove="resources\leapmotion_hands.asset" />
-    <None Remove="resources\menu.js" />
+    <None Remove="resources\ui_menu.js" />
   </ItemGroup>
   
   <ItemGroup>
     <EmbeddedResource Include="resources\leapmotion_controller.asset" />
     <EmbeddedResource Include="resources\leapmotion_hands.asset" />
-    <EmbeddedResource Include="resources\menu.js" />
+    <EmbeddedResource Include="resources\ui_menu.js" />
     <EmbeddedResource Include="vendor\LeapSDK\lib\x64\LeapC.dll">
       <Link>resources/LeapC.dll</Link>
     </EmbeddedResource>
@@ -90,6 +90,10 @@
   
   <ItemGroup>
     <Folder Include="vendor\LeapCSharp\" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <EmbeddedResource Include="..\js\ui_elements.js" Link="resources\ui_elements.js" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

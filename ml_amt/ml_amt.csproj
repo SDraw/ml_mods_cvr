@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
@@ -6,7 +6,7 @@
     <Company>None</Company>
     <Product>AvatarMotionTweaker</Product>
     <PackageId>AvatarMotionTweaker</PackageId>
-    <Version>1.3.2</Version>
+    <Version>1.3.3</Version>
     <Platforms>x64</Platforms>
     <AssemblyName>ml_amt</AssemblyName>
   </PropertyGroup>
@@ -26,11 +26,15 @@
 
   <ItemGroup>
     <None Remove="AvatarMotionTweaker.json" />
-    <None Remove="resources\menu.js" />
+    <None Remove="resources\ui_menu.js" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="resources\menu.js" />
+    <EmbeddedResource Include="resources\ui_menu.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="..\js\ui_elements.js" Link="resources\ui_elements.js" />
   </ItemGroup>
 
   <ItemGroup>

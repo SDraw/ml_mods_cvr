@@ -78,7 +78,8 @@ namespace ml_amt
             };
             ViewManager.Instance.gameMenuView.Listener.FinishLoad += (_) =>
             {
-                ViewManager.Instance.gameMenuView.View.ExecuteScript(Scripts.GetEmbeddedScript("menu.js"));
+                ViewManager.Instance.gameMenuView.View.ExecuteScript(Scripts.GetEmbeddedScript("ui_elements.js"));
+                ViewManager.Instance.gameMenuView.View.ExecuteScript(Scripts.GetEmbeddedScript("ui_menu.js"));
                 foreach(var l_entry in ms_entries)
                     ViewManager.Instance.gameMenuView.View.TriggerEvent("updateModSettingAMT", l_entry.DisplayName, l_entry.GetValueAsString());
             };

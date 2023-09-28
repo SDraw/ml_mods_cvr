@@ -1,5 +1,4 @@
 ﻿using ABI_RC.Core.InteractionSystem;
-using cohtml;
 using System;
 using System.Collections.Generic;
 
@@ -53,7 +52,8 @@ namespace ml_pam
             };
             ViewManager.Instance.gameMenuView.Listener.FinishLoad += (_) =>
             {
-                ViewManager.Instance.gameMenuView.View.ExecuteScript(Scripts.GetEmbeddedScript("menu.js"));
+                ViewManager.Instance.gameMenuView.View.ExecuteScript(Scripts.GetEmbeddedScript("ui_elements.js"));
+                ViewManager.Instance.gameMenuView.View.ExecuteScript(Scripts.GetEmbeddedScript("ui_menu.js"));
                 foreach(var l_entry in ms_entries)
                     ViewManager.Instance.gameMenuView.View.TriggerEvent("updateModSettingPAM", l_entry.DisplayName, l_entry.GetValueAsString());
             };
