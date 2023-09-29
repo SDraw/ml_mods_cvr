@@ -17,15 +17,15 @@
 
   <ItemGroup>
     <None Remove="PickupArmMovement.json" />
-    <None Remove="resources\ui_menu.js" />
+    <None Remove="resources\mod_menu.js" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="resources\ui_menu.js" />
+    <EmbeddedResource Include="resources\mod_menu.js" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="..\js\ui_elements.js" Link="resources\ui_elements.js" />
+    <EmbeddedResource Include="..\js\mods_extension.js" Link="resources\mods_extension.js" />
   </ItemGroup>
 
   <ItemGroup>

@@ -27,16 +27,23 @@ namespace ml_vei
                     float l_mag = ((!__instance.HasEmoteOverride) ? __instance.Primary2DAxis : __instance.EmoteOverride).magnitude;
                     if(__instance.ViveDirectionPressed && (l_mag >= CVRInputManager.VrViveGestureDeadZone))
                     {
-                        if(__instance.Grip > 0.5f)
+                        if(Settings.GripTrigger)
                         {
-                            __instance.GestureRaw = -1f;
-                            __instance.Gesture = -1f;
+                            switch(Settings.AxisPriority)
+                            {
+                                case Settings.PriorityAxis.Grip:
+                                    __instance.GestureRaw = ((__instance.Grip > 0.5f) ? -1f : __instance.Trigger);
+                                    break;
+
+                                case Settings.PriorityAxis.Trigger:
+                                    __instance.GestureRaw = (!UnityEngine.Mathf.Approximately(__instance.Trigger, 0f) ? __instance.Trigger : ((__instance.Grip > 0.5f) ? -1f : 0f));
+                                    break;
+                            }
                         }
                         else
-                        {
-                            __instance.GestureRaw = __instance.Trigger;
-                            __instance.Gesture = __instance.Trigger;
-                        }
+                            __instance.GestureRaw = 0f;
+
+                        __instance.Gesture = __instance.GestureRaw;
                     }
                 }
             }

@@ -73,15 +73,15 @@ namespace ml_amt
 
             ViewManager.Instance.gameMenuView.Listener.ReadyForBindings += () =>
             {
-                ViewManager.Instance.gameMenuView.View.BindCall("MelonMod_AMT_Call_InpSlider", new Action<string, string>(OnSliderUpdate));
-                ViewManager.Instance.gameMenuView.View.BindCall("MelonMod_AMT_Call_InpToggle", new Action<string, string>(OnToggleUpdate));
+                ViewManager.Instance.gameMenuView.View.BindCall("OnSliderUpdate_" + ms_category.Identifier, new Action<string, string>(OnSliderUpdate));
+                ViewManager.Instance.gameMenuView.View.BindCall("OnToggleUpdate_" + ms_category.Identifier, new Action<string, string>(OnToggleUpdate));
             };
             ViewManager.Instance.gameMenuView.Listener.FinishLoad += (_) =>
             {
-                ViewManager.Instance.gameMenuView.View.ExecuteScript(Scripts.GetEmbeddedScript("ui_elements.js"));
-                ViewManager.Instance.gameMenuView.View.ExecuteScript(Scripts.GetEmbeddedScript("ui_menu.js"));
+                ViewManager.Instance.gameMenuView.View.ExecuteScript(Scripts.GetEmbeddedScript("mods_extension.js"));
+                ViewManager.Instance.gameMenuView.View.ExecuteScript(Scripts.GetEmbeddedScript("mod_menu.js"));
                 foreach(var l_entry in ms_entries)
-                    ViewManager.Instance.gameMenuView.View.TriggerEvent("updateModSettingAMT", l_entry.DisplayName, l_entry.GetValueAsString());
+                    ViewManager.Instance.gameMenuView.View.TriggerEvent("updateModSetting", ms_category.Identifier, l_entry.DisplayName, l_entry.GetValueAsString());
             };
         }
 

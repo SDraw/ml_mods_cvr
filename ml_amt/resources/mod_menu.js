@@ -1,16 +1,4 @@
-﻿// Add settings
-var g_modSettingsAMT = [];
-
-engine.on('updateModSettingAMT', function (_name, _value) {
-    for (var i = 0; i < g_modSettingsAMT.length; i++) {
-        if (g_modSettingsAMT[i].name == _name) {
-            g_modSettingsAMT[i].updateValue(_value);
-            break;
-        }
-    }
-});
-
-// Add own menu
+﻿// Add own menu
 {
     let l_block = document.createElement('div');
     l_block.innerHTML = `
@@ -70,15 +58,11 @@ engine.on('updateModSettingAMT', function (_name, _value) {
     `;
     document.getElementById('settings-ik').appendChild(l_block);
 
-    // Update sliders in new menu block
-    let l_sliders = l_block.querySelectorAll('.inp_slider');
-    for (var i = 0; i < l_sliders.length; i++) {
-        g_modSettingsAMT[g_modSettingsAMT.length] = new inp_slider_mod(l_sliders[i], 'MelonMod_AMT_Call_InpSlider');
-    }
+    // Toggles
+    for (let l_toggle of l_block.querySelectorAll('.inp_toggle'))
+        modsExtension.addSetting('AMT', l_toggle.id, modsExtension.createToggle(l_toggle, 'OnToggleUpdate_AMT'));
 
-    // Update toggles in new menu block
-    let l_toggles = l_block.querySelectorAll('.inp_toggle');
-    for (var i = 0; i < l_toggles.length; i++) {
-        g_modSettingsAMT[g_modSettingsAMT.length] = new inp_toggle_mod(l_toggles[i], 'MelonMod_AMT_Call_InpToggle');
-    }
+    // Sliders
+    for (let l_slider of l_block.querySelectorAll('.inp_slider'))
+        modsExtension.addSetting('AMT', l_slider.id, modsExtension.createSlider(l_slider, 'OnSliderUpdate_AMT'));
 }

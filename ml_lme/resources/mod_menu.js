@@ -1,17 +1,4 @@
-﻿// Add settings
-var g_modSettingsLME = [];
-
-engine.on('updateModSettingLME', function (_name, _value) {
-    for (var i = 0; i < g_modSettingsLME.length; i++) {
-        if (g_modSettingsLME[i].name == _name) {
-            g_modSettingsLME[i].updateValue(_value);
-            break;
-        }
-    }
-});
-
-// Add own menu
-{
+﻿{
     let l_block = document.createElement('div');
     l_block.innerHTML = `
         <div class ="settings-subcategory">
@@ -161,21 +148,15 @@ engine.on('updateModSettingLME', function (_name, _value) {
     `;
     document.getElementById('settings-implementation').appendChild(l_block);
 
-    // Update toggles in new menu block
-    let l_toggles = l_block.querySelectorAll('.inp_toggle');
-    for (var i = 0; i < l_toggles.length; i++) {
-        g_modSettingsLME[g_modSettingsLME.length] = new inp_toggle_mod(l_toggles[i], 'MelonMod_LME_Call_InpToggle');
-    }
+    // Toggles
+    for (let l_toggle of l_block.querySelectorAll('.inp_toggle'))
+        modsExtension.addSetting('LME', l_toggle.id, modsExtension.createToggle(l_toggle, 'OnToggleUpdate_LME'));
 
-    // Update sliders in new menu block
-    let l_sliders = l_block.querySelectorAll('.inp_slider');
-    for (var i = 0; i < l_sliders.length; i++) {
-        g_modSettingsLME[g_modSettingsLME.length] = new inp_slider_mod(l_sliders[i], 'MelonMod_LME_Call_InpSlider');
-    }
+    // Sliders
+    for (let l_slider of l_block.querySelectorAll('.inp_slider'))
+        modsExtension.addSetting('LME', l_slider.id, modsExtension.createSlider(l_slider, 'OnSliderUpdate_LME'));
 
-    //Update dropdowns in new menu block
-    let l_dropdowns = l_block.querySelectorAll('.inp_dropdown');
-    for (var i = 0; i < l_dropdowns.length; i++) {
-        g_modSettingsLME[g_modSettingsLME.length] = new inp_dropdown_mod(l_dropdowns[i], 'MelonMod_LME_Call_InpDropdown');
-    }
+    // Dropdowns
+    for (let l_dropdown of l_block.querySelectorAll('.inp_dropdown'))
+        modsExtension.addSetting('LME', l_dropdown.id, modsExtension.createDropdown(l_dropdown, 'OnDropdownUpdate_LME'));
 }

@@ -25,13 +25,13 @@
     <None Remove="LeapMotionExtension.json" />
     <None Remove="resources\leapmotion_controller.asset" />
     <None Remove="resources\leapmotion_hands.asset" />
-    <None Remove="resources\ui_menu.js" />
+    <None Remove="resources\mod_menu.js" />
   </ItemGroup>
   
   <ItemGroup>
     <EmbeddedResource Include="resources\leapmotion_controller.asset" />
     <EmbeddedResource Include="resources\leapmotion_hands.asset" />
-    <EmbeddedResource Include="resources\ui_menu.js" />
+    <EmbeddedResource Include="resources\mod_menu.js" />
     <EmbeddedResource Include="vendor\LeapSDK\lib\x64\LeapC.dll">
       <Link>resources/LeapC.dll</Link>
     </EmbeddedResource>
@@ -93,7 +93,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <EmbeddedResource Include="..\js\ui_elements.js" Link="resources\ui_elements.js" />
+    <EmbeddedResource Include="..\js\mods_extension.js" Link="resources\mods_extension.js" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

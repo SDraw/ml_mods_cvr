@@ -115,16 +115,16 @@ namespace ml_lme
 
             ViewManager.Instance.gameMenuView.Listener.ReadyForBindings += () =>
             {
-                ViewManager.Instance.gameMenuView.View.BindCall("MelonMod_LME_Call_InpToggle", new Action<string, string>(OnToggleUpdate));
-                ViewManager.Instance.gameMenuView.View.BindCall("MelonMod_LME_Call_InpSlider", new Action<string, string>(OnSliderUpdate));
-                ViewManager.Instance.gameMenuView.View.BindCall("MelonMod_LME_Call_InpDropdown", new Action<string, string>(OnDropdownUpdate));
+                ViewManager.Instance.gameMenuView.View.BindCall("OnToggleUpdate_" + ms_category.Identifier, new Action<string, string>(OnToggleUpdate));
+                ViewManager.Instance.gameMenuView.View.BindCall("OnSliderUpdate_" + ms_category.Identifier, new Action<string, string>(OnSliderUpdate));
+                ViewManager.Instance.gameMenuView.View.BindCall("OnDropdownUpdate_" + ms_category.Identifier, new Action<string, string>(OnDropdownUpdate));
             };
             ViewManager.Instance.gameMenuView.Listener.FinishLoad += (_) =>
             {
-                ViewManager.Instance.gameMenuView.View.ExecuteScript(Scripts.GetEmbeddedScript("ui_elements.js"));
-                ViewManager.Instance.gameMenuView.View.ExecuteScript(Scripts.GetEmbeddedScript("ui_menu.js"));
+                ViewManager.Instance.gameMenuView.View.ExecuteScript(Scripts.GetEmbeddedScript("mods_extension.js"));
+                ViewManager.Instance.gameMenuView.View.ExecuteScript(Scripts.GetEmbeddedScript("mod_menu.js"));
                 foreach(var l_entry in ms_entries)
-                    ViewManager.Instance.gameMenuView.View.TriggerEvent("updateModSettingLME", l_entry.DisplayName, l_entry.GetValueAsString());
+                    ViewManager.Instance.gameMenuView.View.TriggerEvent("updateModSetting", ms_category.Identifier, l_entry.DisplayName, l_entry.GetValueAsString());
             };
         }
 
