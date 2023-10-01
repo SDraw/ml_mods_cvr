@@ -9,7 +9,7 @@ Merged set of MelonLoader mods for ChilloutVR.
 | [Pickup Arm Movement](/ml_pam/README.md)| ml_pam | 1.0.8 [:arrow_down:](../../releases/latest/download/ml_pam.dll)| ✔ Yes<br>:hourglass_flowing_sand: Update review |
 | [Player Movement Copycat](/ml_pmc/README.md)| ml_pmc | 1.0.3 [:arrow_down:](../../releases/latest/download/ml_pmc.dll)| ✔ Yes |
 | [Player Ragdoll Mod](/ml_prm/README.md)| ml_prm | 1.0.10 [:arrow_down:](../../releases/latest/download/ml_prm.dll)| ✔ Yes<br>:hourglass_flowing_sand: Update review |
-| [Vive Extended Input](/ml_vei/README.md) | ml_vei | 1.0.0 [:arrow_down:](../../releases/latest/download/ml_vei.dll)| :question: Not planned yet |
+| [Vive Extended Input](/ml_vei/README.md) | ml_vei | 1.0.0 [:arrow_down:](../../releases/latest/download/ml_vei.dll)| :hourglass_flowing_sand: On review |
 
 **Archived mods:**
 | Full name | Short name | Notes |
