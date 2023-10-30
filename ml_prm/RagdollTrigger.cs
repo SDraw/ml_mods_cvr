@@ -6,7 +6,7 @@ using UnityEngine;
 namespace ml_prm
 {
     [DisallowMultipleComponent]
-    public class RagdollTrigger : MonoBehaviour
+    class RagdollTrigger : MonoBehaviour
     {
         const string c_ragdollPointerType = "ragdoll";
 
@@ -18,14 +18,13 @@ namespace ml_prm
         void Start()
         {
             m_collider = this.GetComponent<Collider>();
-            CVRParticlePointerManager.volumes.Add(new RagdollTriggerVolume() {
-                collider = m_collider,
-                trigger = this,
-            });
+
+            CVRParticlePointerManager.volumes.Add(new RagdollTriggerVolume(m_collider, this));
             CVRParticlePointerManager.UpdateParticleSystems();
         }
 
-        void OnDestroy() {
+        void OnDestroy()
+        {
             CVRParticlePointerManager.RemoveTrigger(m_collider);
         }
 
@@ -45,7 +44,7 @@ namespace ml_prm
             {
                 if(m_lastParticleSystemTrigger != null)
                 {
-                    if (m_lastParticleSystemTrigger.particleCount == 0)
+                    if(m_lastParticleSystemTrigger.particleCount == 0)
                         m_lastParticleSystemTrigger = null;
                 }
                 else
@@ -71,8 +70,10 @@ namespace ml_prm
 
         public void OnPointerParticleEnter(CVRPointer p_pointer)
         {
-            if (!gameObject.activeInHierarchy) return;
-            if ((p_pointer.type == c_ragdollPointerType) && !IsIgnored(p_pointer.transform) && (m_lastParticleSystemTrigger != p_pointer.particleSystem))
+            if(!this.gameObject.activeInHierarchy)
+                return;
+
+            if((p_pointer.type == c_ragdollPointerType) && !IsIgnored(p_pointer.transform) && (m_lastParticleSystemTrigger != p_pointer.particleSystem))
             {
                 m_lastParticleSystemTrigger = p_pointer.particleSystem;
                 m_triggered = true;

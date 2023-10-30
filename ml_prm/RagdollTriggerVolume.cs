@@ -2,13 +2,21 @@
 using ABI.CCK.Components;
 using UnityEngine;
 
-namespace ml_prm {
-
-    public class RagdollTriggerVolume : CVRTriggerVolume
+namespace ml_prm
+{
+    class RagdollTriggerVolume : CVRTriggerVolume
     {
+        readonly RagdollTrigger m_trigger = null;
+
         public Collider collider { get; set; }
-        public RagdollTrigger trigger { get; set; }
-        public void TriggerEnter(CVRPointer pointer) => trigger.OnPointerParticleEnter(pointer);
-        public void TriggerExit(CVRPointer pointer)  => trigger.OnPointerParticleExit(pointer);
+
+        internal RagdollTriggerVolume(Collider p_collider, RagdollTrigger p_trigger)
+        {
+            collider = p_collider;
+            m_trigger = p_trigger;
+        }
+
+        public void TriggerEnter(CVRPointer pointer) => m_trigger.OnPointerParticleEnter(pointer);
+        public void TriggerExit(CVRPointer pointer) => m_trigger.OnPointerParticleExit(pointer);
     }
 }

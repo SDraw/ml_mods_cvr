@@ -14,7 +14,7 @@ Optional mod's settings page with [BTKUILib](https://github.com/BTK-Development/
 * **Use hotkey:** enables/disables ragdoll state switch with `R` key; `true` by default.
 * **Use gravity:** enables/disables gravity for ragdoll; `true` by default.
   * Note: Forcibly enabled in worlds that don't allow flight.
-* **Pointers reaction:** enables ragdoll state when player collides with trigger colliders with CVRPointer component of `ragdoll` type (avatars, props and world included); `true` by default.
+* **Pointers reaction:** enables ragdoll state when player collides with trigger colliders and particle systems with CVRPointer component of `ragdoll` type (avatars, props and world included); `true` by default.
 * **Ignore local pointers:** enables/disables ignoring of CVRPointer components of `ragdoll` type on local player's avatar; `true` by default.
 * **Combat reaction:** enables ragdoll state upon death in worlds with combat system; `true` by default.
 * **Auto recover:** enables automatic recovering after specific time delay; `false` by default.
