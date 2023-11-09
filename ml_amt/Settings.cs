@@ -13,7 +13,6 @@ namespace ml_amt
             IKOverrideFly,
             IKOverrideJump,
             DetectEmotes,
-            FollowHips,
             MassCenter
         };
 
