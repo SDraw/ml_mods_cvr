@@ -28,7 +28,6 @@ namespace ml_amt
         int m_locomotionLayer = 0;
         float m_avatarScale = 1f;
         Vector3 m_locomotionOffset = Vector3.zero; // Original locomotion offset
-        Transform m_avatarHips = null;
         bool m_inVR = false;
 
         bool m_avatarReady = false;
@@ -42,9 +41,6 @@ namespace ml_amt
 
         bool m_detectEmotes = true;
         bool m_emoteActive = false;
-
-        bool m_followHips = true;
-        Vector3 m_hipsToPlayer = Vector3.zero;
 
         Vector3 m_massCenter = Vector3.zero;
 
@@ -67,14 +63,12 @@ namespace ml_amt
             SetIKOverrideFly(Settings.IKOverrideFly);
             SetIKOverrideJump(Settings.IKOverrideJump);
             SetDetectEmotes(Settings.DetectEmotes);
-            SetFollowHips(Settings.FollowHips);
 
             Settings.CrouchLimitChange += this.SetCrouchLimit;
             Settings.ProneLimitChange += this.SetProneLimit;
             Settings.IKOverrideFlyChange += this.SetIKOverrideFly;
             Settings.IKOverrideJumpChange += this.SetIKOverrideJump;
             Settings.DetectEmotesChange += this.SetDetectEmotes;
-            Settings.FollowHipsChange += this.SetFollowHips;
             Settings.MassCenterChange += this.OnMassCenterChange;
         }
 
@@ -85,7 +79,6 @@ namespace ml_amt
             Settings.IKOverrideFlyChange -= this.SetIKOverrideFly;
             Settings.IKOverrideJumpChange -= this.SetIKOverrideJump;
             Settings.DetectEmotesChange -= this.SetDetectEmotes;
-            Settings.FollowHipsChange -= this.SetFollowHips;
             Settings.MassCenterChange -= this.OnMassCenterChange;
         }
 
@@ -98,12 +91,6 @@ namespace ml_amt
                 m_moving = !Mathf.Approximately(MovementSystem.Instance.movementVector.magnitude, 0f);
 
                 UpdateIKLimits();
-
-                if(m_avatarHips != null)
-                {
-                    Vector4 l_hipsToPoint = (PlayerSetup.Instance.transform.GetMatrix().inverse * m_avatarHips.GetMatrix()) * ms_pointVector;
-                    m_hipsToPlayer.Set(l_hipsToPoint.x, 0f, l_hipsToPoint.z);
-                }
 
                 m_emoteActive = false;
                 if(m_detectEmotes && (m_locomotionLayer >= 0))
@@ -133,8 +120,6 @@ namespace ml_amt
             m_emoteActive = false;
             m_moving = false;
             m_locomotionOverride = false;
-            m_hipsToPlayer = Vector3.zero;
-            m_avatarHips = null;
             m_massCenter = Vector3.zero;
             m_ikLimits = null;
             m_parameters.Clear();
@@ -148,7 +133,6 @@ namespace ml_amt
             m_inVR = Utils.IsInVR();
             m_vrIk = PlayerSetup.Instance._avatar.GetComponent<VRIK>();
             m_locomotionLayer = PlayerSetup.Instance._animator.GetLayerIndex("Locomotion/Emotes");
-            m_avatarHips = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.Hips);
             m_avatarScale = Mathf.Abs(PlayerSetup.Instance._avatar.transform.localScale.y);
 
             // Parse animator parameters
@@ -261,15 +245,6 @@ namespace ml_amt
                 }
             }
 
-            bool l_solverActive = !Mathf.Approximately(m_vrIk.solver.IKPositionWeight, 0f);
-            if(l_locomotionOverride && l_solverActive && (m_followHips && !MovementSystem.Instance.sitting) && (!m_moving || (PlayerSetup.Instance.avatarUpright <= PlayerSetup.Instance.avatarCrouchLimit)) && m_inVR && !BodySystem.isCalibratedAsFullBody && !ModSupporter.SkipHipsOverride())
-            {
-                m_vrIk.solver.plantFeet = false;
-                if((IKSystem.VrikRootController != null) && !MovementSystem.Instance.sitting)
-                    IKSystem.VrikRootController.enabled = false;
-                PlayerSetup.Instance._avatar.transform.localPosition = m_hipsToPlayer;
-            }
-
             if(m_locomotionOverride && !l_locomotionOverride)
             {
                 m_vrIk.solver.Reset();
@@ -310,10 +285,6 @@ namespace ml_amt
         internal void SetDetectEmotes(bool p_state)
         {
             m_detectEmotes = p_state;
-        }
-        internal void SetFollowHips(bool p_state)
-        {
-            m_followHips = p_state;
         }
         void OnMassCenterChange(bool p_state)
         {

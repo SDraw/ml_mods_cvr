@@ -22,7 +22,6 @@ namespace ml_amt
         public static bool IKOverrideFly { get; private set; } = true;
         public static bool IKOverrideJump { get; private set; } = true;
         public static bool DetectEmotes { get; private set; } = true;
-        public static bool FollowHips { get; private set; } = true;
         public static bool MassCenter { get; private set; } = true;
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
@@ -33,7 +32,6 @@ namespace ml_amt
         static public event Action<bool> IKOverrideFlyChange;
         static public event Action<bool> IKOverrideJumpChange;
         static public event Action<bool> DetectEmotesChange;
-        static public event Action<bool> FollowHipsChange;
         static public event Action<bool> MassCenterChange;
 
         internal static void Init()
@@ -47,7 +45,6 @@ namespace ml_amt
                 ms_category.CreateEntry(ModSetting.IKOverrideFly.ToString(), IKOverrideFly),
                 ms_category.CreateEntry(ModSetting.IKOverrideJump.ToString(), IKOverrideJump),
                 ms_category.CreateEntry(ModSetting.DetectEmotes.ToString(), DetectEmotes),
-                ms_category.CreateEntry(ModSetting.FollowHips.ToString(), FollowHips),
                 ms_category.CreateEntry(ModSetting.MassCenter.ToString(), MassCenter)
             };
 
@@ -56,7 +53,6 @@ namespace ml_amt
             IKOverrideFly = (bool)ms_entries[(int)ModSetting.IKOverrideFly].BoxedValue;
             IKOverrideJump = (bool)ms_entries[(int)ModSetting.IKOverrideJump].BoxedValue;
             DetectEmotes = (bool)ms_entries[(int)ModSetting.DetectEmotes].BoxedValue;
-            FollowHips = (bool)ms_entries[(int)ModSetting.FollowHips].BoxedValue;
             MassCenter = (bool)ms_entries[(int)ModSetting.MassCenter].BoxedValue;
 
             MelonLoader.MelonCoroutines.Start(WaitMainMenuUi());
@@ -134,13 +130,6 @@ namespace ml_amt
                     {
                         DetectEmotes = bool.Parse(p_value);
                         DetectEmotesChange?.Invoke(DetectEmotes);
-                    }
-                    break;
-
-                    case ModSetting.FollowHips:
-                    {
-                        FollowHips = bool.Parse(p_value);
-                        FollowHipsChange?.Invoke(FollowHips);
                     }
                     break;
 

@@ -6,7 +6,7 @@
     <Company>None</Company>
     <Product>AvatarMotionTweaker</Product>
     <PackageId>AvatarMotionTweaker</PackageId>
-    <Version>1.3.3</Version>
+    <Version>1.3.4</Version>
     <Platforms>x64</Platforms>
     <AssemblyName>ml_amt</AssemblyName>
   </PropertyGroup>
@@ -60,14 +60,6 @@
     </Reference>
     <Reference Include="MelonLoader">
       <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\MelonLoader\net35\MelonLoader.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="ml_pmc">
-      <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\Mods\ml_pmc.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="ml_prm">
-      <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\Mods\ml_prm.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="UnityEngine">

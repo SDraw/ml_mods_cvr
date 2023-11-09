@@ -1,5 +1,4 @@
-﻿using ABI.CCK.Components;
-using ABI_RC.Core.Player;
+﻿using ABI_RC.Core.Player;
 using ABI_RC.Systems.IK.SubSystems;
 using System;
 using System.Collections;
@@ -41,7 +40,6 @@ namespace ml_amt
                 new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnPlayspaceScale_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
 
-            ModSupporter.Init();
             MelonLoader.MelonCoroutines.Start(WaitForLocalPlayer());
         }
 

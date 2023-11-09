@@ -111,15 +111,15 @@ namespace ml_lme
         {
             while(PlayerSetup.Instance == null)
                 yield return null;
-            while(PlayerSetup.Instance.leftRay == null)
+            while(PlayerSetup.Instance.vrRayLeft == null)
                 yield return null;
-            while(PlayerSetup.Instance.leftRay.lineRenderer == null)
+            while(PlayerSetup.Instance.vrRayLeft.lineRenderer == null)
                 yield return null;
 
-            m_lineLeft.material = PlayerSetup.Instance.leftRay.lineRenderer.material;
-            m_lineLeft.gameObject.layer = PlayerSetup.Instance.leftRay.gameObject.layer;
-            m_lineRight.material = PlayerSetup.Instance.leftRay.lineRenderer.material;
-            m_lineRight.gameObject.layer = PlayerSetup.Instance.leftRay.gameObject.layer;
+            m_lineLeft.material = PlayerSetup.Instance.vrRayLeft.lineRenderer.material;
+            m_lineLeft.gameObject.layer = PlayerSetup.Instance.vrRayLeft.gameObject.layer;
+            m_lineRight.material = PlayerSetup.Instance.vrRayLeft.lineRenderer.material;
+            m_lineRight.gameObject.layer = PlayerSetup.Instance.vrRayLeft.gameObject.layer;
         }
 
         public override void UpdateInput()

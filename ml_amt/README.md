@@ -14,9 +14,6 @@ Available mod's settings in `Settings - IK - Avatar Motion Tweaker`:
 * **Prone limit:** defines prone limit; default value - `40`.
 * **IK override while flying:** disables legs locomotion/autostep in fly mode; default value - `true`.
 * **IK override while jumping:** disables legs locomotion/autostep in jump; default value - `true`.
-* **Follow hips on IK override:** adjusts avatar position to overcome animation snapping on IK override; default value - `true`.
-  * Note: Works best with animations that have root transform position (XZ) based on center of mass.
-  * Note: Made for four point tracking (head, hands and hips) in mind.
 * **Detect animations emote tag:** disables avatar's IK entirely if current animator state has `Emote` tag; default value - `true`.
   * Note: Created as example for [propoused game feature](https://feedback.abinteractive.net/p/disabling-vr-ik-for-emotes-via-animator-state-tag-7b80d963-053a-41c0-86ac-e3d53c61c1e2).
 * **Adjusted locomotion mass center:** automatically changes IK locomotion center if avatar has toe bones; default value - `true`.

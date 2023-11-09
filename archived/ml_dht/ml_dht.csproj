@@ -2,44 +2,32 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <Platforms>x64</Platforms>
-    <PackageId>LeapMotionExtension</PackageId>
-    <Version>1.4.4</Version>
+    <PackageId>DesktopHeadTracking</PackageId>
     <Authors>SDraw</Authors>
     <Company>None</Company>
-    <Product>LeapMotionExtension</Product>
+    <Product>DesktopHeadTracking</Product>
+    <Version>1.1.2</Version>
+    <Platforms>x64</Platforms>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <PlatformTarget>x64</PlatformTarget>
     <DebugType>none</DebugType>
     <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="vendor\LeapSDK\**" />
-    <EmbeddedResource Remove="vendor\LeapSDK\**" />
-    <None Remove="vendor\LeapSDK\**" />
+    <None Remove="DesktopHeadTracking.json" />
+    <None Remove="resources\menu.js" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="LeapMotionExtension.json" />
-    <None Remove="resources\leapmotion_controller.asset" />
-    <None Remove="resources\leapmotion_hands.asset" />
-    <None Remove="resources\mod_menu.js" />
+    <EmbeddedResource Include="resources\menu.js" />
   </ItemGroup>
-  
-  <ItemGroup>
-    <EmbeddedResource Include="resources\leapmotion_controller.asset" />
-    <EmbeddedResource Include="resources\leapmotion_hands.asset" />
-    <EmbeddedResource Include="resources\mod_menu.js" />
-    <EmbeddedResource Include="vendor\LeapSDK\lib\x64\LeapC.dll">
-      <Link>resources/LeapC.dll</Link>
-    </EmbeddedResource>
-  </ItemGroup>
-  
+
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\MelonLoader\net35\0Harmony.dll</HintPath>
+      <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\MelonLoader\0Harmony.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="Assembly-CSharp">
@@ -59,11 +47,7 @@
       <Private>false</Private>
     </Reference>
     <Reference Include="MelonLoader">
-      <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\MelonLoader\net35\MelonLoader.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="ml_pmc">
-      <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\Mods\ml_pmc.dll</HintPath>
+      <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\MelonLoader\MelonLoader.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="UnityEngine">
@@ -74,26 +58,10 @@
       <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="UnityEngine.AssetBundleModule">
-      <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="UnityEngine.XRModule">
-      <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\UnityEngine.XRModule.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-  </ItemGroup>
-  
-  <ItemGroup>
-    <Folder Include="vendor\LeapCSharp\" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <EmbeddedResource Include="..\js\mods_extension.js" Link="resources\mods_extension.js" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
