@@ -1,6 +1,6 @@
 Merged set of MelonLoader mods for ChilloutVR.
 
-**Table for game build 2023r172p1:**
+**Table for game build 2023r173:**
 | Full name | Short name | Latest version | Available in [CVRMA](https://github.com/knah/CVRMelonAssistant) |
 |:---------:|:----------:|:--------------:| :----------------------------------------------------------------|
 | [Avatar Motion Tweaker](/ml_amt/README.md) | ml_amt | 1.3.4 [:arrow_down:](../../releases/latest/download/ml_amt.dll)| ✔ Yes<br>:hourglass_flowing_sand: Update review |
