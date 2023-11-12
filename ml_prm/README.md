@@ -11,6 +11,7 @@ This mod turns player's avatar into ragdoll puppet.
 
 Optional mod's settings page with [BTKUILib](https://github.com/BTK-Development/BTKUILib):
 * **Switch ragdoll:** turns into ragdoll state and back, made for VR usage primarily.
+  * Note: You can't ragdoll in chairs.
 * **Use hotkey:** enables/disables ragdoll state switch with `R` key; `true` by default.
 * **Use gravity:** enables/disables gravity for ragdoll; `true` by default.
   * Note: Forcibly enabled in worlds that don't allow flight.
@@ -25,6 +26,8 @@ Optional mod's settings page with [BTKUILib](https://github.com/BTK-Development/
 * **View direction velocity:** apply velocity to camera view direction instead of player movement direction; `false` by default.
   * Note: Forcibly disabled in worlds that don't allow flight.
 * **Jump recover:** enables recovering from ragdoll state by jumping; `false` by default.
+* **Buoyancy:** enabled floating in fluid volumes; `true` by default.
+  * Note: Forcibly enabled in worlds that don't allow flight.
 * **Velocity multiplier:** velocity force multiplier based on player's movement direction; `2.0` by default.
   * Note: Limited according to world's fly multiplier.
   * Note: Forcibly set to `1.0` in worlds that don't allow flight.

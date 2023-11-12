@@ -2,11 +2,14 @@
 using ABI_RC.Core.InteractionSystem;
 using ABI_RC.Core.Player;
 using ABI_RC.Core.Savior;
+using ABI_RC.Systems.Camera;
+using ABI_RC.Systems.IK;
 using ABI_RC.Systems.IK.SubSystems;
 using ABI_RC.Systems.InputManagement;
 using ABI_RC.Systems.MovementSystem;
 using RootMotion.Dynamics;
 using RootMotion.FinalIK;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -19,11 +22,12 @@ namespace ml_prm
 
         public static RagdollController Instance { get; private set; } = null;
 
-        VRIK m_vrIK = null;
-        float m_vrIkWeight = 1f;
         bool m_inVr = false;
+        VRIK m_vrIK = null;
+        bool m_applyHipsPosition = false;
 
         bool m_enabled = false;
+        bool m_forcedSwitch = false;
 
         readonly List<Rigidbody> m_rigidBodies = null;
         readonly List<Collider> m_colliders = null;
@@ -32,8 +36,10 @@ namespace ml_prm
         BipedRagdollReferences m_puppetReferences;
         readonly List<System.Tuple<Transform, Transform>> m_boneLinks = null;
         readonly List<System.Tuple<CharacterJoint, Vector3>> m_jointAnchors = null;
+        readonly List<PhysicsInfluencer> m_physicsInfluencers = null;
 
         bool m_avatarReady = false;
+        Coroutine m_initCoroutine = null;
         Vector3 m_lastPosition = Vector3.zero;
         Vector3 m_velocity = Vector3.zero;
         Vector3 m_ragdollLastPos = Vector3.zero;
@@ -56,6 +62,7 @@ namespace ml_prm
             m_colliders = new List<Collider>();
             m_boneLinks = new List<System.Tuple<Transform, Transform>>();
             m_jointAnchors = new List<System.Tuple<CharacterJoint, Vector3>>();
+            m_physicsInfluencers = new List<PhysicsInfluencer>();
 
             m_physicsMaterial = new PhysicMaterial("Ragdoll");
             m_physicsMaterial.dynamicFriction = c_defaultFriction;
@@ -81,12 +88,14 @@ namespace ml_prm
             m_puppetRoot.localRotation = Quaternion.identity;
 
             m_customTrigger = MovementSystem.Instance.proxyCollider.gameObject.AddComponent<RagdollTrigger>();
+            m_customTrigger.enabled = false;
 
             Settings.MovementDragChange += this.OnMovementDragChange;
             Settings.AngularDragChange += this.OnAngularDragChange;
             Settings.GravityChange += this.OnGravityChange;
             Settings.SlipperinessChange += this.OnPhysicsMaterialChange;
             Settings.BouncinessChange += this.OnPhysicsMaterialChange;
+            Settings.BuoyancyChange += this.OnBuoyancyChange;
         }
 
         void OnDestroy()
@@ -112,6 +121,8 @@ namespace ml_prm
                 PlayerSetup.Instance.transform.position += l_dif;
                 m_puppetReferences.hips.position -= l_dif;
                 m_ragdollLastPos = m_puppetReferences.hips.position;
+
+                BodySystem.TrackingPositionWeight = 0f;
             }
 
             if(m_avatarReady && !m_enabled)
@@ -127,9 +138,6 @@ namespace ml_prm
                         m_reachedGround = true;
                 }
             }
-
-            if(m_avatarReady && m_enabled && !BodySystem.isCalibrating)
-                BodySystem.TrackingPositionWeight = 0f;
 
             if(m_avatarReady && m_enabled && Settings.AutoRecover)
             {
@@ -160,13 +168,8 @@ namespace ml_prm
             {
                 if(m_enabled)
                 {
-                    if(!BodySystem.isCalibrating)
-                    {
-                        BodySystem.TrackingPositionWeight = 0f;
-
-                        foreach(var l_link in m_boneLinks)
-                            l_link.Item1.CopyGlobal(l_link.Item2);
-                    }
+                    foreach(var l_link in m_boneLinks)
+                        l_link.Item1.CopyGlobal(l_link.Item2);
                 }
                 else
                 {
@@ -179,14 +182,30 @@ namespace ml_prm
         // Game events
         internal void OnAvatarClear()
         {
-            if(m_enabled && (MovementSystem.Instance != null))
-                MovementSystem.Instance.SetImmobilized(false);
+            if(m_initCoroutine != null)
+            {
+                StopCoroutine(m_initCoroutine);
+                m_initCoroutine = null;
+            }
+
+            if(m_enabled)
+            {
+                TryRestoreMovement();
+                BodySystem.TrackingPositionWeight = 1f;
+            }
 
             if(m_puppet != null)
                 Object.Destroy(m_puppet.gameObject);
             m_puppet = null;
 
+            if(m_customTrigger != null)
+            {
+                m_customTrigger.GetStateWithReset();
+                m_customTrigger.enabled = false;
+            }
+
             m_vrIK = null;
+            m_applyHipsPosition = false;
             m_enabled = false;
             m_avatarReady = false;
             m_avatarRagdollToggle = null;
@@ -196,6 +215,7 @@ namespace ml_prm
             m_puppetReferences = new BipedRagdollReferences();
             m_boneLinks.Clear();
             m_jointAnchors.Clear();
+            m_physicsInfluencers.Clear();
             m_reachedGround = true;
             m_groundedTime = 0f;
             m_downTime = float.MinValue;
@@ -277,13 +297,30 @@ namespace ml_prm
                         Collider l_collider = l_puppetTransforms[i].GetComponent<Collider>();
                         if(l_collider != null)
                         {
-                            Physics.IgnoreCollision(l_collider, MovementSystem.Instance.proxyCollider, true);
                             Physics.IgnoreCollision(l_collider, MovementSystem.Instance.controller, true);
+                            Physics.IgnoreCollision(l_collider, MovementSystem.Instance.proxyCollider, true);
                             Physics.IgnoreCollision(l_collider, MovementSystem.Instance.forceCollider, true);
-                            l_collider.enabled = false;
                             l_collider.sharedMaterial = m_physicsMaterial;
                             l_collider.material = m_physicsMaterial;
                             m_colliders.Add(l_collider);
+                        }
+
+                        if((l_body != null) && (l_collider != null) && (l_puppetTransforms[i] == m_puppetReferences.hips || l_puppetTransforms[i] == m_puppetReferences.spine || l_puppetTransforms[i] == m_puppetReferences.chest))
+                        {
+                            PhysicsInfluencer l_physicsInfluencer = l_puppetTransforms[i].gameObject.AddComponent<PhysicsInfluencer>();
+                            l_physicsInfluencer.airDrag = (Utils.IsWorldSafe() ? Settings.MovementDrag : 1f);
+                            l_physicsInfluencer.airAngularDrag = Settings.AngularDrag;
+                            l_physicsInfluencer.fluidDrag = 3f;
+                            l_physicsInfluencer.fluidAngularDrag = 1f;
+                            l_physicsInfluencer.enableBuoyancy = true;
+                            l_physicsInfluencer.enableInfluence = false;
+                            float mass = l_body.mass;
+                            l_physicsInfluencer.UpdateDensity();
+                            l_body.mass = mass;
+                            l_physicsInfluencer.volume = mass * 0.005f;
+                            l_physicsInfluencer.enableLocalGravity = true;
+
+                            m_physicsInfluencers.Add(l_physicsInfluencer);
                         }
 
                         if(l_avatarTransforms[i] != null)
@@ -294,20 +331,34 @@ namespace ml_prm
                 // And return back
                 m_puppetRoot.localPosition = Vector3.zero;
                 m_puppetRoot.localRotation = Quaternion.identity;
-                m_puppetRoot.gameObject.SetActive(false);
+                m_puppetRoot.gameObject.SetActive(true);
 
                 m_vrIK = PlayerSetup.Instance._avatar.GetComponent<VRIK>();
                 if(m_vrIK != null)
-                {
-                    m_vrIK.onPreSolverUpdate.AddListener(this.OnIKPreUpdate);
                     m_vrIK.onPostSolverUpdate.AddListener(this.OnIKPostUpdate);
-                }
 
                 m_avatarRagdollToggle = PlayerSetup.Instance._avatar.GetComponentInChildren<RagdollToggle>(true);
                 m_ragdolledParameter = new AvatarBoolParameter("Ragdolled", PlayerSetup.Instance.animatorManager);
 
-                m_avatarReady = true;
+                m_initCoroutine = StartCoroutine(WaitForPhysicsInfluencers());
             }
+        }
+
+        IEnumerator WaitForPhysicsInfluencers()
+        {
+            while(!m_physicsInfluencers.TrueForAll(p => p.IsReady()))
+                yield return null;
+
+            m_puppetRoot.gameObject.SetActive(false);
+
+            m_customTrigger.enabled = true;
+            m_avatarReady = true;
+            m_initCoroutine = null;
+
+            OnGravityChange(Settings.Gravity);
+            OnBuoyancyChange(Settings.Buoyancy);
+            OnMovementDragChange(Settings.MovementDrag);
+            OnAngularDragChange(Settings.AngularDrag);
         }
 
         internal void OnAvatarScaling(float p_scaleDifference)
@@ -323,13 +374,21 @@ namespace ml_prm
         internal void OnSeatSitDown(CVRSeat p_seat)
         {
             if(m_avatarReady && m_enabled && !p_seat.occupied)
+            {
+                m_forcedSwitch = true;
                 SwitchRagdoll();
+                m_forcedSwitch = false;
+            }
         }
 
         internal void OnStartCalibration()
         {
             if(m_avatarReady && m_enabled)
+            {
+                m_forcedSwitch = true;
                 SwitchRagdoll();
+                m_forcedSwitch = false;
+            }
         }
 
         internal void OnWorldSpawn()
@@ -340,6 +399,7 @@ namespace ml_prm
             OnGravityChange(Settings.Gravity);
             OnPhysicsMaterialChange(true);
             OnMovementDragChange(Settings.MovementDrag);
+            OnBuoyancyChange(Settings.Buoyancy);
         }
 
         internal void OnCombatDown()
@@ -347,30 +407,38 @@ namespace ml_prm
             if(m_avatarReady && !m_enabled && Settings.CombatReaction)
             {
                 m_reachedGround = true;
+                m_forcedSwitch = true;
                 SwitchRagdoll();
+                m_forcedSwitch = false;
             }
         }
 
         internal void OnChangeFlight()
         {
             if(m_avatarReady && m_enabled && MovementSystem.Instance.flying)
+            {
+                m_forcedSwitch = true;
                 SwitchRagdoll();
+                m_forcedSwitch = false;
+            }
+        }
+
+        internal void OnPlayerTeleport()
+        {
+            if(m_avatarReady && m_enabled)
+                m_ragdollLastPos = m_puppetReferences.hips.position;
+        }
+
+        internal void OnDroneModeDisable()
+        {
+            if(m_avatarReady && m_enabled)
+                MovementSystem.Instance.canRot = false;
         }
 
         // IK updates
-        void OnIKPreUpdate()
-        {
-            if(m_enabled)
-            {
-                m_vrIkWeight = m_vrIK.solver.IKPositionWeight;
-                m_vrIK.solver.IKPositionWeight = 0f;
-            }
-        }
         void OnIKPostUpdate()
         {
-            if(m_enabled)
-                m_vrIK.solver.IKPositionWeight = m_vrIkWeight;
-            else
+            if(!m_enabled)
             {
                 foreach(var l_link in m_boneLinks)
                     l_link.Item2.CopyGlobal(l_link.Item1);
@@ -389,6 +457,8 @@ namespace ml_prm
                     if(m_enabled)
                         l_body.WakeUp();
                 }
+                foreach(PhysicsInfluencer l_influencer in m_physicsInfluencers)
+                    l_influencer.airDrag = l_drag;
             }
         }
         void OnAngularDragChange(float p_value)
@@ -401,6 +471,8 @@ namespace ml_prm
                     if(m_enabled)
                         l_body.WakeUp();
                 }
+                foreach(PhysicsInfluencer l_influencer in m_physicsInfluencers)
+                    l_influencer.airAngularDrag = p_value;
             }
         }
         void OnGravityChange(bool p_state)
@@ -410,6 +482,14 @@ namespace ml_prm
                 bool l_gravity = (!Utils.IsWorldSafe() || p_state);
                 foreach(Rigidbody l_body in m_rigidBodies)
                     l_body.useGravity = l_gravity;
+                foreach(PhysicsInfluencer l_influencer in m_physicsInfluencers)
+                    l_influencer.enabled = l_gravity;
+
+                if(!l_gravity)
+                {
+                    OnMovementDragChange(Settings.MovementDrag);
+                    OnAngularDragChange(Settings.AngularDrag);
+                }
             }
         }
         void OnPhysicsMaterialChange(bool p_state)
@@ -425,6 +505,21 @@ namespace ml_prm
                 m_physicsMaterial.bounceCombine = (l_bounciness ? PhysicMaterialCombine.Maximum : PhysicMaterialCombine.Average);
             }
         }
+        void OnBuoyancyChange(bool p_state)
+        {
+            if(m_avatarReady)
+            {
+                bool l_buoyancy = (!Utils.IsWorldSafe() || p_state);
+                foreach(PhysicsInfluencer l_influencer in m_physicsInfluencers)
+                    l_influencer.enableInfluence = l_buoyancy;
+
+                if(!l_buoyancy)
+                {
+                    OnMovementDragChange(Settings.MovementDrag);
+                    OnAngularDragChange(Settings.AngularDrag);
+                }
+            }
+        }
 
         // Arbitrary
         public void SwitchRagdoll()
@@ -433,40 +528,17 @@ namespace ml_prm
             {
                 if(!m_enabled)
                 {
-                    if(IsSafeToRagdoll() && m_reachedGround)
+                    if(CanRagdoll())
                     {
-                        // Eject player from seat
-                        if(MovementSystem.Instance.lastSeat != null)
-                        {
-                            Vector3 l_pos = PlayerSetup.Instance.transform.position;
-                            Quaternion l_rot = PlayerSetup.Instance.transform.rotation;
-
-                            if(MetaPort.Instance.isUsingVr)
-                            {
-                                MetaPort.Instance.isUsingVr = false;
-                                MovementSystem.Instance.lastSeat.ExitSeat();
-                                MetaPort.Instance.isUsingVr = true;
-                            }
-                            else
-                                MovementSystem.Instance.lastSeat.ExitSeat();
-
-                            PlayerSetup.Instance.transform.position = l_pos;
-                            PlayerSetup.Instance.transform.rotation = Quaternion.Euler(0f, l_rot.eulerAngles.y, 0f);
-                        }
-
                         if(MovementSystem.Instance.flying)
                             MovementSystem.Instance.ChangeFlight(false);
-
-                        bool l_crouch = MovementSystem.Instance.crouching;
-                        bool l_prone = MovementSystem.Instance.prone;
                         MovementSystem.Instance.SetImmobilized(true);
-                        MovementSystem.Instance.ChangeCrouch(l_crouch);
-                        MovementSystem.Instance.ChangeProne(l_prone);
+                        BodySystem.TrackingPositionWeight = 0f;
+                        m_applyHipsPosition = IKSystem.Instance.applyOriginalHipPosition;
+                        IKSystem.Instance.applyOriginalHipPosition = true;
 
                         PlayerSetup.Instance.animatorManager.SetAnimatorParameterTrigger("CancelEmote");
                         m_ragdolledParameter.SetValue(true);
-                        if(!BodySystem.isCalibrating)
-                            BodySystem.TrackingPositionWeight = 0f;
 
                         if(!Utils.IsWorldSafe())
                         {
@@ -492,9 +564,6 @@ namespace ml_prm
                             l_body.angularVelocity = Vector3.zero;
                         }
 
-                        foreach(Collider l_collider in m_colliders)
-                            l_collider.enabled = true;
-
                         m_ragdollLastPos = m_puppetReferences.hips.position;
                         m_downTime = 0f;
 
@@ -503,38 +572,38 @@ namespace ml_prm
                 }
                 else
                 {
-                    if(IsSafeToUnragdoll())
+                    if(CanUnragdoll())
                     {
-                        MovementSystem.Instance.SetImmobilized(false);
+                        MovementSystem.Instance.TeleportTo(m_puppetReferences.hips.position, new Vector3(0f, PlayerSetup.Instance.GetActiveCamera().transform.rotation.eulerAngles.y, 0f));
+                        TryRestoreMovement();
                         if(!Utils.IsWorldSafe())
                         {
                             Vector3 l_vec = MovementSystem.Instance.GetAppliedGravity();
                             l_vec.y = Mathf.Clamp(l_vec.y, float.MinValue, 0f);
                             MovementSystem.Instance.SetAppliedGravity(l_vec);
                         }
-
-                        m_ragdolledParameter.SetValue(false);
-                        if(!BodySystem.isCalibrating)
-                            BodySystem.TrackingPositionWeight = 1f;
-
-                        m_puppetRoot.gameObject.SetActive(false);
-
-                        foreach(Rigidbody l_body in m_rigidBodies)
-                            l_body.isKinematic = true;
-
-                        PlayerSetup.Instance.transform.position = m_puppetReferences.hips.position;
-                        if(m_inVr)
-                            PlayerSetup.Instance.transform.position -= (PlayerSetup.Instance.transform.rotation * PlayerSetup.Instance._avatar.transform.localPosition);
-
-                        foreach(Collider l_collider in m_colliders)
-                            l_collider.enabled = false;
+                        BodySystem.TrackingPositionWeight = 1f;
+                        IKSystem.Instance.applyOriginalHipPosition = m_applyHipsPosition;
 
                         if(m_vrIK != null)
                             m_vrIK.solver.Reset();
 
+                        m_ragdolledParameter.SetValue(false);
+
+                        m_puppetRoot.gameObject.SetActive(false);
+                        m_puppetRoot.localPosition = Vector3.zero;
+                        m_puppetRoot.localRotation = Quaternion.identity;
+
+                        foreach(Rigidbody l_body in m_rigidBodies)
+                            l_body.isKinematic = true;
+
                         m_lastPosition = PlayerSetup.Instance.transform.position;
                         m_velocity = Vector3.zero;
                         m_downTime = float.MinValue;
+
+                        // Restore rigidbody properties that could be affected by buoyancy
+                        OnMovementDragChange(Settings.MovementDrag);
+                        OnAngularDragChange(Settings.AngularDrag);
 
                         m_enabled = false;
                     }
@@ -552,19 +621,34 @@ namespace ml_prm
             return l_target;
         }
 
-        static bool IsSafeToRagdoll()
+        bool CanRagdoll()
         {
-            bool l_result = true;
-            l_result &= !BodySystem.isCalibrating; // Not calibrating
-            l_result &= ((CombatSystem.Instance == null) || !CombatSystem.Instance.isDown); // Non-combat world or not dead
-            return l_result;
+            bool l_result = m_reachedGround;
+            l_result &= !BodySystem.isCalibrating;
+            l_result &= (MovementSystem.Instance.lastSeat == null);
+            l_result &= ((CombatSystem.Instance == null) || !CombatSystem.Instance.isDown);
+            return (l_result || m_forcedSwitch);
         }
 
-        static bool IsSafeToUnragdoll()
+        bool CanUnragdoll()
         {
             bool l_result = true;
-            l_result &= ((CombatSystem.Instance == null) || !CombatSystem.Instance.isDown); // Non-combat world or not dead
-            return l_result;
+            l_result &= ((CombatSystem.Instance == null) || !CombatSystem.Instance.isDown);
+            return (l_result || m_forcedSwitch);
+        }
+
+        static void TryRestoreMovement()
+        {
+            bool l_state = true;
+            l_state &= ((CombatSystem.Instance == null) || !CombatSystem.Instance.isDown);
+            l_state &= (MovementSystem.Instance.lastSeat == null);
+
+            if(l_state)
+            {
+                MovementSystem.Instance.SetImmobilized(false);
+                if(PortableCamera.Instance.CheckModActive(typeof(ABI_RC.Systems.Camera.VisualMods.DroneMode)))
+                    MovementSystem.Instance.canRot = false;
+            }
         }
     }
 }

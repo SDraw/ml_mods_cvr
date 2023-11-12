@@ -20,6 +20,7 @@ namespace ml_prm
             Bounciness,
             ViewVelocity,
             JumpRecover,
+            Buoyancy,
             VelocityMultiplier,
             MovementDrag,
             AngularDrag,
@@ -49,7 +50,7 @@ namespace ml_prm
 
             var l_modCategory = l_modRoot.AddCategory("Settings");
 
-            l_modCategory.AddButton("Switch ragdoll", "PRM-Person", "Switch between normal and ragdoll state").OnPress += () => SwitchChange?.Invoke();
+            l_modCategory.AddButton("Switch ragdoll", "PRM-Person", "Switch between normal and ragdoll state.").OnPress += () => SwitchChange?.Invoke();
 
             ms_uiElements.Add(l_modCategory.AddToggle("Use hotkey", "Switch ragdoll mode with 'R' key", Settings.Hotkey));
             (ms_uiElements[(int)UiIndex.Hotkey] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate(UiIndex.Hotkey, state);
@@ -80,6 +81,9 @@ namespace ml_prm
 
             ms_uiElements.Add(l_modCategory.AddToggle("Jump recover", "Recover from ragdoll state by jumping", Settings.JumpRecover));
             (ms_uiElements[(int)UiIndex.JumpRecover] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate(UiIndex.JumpRecover, state);
+
+            ms_uiElements.Add(l_modCategory.AddToggle("Buoyancy", "Enable buoyancy in fluid volumes. Warning: constantly changes movement and air drag of hips, spine and chest.", Settings.Buoyancy));
+            (ms_uiElements[(int)UiIndex.Buoyancy] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate(UiIndex.Buoyancy, state);
 
             ms_uiElements.Add(l_modRoot.AddSlider("Velocity multiplier", "Velocity multiplier upon entering ragdoll state", Settings.VelocityMultiplier, 1f, 50f));
             (ms_uiElements[(int)UiIndex.VelocityMultiplier] as BTKUILib.UIObjects.Components.SliderFloat).OnValueUpdated += (value) => OnSliderUpdate(UiIndex.VelocityMultiplier, value);
@@ -139,6 +143,10 @@ namespace ml_prm
                 case UiIndex.JumpRecover:
                     Settings.SetSetting(Settings.ModSetting.JumpRecover, p_state);
                     break;
+
+                case UiIndex.Buoyancy:
+                    Settings.SetSetting(Settings.ModSetting.Buoyancy, p_state);
+                    break;
             }
 
             if(p_force)
@@ -182,9 +190,10 @@ namespace ml_prm
             OnToggleUpdate(UiIndex.Bounciness, false, true);
             OnToggleUpdate(UiIndex.ViewVelocity, false, true);
             OnToggleUpdate(UiIndex.JumpRecover, false, true);
+            OnToggleUpdate(UiIndex.Buoyancy, true, true);
             OnSliderUpdate(UiIndex.VelocityMultiplier, 2f, true);
-            OnSliderUpdate(UiIndex.MovementDrag, 2f, true);
-            OnSliderUpdate(UiIndex.AngularDrag, 2f, true);
+            OnSliderUpdate(UiIndex.MovementDrag, 1f, true);
+            OnSliderUpdate(UiIndex.AngularDrag, 1f, true);
             OnSliderUpdate(UiIndex.RecoverDelay, 3f, true);
         }
 

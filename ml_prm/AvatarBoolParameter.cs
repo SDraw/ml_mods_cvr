@@ -22,8 +22,8 @@ namespace ml_prm
                 if(l_regex.IsMatch(l_param.name) && (l_param.type == AnimatorControllerParameterType.Bool))
                 {
                     m_name = l_param.name;
+                    m_sync = l_param.name.StartsWith('#');
                     m_hash = l_param.nameHash;
-                    m_sync = (l_param.name[0] != '#');
                     break;
                 }
             }

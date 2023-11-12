@@ -1,6 +1,7 @@
 ﻿using ABI.CCK.Components;
 using ABI_RC.Core.Savior;
 using ABI_RC.Systems.MovementSystem;
+using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
@@ -10,6 +11,7 @@ namespace ml_prm
     {
         static readonly FieldInfo ms_groundedRaw = typeof(MovementSystem).GetField("_isGroundedRaw", BindingFlags.NonPublic | BindingFlags.Instance);
         static readonly FieldInfo ms_appliedGravity = typeof(MovementSystem).GetField("_appliedGravity", BindingFlags.NonPublic | BindingFlags.Instance);
+        static readonly FieldInfo ms_referencePoints = typeof(PhysicsInfluencer).GetField("_referencePoints", BindingFlags.NonPublic | BindingFlags.Instance);
 
         public static bool IsInVR() => ((CheckVR.Instance != null) && CheckVR.Instance.hasVrDeviceLoaded);
         public static bool IsWorldSafe() => ((CVRWorld.Instance != null) && CVRWorld.Instance.allowFlying);
@@ -34,6 +36,11 @@ namespace ml_prm
         {
             p_target.position = p_source.position;
             p_target.rotation = p_source.rotation;
+        }
+
+        public static bool IsReady(this PhysicsInfluencer p_instance)
+        {
+            return ((ms_referencePoints.GetValue(p_instance) as List<Vector3>).Count > 0);
         }
     }
 }
