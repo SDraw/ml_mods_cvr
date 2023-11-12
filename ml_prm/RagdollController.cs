@@ -25,6 +25,7 @@ namespace ml_prm
         bool m_inVr = false;
         VRIK m_vrIK = null;
         bool m_applyHipsPosition = false;
+        bool m_applyHipsRotation = false;
 
         bool m_enabled = false;
         bool m_forcedSwitch = false;
@@ -536,6 +537,8 @@ namespace ml_prm
                         BodySystem.TrackingPositionWeight = 0f;
                         m_applyHipsPosition = IKSystem.Instance.applyOriginalHipPosition;
                         IKSystem.Instance.applyOriginalHipPosition = true;
+                        m_applyHipsRotation = IKSystem.Instance.applyOriginalHipRotation;
+                        IKSystem.Instance.applyOriginalHipRotation = true;
 
                         PlayerSetup.Instance.animatorManager.SetAnimatorParameterTrigger("CancelEmote");
                         m_ragdolledParameter.SetValue(true);
@@ -584,6 +587,7 @@ namespace ml_prm
                         }
                         BodySystem.TrackingPositionWeight = 1f;
                         IKSystem.Instance.applyOriginalHipPosition = m_applyHipsPosition;
+                        IKSystem.Instance.applyOriginalHipRotation = m_applyHipsRotation;
 
                         if(m_vrIK != null)
                             m_vrIK.solver.Reset();
