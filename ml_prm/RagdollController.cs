@@ -534,6 +534,7 @@ namespace ml_prm
                         if(MovementSystem.Instance.flying)
                             MovementSystem.Instance.ChangeFlight(false);
                         MovementSystem.Instance.SetImmobilized(true);
+                        MovementSystem.Instance.ClearFluidVolumes();
                         BodySystem.TrackingPositionWeight = 0f;
                         m_applyHipsPosition = IKSystem.Instance.applyOriginalHipPosition;
                         IKSystem.Instance.applyOriginalHipPosition = true;
@@ -600,6 +601,9 @@ namespace ml_prm
 
                         foreach(Rigidbody l_body in m_rigidBodies)
                             l_body.isKinematic = true;
+
+                        foreach(PhysicsInfluencer l_physicsInfluencer in m_physicsInfluencers)
+                            l_physicsInfluencer.ClearFluidVolumes();
 
                         m_lastPosition = PlayerSetup.Instance.transform.position;
                         m_velocity = Vector3.zero;
