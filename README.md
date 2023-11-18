@@ -6,7 +6,7 @@ Merged set of MelonLoader mods for ChilloutVR.
 | [Avatar Motion Tweaker](/ml_amt/README.md) | ml_amt | 1.3.4 [:arrow_down:](../../releases/latest/download/ml_amt.dll)| ✔ Yes |
 | [Leap Motion Extension](/ml_lme/README.md)| ml_lme | 1.4.4 [:arrow_down:](../../releases/latest/download/ml_lme.dll)| ✔ Yes |
 | [Pickup Arm Movement](/ml_pam/README.md)| ml_pam | 1.0.8 [:arrow_down:](../../releases/latest/download/ml_pam.dll)| ✔ Yes |
-| [Player Movement Copycat](/ml_pmc/README.md)| ml_pmc | 1.0.3 [:arrow_down:](../../releases/latest/download/ml_pmc.dll)| ✔ Yes |
+| [Player Movement Copycat](/ml_pmc/README.md)| ml_pmc | 1.0.4 [:arrow_down:](../../releases/latest/download/ml_pmc.dll)| ✔ Yes<br>⌛ Update review |
 | [Player Ragdoll Mod](/ml_prm/README.md) | ml_prm | 1.1.1 [:arrow_down:](../../releases/latest/download/ml_prm.dll)| ✔ Yes<br>⌛ Update review |
 | [Vive Extended Input](/ml_vei/README.md) | ml_vei | 1.0.0 [:arrow_down:](../../releases/latest/download/ml_vei.dll)| ✔ Yes |
 
