@@ -8,7 +8,6 @@ namespace ml_amt
     {
         public enum ParameterType
         {
-            Upright,
             GroundedRaw,
             Moving
         }
@@ -43,10 +42,6 @@ namespace ml_amt
         {
             switch(m_type)
             {
-                case ParameterType.Upright:
-                    SetFloat(p_tweaker.GetUpright());
-                    break;
-
                 case ParameterType.GroundedRaw:
                     SetBoolean(p_tweaker.GetGroundedRaw());
                     break;

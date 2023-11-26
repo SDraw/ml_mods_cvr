@@ -364,12 +364,11 @@ namespace ml_prm
 
         internal void OnAvatarScaling(float p_scaleDifference)
         {
-            if(m_avatarReady)
-            {
+            if(m_puppetRoot != null)
                 m_puppetRoot.localScale = Vector3.one * p_scaleDifference;
-                foreach(var l_pair in m_jointAnchors)
-                    l_pair.Item1.connectedAnchor = l_pair.Item2 * p_scaleDifference;
-            }
+
+            foreach(var l_pair in m_jointAnchors)
+                l_pair.Item1.connectedAnchor = l_pair.Item2 * p_scaleDifference;
         }
 
         internal void OnSeatSitDown(CVRSeat p_seat)

@@ -136,7 +136,6 @@ namespace ml_amt
             m_avatarScale = Mathf.Abs(PlayerSetup.Instance._avatar.transform.localScale.y);
 
             // Parse animator parameters
-            m_parameters.Add(new AvatarParameter(AvatarParameter.ParameterType.Upright, PlayerSetup.Instance.animatorManager));
             m_parameters.Add(new AvatarParameter(AvatarParameter.ParameterType.GroundedRaw, PlayerSetup.Instance.animatorManager));
             m_parameters.Add(new AvatarParameter(AvatarParameter.ParameterType.Moving, PlayerSetup.Instance.animatorManager));
             m_parameters.RemoveAll(p => !p.IsValid());
@@ -246,11 +245,7 @@ namespace ml_amt
             }
 
             if(m_locomotionOverride && !l_locomotionOverride)
-            {
                 m_vrIk.solver.Reset();
-                if((IKSystem.VrikRootController != null) && !MovementSystem.Instance.sitting)
-                    IKSystem.VrikRootController.enabled = true;
-            }
             m_locomotionOverride = l_locomotionOverride;
         }
 

@@ -98,7 +98,7 @@ cmake --build ${REPOS_BUILD_ROOT}/${BUILD_TYPE}/LeapSDK/leapc_example -j --confi
 
 ### MacOS
 
-1. Open CMake using /Library/Application Support/Ultraleap/LeapSDK/samples as the source directory
+1. Open CMake using /Applications/Ultraleap\ Hand\ Tracking\ Service.app/Contents/LeapSDK/samples as the source directory
 
 2. Select a build directory (eg. ~/ultraleap-tracking-samples/build) to use
 
@@ -107,7 +107,7 @@ cmake --build ${REPOS_BUILD_ROOT}/${BUILD_TYPE}/LeapSDK/leapc_example -j --confi
 4. Open and build the CMake generated project files. For more help, see the CMake documentation.
     * An example script would be :
 ```bash    
-SRC_DIR='/Library/Application Support/Ultraleap/LeapSDK/samples'
+SRC_DIR='/Applications/Ultraleap\ Hand\ Tracking\ Service.app/Contents/LeapSDK/samples'
 BUILD_TYPE='Release'
 REPOS_BUILD_ROOT=~/ultraleap-tracking-samples/build
 REPOS_INSTALL_ROOT=~/ultraleap-tracking-samples/bin

@@ -14,7 +14,7 @@ namespace ml_lme
         static readonly Quaternion ms_offsetRight = Quaternion.Euler(0f, 270f, 0f);
 
         VRIK m_vrIK = null;
-        Vector4 m_armsWeights = Vector2.zero;
+        Vector4 m_vrIKWeights = Vector2.zero;
         bool m_inVR = false;
         Transform m_hips = null;
         Transform m_origLeftHand = null;
@@ -87,35 +87,8 @@ namespace ml_lme
 
                 if((m_vrIK != null) && !m_fingersOnly)
                 {
-                    if(l_data.m_leftHand.m_present && !m_leftTargetActive)
-                    {
-                        m_vrIK.solver.leftArm.target = m_leftHandTarget;
-                        m_vrIK.solver.leftArm.bendGoal = LeapTracking.Instance.GetLeftElbow();
-                        m_vrIK.solver.leftArm.bendGoalWeight = (m_trackElbows ? 1f : 0f);
-                        m_leftTargetActive = true;
-                    }
-                    if(!l_data.m_leftHand.m_present && m_leftTargetActive)
-                    {
-                        m_vrIK.solver.leftArm.target = m_origLeftHand;
-                        m_vrIK.solver.leftArm.bendGoal = m_origLeftElbow;
-                        m_vrIK.solver.leftArm.bendGoalWeight = ((m_origLeftElbow != null) ? 1f : 0f);
-                        m_leftTargetActive = false;
-                    }
-
-                    if(l_data.m_rightHand.m_present && !m_rightTargetActive)
-                    {
-                        m_vrIK.solver.rightArm.target = m_rightHandTarget;
-                        m_vrIK.solver.rightArm.bendGoal = LeapTracking.Instance.GetRightElbow();
-                        m_vrIK.solver.rightArm.bendGoalWeight = (m_trackElbows ? 1f : 0f);
-                        m_rightTargetActive = true;
-                    }
-                    if(!l_data.m_rightHand.m_present && m_rightTargetActive)
-                    {
-                        m_vrIK.solver.rightArm.target = m_origRightHand;
-                        m_vrIK.solver.rightArm.bendGoal = m_origRightElbow;
-                        m_vrIK.solver.rightArm.bendGoalWeight = ((m_origRightElbow != null) ? 1f : 0f);
-                        m_rightTargetActive = false;
-                    }
+                    m_leftTargetActive = l_data.m_leftHand.m_present;
+                    m_rightTargetActive = l_data.m_rightHand.m_present;
                 }
             }
         }
@@ -207,7 +180,7 @@ namespace ml_lme
             m_origLeftElbow = null;
             m_origRightElbow = null;
             m_hips = null;
-            m_armsWeights = Vector2.zero;
+            m_vrIKWeights = Vector2.zero;
             m_leftArmIK = null;
             m_rightArmIK = null;
             m_leftTargetActive = false;
@@ -329,30 +302,42 @@ namespace ml_lme
         // IK updates
         void OnIKPreUpdate()
         {
-            m_armsWeights.Set(
+            m_vrIKWeights.Set(
                 m_vrIK.solver.leftArm.positionWeight,
                 m_vrIK.solver.leftArm.rotationWeight,
                 m_vrIK.solver.rightArm.positionWeight,
                 m_vrIK.solver.rightArm.rotationWeight
             );
 
-            if(m_leftTargetActive && (Mathf.Approximately(m_armsWeights.x, 0f) || Mathf.Approximately(m_armsWeights.y, 0f)))
+            if(m_leftTargetActive)
             {
                 m_vrIK.solver.leftArm.positionWeight = 1f;
                 m_vrIK.solver.leftArm.rotationWeight = 1f;
+                m_vrIK.solver.leftArm.target = m_leftHandTarget;
+                m_vrIK.solver.leftArm.bendGoal = LeapTracking.Instance.GetLeftElbow();
+                m_vrIK.solver.leftArm.bendGoalWeight = (m_trackElbows ? 1f : 0f);
             }
-            if(m_rightTargetActive && (Mathf.Approximately(m_armsWeights.z, 0f) || Mathf.Approximately(m_armsWeights.w, 0f)))
+            if(m_rightTargetActive)
             {
                 m_vrIK.solver.rightArm.positionWeight = 1f;
                 m_vrIK.solver.rightArm.rotationWeight = 1f;
+                m_vrIK.solver.rightArm.target = m_rightHandTarget;
+                m_vrIK.solver.rightArm.bendGoal = LeapTracking.Instance.GetRightElbow();
+                m_vrIK.solver.rightArm.bendGoalWeight = (m_trackElbows ? 1f : 0f);
             }
         }
         void OnIKPostUpdate()
         {
-            m_vrIK.solver.leftArm.positionWeight = m_armsWeights.x;
-            m_vrIK.solver.leftArm.rotationWeight = m_armsWeights.y;
-            m_vrIK.solver.rightArm.positionWeight = m_armsWeights.z;
-            m_vrIK.solver.rightArm.rotationWeight = m_armsWeights.w;
+            m_vrIK.solver.leftArm.positionWeight = m_vrIKWeights.x;
+            m_vrIK.solver.leftArm.rotationWeight = m_vrIKWeights.y;
+            m_vrIK.solver.leftArm.target = m_origLeftHand;
+            m_vrIK.solver.leftArm.bendGoal = m_origLeftElbow;
+            m_vrIK.solver.leftArm.bendGoalWeight = ((m_origLeftElbow != null) ? 1f : 0f);
+            m_vrIK.solver.rightArm.positionWeight = m_vrIKWeights.z;
+            m_vrIK.solver.rightArm.rotationWeight = m_vrIKWeights.w;
+            m_vrIK.solver.rightArm.target = m_origRightHand;
+            m_vrIK.solver.rightArm.bendGoal = m_origRightElbow;
+            m_vrIK.solver.rightArm.bendGoalWeight = ((m_origRightElbow != null) ? 1f : 0f);
         }
 
         // Settings
@@ -392,20 +377,8 @@ namespace ml_lme
         {
             if(m_vrIK != null)
             {
-                if(m_leftTargetActive)
-                {
-                    m_vrIK.solver.leftArm.target = m_origLeftHand;
-                    m_vrIK.solver.leftArm.bendGoal = m_origLeftElbow;
-                    m_vrIK.solver.leftArm.bendGoalWeight = ((m_origLeftElbow != null) ? 1f : 0f);
-                    m_leftTargetActive = false;
-                }
-                if(m_rightTargetActive)
-                {
-                    m_vrIK.solver.rightArm.target = m_origRightHand;
-                    m_vrIK.solver.rightArm.bendGoal = m_origRightElbow;
-                    m_vrIK.solver.rightArm.bendGoalWeight = ((m_origRightElbow != null) ? 1f : 0f);
-                    m_rightTargetActive = false;
-                }
+                m_leftTargetActive = false;
+                m_rightTargetActive = false;
             }
         }
 

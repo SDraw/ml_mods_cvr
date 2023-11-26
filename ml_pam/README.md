@@ -9,4 +9,10 @@ This mod adds arm tracking upon holding pickup in desktop mode.
 # Usage
 Available mod's settings in `Settings - Interactions - Pickup Arm Movement`:
 * **Enable hand movement:** enables/disables arm tracking; default value - `true`.
-* **Grab offset:** offset from pickup grab point; defalut value - `25`.
+* **Grab offset:** offset from pickup grab point; default value - `25`.
+* **Leading hand:** hand that will be extended when gragging pickup; available values: `Left`, `Right`, `Both`; default value - `Right`.
+* **Hands extension (Q\E):** extend left and right hand if `Q` and `E` keys are pressed; default value - `true`.
+
+# Notes
+* Made for desktop mode in mind.
+* Compatible with [DekstopVRIK](https://github.com/NotAKidOnSteam/NAK_CVR_Mods).
