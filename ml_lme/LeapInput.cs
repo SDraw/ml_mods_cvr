@@ -24,16 +24,6 @@ namespace ml_lme
         bool m_gripLeft = false;
         bool m_gripRight = false;
 
-        ~LeapInput()
-        {
-            Settings.EnabledChange -= this.OnEnableChange;
-            Settings.InteractionChange -= this.OnInteractionChange;
-            Settings.GesturesChange -= this.OnGesturesChange;
-            Settings.FingersOnlyChange -= this.OnFingersOnlyChange;
-
-            MetaPort.Instance.settings.settingBoolChanged.RemoveListener(this.OnGameSettingBoolChange);
-        }
-
         public override void ModuleAdded()
         {
             base.ModuleAdded();
@@ -120,6 +110,34 @@ namespace ml_lme
             m_lineLeft.gameObject.layer = PlayerSetup.Instance.vrRayLeft.gameObject.layer;
             m_lineRight.material = PlayerSetup.Instance.vrRayLeft.lineRenderer.material;
             m_lineRight.gameObject.layer = PlayerSetup.Instance.vrRayLeft.gameObject.layer;
+        }
+
+        public override void ModuleDestroyed()
+        {
+            base.ModuleDestroyed();
+
+            if(m_handRayLeft != null)
+                Object.Destroy(m_handRayLeft);
+            m_handRayLeft = null;
+
+            if(m_handRayRight != null)
+                Object.Destroy(m_handRayRight);
+            m_handRayRight = null;
+
+            if(m_lineLeft != null)
+                Object.Destroy(m_lineLeft);
+            m_lineLeft = null;
+
+            if(m_lineRight != null)
+                Object.Destroy(m_lineRight);
+            m_lineRight = null;
+
+            Settings.EnabledChange -= this.OnEnableChange;
+            Settings.InteractionChange -= this.OnInteractionChange;
+            Settings.GesturesChange -= this.OnGesturesChange;
+            Settings.FingersOnlyChange -= this.OnFingersOnlyChange;
+
+            MetaPort.Instance.settings.settingBoolChanged.RemoveListener(this.OnGameSettingBoolChange);
         }
 
         public override void UpdateInput()

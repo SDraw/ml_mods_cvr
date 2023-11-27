@@ -74,6 +74,10 @@ namespace ml_amt
 
         void OnDestroy()
         {
+            m_vrIk = null;
+            m_ikLimits = null;
+            m_parameters.Clear();
+
             Settings.CrouchLimitChange -= this.SetCrouchLimit;
             Settings.ProneLimitChange -= this.SetProneLimit;
             Settings.IKOverrideFlyChange -= this.SetIKOverrideFly;

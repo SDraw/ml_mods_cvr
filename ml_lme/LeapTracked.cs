@@ -14,7 +14,7 @@ namespace ml_lme
         static readonly Quaternion ms_offsetRight = Quaternion.Euler(0f, 270f, 0f);
 
         VRIK m_vrIK = null;
-        Vector4 m_vrIKWeights = Vector2.zero;
+        Vector4 m_vrIKWeights = Vector4.zero;
         bool m_inVR = false;
         Transform m_hips = null;
         Transform m_origLeftHand = null;
@@ -61,6 +61,31 @@ namespace ml_lme
 
         void OnDestroy()
         {
+            if(m_leftArmIK != null)
+                Destroy(m_leftArmIK);
+            m_leftArmIK = null;
+
+            if(m_rightArmIK != null)
+                Destroy(m_rightArmIK);
+            m_rightArmIK = null;
+
+            if(m_leftHandTarget != null)
+                Destroy(m_leftHandTarget);
+            m_leftHandTarget = null;
+
+            if(m_rightHandTarget != null)
+                Destroy(m_rightHandTarget);
+            m_rightHandTarget = null;
+
+            m_poseHandler?.Dispose();
+            m_poseHandler = null;
+
+            m_vrIK = null;
+            m_origLeftHand = null;
+            m_origRightHand = null;
+            m_origLeftElbow = null;
+            m_origRightElbow = null;
+
             Settings.EnabledChange -= this.OnEnabledChange;
             Settings.FingersOnlyChange -= this.OnFingersOnlyChange;
             Settings.TrackElbowsChange -= this.OnTrackElbowsChange;
@@ -180,7 +205,7 @@ namespace ml_lme
             m_origLeftElbow = null;
             m_origRightElbow = null;
             m_hips = null;
-            m_vrIKWeights = Vector2.zero;
+            m_vrIKWeights = Vector4.zero;
             m_leftArmIK = null;
             m_rightArmIK = null;
             m_leftTargetActive = false;
@@ -328,16 +353,22 @@ namespace ml_lme
         }
         void OnIKPostUpdate()
         {
-            m_vrIK.solver.leftArm.positionWeight = m_vrIKWeights.x;
-            m_vrIK.solver.leftArm.rotationWeight = m_vrIKWeights.y;
-            m_vrIK.solver.leftArm.target = m_origLeftHand;
-            m_vrIK.solver.leftArm.bendGoal = m_origLeftElbow;
-            m_vrIK.solver.leftArm.bendGoalWeight = ((m_origLeftElbow != null) ? 1f : 0f);
-            m_vrIK.solver.rightArm.positionWeight = m_vrIKWeights.z;
-            m_vrIK.solver.rightArm.rotationWeight = m_vrIKWeights.w;
-            m_vrIK.solver.rightArm.target = m_origRightHand;
-            m_vrIK.solver.rightArm.bendGoal = m_origRightElbow;
-            m_vrIK.solver.rightArm.bendGoalWeight = ((m_origRightElbow != null) ? 1f : 0f);
+            if(m_leftTargetActive)
+            {
+                m_vrIK.solver.leftArm.positionWeight = m_vrIKWeights.x;
+                m_vrIK.solver.leftArm.rotationWeight = m_vrIKWeights.y;
+                m_vrIK.solver.leftArm.target = m_origLeftHand;
+                m_vrIK.solver.leftArm.bendGoal = m_origLeftElbow;
+                m_vrIK.solver.leftArm.bendGoalWeight = ((m_origLeftElbow != null) ? 1f : 0f);
+            }
+            if(m_rightTargetActive)
+            {
+                m_vrIK.solver.rightArm.positionWeight = m_vrIKWeights.z;
+                m_vrIK.solver.rightArm.rotationWeight = m_vrIKWeights.w;
+                m_vrIK.solver.rightArm.target = m_origRightHand;
+                m_vrIK.solver.rightArm.bendGoal = m_origRightElbow;
+                m_vrIK.solver.rightArm.bendGoalWeight = ((m_origRightElbow != null) ? 1f : 0f);
+            }
         }
 
         // Settings

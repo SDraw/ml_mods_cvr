@@ -1,5 +1,4 @@
 ﻿using ABI_RC.Core.Player;
-using ABI_RC.Core.Savior;
 using ABI_RC.Systems.InputManagement;
 using System.Collections;
 using UnityEngine;
@@ -59,6 +58,23 @@ namespace ml_lme
             m_leapController.Disconnect -= this.OnLeapServiceDisconnect;
             m_leapController.Dispose();
             m_leapController = null;
+
+            if(m_leapTracking != null)
+                Object.Destroy(m_leapTracking);
+            m_leapTracking = null;
+
+            if(m_leapTracked != null)
+                Object.Destroy(m_leapTracked);
+            m_leapTracked = null;
+
+            if(m_leapInput != null)
+            {
+                if(CVRInputManager.Instance != null)
+                    CVRInputManager.Instance.DestroyInputModule(m_leapInput);
+                else
+                    m_leapInput.ModuleDestroyed();
+            }
+            m_leapInput = null;
 
             Settings.EnabledChange -= this.OnEnableChange;
             Settings.TrackingModeChange -= this.OnTrackingModeChange;

@@ -46,9 +46,9 @@ namespace ml_prm
         Vector3 m_ragdollLastPos = Vector3.zero;
 
         RagdollToggle m_avatarRagdollToggle = null;
-        RagdollTrigger m_customTrigger = null;
+        RagdollTrigger m_ragdollTrigger = null;
         AvatarBoolParameter m_ragdolledParameter = null;
-        readonly PhysicMaterial m_physicsMaterial = null;
+        PhysicMaterial m_physicsMaterial = null;
 
         bool m_reachedGround = true;
         float m_groundedTime = 0f;
@@ -56,14 +56,20 @@ namespace ml_prm
 
         internal RagdollController()
         {
-            if(Instance == null)
-                Instance = this;
-
             m_rigidBodies = new List<Rigidbody>();
             m_colliders = new List<Collider>();
             m_boneLinks = new List<System.Tuple<Transform, Transform>>();
             m_jointAnchors = new List<System.Tuple<CharacterJoint, Vector3>>();
             m_physicsInfluencers = new List<PhysicsInfluencer>();
+        }
+
+        // Unity events
+        void Start()
+        {
+            if(Instance == null)
+                Instance = this;
+
+            m_inVr = Utils.IsInVR();
 
             m_physicsMaterial = new PhysicMaterial("Ragdoll");
             m_physicsMaterial.dynamicFriction = c_defaultFriction;
@@ -71,25 +77,14 @@ namespace ml_prm
             m_physicsMaterial.frictionCombine = PhysicMaterialCombine.Average;
             m_physicsMaterial.bounciness = 0f;
             m_physicsMaterial.bounceCombine = PhysicMaterialCombine.Average;
-        }
-        ~RagdollController()
-        {
-            if(Instance == this)
-                Instance = null;
-        }
-
-        // Unity events
-        void Start()
-        {
-            m_inVr = Utils.IsInVR();
 
             m_puppetRoot = new GameObject("[PlayerAvatarPuppet]").transform;
             m_puppetRoot.parent = PlayerSetup.Instance.transform;
             m_puppetRoot.localPosition = Vector3.zero;
             m_puppetRoot.localRotation = Quaternion.identity;
 
-            m_customTrigger = MovementSystem.Instance.proxyCollider.gameObject.AddComponent<RagdollTrigger>();
-            m_customTrigger.enabled = false;
+            m_ragdollTrigger = MovementSystem.Instance.proxyCollider.gameObject.AddComponent<RagdollTrigger>();
+            m_ragdollTrigger.enabled = false;
 
             Settings.MovementDragChange += this.OnMovementDragChange;
             Settings.AngularDragChange += this.OnAngularDragChange;
@@ -101,17 +96,38 @@ namespace ml_prm
 
         void OnDestroy()
         {
-            if(m_customTrigger != null)
-            {
-                Object.Destroy(m_customTrigger);
-                m_customTrigger = null;
-            }
+            if(Instance == this)
+                Instance = null;
+
+            if(m_initCoroutine != null)
+                StopCoroutine(m_initCoroutine);
+            m_initCoroutine = null;
+
+            if(m_puppetRoot != null)
+                Object.Destroy(m_puppetRoot);
+            m_puppetRoot = null;
+            m_puppet = null;
+            m_rigidBodies.Clear();
+            m_colliders.Clear();
+            m_boneLinks.Clear();
+            m_jointAnchors.Clear();
+            m_physicsInfluencers.Clear();
+            m_avatarRagdollToggle = null;
+
+            if(m_ragdollTrigger != null)
+                Object.Destroy(m_ragdollTrigger);
+            m_ragdollTrigger = null;
+
+            if(m_physicsMaterial != null)
+                Object.Destroy(m_physicsMaterial);
+            m_physicsMaterial = null;
 
             Settings.MovementDragChange -= this.OnMovementDragChange;
             Settings.AngularDragChange -= this.OnAngularDragChange;
             Settings.GravityChange -= this.OnGravityChange;
             Settings.SlipperinessChange -= this.OnPhysicsMaterialChange;
             Settings.BouncinessChange -= this.OnPhysicsMaterialChange;
+            Settings.BuoyancyChange -= this.OnBuoyancyChange;
         }
 
         void Update()
@@ -153,7 +169,7 @@ namespace ml_prm
             if((m_avatarRagdollToggle != null) && m_avatarRagdollToggle.isActiveAndEnabled && m_avatarRagdollToggle.shouldOverride && (m_enabled != m_avatarRagdollToggle.isOn))
                 SwitchRagdoll();
 
-            if((m_customTrigger != null) && m_customTrigger.GetStateWithReset() && m_avatarReady && !m_enabled && Settings.PointersReaction)
+            if((m_ragdollTrigger != null) && m_ragdollTrigger.GetStateWithReset() && m_avatarReady && !m_enabled && Settings.PointersReaction)
                 SwitchRagdoll();
 
             if(Settings.Hotkey && Input.GetKeyDown(Settings.HotkeyKey) && !ViewManager.Instance.isGameMenuOpen())
@@ -199,10 +215,10 @@ namespace ml_prm
                 Object.Destroy(m_puppet.gameObject);
             m_puppet = null;
 
-            if(m_customTrigger != null)
+            if(m_ragdollTrigger != null)
             {
-                m_customTrigger.GetStateWithReset();
-                m_customTrigger.enabled = false;
+                m_ragdollTrigger.GetStateWithReset();
+                m_ragdollTrigger.enabled = false;
             }
 
             m_vrIK = null;
@@ -352,7 +368,7 @@ namespace ml_prm
 
             m_puppetRoot.gameObject.SetActive(false);
 
-            m_customTrigger.enabled = true;
+            m_ragdollTrigger.enabled = true;
             m_avatarReady = true;
             m_initCoroutine = null;
 

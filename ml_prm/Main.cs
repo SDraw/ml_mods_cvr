@@ -89,6 +89,10 @@ namespace ml_prm
             if(ms_instance == this)
                 ms_instance = null;
 
+            ModUi.SwitchChange -= this.OnSwitchActivation;
+
+            if(m_localController != null)
+                UnityEngine.Object.Destroy(m_localController);
             m_localController = null;
         }
 

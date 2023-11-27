@@ -56,6 +56,8 @@ namespace ml_amt
             if(ms_instance == this)
                 ms_instance = null;
 
+            if(m_localTweaker != null)
+                UnityEngine.Object.Destroy(m_localTweaker);
             m_localTweaker = null;
         }
 

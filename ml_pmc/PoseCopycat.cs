@@ -33,15 +33,26 @@ namespace ml_pmc
         HumanPose m_pose;
         PuppetParser m_puppetParser = null;
 
-        internal PoseCopycat()
+        void Start()
         {
             if(Instance == null)
                 Instance = this;
         }
-        ~PoseCopycat()
+        void OnDestroy()
         {
             if(Instance == this)
                 Instance = null;
+
+            m_poseHandler?.Dispose();
+            m_poseHandler = null;
+
+            if(m_puppetParser != null)
+                Object.Destroy(m_puppetParser);
+            m_puppetParser = null;
+
+            m_animator = null;
+            m_vrIk = null;
+            m_lookAtIk = null;
         }
 
         // Unity events

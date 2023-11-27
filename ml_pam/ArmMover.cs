@@ -79,8 +79,33 @@ namespace ml_pam
 
         void OnDestroy()
         {
+            if(m_armIKLeft != null)
+                Destroy(m_armIKLeft);
+            m_armIKLeft = null;
+
+            if(m_armIKRight != null)
+                Destroy(m_armIKRight);
+            m_armIKRight = null;
+
+            if(m_rootLeft != null)
+                Destroy(m_rootLeft);
+            m_rootLeft = null;
+            m_leftTarget = null;
+
+            if(m_rootRight != null)
+                Destroy(m_rootRight);
+            m_rootRight = null;
+            m_rightTarget = null;
+
+            m_pickup = null;
+            m_vrIK = null;
+            m_origLeftHand = null;
+            m_origRightHand = null;
+
             Settings.EnabledChange -= this.SetEnabled;
             Settings.GrabOffsetChange -= this.SetGrabOffset;
+            Settings.LeadingHandChange -= this.OnLeadingHandChange;
+            Settings.HandsExtensionChange -= this.OnHandsExtensionChange;
         }
 
         void Update()

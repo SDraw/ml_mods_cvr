@@ -25,7 +25,12 @@ namespace ml_prm
 
         void OnDestroy()
         {
-            CVRParticlePointerManager.RemoveTrigger(m_collider);
+            if(m_collider != null)
+                CVRParticlePointerManager.RemoveTrigger(m_collider);
+            m_collider = null;
+
+            m_lastColliderTrigger = null;
+            m_lastParticleSystemTrigger = null;
         }
 
         void Update()

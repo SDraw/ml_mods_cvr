@@ -42,6 +42,10 @@ namespace ml_pmc
             if(ms_instance == this)
                 ms_instance = null;
 
+            ModUi.CopySwitch -= this.OnTargetSelect;
+
+            if(m_localCopycat != null)
+                UnityEngine.Object.Destroy(m_localCopycat);
             m_localCopycat = null;
         }
 

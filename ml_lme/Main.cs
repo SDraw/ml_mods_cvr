@@ -57,6 +57,10 @@ namespace ml_lme
         {
             if(ms_instance == this)
                 ms_instance = null;
+
+            if(m_leapManager != null)
+                Object.Destroy(m_leapManager);
+            m_leapManager = null;
         }
 
         IEnumerator WaitForRootLogic()
