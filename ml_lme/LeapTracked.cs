@@ -9,31 +9,37 @@ namespace ml_lme
     [DisallowMultipleComponent]
     class LeapTracked : MonoBehaviour
     {
+        struct IKInfo
+        {
+            public Vector4 m_armsWeights;
+            public Vector2 m_elbowsWeights;
+            public Transform m_leftHandTarget;
+            public Transform m_rightHandTarget;
+            public Transform m_leftElbowTarget;
+            public Transform m_rightElbowTarget;
+        }
+
         static readonly float[] ms_tposeMuscles = typeof(ABI_RC.Systems.IK.SubSystems.BodySystem).GetField("TPoseMuscles", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null) as float[];
         static readonly Quaternion ms_offsetLeft = Quaternion.Euler(0f, 90f, 0f);
         static readonly Quaternion ms_offsetRight = Quaternion.Euler(0f, 270f, 0f);
 
-        VRIK m_vrIK = null;
-        Vector4 m_vrIKWeights = Vector4.zero;
         bool m_inVR = false;
+        VRIK m_vrIK = null;
         Transform m_hips = null;
-        Transform m_origLeftHand = null;
-        Transform m_origRightHand = null;
-        Transform m_origLeftElbow = null;
-        Transform m_origRightElbow = null;
 
         bool m_enabled = true;
         bool m_fingersOnly = false;
         bool m_trackElbows = true;
 
+        IKInfo m_vrIKInfo;
         ArmIK m_leftArmIK = null;
         ArmIK m_rightArmIK = null;
         HumanPoseHandler m_poseHandler = null;
         HumanPose m_pose;
         Transform m_leftHandTarget = null;
         Transform m_rightHandTarget = null;
-        bool m_leftTargetActive = false;
-        bool m_rightTargetActive = false;
+        bool m_leftTargetActive = false; // VRIK only
+        bool m_rightTargetActive = false; // VRIK only
 
         // Unity events
         void Start()
@@ -81,10 +87,6 @@ namespace ml_lme
             m_poseHandler = null;
 
             m_vrIK = null;
-            m_origLeftHand = null;
-            m_origRightHand = null;
-            m_origLeftElbow = null;
-            m_origRightElbow = null;
 
             Settings.EnabledChange -= this.OnEnabledChange;
             Settings.FingersOnlyChange -= this.OnFingersOnlyChange;
@@ -136,76 +138,11 @@ namespace ml_lme
             }
         }
 
-        // Tracking update
-        void UpdateFingers(LeapParser.LeapData p_data)
-        {
-            if(p_data.m_leftHand.m_present)
-            {
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftThumb1Stretched, -0.5f - p_data.m_leftHand.m_bends[0]);
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftThumb2Stretched, 0.7f - p_data.m_leftHand.m_bends[0] * 2f);
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftThumb3Stretched, 0.7f - p_data.m_leftHand.m_bends[0] * 2f);
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftThumbSpread, -p_data.m_leftHand.m_spreads[0]);
-
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftIndex1Stretched, 0.5f - p_data.m_leftHand.m_bends[1]);
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftIndex2Stretched, 0.7f - p_data.m_leftHand.m_bends[1] * 2f);
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftIndex3Stretched, 0.7f - p_data.m_leftHand.m_bends[1] * 2f);
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftIndexSpread, p_data.m_leftHand.m_spreads[1]);
-
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftMiddle1Stretched, 0.5f - p_data.m_leftHand.m_bends[2]);
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftMiddle2Stretched, 0.7f - p_data.m_leftHand.m_bends[2] * 2f);
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftMiddle3Stretched, 0.7f - p_data.m_leftHand.m_bends[2] * 2f);
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftMiddleSpread, p_data.m_leftHand.m_spreads[2]);
-
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftRing1Stretched, 0.5f - p_data.m_leftHand.m_bends[3]);
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftRing2Stretched, 0.7f - p_data.m_leftHand.m_bends[3] * 2f);
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftRing3Stretched, 0.7f - p_data.m_leftHand.m_bends[3] * 2f);
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftRingSpread, -p_data.m_leftHand.m_spreads[3]);
-
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftLittle1Stretched, 0.5f - p_data.m_leftHand.m_bends[4]);
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftLittle2Stretched, 0.7f - p_data.m_leftHand.m_bends[4] * 2f);
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftLittle3Stretched, 0.7f - p_data.m_leftHand.m_bends[4] * 2f);
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftLittleSpread, -p_data.m_leftHand.m_spreads[4]);
-            }
-
-            if(p_data.m_rightHand.m_present)
-            {
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightThumb1Stretched, -0.5f - p_data.m_rightHand.m_bends[0]);
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightThumb2Stretched, 0.7f - p_data.m_rightHand.m_bends[0] * 2f);
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightThumb3Stretched, 0.7f - p_data.m_rightHand.m_bends[0] * 2f);
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightThumbSpread, -p_data.m_rightHand.m_spreads[0]);
-
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightIndex1Stretched, 0.5f - p_data.m_rightHand.m_bends[1]);
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightIndex2Stretched, 0.7f - p_data.m_rightHand.m_bends[1] * 2f);
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightIndex3Stretched, 0.7f - p_data.m_rightHand.m_bends[1] * 2f);
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightIndexSpread, p_data.m_rightHand.m_spreads[1]);
-
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightMiddle1Stretched, 0.5f - p_data.m_rightHand.m_bends[2]);
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightMiddle2Stretched, 0.7f - p_data.m_rightHand.m_bends[2] * 2f);
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightMiddle3Stretched, 0.7f - p_data.m_rightHand.m_bends[2] * 2f);
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightMiddleSpread, p_data.m_rightHand.m_spreads[2]);
-
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightRing1Stretched, 0.5f - p_data.m_rightHand.m_bends[3]);
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightRing2Stretched, 0.7f - p_data.m_rightHand.m_bends[3] * 2f);
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightRing3Stretched, 0.7f - p_data.m_rightHand.m_bends[3] * 2f);
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightRingSpread, -p_data.m_rightHand.m_spreads[3]);
-
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightLittle1Stretched, 0.5f - p_data.m_rightHand.m_bends[4]);
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightLittle2Stretched, 0.7f - p_data.m_rightHand.m_bends[4] * 2f);
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightLittle3Stretched, 0.7f - p_data.m_rightHand.m_bends[4] * 2f);
-                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightLittleSpread, -p_data.m_rightHand.m_spreads[4]);
-            }
-        }
-
         // Game events
         internal void OnAvatarClear()
         {
             m_vrIK = null;
-            m_origLeftHand = null;
-            m_origRightHand = null;
-            m_origLeftElbow = null;
-            m_origRightElbow = null;
             m_hips = null;
-            m_vrIKWeights = Vector4.zero;
             m_leftArmIK = null;
             m_rightArmIK = null;
             m_leftTargetActive = false;
@@ -300,10 +237,6 @@ namespace ml_lme
                 }
                 else
                 {
-                    m_origLeftHand = m_vrIK.solver.leftArm.target;
-                    m_origRightHand = m_vrIK.solver.rightArm.target;
-                    m_origLeftElbow = m_vrIK.solver.leftArm.bendGoal;
-                    m_origRightElbow = m_vrIK.solver.rightArm.bendGoal;
                     m_vrIK.solver.OnPreUpdate += this.OnIKPreUpdate;
                     m_vrIK.solver.OnPostUpdate += this.OnIKPostUpdate;
                 }
@@ -313,40 +246,34 @@ namespace ml_lme
             }
         }
 
-        internal void OnCalibrate()
-        {
-            if(m_vrIK != null)
-            {
-                m_origLeftHand = m_vrIK.solver.leftArm.target;
-                m_origRightHand = m_vrIK.solver.rightArm.target;
-                m_origLeftElbow = m_vrIK.solver.leftArm.bendGoal;
-                m_origRightElbow = m_vrIK.solver.rightArm.bendGoal;
-            }
-        }
-
-        // IK updates
+        // VRIK updates
         void OnIKPreUpdate()
         {
-            m_vrIKWeights.Set(
-                m_vrIK.solver.leftArm.positionWeight,
-                m_vrIK.solver.leftArm.rotationWeight,
-                m_vrIK.solver.rightArm.positionWeight,
-                m_vrIK.solver.rightArm.rotationWeight
-            );
-
             if(m_leftTargetActive)
             {
+                m_vrIKInfo.m_leftHandTarget = m_vrIK.solver.leftArm.target;
+                m_vrIKInfo.m_armsWeights.x = m_vrIK.solver.leftArm.positionWeight;
+                m_vrIKInfo.m_armsWeights.y = m_vrIK.solver.leftArm.rotationWeight;
+                m_vrIKInfo.m_leftElbowTarget = m_vrIK.solver.leftArm.bendGoal;
+                m_vrIKInfo.m_elbowsWeights.x = m_vrIK.solver.leftArm.bendGoalWeight;
+
+                m_vrIK.solver.leftArm.target = m_leftHandTarget;
                 m_vrIK.solver.leftArm.positionWeight = 1f;
                 m_vrIK.solver.leftArm.rotationWeight = 1f;
-                m_vrIK.solver.leftArm.target = m_leftHandTarget;
                 m_vrIK.solver.leftArm.bendGoal = LeapTracking.Instance.GetLeftElbow();
                 m_vrIK.solver.leftArm.bendGoalWeight = (m_trackElbows ? 1f : 0f);
             }
             if(m_rightTargetActive)
             {
+                m_vrIKInfo.m_rightHandTarget = m_vrIK.solver.rightArm.target;
+                m_vrIKInfo.m_armsWeights.z = m_vrIK.solver.rightArm.positionWeight;
+                m_vrIKInfo.m_armsWeights.w = m_vrIK.solver.rightArm.rotationWeight;
+                m_vrIKInfo.m_rightElbowTarget = m_vrIK.solver.rightArm.bendGoal;
+                m_vrIKInfo.m_elbowsWeights.y = m_vrIK.solver.rightArm.bendGoalWeight;
+
+                m_vrIK.solver.rightArm.target = m_rightHandTarget;
                 m_vrIK.solver.rightArm.positionWeight = 1f;
                 m_vrIK.solver.rightArm.rotationWeight = 1f;
-                m_vrIK.solver.rightArm.target = m_rightHandTarget;
                 m_vrIK.solver.rightArm.bendGoal = LeapTracking.Instance.GetRightElbow();
                 m_vrIK.solver.rightArm.bendGoalWeight = (m_trackElbows ? 1f : 0f);
             }
@@ -355,19 +282,19 @@ namespace ml_lme
         {
             if(m_leftTargetActive)
             {
-                m_vrIK.solver.leftArm.positionWeight = m_vrIKWeights.x;
-                m_vrIK.solver.leftArm.rotationWeight = m_vrIKWeights.y;
-                m_vrIK.solver.leftArm.target = m_origLeftHand;
-                m_vrIK.solver.leftArm.bendGoal = m_origLeftElbow;
-                m_vrIK.solver.leftArm.bendGoalWeight = ((m_origLeftElbow != null) ? 1f : 0f);
+                m_vrIK.solver.leftArm.target = m_vrIKInfo.m_leftHandTarget;
+                m_vrIK.solver.leftArm.positionWeight = m_vrIKInfo.m_armsWeights.x;
+                m_vrIK.solver.leftArm.rotationWeight = m_vrIKInfo.m_armsWeights.y;
+                m_vrIK.solver.leftArm.bendGoal = m_vrIKInfo.m_leftElbowTarget;
+                m_vrIK.solver.leftArm.bendGoalWeight = m_vrIKInfo.m_elbowsWeights.x;
             }
             if(m_rightTargetActive)
             {
-                m_vrIK.solver.rightArm.positionWeight = m_vrIKWeights.z;
-                m_vrIK.solver.rightArm.rotationWeight = m_vrIKWeights.w;
-                m_vrIK.solver.rightArm.target = m_origRightHand;
-                m_vrIK.solver.rightArm.bendGoal = m_origRightElbow;
-                m_vrIK.solver.rightArm.bendGoalWeight = ((m_origRightElbow != null) ? 1f : 0f);
+                m_vrIK.solver.rightArm.target = m_vrIKInfo.m_rightHandTarget;
+                m_vrIK.solver.rightArm.positionWeight = m_vrIKInfo.m_armsWeights.z;
+                m_vrIK.solver.rightArm.rotationWeight = m_vrIKInfo.m_armsWeights.w;
+                m_vrIK.solver.rightArm.bendGoal = m_vrIKInfo.m_rightElbowTarget;
+                m_vrIK.solver.rightArm.bendGoalWeight = m_vrIKInfo.m_elbowsWeights.y;
             }
         }
 
@@ -377,8 +304,7 @@ namespace ml_lme
             m_enabled = p_state;
 
             RefreshArmIK();
-            if(!m_enabled || m_fingersOnly)
-                RestoreVRIK();
+            ResetTargetsStates();
         }
 
         void OnFingersOnlyChange(bool p_state)
@@ -386,8 +312,7 @@ namespace ml_lme
             m_fingersOnly = p_state;
 
             RefreshArmIK();
-            if(!m_enabled || m_fingersOnly)
-                RestoreVRIK();
+            ResetTargetsStates();
         }
 
         void OnTrackElbowsChange(bool p_state)
@@ -400,17 +325,14 @@ namespace ml_lme
                 m_rightArmIK.solver.arm.bendGoalWeight = (m_trackElbows ? 1f : 0f);
             }
 
-            RestoreVRIK();
+            ResetTargetsStates();
         }
 
         // Arbitrary
-        void RestoreVRIK()
+        void ResetTargetsStates()
         {
-            if(m_vrIK != null)
-            {
-                m_leftTargetActive = false;
-                m_rightTargetActive = false;
-            }
+            m_leftTargetActive = false;
+            m_rightTargetActive = false;
         }
 
         void RefreshArmIK()
@@ -419,6 +341,65 @@ namespace ml_lme
             {
                 m_leftArmIK.enabled = (m_enabled && !m_fingersOnly);
                 m_rightArmIK.enabled = (m_enabled && !m_fingersOnly);
+            }
+        }
+
+        void UpdateFingers(LeapParser.LeapData p_data)
+        {
+            if(p_data.m_leftHand.m_present)
+            {
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftThumb1Stretched, -0.5f - p_data.m_leftHand.m_bends[0]);
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftThumb2Stretched, 0.7f - p_data.m_leftHand.m_bends[0] * 2f);
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftThumb3Stretched, 0.7f - p_data.m_leftHand.m_bends[0] * 2f);
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftThumbSpread, -p_data.m_leftHand.m_spreads[0]);
+
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftIndex1Stretched, 0.5f - p_data.m_leftHand.m_bends[1]);
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftIndex2Stretched, 0.7f - p_data.m_leftHand.m_bends[1] * 2f);
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftIndex3Stretched, 0.7f - p_data.m_leftHand.m_bends[1] * 2f);
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftIndexSpread, p_data.m_leftHand.m_spreads[1]);
+
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftMiddle1Stretched, 0.5f - p_data.m_leftHand.m_bends[2]);
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftMiddle2Stretched, 0.7f - p_data.m_leftHand.m_bends[2] * 2f);
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftMiddle3Stretched, 0.7f - p_data.m_leftHand.m_bends[2] * 2f);
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftMiddleSpread, p_data.m_leftHand.m_spreads[2]);
+
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftRing1Stretched, 0.5f - p_data.m_leftHand.m_bends[3]);
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftRing2Stretched, 0.7f - p_data.m_leftHand.m_bends[3] * 2f);
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftRing3Stretched, 0.7f - p_data.m_leftHand.m_bends[3] * 2f);
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftRingSpread, -p_data.m_leftHand.m_spreads[3]);
+
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftLittle1Stretched, 0.5f - p_data.m_leftHand.m_bends[4]);
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftLittle2Stretched, 0.7f - p_data.m_leftHand.m_bends[4] * 2f);
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftLittle3Stretched, 0.7f - p_data.m_leftHand.m_bends[4] * 2f);
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.LeftLittleSpread, -p_data.m_leftHand.m_spreads[4]);
+            }
+
+            if(p_data.m_rightHand.m_present)
+            {
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightThumb1Stretched, -0.5f - p_data.m_rightHand.m_bends[0]);
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightThumb2Stretched, 0.7f - p_data.m_rightHand.m_bends[0] * 2f);
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightThumb3Stretched, 0.7f - p_data.m_rightHand.m_bends[0] * 2f);
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightThumbSpread, -p_data.m_rightHand.m_spreads[0]);
+
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightIndex1Stretched, 0.5f - p_data.m_rightHand.m_bends[1]);
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightIndex2Stretched, 0.7f - p_data.m_rightHand.m_bends[1] * 2f);
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightIndex3Stretched, 0.7f - p_data.m_rightHand.m_bends[1] * 2f);
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightIndexSpread, p_data.m_rightHand.m_spreads[1]);
+
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightMiddle1Stretched, 0.5f - p_data.m_rightHand.m_bends[2]);
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightMiddle2Stretched, 0.7f - p_data.m_rightHand.m_bends[2] * 2f);
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightMiddle3Stretched, 0.7f - p_data.m_rightHand.m_bends[2] * 2f);
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightMiddleSpread, p_data.m_rightHand.m_spreads[2]);
+
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightRing1Stretched, 0.5f - p_data.m_rightHand.m_bends[3]);
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightRing2Stretched, 0.7f - p_data.m_rightHand.m_bends[3] * 2f);
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightRing3Stretched, 0.7f - p_data.m_rightHand.m_bends[3] * 2f);
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightRingSpread, -p_data.m_rightHand.m_spreads[3]);
+
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightLittle1Stretched, 0.5f - p_data.m_rightHand.m_bends[4]);
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightLittle2Stretched, 0.7f - p_data.m_rightHand.m_bends[4] * 2f);
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightLittle3Stretched, 0.7f - p_data.m_rightHand.m_bends[4] * 2f);
+                UpdatePoseMuscle(ref m_pose, (int)MuscleIndex.RightLittleSpread, -p_data.m_rightHand.m_spreads[4]);
             }
         }
 

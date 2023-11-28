@@ -34,11 +34,6 @@ namespace ml_lme
                 new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnSetupAvatar_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
             HarmonyInstance.Patch(
-                typeof(BodySystem).GetMethod(nameof(BodySystem.Calibrate)),
-                null,
-                new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnCalibrate_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
-            );
-            HarmonyInstance.Patch(
                 typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.SetControllerRayScale)),
                 null,
                 new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnRayScale_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
@@ -93,20 +88,6 @@ namespace ml_lme
             {
                 if(m_leapManager != null)
                     m_leapManager.OnAvatarSetup();
-            }
-            catch(System.Exception e)
-            {
-                MelonLoader.MelonLogger.Error(e);
-            }
-        }
-
-        static void OnCalibrate_Postfix() => ms_instance?.OnCalibrate();
-        void OnCalibrate()
-        {
-            try
-            {
-                if(m_leapManager != null)
-                    m_leapManager.OnCalibrate();
             }
             catch(System.Exception e)
             {

@@ -15,6 +15,12 @@ namespace ml_pam
             Pickup,
             Extended
         }
+        struct IKInfo
+        {
+            public Vector4 m_armsWeights;
+            public Transform m_leftHandTarget;
+            public Transform m_rightHandTarget;
+        }
 
         const float c_offsetLimit = 0.5f;
         const KeyCode c_leftKey = KeyCode.Q;
@@ -26,13 +32,11 @@ namespace ml_pam
 
         bool m_inVR = false;
         VRIK m_vrIK = null;
-        Vector4 m_vrIKWeights = Vector4.zero;
-        Transform m_origRightHand = null;
-        Transform m_origLeftHand = null;
         float m_armLength = 0f;
         float m_playspaceScale = 1f;
 
         bool m_enabled = true;
+        IKInfo m_vrIKInfo;
         Transform m_rootLeft = null;
         Transform m_rootRight = null;
         Transform m_leftTarget = null;
@@ -99,8 +103,6 @@ namespace ml_pam
 
             m_pickup = null;
             m_vrIK = null;
-            m_origLeftHand = null;
-            m_origRightHand = null;
 
             Settings.EnabledChange -= this.SetEnabled;
             Settings.GrabOffsetChange -= this.SetGrabOffset;
@@ -183,16 +185,22 @@ namespace ml_pam
         {
             if(m_enabled)
             {
-                m_vrIKWeights.Set(m_vrIK.solver.leftArm.positionWeight, m_vrIK.solver.leftArm.rotationWeight, m_vrIK.solver.rightArm.positionWeight, m_vrIK.solver.rightArm.rotationWeight);
-
                 if(m_leftHandState != HandState.Empty)
                 {
+                    m_vrIKInfo.m_leftHandTarget = m_vrIK.solver.leftArm.target;
+                    m_vrIKInfo.m_armsWeights.x = m_vrIK.solver.leftArm.positionWeight;
+                    m_vrIKInfo.m_armsWeights.y = m_vrIK.solver.leftArm.rotationWeight;
+
                     m_vrIK.solver.leftArm.positionWeight = 1f;
                     m_vrIK.solver.leftArm.rotationWeight = 1f;
                     m_vrIK.solver.leftArm.target = m_leftTarget;
                 }
                 if(m_rightHandState != HandState.Empty)
                 {
+                    m_vrIKInfo.m_rightHandTarget = m_vrIK.solver.rightArm.target;
+                    m_vrIKInfo.m_armsWeights.z = m_vrIK.solver.rightArm.positionWeight;
+                    m_vrIKInfo.m_armsWeights.w = m_vrIK.solver.rightArm.rotationWeight;
+
                     m_vrIK.solver.rightArm.positionWeight = 1f;
                     m_vrIK.solver.rightArm.rotationWeight = 1f;
                     m_vrIK.solver.rightArm.target = m_rightTarget;
@@ -203,12 +211,18 @@ namespace ml_pam
         {
             if(m_enabled)
             {
-                m_vrIK.solver.leftArm.positionWeight = m_vrIKWeights.x;
-                m_vrIK.solver.leftArm.rotationWeight = m_vrIKWeights.y;
-                m_vrIK.solver.leftArm.target = m_origLeftHand;
-                m_vrIK.solver.rightArm.positionWeight = m_vrIKWeights.z;
-                m_vrIK.solver.rightArm.rotationWeight = m_vrIKWeights.w;
-                m_vrIK.solver.rightArm.target = m_origRightHand;
+                if(m_leftHandState != HandState.Empty)
+                {
+                    m_vrIK.solver.leftArm.target = m_vrIKInfo.m_leftHandTarget;
+                    m_vrIK.solver.leftArm.positionWeight = m_vrIKInfo.m_armsWeights.x;
+                    m_vrIK.solver.leftArm.rotationWeight = m_vrIKInfo.m_armsWeights.y;
+                }
+                if(m_rightHandState != HandState.Empty)
+                {
+                    m_vrIK.solver.rightArm.target = m_vrIKInfo.m_rightHandTarget;
+                    m_vrIK.solver.rightArm.positionWeight = m_vrIKInfo.m_armsWeights.z;
+                    m_vrIK.solver.rightArm.rotationWeight = m_vrIKInfo.m_armsWeights.w;
+                }
             }
         }
 
@@ -310,7 +324,6 @@ namespace ml_pam
         internal void OnAvatarClear()
         {
             m_vrIK = null;
-            m_origRightHand = null;
             m_armIKLeft = null;
             m_armIKRight = null;
             m_armLength = 0f;
@@ -392,8 +405,6 @@ namespace ml_pam
                 }
                 else
                 {
-                    m_origLeftHand = m_vrIK.solver.leftArm.target;
-                    m_origRightHand = m_vrIK.solver.rightArm.target;
                     m_armLength = m_vrIK.solver.leftArm.mag * 1.25f;
                     m_vrIK.solver.OnPreUpdate += this.OnIKPreUpdate;
                     m_vrIK.solver.OnPostUpdate += this.OnIKPostUpdate;

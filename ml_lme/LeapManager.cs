@@ -185,12 +185,6 @@ namespace ml_lme
                 m_leapTracked.OnAvatarSetup();
         }
 
-        internal void OnCalibrate()
-        {
-            if(m_leapTracked != null)
-                m_leapTracked.OnCalibrate();
-        }
-
         internal void OnRayScale(float p_scale)
         {
             m_leapInput?.OnRayScale(p_scale);
