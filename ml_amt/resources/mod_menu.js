@@ -27,13 +27,6 @@
                 <div id="IKOverrideFly" class ="inp_toggle no-scroll" data-current="true"></div>
             </div>
         </div>
-
-        <div class ="row-wrapper">
-            <div class ="option-caption">Follow hips on IK override: </div>
-            <div class ="option-input">
-                <div id="FollowHips" class ="inp_toggle no-scroll" data-current="true"></div>
-            </div>
-        </div>
         
         <div class ="row-wrapper">
             <div class ="option-caption">Detect animations emote tag: </div>
