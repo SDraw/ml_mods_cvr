@@ -4,9 +4,9 @@ using System.Reflection;
 
 namespace ml_pam
 {
-    static class Scripts
+    static class ResourcesHandler
     {
-        public static string GetEmbeddedScript(string p_name)
+        public static string GetEmbeddedResources(string p_name)
         {
             string l_result = "";
             Assembly l_assembly = Assembly.GetExecutingAssembly();

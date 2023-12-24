@@ -2,11 +2,11 @@
 using System.IO;
 using System.Reflection;
 
-namespace ml_lme
+namespace ml_amt
 {
-    static class Scripts
+    static class ResourcesHandler
     {
-        public static string GetEmbeddedScript(string p_name)
+        public static string GetEmbeddedResource(string p_name)
         {
             string l_result = "";
             Assembly l_assembly = Assembly.GetExecutingAssembly();

@@ -26,9 +26,11 @@
     </Reference>
     <Reference Include="cohtml.Net">
       <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\cohtml.Net.dll</HintPath>
+      <Private>false</Private>
     </Reference>
     <Reference Include="Cohtml.Runtime">
       <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\Cohtml.Runtime.dll</HintPath>
+      <Private>false</Private>
     </Reference>
     <Reference Include="MelonLoader">
       <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\MelonLoader\net35\MelonLoader.dll</HintPath>
