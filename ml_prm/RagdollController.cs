@@ -1,7 +1,6 @@
 ﻿using ABI.CCK.Components;
 using ABI_RC.Core.InteractionSystem;
 using ABI_RC.Core.Player;
-using ABI_RC.Core.Savior;
 using ABI_RC.Systems.Camera;
 using ABI_RC.Systems.IK;
 using ABI_RC.Systems.IK.SubSystems;
@@ -22,7 +21,6 @@ namespace ml_prm
 
         public static RagdollController Instance { get; private set; } = null;
 
-        bool m_inVr = false;
         VRIK m_vrIK = null;
         bool m_applyHipsPosition = false;
         bool m_applyHipsRotation = false;
@@ -68,8 +66,6 @@ namespace ml_prm
         {
             if(Instance == null)
                 Instance = this;
-
-            m_inVr = Utils.IsInVR();
 
             m_physicsMaterial = new PhysicMaterial("Ragdoll");
             m_physicsMaterial.dynamicFriction = c_defaultFriction;
@@ -241,8 +237,6 @@ namespace ml_prm
 
         internal void OnAvatarSetup()
         {
-            m_inVr = Utils.IsInVR();
-
             if(PlayerSetup.Instance._animator.isHuman)
             {
                 BipedRagdollReferences l_avatarReferences = BipedRagdollReferences.FromAvatar(PlayerSetup.Instance._animator);

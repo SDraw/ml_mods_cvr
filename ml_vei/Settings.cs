@@ -88,7 +88,8 @@ namespace ml_vei
                     {
                         GripTrigger = bool.Parse(p_value);
                         GripTriggerChange?.Invoke(GripTrigger);
-                    } break;
+                    }
+                    break;
                 }
 
                 ms_entries[(int)l_setting].BoxedValue = bool.Parse(p_value);

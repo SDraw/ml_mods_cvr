@@ -1,5 +1,4 @@
 ﻿using ABI_RC.Core.Player;
-using ABI_RC.Core.Savior;
 using ABI_RC.Systems.IK;
 using ABI_RC.Systems.IK.SubSystems;
 using ABI_RC.Systems.InputManagement;
@@ -81,8 +80,8 @@ namespace ml_pmc
                         CVRInputManager.Instance.individualFingerTracking = true;
                         IKSystem.Instance.FingerSystem.controlActive = true;
 
-                        ref float[] l_curls = ref m_puppetParser.GetFingerCurls();
-                        ref float[] l_spreads = ref m_puppetParser.GetFingerSpreads();
+                        ref readonly float[] l_curls = ref m_puppetParser.GetFingerCurls();
+                        ref readonly float[] l_spreads = ref m_puppetParser.GetFingerSpreads();
 
                         CVRInputManager.Instance.fingerCurlLeftThumb = l_curls[l_mirror ? 5 : 0];
                         CVRInputManager.Instance.fingerCurlLeftIndex = l_curls[l_mirror ? 6 : 1];

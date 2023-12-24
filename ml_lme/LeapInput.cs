@@ -283,7 +283,7 @@ namespace ml_lme
                 {
                     float l_strength = l_data.m_leftHand.m_grabStrength;
 
-                    float l_interactValue = 0f;
+                    float l_interactValue;
                     if(m_gripToGrab)
                         l_interactValue = Mathf.Clamp01(Mathf.InverseLerp(Mathf.Min(Settings.GripThreadhold, Settings.InteractThreadhold), Mathf.Max(Settings.GripThreadhold, Settings.InteractThreadhold), l_strength));
                     else
@@ -311,7 +311,7 @@ namespace ml_lme
                 {
                     float l_strength = l_data.m_rightHand.m_grabStrength;
 
-                    float l_interactValue = 0f;
+                    float l_interactValue;
                     if(m_gripToGrab)
                         l_interactValue = Mathf.Clamp01(Mathf.InverseLerp(Mathf.Min(Settings.GripThreadhold, Settings.InteractThreadhold), Mathf.Max(Settings.GripThreadhold, Settings.InteractThreadhold), l_strength));
                     else

@@ -20,8 +20,8 @@ namespace ml_pmc
         float m_leftGesture = 0f;
         float m_rightGesture = 0f;
         bool m_fingerTracking = false;
-        float[] m_fingerCurls = null;
-        float[] m_fingerSpreads = null;
+        readonly float[] m_fingerCurls = null;
+        readonly float[] m_fingerSpreads = null;
 
         internal PuppetParser()
         {
@@ -102,7 +102,7 @@ namespace ml_pmc
         public float GetLeftGesture() => m_leftGesture;
         public float GetRightGesture() => m_rightGesture;
         public bool HasFingerTracking() => m_fingerTracking;
-        public ref float[] GetFingerCurls() => ref m_fingerCurls;
-        public ref float[] GetFingerSpreads() => ref m_fingerSpreads;
+        public ref readonly float[] GetFingerCurls() => ref m_fingerCurls;
+        public ref readonly float[] GetFingerSpreads() => ref m_fingerSpreads;
     }
 }

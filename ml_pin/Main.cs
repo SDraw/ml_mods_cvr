@@ -59,12 +59,7 @@ namespace ml_pin
                 l_notify |= (Settings.FriendsAlways && l_isFriend);
 
                 if(l_notify)
-                {
-                    if(l_isFriend)
-                        m_soundManager?.PlaySound(SoundManager.SoundType.FriendJoin);
-                    else
-                        m_soundManager?.PlaySound(SoundManager.SoundType.PlayerJoin);
-                }
+                    m_soundManager?.PlaySound(l_isFriend ? SoundManager.SoundType.FriendJoin : SoundManager.SoundType.PlayerJoin);
             }
             catch(Exception e)
             {
@@ -93,12 +88,7 @@ namespace ml_pin
                 l_notify |= (Settings.FriendsAlways && l_isFriend);
 
                 if(l_notify)
-                {
-                    if(l_isFriend)
-                        m_soundManager?.PlaySound(SoundManager.SoundType.FriendLeave);
-                    else
-                        m_soundManager?.PlaySound(SoundManager.SoundType.PlayerLeave);
-                }
+                    m_soundManager?.PlaySound(l_isFriend ? SoundManager.SoundType.FriendLeave : SoundManager.SoundType.PlayerLeave);
             }
             catch(Exception e)
             {
@@ -108,9 +98,9 @@ namespace ml_pin
 
         bool ShouldNotifyInCurrentInstance()
         {
-            bool l_isInPublic = Settings.NotifyInPublic && MetaPort.Instance.CurrentInstancePrivacy.Contains("Public");
-            bool l_isInFriends = Settings.NotifyInFriends && MetaPort.Instance.CurrentInstancePrivacy.Contains("Friends");
-            bool l_isInPrivate = Settings.NotifyInPrivate && MetaPort.Instance.CurrentInstancePrivacy.Contains("invite");
+            bool l_isInPublic = (Settings.NotifyInPublic && MetaPort.Instance.CurrentInstancePrivacy.Contains("Public"));
+            bool l_isInFriends = (Settings.NotifyInFriends && MetaPort.Instance.CurrentInstancePrivacy.Contains("Friends"));
+            bool l_isInPrivate = (Settings.NotifyInPrivate && MetaPort.Instance.CurrentInstancePrivacy.Contains("invite"));
             return (l_isInPublic || l_isInFriends || l_isInPrivate);
         }
     }

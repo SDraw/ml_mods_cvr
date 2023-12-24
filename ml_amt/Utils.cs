@@ -2,7 +2,6 @@
 using ABI_RC.Core.UI;
 using ABI_RC.Systems.MovementSystem;
 using RootMotion.FinalIK;
-using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
