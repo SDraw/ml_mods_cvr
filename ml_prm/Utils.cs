@@ -31,7 +31,7 @@ namespace ml_prm
             return l_result;
         }
 
-        public static bool IsGrounded(this MovementSystem p_instance) => (bool)ms_groundedRaw.GetValue(p_instance);
+        public static bool IsGroundedRaw(this MovementSystem p_instance) => (bool)ms_groundedRaw.GetValue(p_instance);
         public static Vector3 GetAppliedGravity(this MovementSystem p_instance) => (Vector3)ms_appliedGravity.GetValue(p_instance);
         public static void SetAppliedGravity(this MovementSystem p_instance, Vector3 p_vec) => ms_appliedGravity.SetValue(p_instance, p_vec);
         public static void ClearFluidVolumes(this MovementSystem p_instance) => (ms_touchingVolumes.GetValue(p_instance) as List<FluidVolume>)?.Clear();

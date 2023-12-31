@@ -42,7 +42,7 @@ namespace ml_pin
             try
             {
                 bool l_isFriend = Friends.FriendsWith(p_player.ownerId);
-                bool l_notify = true;
+                bool l_notify = false;
 
                 switch(Settings.NotifyType)
                 {
@@ -50,13 +50,13 @@ namespace ml_pin
                         l_notify = false;
                         break;
                     case Settings.NotificationType.Friends:
-                        l_notify = (ShouldNotifyInCurrentInstance() && l_isFriend);
+                        l_notify = (l_isFriend && ShouldNotifyInCurrentInstance());
                         break;
                     case Settings.NotificationType.All:
                         l_notify = ShouldNotifyInCurrentInstance();
                         break;
                 }
-                l_notify |= (Settings.FriendsAlways && l_isFriend);
+                l_notify |= (l_isFriend && Settings.FriendsAlways);
 
                 if(l_notify)
                     m_soundManager?.PlaySound(l_isFriend ? SoundManager.SoundType.FriendJoin : SoundManager.SoundType.PlayerJoin);
@@ -71,7 +71,7 @@ namespace ml_pin
             try
             {
                 bool l_isFriend = Friends.FriendsWith(p_player.ownerId);
-                bool l_notify = true;
+                bool l_notify = false;
 
                 switch(Settings.NotifyType)
                 {
@@ -79,13 +79,13 @@ namespace ml_pin
                         l_notify = false;
                         break;
                     case Settings.NotificationType.Friends:
-                        l_notify = (ShouldNotifyInCurrentInstance() && l_isFriend);
+                        l_notify = (l_isFriend && ShouldNotifyInCurrentInstance());
                         break;
                     case Settings.NotificationType.All:
                         l_notify = ShouldNotifyInCurrentInstance();
                         break;
                 }
-                l_notify |= (Settings.FriendsAlways && l_isFriend);
+                l_notify |= (l_isFriend && Settings.FriendsAlways);
 
                 if(l_notify)
                     m_soundManager?.PlaySound(l_isFriend ? SoundManager.SoundType.FriendLeave : SoundManager.SoundType.PlayerLeave);
@@ -98,9 +98,9 @@ namespace ml_pin
 
         bool ShouldNotifyInCurrentInstance()
         {
-            bool l_isInPublic = (Settings.NotifyInPublic && MetaPort.Instance.CurrentInstancePrivacy.Contains("Public"));
-            bool l_isInFriends = (Settings.NotifyInFriends && MetaPort.Instance.CurrentInstancePrivacy.Contains("Friends"));
-            bool l_isInPrivate = (Settings.NotifyInPrivate && MetaPort.Instance.CurrentInstancePrivacy.Contains("invite"));
+            bool l_isInPublic = (MetaPort.Instance.CurrentInstancePrivacy.Contains("Public") && Settings.NotifyInPublic);
+            bool l_isInFriends = (MetaPort.Instance.CurrentInstancePrivacy.Contains("Friends") && Settings.NotifyInFriends);
+            bool l_isInPrivate = (MetaPort.Instance.CurrentInstancePrivacy.Contains("invite") && Settings.NotifyInPrivate);
             return (l_isInPublic || l_isInFriends || l_isInPrivate);
         }
     }

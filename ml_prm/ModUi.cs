@@ -21,10 +21,12 @@ namespace ml_prm
             ViewVelocity,
             JumpRecover,
             Buoyancy,
+            FallDamage,
             VelocityMultiplier,
             MovementDrag,
             AngularDrag,
-            RecoverDelay
+            RecoverDelay,
+            FallLimit
         }
 
         static public event Action SwitchChange;
@@ -85,6 +87,9 @@ namespace ml_prm
             ms_uiElements.Add(l_modCategory.AddToggle("Buoyancy", "Enable buoyancy in fluid volumes. Warning: constantly changes movement and air drag of hips, spine and chest.", Settings.Buoyancy));
             (ms_uiElements[(int)UiIndex.Buoyancy] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate(UiIndex.Buoyancy, state);
 
+            ms_uiElements.Add(l_modCategory.AddToggle("Fall damage", "Enable ragdoll when falling from height", Settings.FallDamage));
+            (ms_uiElements[(int)UiIndex.FallDamage] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate(UiIndex.FallDamage, state);
+
             ms_uiElements.Add(l_modRoot.AddSlider("Velocity multiplier", "Velocity multiplier upon entering ragdoll state", Settings.VelocityMultiplier, 1f, 50f));
             (ms_uiElements[(int)UiIndex.VelocityMultiplier] as BTKUILib.UIObjects.Components.SliderFloat).OnValueUpdated += (value) => OnSliderUpdate(UiIndex.VelocityMultiplier, value);
 
@@ -96,6 +101,9 @@ namespace ml_prm
 
             ms_uiElements.Add(l_modRoot.AddSlider("Recover delay (seconds)", "Recover delay for automatic recover", Settings.RecoverDelay, 1f, 10f));
             (ms_uiElements[(int)UiIndex.RecoverDelay] as BTKUILib.UIObjects.Components.SliderFloat).OnValueUpdated += (value) => OnSliderUpdate(UiIndex.RecoverDelay, value);
+
+            ms_uiElements.Add(l_modRoot.AddSlider("Fall limit", "Height limit for fall damage", Settings.FallLimit, 0f, 100f));
+            (ms_uiElements[(int)UiIndex.FallLimit] as BTKUILib.UIObjects.Components.SliderFloat).OnValueUpdated += (value) => OnSliderUpdate(UiIndex.FallLimit, value);
 
             l_modCategory.AddButton("Reset settings", "", "Reset mod settings to default").OnPress += Reset;
         }
@@ -147,6 +155,10 @@ namespace ml_prm
                 case UiIndex.Buoyancy:
                     Settings.SetSetting(Settings.ModSetting.Buoyancy, p_state);
                     break;
+
+                case UiIndex.FallDamage:
+                    Settings.SetSetting(Settings.ModSetting.FallDamage, p_state);
+                    break;
             }
 
             if(p_force)
@@ -172,6 +184,10 @@ namespace ml_prm
                 case UiIndex.RecoverDelay:
                     Settings.SetSetting(Settings.ModSetting.RecoverDelay, p_value);
                     break;
+
+                case UiIndex.FallLimit:
+                    Settings.SetSetting(Settings.ModSetting.FallLimit, p_value);
+                    break;
             }
 
             if(p_force)
@@ -191,10 +207,12 @@ namespace ml_prm
             OnToggleUpdate(UiIndex.ViewVelocity, false, true);
             OnToggleUpdate(UiIndex.JumpRecover, false, true);
             OnToggleUpdate(UiIndex.Buoyancy, true, true);
+            OnToggleUpdate(UiIndex.FallDamage, true, true);
             OnSliderUpdate(UiIndex.VelocityMultiplier, 2f, true);
             OnSliderUpdate(UiIndex.MovementDrag, 1f, true);
             OnSliderUpdate(UiIndex.AngularDrag, 1f, true);
             OnSliderUpdate(UiIndex.RecoverDelay, 3f, true);
+            OnSliderUpdate(UiIndex.FallLimit, 5f, true);
         }
 
         static Stream GetIconStream(string p_name)

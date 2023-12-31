@@ -23,7 +23,9 @@ namespace ml_prm
             Bounciness,
             ViewVelocity,
             JumpRecover,
-            Buoyancy
+            Buoyancy,
+            FallDamage,
+            FallLimit
         }
 
         public static bool Hotkey { get; private set; } = true;
@@ -42,6 +44,8 @@ namespace ml_prm
         public static bool ViewVelocity { get; private set; } = false;
         public static bool JumpRecover { get; private set; } = false;
         public static bool Buoyancy { get; private set; } = true;
+        public static bool FallDamage { get; private set; } = true;
+        public static float FallLimit { get; private set; } = 5f;
 
         static public event Action<bool> HotkeyChange;
         static public event Action<KeyCode> HotkeyKeyChange;
@@ -59,6 +63,8 @@ namespace ml_prm
         static public event Action<bool> ViewVelocityChange;
         static public event Action<bool> JumpRecoverChange;
         static public event Action<bool> BuoyancyChange;
+        static public event Action<bool> FallDamageChange;
+        static public event Action<float> FallLimitChange;
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
@@ -85,6 +91,8 @@ namespace ml_prm
                 ms_category.CreateEntry(ModSetting.ViewVelocity.ToString(), ViewVelocity, null, null, true),
                 ms_category.CreateEntry(ModSetting.JumpRecover.ToString(), JumpRecover, null, null, true),
                 ms_category.CreateEntry(ModSetting.Buoyancy.ToString(), Buoyancy, null, null, true),
+                ms_category.CreateEntry(ModSetting.FallDamage.ToString(), FallDamage, null, null, true),
+                ms_category.CreateEntry(ModSetting.FallLimit.ToString(), FallLimit, null, null, true),
             };
 
             ms_entries[(int)ModSetting.HotkeyKey].OnEntryValueChangedUntyped.Subscribe(OnMelonSettingSave_HotkeyKey);
@@ -105,6 +113,8 @@ namespace ml_prm
             ViewVelocity = (bool)ms_entries[(int)ModSetting.ViewVelocity].BoxedValue;
             JumpRecover = (bool)ms_entries[(int)ModSetting.JumpRecover].BoxedValue;
             Buoyancy = (bool)ms_entries[(int)ModSetting.Buoyancy].BoxedValue;
+            FallDamage = (bool)ms_entries[(int)ModSetting.FallDamage].BoxedValue;
+            FallLimit = Mathf.Clamp((float)ms_entries[(int)ModSetting.FallLimit].BoxedValue, 0f, 100f);
         }
 
         static void OnMelonSettingSave_HotkeyKey(object p_oldValue, object p_newValue)
@@ -198,6 +208,13 @@ namespace ml_prm
                 }
                 break;
 
+                case ModSetting.FallDamage:
+                {
+                    FallDamage = (bool)p_value;
+                    FallDamageChange?.Invoke((bool)p_value);
+                }
+                break;
+
                 // Floats
                 case ModSetting.VelocityMultiplier:
                 {
@@ -224,6 +241,13 @@ namespace ml_prm
                 {
                     RecoverDelay = (float)p_value;
                     RecoverDelayChange?.Invoke((float)p_value);
+                }
+                break;
+
+                case ModSetting.FallLimit:
+                {
+                    FallLimit = (float)p_value;
+                    FallLimitChange?.Invoke((float)p_value);
                 }
                 break;
             }

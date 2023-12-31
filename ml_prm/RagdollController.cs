@@ -52,6 +52,9 @@ namespace ml_prm
         float m_groundedTime = 0f;
         float m_downTime = float.MinValue;
 
+        bool m_inAir = false;
+        float m_inAirDistance = 0f;
+
         internal RagdollController()
         {
             m_rigidBodies = new List<Rigidbody>();
@@ -88,6 +91,7 @@ namespace ml_prm
             Settings.SlipperinessChange += this.OnPhysicsMaterialChange;
             Settings.BouncinessChange += this.OnPhysicsMaterialChange;
             Settings.BuoyancyChange += this.OnBuoyancyChange;
+            Settings.FallDamageChange += this.OnFallDamageChange;
         }
 
         void OnDestroy()
@@ -124,12 +128,29 @@ namespace ml_prm
             Settings.SlipperinessChange -= this.OnPhysicsMaterialChange;
             Settings.BouncinessChange -= this.OnPhysicsMaterialChange;
             Settings.BuoyancyChange -= this.OnBuoyancyChange;
+            Settings.FallDamageChange -= this.OnFallDamageChange;
         }
 
         void Update()
         {
+            if(m_avatarReady && !m_enabled && Settings.FallDamage && !MovementSystem.Instance.flying)
+            {
+                bool l_grounded = MovementSystem.Instance.IsGroundedRaw();
+                if(m_inAir && l_grounded && (m_inAirDistance > Settings.FallLimit))
+                {
+                    m_inAirDistance = 0f;
+                    SwitchRagdoll();
+                }
+
+                m_inAir = !l_grounded;
+                if(l_grounded)
+                    m_inAirDistance = 0f;
+            }
+
             if(m_avatarReady && m_enabled)
             {
+                m_inAirDistance = 0f;
+
                 Vector3 l_dif = m_puppetReferences.hips.position - m_ragdollLastPos;
                 PlayerSetup.Instance.transform.position += l_dif;
                 m_puppetReferences.hips.position -= l_dif;
@@ -142,6 +163,12 @@ namespace ml_prm
             {
                 Vector3 l_pos = PlayerSetup.Instance.transform.position;
                 m_velocity = (m_velocity + (l_pos - m_lastPosition) / Time.deltaTime) * 0.5f;
+                if(m_inAir)
+                {
+                    m_inAirDistance += (m_lastPosition - l_pos).y;
+                    m_inAirDistance = Mathf.Clamp(m_inAirDistance, 0f, float.MaxValue);
+                }
+
                 m_lastPosition = l_pos;
 
                 if(!m_reachedGround && MovementSystem.Instance.IsGrounded())
@@ -233,6 +260,8 @@ namespace ml_prm
             m_groundedTime = 0f;
             m_downTime = float.MinValue;
             m_puppetRoot.localScale = Vector3.one;
+            m_inAir = false;
+            m_inAirDistance = 0f;
         }
 
         internal void OnAvatarSetup()
@@ -410,6 +439,7 @@ namespace ml_prm
             OnPhysicsMaterialChange(true);
             OnMovementDragChange(Settings.MovementDrag);
             OnBuoyancyChange(Settings.Buoyancy);
+            OnFallDamageChange(Settings.FallDamage);
         }
 
         internal void OnCombatDown()
@@ -425,6 +455,8 @@ namespace ml_prm
 
         internal void OnChangeFlight()
         {
+            OnFallDamageChange(Settings.FallDamage);
+
             if(m_avatarReady && m_enabled && MovementSystem.Instance.flying)
             {
                 m_forcedSwitch = true;
@@ -435,6 +467,8 @@ namespace ml_prm
 
         internal void OnPlayerTeleport()
         {
+            OnFallDamageChange(Settings.FallDamage);
+
             if(m_avatarReady && m_enabled)
                 m_ragdollLastPos = m_puppetReferences.hips.position;
         }
@@ -529,6 +563,11 @@ namespace ml_prm
                     OnAngularDragChange(Settings.AngularDrag);
                 }
             }
+        }
+        void OnFallDamageChange(bool p_state)
+        {
+            m_inAir = false;
+            m_inAirDistance = 0f;
         }
 
         // Arbitrary

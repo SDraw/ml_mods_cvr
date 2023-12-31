@@ -16,7 +16,6 @@ namespace ml_amt
 
         public static bool IsInVR() => ((ABI_RC.Core.Savior.CheckVR.Instance != null) && ABI_RC.Core.Savior.CheckVR.Instance.hasVrDeviceLoaded);
 
-        public static bool IsGrounded(this MovementSystem p_instance) => (bool)ms_grounded.GetValue(MovementSystem.Instance);
         public static bool IsGroundedRaw(this MovementSystem p_instance) => (bool)ms_groundedRaw.GetValue(MovementSystem.Instance);
 
         public static bool HasToes(this IKSolverVR p_instance) => (bool)ms_hasToes.GetValue(p_instance);
