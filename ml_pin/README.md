@@ -19,8 +19,9 @@ Available mod's settings in `Settings - Audio - Players Instance Notifier`:
 
 # Custom notification sounds
 You can setup your own notification sounds.  
-Go to `<game_folder>/UserData/PlayersInstanceNotifier` and replaces your preferable sounds.  
-Available type of sounds:
+Go to `<game_folder>/UserData/PlayersInstanceNotifier` and replace to your preferable sounds.
+
+Available sounds for replacement:
 * **player_join.wav**
 * **player_leave.wav**
 * **friend_join.wav**
