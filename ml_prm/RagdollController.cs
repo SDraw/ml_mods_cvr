@@ -136,14 +136,15 @@ namespace ml_prm
             if(m_avatarReady && !m_enabled && Settings.FallDamage && !MovementSystem.Instance.flying)
             {
                 bool l_grounded = MovementSystem.Instance.IsGroundedRaw();
-                if(m_inAir && l_grounded && (m_inAirDistance > Settings.FallLimit))
+                bool l_inWater = MovementSystem.Instance.GetSubmerged();
+                if(m_inAir && l_grounded && !l_inWater && (m_inAirDistance > Settings.FallLimit))
                 {
                     m_inAirDistance = 0f;
                     SwitchRagdoll();
                 }
 
-                m_inAir = !l_grounded;
-                if(l_grounded)
+                m_inAir = !(l_grounded || l_inWater);
+                if(!m_inAir)
                     m_inAirDistance = 0f;
             }
 
@@ -435,11 +436,12 @@ namespace ml_prm
             if(m_avatarReady && m_enabled)
                 SwitchRagdoll();
 
+            ResetStates();
+
             OnGravityChange(Settings.Gravity);
             OnPhysicsMaterialChange(true);
             OnMovementDragChange(Settings.MovementDrag);
             OnBuoyancyChange(Settings.Buoyancy);
-            OnFallDamageChange(Settings.FallDamage);
         }
 
         internal void OnCombatDown()
@@ -455,7 +457,7 @@ namespace ml_prm
 
         internal void OnChangeFlight()
         {
-            OnFallDamageChange(Settings.FallDamage);
+            ResetStates();
 
             if(m_avatarReady && m_enabled && MovementSystem.Instance.flying)
             {
@@ -467,7 +469,7 @@ namespace ml_prm
 
         internal void OnPlayerTeleport()
         {
-            OnFallDamageChange(Settings.FallDamage);
+            ResetStates();
 
             if(m_avatarReady && m_enabled)
                 m_ragdollLastPos = m_puppetReferences.hips.position;
@@ -668,6 +670,14 @@ namespace ml_prm
         }
 
         public bool IsRagdolled() => (m_avatarReady && m_enabled);
+
+        void ResetStates()
+        {
+            m_lastPosition = this.transform.position;
+            m_velocity = Vector3.zero;
+            m_inAir = false;
+            m_inAirDistance = 0f;
+        }
 
         static Transform CloneTransform(Transform p_source, Transform p_parent, string p_name)
         {
