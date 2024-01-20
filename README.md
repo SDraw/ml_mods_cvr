@@ -5,6 +5,7 @@ Merged set of MelonLoader mods for ChilloutVR.
 |:---------:|:----------:|:--------------:| :----------------------------------------------------------------|
 | [Avatar Motion Tweaker](/ml_amt/README.md) | ml_amt | 1.3.6 [:arrow_down:](../../releases/latest/download/ml_amt.dll)| ✔ Yes<br>:hourglass: Update review |
 | [Avatar Synced Look](/ml_asl/README.md) | ml_asl | 1.0.0 [:arrow_down:](../../releases/latest/download/ml_asl.dll)| ✔ Yes |
+| [Desktop Head Tracking](/ml_dht/README.md) | ml_dht | 1.2.0 [:arrow_down:](../../releases/latest/download/ml_dht.dll) | ✔ Yes (`Retired` group)<br>:hourglass: Update review |
 | [Leap Motion Extension](/ml_lme/README.md)| ml_lme | 1.4.5 [:arrow_down:](../../releases/latest/download/ml_lme.dll)| ✔ Yes |
 | [Pickup Arm Movement](/ml_pam/README.md)| ml_pam | 1.0.9 [:arrow_down:](../../releases/latest/download/ml_pam.dll)| ✔ Yes |
 | [Player Movement Copycat](/ml_pmc/README.md)| ml_pmc | 1.0.4 [:arrow_down:](../../releases/latest/download/ml_pmc.dll)| ✔ Yes |
@@ -16,7 +17,6 @@ Merged set of MelonLoader mods for ChilloutVR.
 | Full name | Short name | Notes |
 |:---------:|:----------:|-------|
 | Avatar Change Info | ml_aci | Superseded by `Extended Game Notifications` |
-| Desktop Head Tracking | ml_dht | Unable to emulate fake data |
 | Desktop Reticle Switch | ml_drs | Boring functionality |
 | Extended Game Notifications | ml_egn | In-game feature sine 2023r172 update |
 | Four Point Tracking | ml_fpt | In-game feature since 2022r170 update |
