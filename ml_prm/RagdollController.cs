@@ -418,6 +418,7 @@ namespace ml_prm
                 m_forcedSwitch = true;
                 SwitchRagdoll();
                 m_forcedSwitch = false;
+                ResetStates();
             }
         }
 
@@ -428,6 +429,7 @@ namespace ml_prm
                 m_forcedSwitch = true;
                 SwitchRagdoll();
                 m_forcedSwitch = false;
+                ResetStates();
             }
         }
 
@@ -452,18 +454,19 @@ namespace ml_prm
                 m_forcedSwitch = true;
                 SwitchRagdoll();
                 m_forcedSwitch = false;
+                ResetStates(false);
             }
         }
 
         internal void OnChangeFlight()
         {
-            ResetStates();
-
             if(m_avatarReady && m_enabled && MovementSystem.Instance.flying)
             {
                 m_forcedSwitch = true;
                 SwitchRagdoll();
                 m_forcedSwitch = false;
+
+                ResetStates(false);
             }
         }
 
@@ -671,10 +674,14 @@ namespace ml_prm
 
         public bool IsRagdolled() => (m_avatarReady && m_enabled);
 
-        void ResetStates()
+        void ResetStates(bool p_resetVelocity = true)
         {
-            m_lastPosition = this.transform.position;
-            m_velocity = Vector3.zero;
+            if(p_resetVelocity)
+            {
+                m_lastPosition = this.transform.position;
+                m_velocity = Vector3.zero;
+            }
+
             m_inAir = false;
             m_inAirDistance = 0f;
         }
