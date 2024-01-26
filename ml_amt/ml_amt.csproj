@@ -6,7 +6,7 @@
     <Company>None</Company>
     <Product>AvatarMotionTweaker</Product>
     <PackageId>AvatarMotionTweaker</PackageId>
-    <Version>1.3.6</Version>
+    <Version>1.3.7</Version>
     <Platforms>x64</Platforms>
     <AssemblyName>ml_amt</AssemblyName>
   </PropertyGroup>
@@ -60,6 +60,16 @@
     </Reference>
     <Reference Include="Cohtml.Runtime">
       <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\Cohtml.Runtime.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="EasyCharacterMovement.CharacterMovement">
+      <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\EasyCharacterMovement.CharacterMovement.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="EasyCharacterMovement.Characters">
+      <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\EasyCharacterMovement.Characters.dll</HintPath>
       <Private>false</Private>
       <SpecificVersion>false</SpecificVersion>
     </Reference>

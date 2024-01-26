@@ -8,7 +8,6 @@ namespace ml_amt
     {
         public enum ParameterType
         {
-            GroundedRaw,
             Moving
         }
 
@@ -42,10 +41,6 @@ namespace ml_amt
         {
             switch(m_type)
             {
-                case ParameterType.GroundedRaw:
-                    SetBoolean(p_tweaker.GetGroundedRaw());
-                    break;
-
                 case ParameterType.Moving:
                     SetBoolean(p_tweaker.GetMoving());
                     break;

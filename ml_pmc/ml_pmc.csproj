@@ -7,7 +7,7 @@
     <Authors>SDraw</Authors>
     <Company>None</Company>
     <Product>PlayerMovementCopycat</Product>
-    <Version>1.0.4</Version>
+    <Version>1.0.5</Version>
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
@@ -42,6 +42,16 @@
     </Reference>
     <Reference Include="BTKUILib">
       <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\Mods\BTKUILib.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="EasyCharacterMovement.CharacterMovement">
+      <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\EasyCharacterMovement.CharacterMovement.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="EasyCharacterMovement.Characters">
+      <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\EasyCharacterMovement.Characters.dll</HintPath>
       <Private>false</Private>
       <SpecificVersion>false</SpecificVersion>
     </Reference>

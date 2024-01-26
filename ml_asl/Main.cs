@@ -18,7 +18,7 @@ namespace ml_asl
 
         static void OnPlayerAvatarMovementDataUpdate_Postfix(ref PlayerSetup __instance, PlayerAvatarMovementData ____playerAvatarMovementData)
         {
-            if(Settings.Enabled && (__instance.eyeMovement != null))
+            if(Settings.Enabled && (__instance.EyeMovementController != null))
                 ____playerAvatarMovementData.EyeTrackingOverride = true;
         }
     }

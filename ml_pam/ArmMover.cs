@@ -347,10 +347,13 @@ namespace ml_pam
             if(!m_inVR && PlayerSetup.Instance._animator.isHuman)
             {
                 m_vrIK = PlayerSetup.Instance._animator.GetComponent<VRIK>();
-
                 TPoseHelper l_tpHelper = new TPoseHelper();
-                l_tpHelper.Assign(PlayerSetup.Instance._animator);
-                l_tpHelper.Apply();
+
+                if(m_vrIK == null)
+                {
+                    l_tpHelper.Assign(PlayerSetup.Instance._animator);
+                    l_tpHelper.Apply();
+                }
 
                 Transform l_leftHand = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftHand);
                 if(l_leftHand != null)

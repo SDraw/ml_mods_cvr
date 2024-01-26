@@ -1,6 +1,5 @@
 ﻿using ABI.CCK.Components;
 using ABI_RC.Core.UI;
-using ABI_RC.Systems.MovementSystem;
 using RootMotion.FinalIK;
 using System.Reflection;
 using UnityEngine;
@@ -9,14 +8,10 @@ namespace ml_amt
 {
     static class Utils
     {
-        static readonly FieldInfo ms_grounded = typeof(MovementSystem).GetField("_isGrounded", BindingFlags.NonPublic | BindingFlags.Instance);
-        static readonly FieldInfo ms_groundedRaw = typeof(MovementSystem).GetField("_isGroundedRaw", BindingFlags.NonPublic | BindingFlags.Instance);
         static readonly FieldInfo ms_hasToes = typeof(IKSolverVR).GetField("hasToes", BindingFlags.NonPublic | BindingFlags.Instance);
         static readonly FieldInfo ms_view = typeof(CohtmlControlledViewWrapper).GetField("_view", BindingFlags.NonPublic | BindingFlags.Instance);
 
         public static bool IsInVR() => ((ABI_RC.Core.Savior.CheckVR.Instance != null) && ABI_RC.Core.Savior.CheckVR.Instance.hasVrDeviceLoaded);
-
-        public static bool IsGroundedRaw(this MovementSystem p_instance) => (bool)ms_groundedRaw.GetValue(MovementSystem.Instance);
 
         public static bool HasToes(this IKSolverVR p_instance) => (bool)ms_hasToes.GetValue(p_instance);
 

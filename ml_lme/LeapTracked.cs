@@ -19,7 +19,6 @@ namespace ml_lme
             public Transform m_rightElbowTarget;
         }
 
-        static readonly float[] ms_tposeMuscles = typeof(ABI_RC.Systems.IK.SubSystems.BodySystem).GetField("TPoseMuscles", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null) as float[];
         static readonly Quaternion ms_offsetLeft = Quaternion.Euler(0f, 90f, 0f);
         static readonly Quaternion ms_offsetRight = Quaternion.Euler(0f, 270f, 0f);
 
@@ -170,7 +169,7 @@ namespace ml_lme
                 if(m_hips != null)
                     l_hipsPos = m_hips.localPosition;
 
-                if(!m_inVR)
+                if(m_vrIK == null)
                 {
                     // Force desktop avatar into T-Pose
                     m_poseHandler = new HumanPoseHandler(PlayerSetup.Instance._animator.avatar, PlayerSetup.Instance._avatar.transform);
@@ -183,7 +182,7 @@ namespace ml_lme
                         muscles = new float[m_pose.muscles.Length]
                     };
                     for(int i = 0; i < l_tPose.muscles.Length; i++)
-                        l_tPose.muscles[i] = ms_tposeMuscles[i];
+                        l_tPose.muscles[i] = MusclePoses.TPoseMuscles[i];
                     m_poseHandler.SetHumanPose(ref l_tPose);
                 }
 

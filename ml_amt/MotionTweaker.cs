@@ -1,7 +1,7 @@
 ﻿using ABI_RC.Core.Player;
 using ABI_RC.Systems.IK;
 using ABI_RC.Systems.IK.SubSystems;
-using ABI_RC.Systems.MovementSystem;
+using ABI_RC.Systems.Movement;
 using RootMotion.FinalIK;
 using System.Collections.Generic;
 using UnityEngine;
@@ -32,7 +32,6 @@ namespace ml_amt
 
         bool m_avatarReady = false;
         bool m_grounded = false;
-        bool m_groundedRaw = false;
         bool m_moving = false;
         bool m_locomotionOverride = false;
 
@@ -90,9 +89,8 @@ namespace ml_amt
         {
             if(m_avatarReady)
             {
-                m_grounded = MovementSystem.Instance.IsGrounded();
-                m_groundedRaw = MovementSystem.Instance.IsGroundedRaw();
-                m_moving = !Mathf.Approximately(MovementSystem.Instance.movementVector.magnitude, 0f);
+                m_grounded = BetterBetterCharacterController.Instance.IsGrounded();
+                m_moving = BetterBetterCharacterController.Instance.IsMoving();
 
                 UpdateIKLimits();
 
@@ -117,7 +115,6 @@ namespace ml_amt
             m_vrIk = null;
             m_locomotionLayer = -1;
             m_grounded = false;
-            m_groundedRaw = false;
             m_avatarReady = false;
             m_avatarScale = 1f;
             m_locomotionOffset = Vector3.zero;
@@ -128,8 +125,8 @@ namespace ml_amt
             m_ikLimits = null;
             m_parameters.Clear();
 
-            PlayerSetup.Instance.avatarCrouchLimit = Mathf.Clamp01(Settings.CrouchLimit);
-            PlayerSetup.Instance.avatarProneLimit = Mathf.Clamp01(Settings.ProneLimit);
+            BetterBetterCharacterController.Instance.avatarCrouchLimit = Mathf.Clamp01(Settings.CrouchLimit);
+            BetterBetterCharacterController.Instance.avatarProneLimit = Mathf.Clamp01(Settings.ProneLimit);
         }
 
         internal void OnSetupAvatar()
@@ -140,7 +137,6 @@ namespace ml_amt
             m_avatarScale = Mathf.Abs(PlayerSetup.Instance._avatar.transform.localScale.y);
 
             // Parse animator parameters
-            m_parameters.Add(new AvatarParameter(AvatarParameter.ParameterType.GroundedRaw, PlayerSetup.Instance.animatorManager));
             m_parameters.Add(new AvatarParameter(AvatarParameter.ParameterType.Moving, PlayerSetup.Instance.animatorManager));
             m_parameters.RemoveAll(p => !p.IsValid());
 
@@ -225,21 +221,21 @@ namespace ml_amt
 
             if(!BodySystem.isCalibratedAsFullBody)
             {
-                if(PlayerSetup.Instance.avatarUpright <= PlayerSetup.Instance.avatarCrouchLimit)
+                if(BetterBetterCharacterController.Instance.AvatarUpright <= BetterBetterCharacterController.Instance.avatarCrouchLimit)
                 {
                     m_vrIk.solver.leftLeg.useAnimatedBendNormal = true;
                     m_vrIk.solver.rightLeg.useAnimatedBendNormal = true;
                     l_locomotionOverride = true;
                 }
 
-                if(m_ikOverrideFly && MovementSystem.Instance.flying)
+                if(m_ikOverrideFly && BetterBetterCharacterController.Instance.IsFlying())
                 {
                     m_vrIk.solver.locomotion.weight = 0f;
                     m_vrIk.solver.leftLeg.useAnimatedBendNormal = true;
                     m_vrIk.solver.rightLeg.useAnimatedBendNormal = true;
                     l_locomotionOverride = true;
                 }
-                if(m_ikOverrideJump && !m_grounded && !MovementSystem.Instance.flying)
+                if(m_ikOverrideJump && !m_grounded && !BetterBetterCharacterController.Instance.IsFlying())
                 {
                     m_vrIk.solver.locomotion.weight = 0f;
                     m_vrIk.solver.leftLeg.useAnimatedBendNormal = true;
@@ -266,12 +262,12 @@ namespace ml_amt
         internal void SetCrouchLimit(float p_value)
         {
             if(m_ikLimits == null)
-                PlayerSetup.Instance.avatarCrouchLimit = Mathf.Clamp01(p_value);
+                BetterBetterCharacterController.Instance.avatarCrouchLimit = Mathf.Clamp01(p_value);
         }
         internal void SetProneLimit(float p_value)
         {
             if(m_ikLimits == null)
-                PlayerSetup.Instance.avatarProneLimit = Mathf.Clamp01(p_value);
+                BetterBetterCharacterController.Instance.avatarProneLimit = Mathf.Clamp01(p_value);
         }
         internal void SetIKOverrideFly(bool p_state)
         {
@@ -302,14 +298,12 @@ namespace ml_amt
             if(m_ikLimits != null)
             {
                 Vector3 l_values = m_ikLimits.localPosition;
-                PlayerSetup.Instance.avatarCrouchLimit = Mathf.Clamp01(l_values.x);
-                PlayerSetup.Instance.avatarProneLimit = Mathf.Clamp01(l_values.y);
+                BetterBetterCharacterController.Instance.avatarCrouchLimit = Mathf.Clamp01(l_values.x);
+                BetterBetterCharacterController.Instance.avatarProneLimit = Mathf.Clamp01(l_values.y);
             }
         }
 
         // Parameters access
-        public float GetUpright() => PlayerSetup.Instance.avatarUpright;
-        public bool GetGroundedRaw() => m_groundedRaw;
         public bool GetMoving() => m_moving;
     }
 }

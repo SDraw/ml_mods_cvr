@@ -1,5 +1,6 @@
 ﻿using ABI.CCK.Components;
 using ABI_RC.Core.Player;
+using ABI_RC.Core.Player.EyeMovement;
 using RootMotion.FinalIK;
 using System.Reflection;
 using UnityEngine;
@@ -92,7 +93,7 @@ namespace ml_dht
             m_bindRotation = Quaternion.identity;
         }
 
-        internal void OnEyeControllerUpdate(CVREyeController p_component)
+        internal void OnEyeControllerUpdate(EyeMovementController p_component)
         {
             if(m_enabled)
             {

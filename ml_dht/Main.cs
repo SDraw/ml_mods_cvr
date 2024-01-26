@@ -1,4 +1,5 @@
 using ABI_RC.Core.Player;
+using ABI_RC.Core.Player.EyeMovement;
 using ABI_RC.Core.Savior;
 using ABI_RC.Systems.FaceTracking;
 using System.Reflection;
@@ -49,7 +50,7 @@ namespace ml_dht
 
             // If you think it's a joke to put patch here, go on, try to put it in OnInitializeMelon, you melon :>
             HarmonyInstance.Patch(
-                typeof(CVREyeController).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic),
+                typeof(EyeMovementController).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic),
                 null,
                 new HarmonyLib.HarmonyMethod(typeof(DesktopHeadTracking).GetMethod(nameof(OnEyeControllerUpdate_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
@@ -102,12 +103,12 @@ namespace ml_dht
             }
         }
 
-        static void OnEyeControllerUpdate_Postfix(ref CVREyeController __instance) => ms_instance?.OnEyeControllerUpdate(__instance);
-        void OnEyeControllerUpdate(CVREyeController p_component)
+        static void OnEyeControllerUpdate_Postfix(ref EyeMovementController __instance) => ms_instance?.OnEyeControllerUpdate(__instance);
+        void OnEyeControllerUpdate(EyeMovementController p_component)
         {
             try
             {
-                if(p_component.isLocal && (m_localTracked != null))
+                if(p_component.IsLocal && (m_localTracked != null))
                     m_localTracked.OnEyeControllerUpdate(p_component);
             }
             catch(System.Exception e)

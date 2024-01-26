@@ -2,7 +2,7 @@
 using ABI_RC.Systems.IK;
 using ABI_RC.Systems.IK.SubSystems;
 using ABI_RC.Systems.InputManagement;
-using ABI_RC.Systems.MovementSystem;
+using ABI_RC.Systems.Movement;
 using RootMotion.FinalIK;
 using UnityEngine;
 
@@ -57,7 +57,7 @@ namespace ml_pmc
         // Unity events
         void Update()
         {
-            m_sitting = (MovementSystem.Instance.lastSeat != null);
+            m_sitting = BetterBetterCharacterController.Instance.IsSitting();
 
             if(m_active)
             {

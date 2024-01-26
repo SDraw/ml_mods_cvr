@@ -1,6 +1,6 @@
 ﻿using ABI_RC.Core.Networking.IO.Social;
 using ABI_RC.Core.Player;
-using ABI_RC.Systems.MovementSystem;
+using ABI_RC.Systems.Movement;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -70,7 +70,7 @@ namespace ml_pmc
                     {
                         if(CVRPlayerManager.Instance.GetPlayerPuppetMaster(p_id, out PuppetMaster l_puppetMaster))
                         {
-                            if(IsInSight(MovementSystem.Instance.proxyCollider, l_puppetMaster.GetComponent<CapsuleCollider>(), Utils.GetWorldMovementLimit()))
+                            if(IsInSight(BetterBetterCharacterController.Instance.KinematicTriggerProxy.Collider, l_puppetMaster.GetComponent<CapsuleCollider>(), Utils.GetWorldMovementLimit()))
                                 m_localCopycat.SetTarget(l_puppetMaster);
                             else
                                 ModUi.ShowAlert("Selected player is too far away or obstructed");

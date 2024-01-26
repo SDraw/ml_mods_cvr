@@ -1,11 +1,10 @@
 ﻿using ABI.CCK.Components;
 using ABI_RC.Core.InteractionSystem;
 using ABI_RC.Core.Player;
-using ABI_RC.Systems.Camera;
 using ABI_RC.Systems.IK;
 using ABI_RC.Systems.IK.SubSystems;
 using ABI_RC.Systems.InputManagement;
-using ABI_RC.Systems.MovementSystem;
+using ABI_RC.Systems.Movement;
 using RootMotion.Dynamics;
 using RootMotion.FinalIK;
 using System.Collections;
@@ -21,6 +20,7 @@ namespace ml_prm
 
         public static RagdollController Instance { get; private set; } = null;
 
+        bool m_inVR = false;
         VRIK m_vrIK = null;
         bool m_applyHipsPosition = false;
         bool m_applyHipsRotation = false;
@@ -36,6 +36,7 @@ namespace ml_prm
         readonly List<System.Tuple<Transform, Transform>> m_boneLinks = null;
         readonly List<System.Tuple<CharacterJoint, Vector3>> m_jointAnchors = null;
         readonly List<PhysicsInfluencer> m_physicsInfluencers = null;
+        readonly List<GravityInfluencer> m_gravityInfluencers = null;
 
         bool m_avatarReady = false;
         Coroutine m_initCoroutine = null;
@@ -62,6 +63,7 @@ namespace ml_prm
             m_boneLinks = new List<System.Tuple<Transform, Transform>>();
             m_jointAnchors = new List<System.Tuple<CharacterJoint, Vector3>>();
             m_physicsInfluencers = new List<PhysicsInfluencer>();
+            m_gravityInfluencers = new List<GravityInfluencer>();
         }
 
         // Unity events
@@ -82,7 +84,7 @@ namespace ml_prm
             m_puppetRoot.localPosition = Vector3.zero;
             m_puppetRoot.localRotation = Quaternion.identity;
 
-            m_ragdollTrigger = MovementSystem.Instance.proxyCollider.gameObject.AddComponent<RagdollTrigger>();
+            m_ragdollTrigger = BetterBetterCharacterController.Instance.NonKinematicProxy.gameObject.AddComponent<RagdollTrigger>();
             m_ragdollTrigger.enabled = false;
 
             Settings.MovementDragChange += this.OnMovementDragChange;
@@ -92,6 +94,8 @@ namespace ml_prm
             Settings.BouncinessChange += this.OnPhysicsMaterialChange;
             Settings.BuoyancyChange += this.OnBuoyancyChange;
             Settings.FallDamageChange += this.OnFallDamageChange;
+
+            BetterBetterCharacterController.OnTeleport.AddListener(this.OnPlayerTeleport);
         }
 
         void OnDestroy()
@@ -129,14 +133,16 @@ namespace ml_prm
             Settings.BouncinessChange -= this.OnPhysicsMaterialChange;
             Settings.BuoyancyChange -= this.OnBuoyancyChange;
             Settings.FallDamageChange -= this.OnFallDamageChange;
+
+            BetterBetterCharacterController.OnTeleport.RemoveListener(this.OnPlayerTeleport);
         }
 
         void Update()
         {
-            if(m_avatarReady && !m_enabled && Settings.FallDamage && !MovementSystem.Instance.flying)
+            if(m_avatarReady && !m_enabled && Settings.FallDamage && !BetterBetterCharacterController.Instance.IsFlying())
             {
-                bool l_grounded = MovementSystem.Instance.IsGroundedRaw();
-                bool l_inWater = MovementSystem.Instance.GetSubmerged();
+                bool l_grounded = BetterBetterCharacterController.Instance.IsGrounded();
+                bool l_inWater = BetterBetterCharacterController.Instance.IsInWater();
                 if(m_inAir && l_grounded && !l_inWater && (m_inAirDistance > Settings.FallLimit))
                 {
                     m_inAirDistance = 0f;
@@ -151,12 +157,6 @@ namespace ml_prm
             if(m_avatarReady && m_enabled)
             {
                 m_inAirDistance = 0f;
-
-                Vector3 l_dif = m_puppetReferences.hips.position - m_ragdollLastPos;
-                PlayerSetup.Instance.transform.position += l_dif;
-                m_puppetReferences.hips.position -= l_dif;
-                m_ragdollLastPos = m_puppetReferences.hips.position;
-
                 BodySystem.TrackingPositionWeight = 0f;
             }
 
@@ -166,13 +166,13 @@ namespace ml_prm
                 m_velocity = (m_velocity + (l_pos - m_lastPosition) / Time.deltaTime) * 0.5f;
                 if(m_inAir)
                 {
-                    m_inAirDistance += (m_lastPosition - l_pos).y;
+                    m_inAirDistance += (Quaternion.Inverse(PlayerSetup.Instance.transform.rotation) * (m_lastPosition - l_pos)).y;
                     m_inAirDistance = Mathf.Clamp(m_inAirDistance, 0f, float.MaxValue);
                 }
 
                 m_lastPosition = l_pos;
 
-                if(!m_reachedGround && MovementSystem.Instance.IsGrounded())
+                if(!m_reachedGround && BetterBetterCharacterController.Instance.IsOnGround())
                 {
                     m_groundedTime += Time.deltaTime;
                     if(m_groundedTime >= 0.25f)
@@ -196,11 +196,22 @@ namespace ml_prm
             if((m_ragdollTrigger != null) && m_ragdollTrigger.GetStateWithReset() && m_avatarReady && !m_enabled && Settings.PointersReaction)
                 SwitchRagdoll();
 
-            if(Settings.Hotkey && Input.GetKeyDown(Settings.HotkeyKey) && !ViewManager.Instance.isGameMenuOpen())
+            if(Settings.Hotkey && Input.GetKeyDown(Settings.HotkeyKey) && !ViewManager.Instance.IsAnyMenuOpen)
                 SwitchRagdoll();
 
             if(m_avatarReady && m_enabled && CVRInputManager.Instance.jump && Settings.JumpRecover)
                 SwitchRagdoll();
+        }
+
+        void FixedUpdate()
+        {
+            if(m_avatarReady && m_enabled)
+            {
+                Vector3 l_dif = m_puppetReferences.hips.position - m_ragdollLastPos;
+                PlayerSetup.Instance.transform.position += l_dif;
+                m_puppetReferences.hips.position -= l_dif;
+                m_ragdollLastPos = m_puppetReferences.hips.position;
+            }
         }
 
         void LateUpdate()
@@ -223,6 +234,8 @@ namespace ml_prm
         // Game events
         internal void OnAvatarClear()
         {
+            m_inVR = Utils.IsInVR();
+
             if(m_initCoroutine != null)
             {
                 StopCoroutine(m_initCoroutine);
@@ -257,6 +270,7 @@ namespace ml_prm
             m_boneLinks.Clear();
             m_jointAnchors.Clear();
             m_physicsInfluencers.Clear();
+            m_gravityInfluencers.Clear();
             m_reachedGround = true;
             m_groundedTime = 0f;
             m_downTime = float.MinValue;
@@ -267,6 +281,8 @@ namespace ml_prm
 
         internal void OnAvatarSetup()
         {
+            m_inVR = Utils.IsInVR();
+
             if(PlayerSetup.Instance._animator.isHuman)
             {
                 BipedRagdollReferences l_avatarReferences = BipedRagdollReferences.FromAvatar(PlayerSetup.Instance._animator);
@@ -322,9 +338,13 @@ namespace ml_prm
                             l_body.isKinematic = true;
                             l_body.angularDrag = Settings.AngularDrag;
                             l_body.drag = (Utils.IsWorldSafe() ? Settings.MovementDrag : 1f);
-                            l_body.useGravity = (!Utils.IsWorldSafe() || Settings.Gravity);
+                            l_body.useGravity = false;
                             l_body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
                             l_body.gameObject.layer = LayerMask.NameToLayer("PlayerLocal");
+
+                            GravityInfluencer l_gravInfluencer = l_body.gameObject.AddComponent<GravityInfluencer>();
+                            l_gravInfluencer.SetActiveGravity((!Utils.IsWorldSafe() || Settings.Gravity));
+                            m_gravityInfluencers.Add(l_gravInfluencer);
                         }
 
                         CharacterJoint l_joint = l_puppetTransforms[i].GetComponent<CharacterJoint>();
@@ -338,9 +358,12 @@ namespace ml_prm
                         Collider l_collider = l_puppetTransforms[i].GetComponent<Collider>();
                         if(l_collider != null)
                         {
-                            Physics.IgnoreCollision(l_collider, MovementSystem.Instance.controller, true);
-                            Physics.IgnoreCollision(l_collider, MovementSystem.Instance.proxyCollider, true);
-                            Physics.IgnoreCollision(l_collider, MovementSystem.Instance.forceCollider, true);
+                            Physics.IgnoreCollision(l_collider, BetterBetterCharacterController.Instance.Collider, true);
+                            Physics.IgnoreCollision(l_collider, BetterBetterCharacterController.Instance.KinematicTriggerProxy.Collider, true);
+                            Physics.IgnoreCollision(l_collider, BetterBetterCharacterController.Instance.NonKinematicProxy.Collider, true);
+                            Physics.IgnoreCollision(l_collider, BetterBetterCharacterController.Instance.SphereProxy.Collider, true);
+                            BetterBetterCharacterController.Instance.IgnoreCollision(l_collider, true);
+
                             l_collider.sharedMaterial = m_physicsMaterial;
                             l_collider.material = m_physicsMaterial;
                             m_colliders.Add(l_collider);
@@ -460,7 +483,7 @@ namespace ml_prm
 
         internal void OnChangeFlight()
         {
-            if(m_avatarReady && m_enabled && MovementSystem.Instance.flying)
+            if(m_avatarReady && m_enabled && BetterBetterCharacterController.Instance.IsFlying())
             {
                 m_forcedSwitch = true;
                 SwitchRagdoll();
@@ -470,18 +493,19 @@ namespace ml_prm
             }
         }
 
-        internal void OnPlayerTeleport()
+        void OnPlayerTeleport(BetterBetterCharacterController.PlayerMoveOffset p_offset)
         {
-            ResetStates();
+            try
+            {
+                ResetStates();
 
-            if(m_avatarReady && m_enabled)
-                m_ragdollLastPos = m_puppetReferences.hips.position;
-        }
-
-        internal void OnDroneModeDisable()
-        {
-            if(m_avatarReady && m_enabled)
-                MovementSystem.Instance.canRot = false;
+                if(m_avatarReady && m_enabled)
+                    m_ragdollLastPos = m_puppetReferences.hips.position;
+            }
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
         }
 
         // IK updates
@@ -529,10 +553,10 @@ namespace ml_prm
             if(m_avatarReady)
             {
                 bool l_gravity = (!Utils.IsWorldSafe() || p_state);
-                foreach(Rigidbody l_body in m_rigidBodies)
-                    l_body.useGravity = l_gravity;
                 foreach(PhysicsInfluencer l_influencer in m_physicsInfluencers)
                     l_influencer.enabled = l_gravity;
+                foreach(GravityInfluencer l_influencer in m_gravityInfluencers)
+                    l_influencer.SetActiveGravity(l_gravity);
 
                 if(!l_gravity)
                 {
@@ -584,10 +608,10 @@ namespace ml_prm
                 {
                     if(CanRagdoll())
                     {
-                        if(MovementSystem.Instance.flying)
-                            MovementSystem.Instance.ChangeFlight(false);
-                        MovementSystem.Instance.SetImmobilized(true);
-                        MovementSystem.Instance.ClearFluidVolumes();
+                        if(BetterBetterCharacterController.Instance.IsFlying())
+                            BetterBetterCharacterController.Instance.ChangeFlight(false,true);
+                        BetterBetterCharacterController.Instance.SetImmobilized(true);
+                        BetterBetterCharacterController.Instance.ClearFluidVolumes();
                         BodySystem.TrackingPositionWeight = 0f;
                         m_applyHipsPosition = IKSystem.Instance.applyOriginalHipPosition;
                         IKSystem.Instance.applyOriginalHipPosition = true;
@@ -631,13 +655,13 @@ namespace ml_prm
                 {
                     if(CanUnragdoll())
                     {
-                        MovementSystem.Instance.TeleportTo(m_puppetReferences.hips.position, new Vector3(0f, PlayerSetup.Instance.GetActiveCamera().transform.rotation.eulerAngles.y, 0f));
+                        BetterBetterCharacterController.Instance.TeleportPlayerTo(m_puppetReferences.hips.position, PlayerSetup.Instance.transform.rotation.eulerAngles, false, false);
                         TryRestoreMovement();
                         if(!Utils.IsWorldSafe())
                         {
-                            Vector3 l_vec = MovementSystem.Instance.GetAppliedGravity();
+                            Vector3 l_vec = BetterBetterCharacterController.Instance.GetVelocity();
                             l_vec.y = Mathf.Clamp(l_vec.y, float.MinValue, 0f);
-                            MovementSystem.Instance.SetAppliedGravity(l_vec);
+                            BetterBetterCharacterController.Instance.SetVelocity(l_vec);
                         }
                         BodySystem.TrackingPositionWeight = 1f;
                         IKSystem.Instance.applyOriginalHipPosition = m_applyHipsPosition;
@@ -698,7 +722,7 @@ namespace ml_prm
         {
             bool l_result = m_reachedGround;
             l_result &= !BodySystem.isCalibrating;
-            l_result &= (MovementSystem.Instance.lastSeat == null);
+            l_result &= !BetterBetterCharacterController.Instance.IsSitting();
             l_result &= ((CombatSystem.Instance == null) || !CombatSystem.Instance.isDown);
             return (l_result || m_forcedSwitch);
         }
@@ -710,18 +734,19 @@ namespace ml_prm
             return (l_result || m_forcedSwitch);
         }
 
+        internal bool ShoudlDisableHeadOffset()
+        {
+            return (!m_inVR && m_enabled && (m_vrIK != null));
+        }
+
         static void TryRestoreMovement()
         {
             bool l_state = true;
             l_state &= ((CombatSystem.Instance == null) || !CombatSystem.Instance.isDown);
-            l_state &= (MovementSystem.Instance.lastSeat == null);
+            l_state &= !BetterBetterCharacterController.Instance.IsSitting();
 
             if(l_state)
-            {
-                MovementSystem.Instance.SetImmobilized(false);
-                if(PortableCamera.Instance.CheckModActive(typeof(ABI_RC.Systems.Camera.VisualMods.DroneMode)))
-                    MovementSystem.Instance.canRot = false;
-            }
+                BetterBetterCharacterController.Instance.SetImmobilized(false);
         }
     }
 }
