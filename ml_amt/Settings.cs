@@ -1,5 +1,4 @@
 ﻿using ABI_RC.Core.InteractionSystem;
-using cohtml;
 using System;
 using System.Collections.Generic;
 
@@ -14,10 +13,7 @@ namespace ml_amt
             IKOverrideFly,
             IKOverrideJump,
             DetectEmotes,
-            FollowHips,
-            ScaledJump,
-            MassCenter,
-            OverrideFix
+            MassCenter
         };
 
         public static float CrouchLimit { get; private set; } = 0.75f;
@@ -25,10 +21,7 @@ namespace ml_amt
         public static bool IKOverrideFly { get; private set; } = true;
         public static bool IKOverrideJump { get; private set; } = true;
         public static bool DetectEmotes { get; private set; } = true;
-        public static bool FollowHips { get; private set; } = true;
         public static bool MassCenter { get; private set; } = true;
-        public static bool ScaledJump { get; private set; } = false;
-        public static bool OverrideFix { get; private set; } = true;
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
@@ -38,10 +31,7 @@ namespace ml_amt
         static public event Action<bool> IKOverrideFlyChange;
         static public event Action<bool> IKOverrideJumpChange;
         static public event Action<bool> DetectEmotesChange;
-        static public event Action<bool> FollowHipsChange;
         static public event Action<bool> MassCenterChange;
-        static public event Action<bool> ScaledJumpChange;
-        static public event Action<bool> OverrideFixChange;
 
         internal static void Init()
         {
@@ -54,10 +44,7 @@ namespace ml_amt
                 ms_category.CreateEntry(ModSetting.IKOverrideFly.ToString(), IKOverrideFly),
                 ms_category.CreateEntry(ModSetting.IKOverrideJump.ToString(), IKOverrideJump),
                 ms_category.CreateEntry(ModSetting.DetectEmotes.ToString(), DetectEmotes),
-                ms_category.CreateEntry(ModSetting.FollowHips.ToString(), FollowHips),
-                ms_category.CreateEntry(ModSetting.MassCenter.ToString(), MassCenter),
-                ms_category.CreateEntry(ModSetting.ScaledJump.ToString(), ScaledJump),
-                ms_category.CreateEntry(ModSetting.OverrideFix.ToString(), OverrideFix)
+                ms_category.CreateEntry(ModSetting.MassCenter.ToString(), MassCenter)
             };
 
             CrouchLimit = ((int)ms_entries[(int)ModSetting.CrouchLimit].BoxedValue) * 0.01f;
@@ -65,10 +52,7 @@ namespace ml_amt
             IKOverrideFly = (bool)ms_entries[(int)ModSetting.IKOverrideFly].BoxedValue;
             IKOverrideJump = (bool)ms_entries[(int)ModSetting.IKOverrideJump].BoxedValue;
             DetectEmotes = (bool)ms_entries[(int)ModSetting.DetectEmotes].BoxedValue;
-            FollowHips = (bool)ms_entries[(int)ModSetting.FollowHips].BoxedValue;
             MassCenter = (bool)ms_entries[(int)ModSetting.MassCenter].BoxedValue;
-            ScaledJump = (bool)ms_entries[(int)ModSetting.ScaledJump].BoxedValue;
-            OverrideFix = (bool)ms_entries[(int)ModSetting.OverrideFix].BoxedValue;
 
             MelonLoader.MelonCoroutines.Start(WaitMainMenuUi());
         }
@@ -84,14 +68,15 @@ namespace ml_amt
 
             ViewManager.Instance.gameMenuView.Listener.ReadyForBindings += () =>
             {
-                ViewManager.Instance.gameMenuView.View.BindCall("MelonMod_AMT_Call_InpSlider", new Action<string, string>(OnSliderUpdate));
-                ViewManager.Instance.gameMenuView.View.BindCall("MelonMod_AMT_Call_InpToggle", new Action<string, string>(OnToggleUpdate));
+                ViewManager.Instance.gameMenuView.View.BindCall("OnSliderUpdate_" + ms_category.Identifier, new Action<string, string>(OnSliderUpdate));
+                ViewManager.Instance.gameMenuView.View.BindCall("OnToggleUpdate_" + ms_category.Identifier, new Action<string, string>(OnToggleUpdate));
             };
             ViewManager.Instance.gameMenuView.Listener.FinishLoad += (_) =>
             {
-                ViewManager.Instance.gameMenuView.View.ExecuteScript(Scripts.GetEmbeddedScript("menu.js"));
+                ViewManager.Instance.gameMenuView.View.ExecuteScript(ResourcesHandler.GetEmbeddedResource("mods_extension.js"));
+                ViewManager.Instance.gameMenuView.View.ExecuteScript(ResourcesHandler.GetEmbeddedResource("mod_menu.js"));
                 foreach(var l_entry in ms_entries)
-                    ViewManager.Instance.gameMenuView.View.TriggerEvent("updateModSettingAMT", l_entry.DisplayName, l_entry.GetValueAsString());
+                    ViewManager.Instance.gameMenuView.View.TriggerEvent("updateModSetting", ms_category.Identifier, l_entry.DisplayName, l_entry.GetValueAsString());
             };
         }
 
@@ -147,31 +132,10 @@ namespace ml_amt
                     }
                     break;
 
-                    case ModSetting.FollowHips:
-                    {
-                        FollowHips = bool.Parse(p_value);
-                        FollowHipsChange?.Invoke(FollowHips);
-                    }
-                    break;
-
                     case ModSetting.MassCenter:
                     {
                         MassCenter = bool.Parse(p_value);
                         MassCenterChange?.Invoke(MassCenter);
-                    }
-                    break;
-
-                    case ModSetting.ScaledJump:
-                    {
-                        ScaledJump = bool.Parse(p_value);
-                        ScaledJumpChange?.Invoke(ScaledJump);
-                    }
-                    break;
-
-                    case ModSetting.OverrideFix:
-                    {
-                        OverrideFix = bool.Parse(p_value);
-                        OverrideFixChange?.Invoke(OverrideFix);
                     }
                     break;
                 }

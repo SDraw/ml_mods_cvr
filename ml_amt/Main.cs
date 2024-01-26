@@ -1,5 +1,4 @@
-﻿using ABI.CCK.Components;
-using ABI_RC.Core.Player;
+﻿using ABI_RC.Core.Player;
 using ABI_RC.Systems.IK.SubSystems;
 using System;
 using System.Collections;
@@ -35,12 +34,12 @@ namespace ml_amt
                 null,
                 new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnCalibrate_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
+            HarmonyInstance.Patch(
+                typeof(PlayerSetup).GetMethod("SetPlaySpaceScale", BindingFlags.NonPublic | BindingFlags.Instance),
+                null,
+                new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnPlayspaceScale_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
+            );
 
-            // Fixes
-            Fixes.AnimatorOverrideControllerFix.Init(HarmonyInstance);
-            Fixes.MovementJumpFix.Init(HarmonyInstance);
-
-            ModSupporter.Init();
             MelonLoader.MelonCoroutines.Start(WaitForLocalPlayer());
         }
 
@@ -50,12 +49,6 @@ namespace ml_amt
                 yield return null;
 
             m_localTweaker = PlayerSetup.Instance.gameObject.AddComponent<MotionTweaker>();
-            m_localTweaker.SetCrouchLimit(Settings.CrouchLimit);
-            m_localTweaker.SetProneLimit(Settings.ProneLimit);
-            m_localTweaker.SetIKOverrideFly(Settings.IKOverrideFly);
-            m_localTweaker.SetIKOverrideJump(Settings.IKOverrideJump);
-            m_localTweaker.SetDetectEmotes(Settings.DetectEmotes);
-            m_localTweaker.SetFollowHips(Settings.FollowHips);
         }
 
         public override void OnDeinitializeMelon()
@@ -63,6 +56,8 @@ namespace ml_amt
             if(ms_instance == this)
                 ms_instance = null;
 
+            if(m_localTweaker != null)
+                UnityEngine.Object.Destroy(m_localTweaker);
             m_localTweaker = null;
         }
 
@@ -101,6 +96,20 @@ namespace ml_amt
             {
                 if(m_localTweaker != null)
                     m_localTweaker.OnCalibrate();
+            }
+            catch(Exception l_exception)
+            {
+                MelonLoader.MelonLogger.Error(l_exception);
+            }
+        }
+
+        static void OnPlayspaceScale_Postfix() => ms_instance?.OnPlayspaceScale();
+        void OnPlayspaceScale()
+        {
+            try
+            {
+                if(m_localTweaker != null)
+                    m_localTweaker.OnPlayspaceScale();
             }
             catch(Exception l_exception)
             {

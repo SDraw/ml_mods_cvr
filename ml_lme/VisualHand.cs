@@ -4,17 +4,14 @@ namespace ml_lme
 {
     class VisualHand
     {
-        Transform m_root = null;
-        Transform m_wrist = null;
-        Transform[] m_fingers = null;
+        readonly Transform m_wrist = null;
+        readonly Transform[] m_fingers = null;
 
         public VisualHand(Transform p_root, bool p_left)
         {
-            m_root = p_root;
-
-            if(m_root != null)
+            if(p_root != null)
             {
-                m_wrist = m_root.Find(p_left ? "LeftHand/Wrist" : "RightHand/Wrist");
+                m_wrist = p_root.Find(p_left ? "LeftHand/Wrist" : "RightHand/Wrist");
                 if(m_wrist != null)
                 {
                     m_fingers = new Transform[20];
@@ -47,7 +44,7 @@ namespace ml_lme
             }
         }
 
-        public void Update(GestureMatcher.HandData p_data)
+        public void Update(LeapParser.HandData p_data)
         {
             if(m_wrist != null)
             {

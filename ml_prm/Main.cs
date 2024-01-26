@@ -3,6 +3,7 @@ using ABI_RC.Core;
 using ABI_RC.Core.InteractionSystem;
 using ABI_RC.Core.Player;
 using ABI_RC.Core.Util.AssetFiltering;
+using ABI_RC.Systems.Camera.VisualMods;
 using ABI_RC.Systems.IK.SubSystems;
 using ABI_RC.Systems.MovementSystem;
 using System;
@@ -62,9 +63,19 @@ namespace ml_prm
                 null
             );
             HarmonyInstance.Patch(
-                typeof(MovementSystem).GetMethod(nameof(MovementSystem.ToggleFlight)),
+                typeof(MovementSystem).GetMethod(nameof(MovementSystem.ChangeFlight)),
                 null,
-                new HarmonyLib.HarmonyMethod(typeof(PlayerRagdollMod).GetMethod(nameof(OnToggleFlight_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
+                new HarmonyLib.HarmonyMethod(typeof(PlayerRagdollMod).GetMethod(nameof(OnChangeFlight_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
+            );
+            HarmonyInstance.Patch(
+                typeof(MovementSystem).GetMethod(nameof(MovementSystem.TeleportToPosRot)),
+                null,
+                new HarmonyLib.HarmonyMethod(typeof(PlayerRagdollMod).GetMethod(nameof(OnPlayerTeleport_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
+            );
+            HarmonyInstance.Patch(
+                typeof(DroneMode).GetMethod(nameof(DroneMode.Disable)),
+                null,
+                new HarmonyLib.HarmonyMethod(typeof(PlayerRagdollMod).GetMethod(nameof(OnDroneModeDisable_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
 
             // Whitelist the toggle script
@@ -78,6 +89,10 @@ namespace ml_prm
             if(ms_instance == this)
                 ms_instance = null;
 
+            ModUi.SwitchChange -= this.OnSwitchActivation;
+
+            if(m_localController != null)
+                UnityEngine.Object.Destroy(m_localController);
             m_localController = null;
         }
 
@@ -199,13 +214,41 @@ namespace ml_prm
             }
         }
 
-        static void OnToggleFlight_Postfix() => ms_instance?.OnToggleFlight();
-        void OnToggleFlight()
+        static void OnChangeFlight_Postfix() => ms_instance?.OnChangeFlight();
+        void OnChangeFlight()
         {
             try
             {
                 if(m_localController != null)
-                    m_localController.OnToggleFlight();
+                    m_localController.OnChangeFlight();
+            }
+            catch(Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
+        }
+
+        static void OnPlayerTeleport_Postfix() => ms_instance?.OnPlayerTeleport();
+        void OnPlayerTeleport()
+        {
+            try
+            {
+                if(m_localController != null)
+                    m_localController.OnPlayerTeleport();
+            }
+            catch(Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
+        }
+
+        static void OnDroneModeDisable_Postfix() => ms_instance?.OnDroneModeDisable();
+        void OnDroneModeDisable()
+        {
+            try
+            {
+                if(m_localController != null)
+                    m_localController.OnDroneModeDisable();
             }
             catch(Exception e)
             {

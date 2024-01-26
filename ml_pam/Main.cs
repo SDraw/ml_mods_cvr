@@ -61,6 +61,10 @@ namespace ml_pam
         {
             if(ms_instance == this)
                 ms_instance = null;
+
+            if(m_localMover != null)
+                UnityEngine.Object.Destroy(m_localMover);
+            m_localMover = null;
         }
 
         static void OnAvatarClear_Postfix() => ms_instance?.OnAvatarClear();

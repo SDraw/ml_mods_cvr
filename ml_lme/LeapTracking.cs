@@ -102,8 +102,36 @@ namespace ml_lme
             if(Instance == this)
                 Instance = null;
 
+            if(m_leapHandLeft != null)
+                Object.Destroy(m_leapHandLeft);
+            m_leapHandLeft = null;
+
+            if(m_leapHandRight != null)
+                Object.Destroy(m_leapHandRight);
+            m_leapHandRight = null;
+
+            if(m_leapElbowLeft != null)
+                Object.Destroy(m_leapElbowLeft);
+            m_leapElbowLeft = null;
+
+            if(m_leapElbowRight != null)
+                Object.Destroy(m_leapElbowRight);
+            m_leapElbowRight = null;
+
+            if(m_leapControllerModel != null)
+                Object.Destroy(m_leapControllerModel);
+            m_leapControllerModel = null;
+
+            if(m_visualHands != null)
+                Object.Destroy(m_visualHands);
+            m_visualHands = null;
+
+            m_visualHandLeft = null;
+            m_visualHandRight = null;
+
             Settings.DesktopOffsetChange -= this.OnDesktopOffsetChange;
             Settings.ModelVisibilityChange -= this.OnModelVisibilityChange;
+            Settings.VisualHandsChange -= this.OnVisualHandsChange;
             Settings.TrackingModeChange -= this.OnTrackingModeChange;
             Settings.RootAngleChange -= this.OnRootAngleChange;
             Settings.HeadAttachChange -= this.OnHeadAttachChange;
@@ -114,7 +142,7 @@ namespace ml_lme
         {
             if(Settings.Enabled)
             {
-                GestureMatcher.LeapData l_data = LeapManager.Instance.GetLatestData();
+                LeapParser.LeapData l_data = LeapManager.Instance.GetLatestData();
 
                 if(l_data.m_leftHand.m_present)
                 {

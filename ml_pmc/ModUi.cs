@@ -122,8 +122,7 @@ namespace ml_pmc
         // Currently broken in BTKUILib, waiting for fix
         static void UpdateToggleColor(bool p_state)
         {
-            //(ms_uiElements[(int)UiIndex.Toggle] as Button).ButtonIcon = (p_state ? "PMC-Dancing-On" : "PMC-Dancing");
-            //(ms_uiElements[(int)UiIndex.Toggle] as Button).ButtonText = (p_state ? "PMC-Dancing-On" : "PMC-Dancing");
+            (ms_uiElements[(int)UiIndex.Toggle] as Button).ButtonIcon = (p_state ? "PMC-Dancing-On" : "PMC-Dancing");
         }
 
         static Stream GetIconStream(string p_name)

@@ -1,9 +1,6 @@
 ﻿using ABI.CCK.Components;
-using ABI_RC.Core.Player;
 using ABI_RC.Core.Savior;
 using ABI_RC.Systems.InputManagement;
-using System.Linq;
-using System.Reflection;
 using UnityEngine;
 
 namespace ml_pmc
@@ -20,7 +17,7 @@ namespace ml_pmc
         static readonly int[] ms_centralMuscles = new int[] { 1, 2, 4, 5, 7, 8, 10, 11, 13, 14, 16, 18, 20 };
 
         public static bool IsInVR() => ((CheckVR.Instance != null) && CheckVR.Instance.hasVrDeviceLoaded);
-        public static bool AreKnucklesInUse() => ((CVRInputManager.Instance._leftController == ABI_RC.Systems.InputManagement.XR.EXRControllerType.Index) || (CVRInputManager.Instance._rightController == ABI_RC.Systems.InputManagement.XR.EXRControllerType.Index));
+        public static bool AreKnucklesInUse() => ((CVRInputManager.Instance._leftController == ABI_RC.Systems.InputManagement.XR.eXRControllerType.Index) || (CVRInputManager.Instance._rightController == ABI_RC.Systems.InputManagement.XR.eXRControllerType.Index));
 
         public static bool IsWorldSafe() => ((CVRWorld.Instance != null) && CVRWorld.Instance.allowFlying);
         public static bool IsCombatSafe() => ((CombatSystem.Instance == null) || !CombatSystem.Instance.isDown);

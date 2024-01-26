@@ -11,19 +11,19 @@ namespace ml_dht
             Enabled = 0,
             HeadTracking,
             EyeTracking,
+            FaceTracking,
             Blinking,
             Mirrored,
             Smoothing,
-            FaceOverride
         }
 
         public static bool Enabled { get; private set; } = false;
         public static bool HeadTracking { get; private set; } = true;
         public static bool EyeTracking { get; private set; } = true;
+        public static bool FaceTracking { get; private set; } = true;
         public static bool Blinking { get; private set; } = true;
         public static bool Mirrored { get; private set; } = false;
         public static float Smoothing { get; private set; } = 0.5f;
-        public static bool FaceOverride { get; private set; } = true;
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
@@ -31,10 +31,11 @@ namespace ml_dht
         static public event Action<bool> EnabledChange;
         static public event Action<bool> HeadTrackingChange;
         static public event Action<bool> EyeTrackingChange;
+        static public event Action<bool> FaceTrackingChange;
         static public event Action<bool> BlinkingChange;
         static public event Action<bool> MirroredChange;
         static public event Action<float> SmoothingChange;
-        static public event Action<bool> FaceOverrideChange;
+        
 
         internal static void Init()
         {
@@ -45,13 +46,19 @@ namespace ml_dht
                 ms_category.CreateEntry(ModSetting.Enabled.ToString(), Enabled),
                 ms_category.CreateEntry(ModSetting.HeadTracking.ToString(), HeadTracking),
                 ms_category.CreateEntry(ModSetting.EyeTracking.ToString(), EyeTracking),
+                ms_category.CreateEntry(ModSetting.FaceTracking.ToString(), FaceTracking),
                 ms_category.CreateEntry(ModSetting.Blinking.ToString(), Blinking),
                 ms_category.CreateEntry(ModSetting.Mirrored.ToString(), Mirrored),
                 ms_category.CreateEntry(ModSetting.Smoothing.ToString(), (int)(Smoothing * 50f)),
-                ms_category.CreateEntry(ModSetting.FaceOverride.ToString(), FaceOverride)
             };
 
-            Load();
+            Enabled = (bool)ms_entries[(int)ModSetting.Enabled].BoxedValue;
+            HeadTracking = (bool)ms_entries[(int)ModSetting.HeadTracking].BoxedValue;
+            EyeTracking = (bool)ms_entries[(int)ModSetting.EyeTracking].BoxedValue;
+            FaceTracking = (bool)ms_entries[(int)ModSetting.FaceTracking].BoxedValue;
+            Blinking = (bool)ms_entries[(int)ModSetting.Blinking].BoxedValue;
+            Mirrored = (bool)ms_entries[(int)ModSetting.Mirrored].BoxedValue;
+            Smoothing = ((int)ms_entries[(int)ModSetting.Smoothing].BoxedValue) * 0.01f;
 
             MelonLoader.MelonCoroutines.Start(WaitMainMenuUi());
         }
@@ -67,26 +74,16 @@ namespace ml_dht
 
             ViewManager.Instance.gameMenuView.Listener.ReadyForBindings += () =>
             {
-                ViewManager.Instance.gameMenuView.View.BindCall("MelonMod_DHT_Call_InpSlider", new Action<string, string>(OnSliderUpdate));
-                ViewManager.Instance.gameMenuView.View.BindCall("MelonMod_DHT_Call_InpToggle", new Action<string, string>(OnToggleUpdate));
+                ViewManager.Instance.gameMenuView.View.BindCall("OnToggleUpdate_" + ms_category.Identifier, new Action<string, string>(OnToggleUpdate));
+                ViewManager.Instance.gameMenuView.View.BindCall("OnSliderUpdate_" + ms_category.Identifier, new Action<string, string>(OnSliderUpdate));
             };
             ViewManager.Instance.gameMenuView.Listener.FinishLoad += (_) =>
             {
-                ViewManager.Instance.gameMenuView.View.ExecuteScript(Scripts.GetEmbeddedScript("menu.js"));
+                ViewManager.Instance.gameMenuView.View.ExecuteScript(ResourcesHandler.GetEmbeddedResource("mods_extension.js"));
+                ViewManager.Instance.gameMenuView.View.ExecuteScript(ResourcesHandler.GetEmbeddedResource("mod_menu.js"));
                 foreach(var l_entry in ms_entries)
-                    ViewManager.Instance.gameMenuView.View.TriggerEvent("updateModSettingDHT", l_entry.DisplayName, l_entry.GetValueAsString());
+                    ViewManager.Instance.gameMenuView.View.TriggerEvent("updateModSetting", ms_category.Identifier, l_entry.DisplayName, l_entry.GetValueAsString());
             };
-        }
-
-        static void Load()
-        {
-            Enabled = (bool)ms_entries[(int)ModSetting.Enabled].BoxedValue;
-            HeadTracking = (bool)ms_entries[(int)ModSetting.HeadTracking].BoxedValue;
-            EyeTracking = (bool)ms_entries[(int)ModSetting.EyeTracking].BoxedValue;
-            Blinking = (bool)ms_entries[(int)ModSetting.Blinking].BoxedValue;
-            Mirrored = (bool)ms_entries[(int)ModSetting.Mirrored].BoxedValue;
-            Smoothing = ((int)ms_entries[(int)ModSetting.Smoothing].BoxedValue) * 0.01f;
-            FaceOverride = (bool)ms_entries[(int)ModSetting.FaceOverride].BoxedValue;
         }
 
         static void OnSliderUpdate(string p_name, string p_value)
@@ -134,6 +131,13 @@ namespace ml_dht
                     }
                     break;
 
+                    case ModSetting.FaceTracking:
+                    {
+                        FaceTracking = bool.Parse(p_value);
+                        FaceTrackingChange?.Invoke(FaceTracking);
+                    }
+                    break;
+
                     case ModSetting.Blinking:
                     {
                         Blinking = bool.Parse(p_value);
@@ -145,13 +149,6 @@ namespace ml_dht
                     {
                         Mirrored = bool.Parse(p_value);
                         MirroredChange?.Invoke(Mirrored);
-                    }
-                    break;
-
-                    case ModSetting.FaceOverride:
-                    {
-                        FaceOverride = bool.Parse(p_value);
-                        FaceOverrideChange?.Invoke(FaceOverride);
                     }
                     break;
                 }

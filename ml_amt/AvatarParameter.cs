@@ -8,7 +8,6 @@ namespace ml_amt
     {
         public enum ParameterType
         {
-            Upright,
             GroundedRaw,
             Moving
         }
@@ -32,7 +31,7 @@ namespace ml_amt
                 if(l_regex.IsMatch(l_param.name))
                 {
                     m_hash = l_param.nameHash;
-                    m_sync = (l_param.name[0] != '#');
+                    m_sync = !l_param.name.StartsWith('#');
                     m_innerType = l_param.type;
                     break;
                 }
@@ -43,10 +42,6 @@ namespace ml_amt
         {
             switch(m_type)
             {
-                case ParameterType.Upright:
-                    SetFloat(p_tweaker.GetUpright());
-                    break;
-
                 case ParameterType.GroundedRaw:
                     SetBoolean(p_tweaker.GetGroundedRaw());
                     break;

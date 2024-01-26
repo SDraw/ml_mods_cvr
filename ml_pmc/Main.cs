@@ -42,6 +42,10 @@ namespace ml_pmc
             if(ms_instance == this)
                 ms_instance = null;
 
+            ModUi.CopySwitch -= this.OnTargetSelect;
+
+            if(m_localCopycat != null)
+                UnityEngine.Object.Destroy(m_localCopycat);
             m_localCopycat = null;
         }
 
@@ -67,7 +71,7 @@ namespace ml_pmc
                         if(CVRPlayerManager.Instance.GetPlayerPuppetMaster(p_id, out PuppetMaster l_puppetMaster))
                         {
                             if(IsInSight(MovementSystem.Instance.proxyCollider, l_puppetMaster.GetComponent<CapsuleCollider>(), Utils.GetWorldMovementLimit()))
-                                m_localCopycat.SetTarget(l_puppetMaster.gameObject);
+                                m_localCopycat.SetTarget(l_puppetMaster);
                             else
                                 ModUi.ShowAlert("Selected player is too far away or obstructed");
                         }
@@ -86,11 +90,14 @@ namespace ml_pmc
             if((p_source != null) && (p_target != null))
             {
                 Ray l_ray = new Ray();
-                l_ray.origin = (p_source.transform.position + p_source.transform.rotation * p_source.center);
-                l_ray.direction = (p_target.transform.position + p_target.transform.rotation * p_target.center) - l_ray.origin;
-                List<RaycastHit> l_hits = Physics.RaycastAll(l_ray, p_limit, LayerMask.NameToLayer("UI Internal")).ToList();
+                l_ray.origin = p_source.bounds.center;
+                l_ray.direction = p_target.bounds.center - l_ray.origin;
+                List<RaycastHit> l_hits = Physics.RaycastAll(l_ray, p_limit).ToList();
                 if(l_hits.Count > 0)
                 {
+                    l_hits.RemoveAll(hit => hit.collider.gameObject.layer == LayerMask.NameToLayer("UI Internal")); // Somehow layer mask in RaycastAll just ignores players entirely
+                    l_hits.RemoveAll(hit => hit.collider.gameObject.layer == LayerMask.NameToLayer("PlayerLocal"));
+                    l_hits.RemoveAll(hit => hit.collider.gameObject.layer == LayerMask.NameToLayer("PlayerClone"));
                     l_hits.Sort((a, b) => ((a.distance < b.distance) ? -1 : 1));
                     l_result = (l_hits.First().collider.gameObject.transform.root == p_target.transform.root);
                 }

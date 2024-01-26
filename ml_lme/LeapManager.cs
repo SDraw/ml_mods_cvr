@@ -1,5 +1,4 @@
 ﻿using ABI_RC.Core.Player;
-using ABI_RC.Core.Savior;
 using ABI_RC.Systems.InputManagement;
 using System.Collections;
 using UnityEngine;
@@ -12,7 +11,7 @@ namespace ml_lme
         public static LeapManager Instance { get; private set; } = null;
 
         Leap.Controller m_leapController = null;
-        GestureMatcher.LeapData m_leapData = null;
+        LeapParser.LeapData m_leapData = null;
 
         LeapTracking m_leapTracking = null;
         LeapTracked m_leapTracked = null;
@@ -24,7 +23,7 @@ namespace ml_lme
                 Instance = this;
 
             m_leapController = new Leap.Controller();
-            m_leapData = new GestureMatcher.LeapData();
+            m_leapData = new LeapParser.LeapData();
 
             DontDestroyOnLoad(this);
 
@@ -60,6 +59,23 @@ namespace ml_lme
             m_leapController.Dispose();
             m_leapController = null;
 
+            if(m_leapTracking != null)
+                Object.Destroy(m_leapTracking);
+            m_leapTracking = null;
+
+            if(m_leapTracked != null)
+                Object.Destroy(m_leapTracked);
+            m_leapTracked = null;
+
+            if(m_leapInput != null)
+            {
+                if(CVRInputManager.Instance != null)
+                    CVRInputManager.Instance.DestroyInputModule(m_leapInput);
+                else
+                    m_leapInput.ModuleDestroyed();
+            }
+            m_leapInput = null;
+
             Settings.EnabledChange -= this.OnEnableChange;
             Settings.TrackingModeChange -= this.OnTrackingModeChange;
         }
@@ -90,12 +106,12 @@ namespace ml_lme
                 if(m_leapController.IsConnected)
                 {
                     Leap.Frame l_frame = m_leapController.Frame();
-                    GestureMatcher.GetFrameData(l_frame, m_leapData);
+                    LeapParser.ParseFrame(l_frame, m_leapData);
                 }
             }
         }
 
-        public GestureMatcher.LeapData GetLatestData() => m_leapData;
+        public LeapParser.LeapData GetLatestData() => m_leapData;
 
         // Device events
         void OnLeapDeviceInitialized(object p_sender, Leap.DeviceEventArgs p_args)
@@ -167,12 +183,6 @@ namespace ml_lme
 
             if(m_leapTracked != null)
                 m_leapTracked.OnAvatarSetup();
-        }
-
-        internal void OnCalibrate()
-        {
-            if(m_leapTracked != null)
-                m_leapTracked.OnCalibrate();
         }
 
         internal void OnRayScale(float p_scale)

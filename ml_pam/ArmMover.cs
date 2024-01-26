@@ -2,7 +2,6 @@
 using ABI_RC.Core.InteractionSystem;
 using ABI_RC.Core.Player;
 using RootMotion.FinalIK;
-using System.Reflection;
 using UnityEngine;
 
 namespace ml_pam
@@ -10,84 +9,221 @@ namespace ml_pam
     [DisallowMultipleComponent]
     class ArmMover : MonoBehaviour
     {
-        const float c_offsetLimit = 0.5f;
+        enum HandState
+        {
+            Empty = 0,
+            Pickup,
+            Extended
+        }
+        struct IKInfo
+        {
+            public Vector4 m_armsWeights;
+            public Transform m_leftHandTarget;
+            public Transform m_rightHandTarget;
+        }
 
-        static readonly float[] ms_tposeMuscles = typeof(ABI_RC.Systems.IK.SubSystems.BodySystem).GetField("TPoseMuscles", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null) as float[];
+        const float c_offsetLimit = 0.5f;
+        const KeyCode c_leftKey = KeyCode.Q;
+        const KeyCode c_rightKey = KeyCode.E;
+
         static readonly Vector4 ms_pointVector = new Vector4(0f, 0f, 0f, 1f);
-        static readonly Quaternion ms_offsetRight = Quaternion.Euler(0f, 0f, 90f);
-        static readonly Quaternion ms_offsetRightDesktop = Quaternion.Euler(0f, 270f, 0f);
-        static readonly Quaternion ms_palmToLeft = Quaternion.Euler(0f, 0f, -90f);
+        static readonly Quaternion ms_offsetLeft = Quaternion.Euler(270f, 90f, 0f);
+        static readonly Quaternion ms_offsetRight = Quaternion.Euler(270f, 270f, 0f);
 
         bool m_inVR = false;
         VRIK m_vrIK = null;
-        Vector2 m_armWeight = Vector2.zero;
-        Transform m_origRightHand = null;
+        float m_armLength = 0f;
         float m_playspaceScale = 1f;
 
         bool m_enabled = true;
-        ArmIK m_armIK = null;
-        Transform m_target = null;
-        Transform m_rotationTarget = null;
+        IKInfo m_vrIKInfo;
+        Transform m_rootLeft = null;
+        Transform m_rootRight = null;
+        Transform m_leftTarget = null;
+        Transform m_rightTarget = null;
+        ArmIK m_armIKLeft = null;
+        ArmIK m_armIKRight = null;
         CVRPickupObject m_pickup = null;
-        Matrix4x4 m_offset = Matrix4x4.identity;
-        bool m_targetActive = false;
+        Matrix4x4 m_offset;
+        HandState m_leftHandState = HandState.Empty;
+        HandState m_rightHandState = HandState.Empty;
 
         // Unity events
         void Start()
         {
             m_inVR = Utils.IsInVR();
 
-            m_target = new GameObject("ArmPickupTarget").transform;
-            m_target.parent = PlayerSetup.Instance.GetActiveCamera().transform;
-            m_target.localPosition = Vector3.zero;
-            m_target.localRotation = Quaternion.identity;
+            m_rootLeft = new GameObject("[ArmPickupLeft]").transform;
+            m_rootLeft.parent = PlayerSetup.Instance.GetActiveCamera().transform;
+            m_rootLeft.localPosition = Vector3.zero;
+            m_rootLeft.localRotation = Quaternion.identity;
 
-            m_rotationTarget = new GameObject("RotationTarget").transform;
-            m_rotationTarget.parent = m_target;
-            m_rotationTarget.localPosition = new Vector3(c_offsetLimit * Settings.GrabOffset, 0f, 0f);
-            m_rotationTarget.localRotation = Quaternion.identity;
+            m_leftTarget = new GameObject("Target").transform;
+            m_leftTarget.parent = m_rootLeft;
+            m_leftTarget.localPosition = new Vector3(c_offsetLimit * -Settings.GrabOffset, 0f, 0f);
+            m_leftTarget.localRotation = Quaternion.identity;
+
+            m_rootRight = new GameObject("[ArmPickupRight]").transform;
+            m_rootRight.parent = PlayerSetup.Instance.GetActiveCamera().transform;
+            m_rootRight.localPosition = Vector3.zero;
+            m_rootRight.localRotation = Quaternion.identity;
+
+            m_rightTarget = new GameObject("Target").transform;
+            m_rightTarget.parent = m_rootRight;
+            m_rightTarget.localPosition = new Vector3(c_offsetLimit * Settings.GrabOffset, 0f, 0f);
+            m_rightTarget.localRotation = Quaternion.identity;
 
             m_enabled = Settings.Enabled;
 
             Settings.EnabledChange += this.SetEnabled;
             Settings.GrabOffsetChange += this.SetGrabOffset;
+            Settings.LeadingHandChange += this.OnLeadingHandChange;
+            Settings.HandsExtensionChange += this.OnHandsExtensionChange;
         }
 
         void OnDestroy()
         {
+            if(m_armIKLeft != null)
+                Destroy(m_armIKLeft);
+            m_armIKLeft = null;
+
+            if(m_armIKRight != null)
+                Destroy(m_armIKRight);
+            m_armIKRight = null;
+
+            if(m_rootLeft != null)
+                Destroy(m_rootLeft);
+            m_rootLeft = null;
+            m_leftTarget = null;
+
+            if(m_rootRight != null)
+                Destroy(m_rootRight);
+            m_rootRight = null;
+            m_rightTarget = null;
+
+            m_pickup = null;
+            m_vrIK = null;
+
             Settings.EnabledChange -= this.SetEnabled;
             Settings.GrabOffsetChange -= this.SetGrabOffset;
+            Settings.LeadingHandChange -= this.OnLeadingHandChange;
+            Settings.HandsExtensionChange -= this.OnHandsExtensionChange;
         }
 
         void Update()
         {
-            if(m_enabled && !ReferenceEquals(m_pickup, null))
+            if(!ReferenceEquals(m_pickup, null) && (m_pickup == null))
+                OnPickupDrop(m_pickup);
+
+            switch(m_leftHandState)
             {
-                if(m_pickup != null)
+                case HandState.Empty:
                 {
-                    Matrix4x4 l_result = m_pickup.transform.GetMatrix() * m_offset;
-                    m_target.position = l_result * ms_pointVector;
+                    if(Settings.HandsExtension && Input.GetKeyDown(c_leftKey))
+                    {
+                        m_leftHandState = HandState.Extended;
+                        m_rootLeft.localPosition = new Vector3(0f, 0f, m_armLength * m_playspaceScale);
+                        SetArmActive(Settings.LeadHand.Left, true);
+                    }
                 }
-                else
-                    this.OnPickupDrop(m_pickup);
+                break;
+                case HandState.Extended:
+                {
+                    if(Input.GetKeyUp(c_leftKey))
+                    {
+                        m_leftHandState = HandState.Empty;
+                        SetArmActive(Settings.LeadHand.Left, false);
+                    }
+                }
+                break;
+                case HandState.Pickup:
+                {
+                    if(m_pickup != null)
+                    {
+                        Matrix4x4 l_result = m_pickup.transform.GetMatrix() * m_offset;
+                        m_rootLeft.position = l_result * ms_pointVector;
+                    }
+                }
+                break;
+            }
+
+            switch(m_rightHandState)
+            {
+                case HandState.Empty:
+                {
+                    if(Settings.HandsExtension && Input.GetKeyDown(c_rightKey))
+                    {
+                        m_rightHandState = HandState.Extended;
+                        m_rootRight.localPosition = new Vector3(0f, 0f, m_armLength * m_playspaceScale);
+                        SetArmActive(Settings.LeadHand.Right, true);
+                    }
+                }
+                break;
+                case HandState.Extended:
+                {
+                    if(Input.GetKeyUp(c_rightKey))
+                    {
+                        m_rightHandState = HandState.Empty;
+                        SetArmActive(Settings.LeadHand.Right, false);
+                    }
+                }
+                break;
+                case HandState.Pickup:
+                {
+                    if(m_pickup != null)
+                    {
+                        Matrix4x4 l_result = m_pickup.transform.GetMatrix() * m_offset;
+                        m_rootRight.position = l_result * ms_pointVector;
+                    }
+                }
+                break;
             }
         }
 
-        // IK updates
+        // VRIK updates
         void OnIKPreUpdate()
         {
-            m_armWeight.Set(m_vrIK.solver.rightArm.positionWeight, m_vrIK.solver.rightArm.rotationWeight);
-
-            if(m_targetActive && (Mathf.Approximately(m_armWeight.x, 0f) || Mathf.Approximately(m_armWeight.y, 0f)))
+            if(m_enabled)
             {
-                m_vrIK.solver.rightArm.positionWeight = 1f;
-                m_vrIK.solver.rightArm.rotationWeight = 1f;
+                if(m_leftHandState != HandState.Empty)
+                {
+                    m_vrIKInfo.m_leftHandTarget = m_vrIK.solver.leftArm.target;
+                    m_vrIKInfo.m_armsWeights.x = m_vrIK.solver.leftArm.positionWeight;
+                    m_vrIKInfo.m_armsWeights.y = m_vrIK.solver.leftArm.rotationWeight;
+
+                    m_vrIK.solver.leftArm.positionWeight = 1f;
+                    m_vrIK.solver.leftArm.rotationWeight = 1f;
+                    m_vrIK.solver.leftArm.target = m_leftTarget;
+                }
+                if(m_rightHandState != HandState.Empty)
+                {
+                    m_vrIKInfo.m_rightHandTarget = m_vrIK.solver.rightArm.target;
+                    m_vrIKInfo.m_armsWeights.z = m_vrIK.solver.rightArm.positionWeight;
+                    m_vrIKInfo.m_armsWeights.w = m_vrIK.solver.rightArm.rotationWeight;
+
+                    m_vrIK.solver.rightArm.positionWeight = 1f;
+                    m_vrIK.solver.rightArm.rotationWeight = 1f;
+                    m_vrIK.solver.rightArm.target = m_rightTarget;
+                }
             }
         }
         void OnIKPostUpdate()
         {
-            m_vrIK.solver.rightArm.positionWeight = m_armWeight.x;
-            m_vrIK.solver.rightArm.rotationWeight = m_armWeight.y;
+            if(m_enabled)
+            {
+                if(m_leftHandState != HandState.Empty)
+                {
+                    m_vrIK.solver.leftArm.target = m_vrIKInfo.m_leftHandTarget;
+                    m_vrIK.solver.leftArm.positionWeight = m_vrIKInfo.m_armsWeights.x;
+                    m_vrIK.solver.leftArm.rotationWeight = m_vrIKInfo.m_armsWeights.y;
+                }
+                if(m_rightHandState != HandState.Empty)
+                {
+                    m_vrIK.solver.rightArm.target = m_vrIKInfo.m_rightHandTarget;
+                    m_vrIK.solver.rightArm.positionWeight = m_vrIKInfo.m_armsWeights.z;
+                    m_vrIK.solver.rightArm.rotationWeight = m_vrIKInfo.m_armsWeights.w;
+                }
+            }
         }
 
         // Settings
@@ -95,26 +231,102 @@ namespace ml_pam
         {
             m_enabled = p_state;
 
-            RefreshArmIK();
             if(m_enabled)
-                RestorePickup();
+            {
+                if(m_leftHandState != HandState.Empty)
+                    SetArmActive(Settings.LeadHand.Left, true);
+                if(m_rightHandState != HandState.Empty)
+                    SetArmActive(Settings.LeadHand.Right, true);
+
+                OnHandsExtensionChange(Settings.HandsExtension);
+            }
             else
-                RestoreVRIK();
+                SetArmActive(Settings.LeadHand.Both, false, true);
         }
 
         void SetGrabOffset(float p_value)
         {
-            if(m_rotationTarget != null)
-                m_rotationTarget.localPosition = new Vector3(c_offsetLimit * m_playspaceScale * p_value, 0f, 0f);
+            if(m_leftTarget != null)
+                m_leftTarget.localPosition = new Vector3(c_offsetLimit * m_playspaceScale * -p_value, 0f, 0f);
+            if(m_rightTarget != null)
+                m_rightTarget.localPosition = new Vector3(c_offsetLimit * m_playspaceScale * p_value, 0f, 0f);
+        }
+
+        void OnLeadingHandChange(Settings.LeadHand p_hand)
+        {
+            if(m_pickup != null)
+            {
+                if(m_leftHandState == HandState.Pickup)
+                {
+                    m_leftHandState = HandState.Empty;
+                    SetArmActive(Settings.LeadHand.Left, false);
+                }
+                if(m_rightHandState == HandState.Pickup)
+                {
+                    m_rightHandState = HandState.Empty;
+                    SetArmActive(Settings.LeadHand.Right, false);
+                }
+
+                switch(p_hand)
+                {
+                    case Settings.LeadHand.Left:
+                        m_leftHandState = HandState.Pickup;
+                        break;
+                    case Settings.LeadHand.Right:
+                        m_rightHandState = HandState.Pickup;
+                        break;
+                    case Settings.LeadHand.Both:
+                    {
+                        m_leftHandState = HandState.Pickup;
+                        m_rightHandState = HandState.Pickup;
+                    }
+                    break;
+                }
+
+                SetArmActive(p_hand, true);
+            }
+        }
+
+        void OnHandsExtensionChange(bool p_state)
+        {
+            if(m_enabled)
+            {
+                if(p_state)
+                {
+                    if((m_leftHandState == HandState.Empty) && Input.GetKey(c_leftKey))
+                    {
+                        m_leftHandState = HandState.Extended;
+                        SetArmActive(Settings.LeadHand.Left, true);
+                    }
+                    if((m_rightHandState == HandState.Empty) && Input.GetKey(c_rightKey))
+                    {
+                        m_rightHandState = HandState.Extended;
+                        SetArmActive(Settings.LeadHand.Right, true);
+                    }
+                }
+                else
+                {
+                    if(m_leftHandState == HandState.Extended)
+                    {
+                        m_leftHandState = HandState.Empty;
+                        SetArmActive(Settings.LeadHand.Left, false);
+                    }
+                    if(m_rightHandState == HandState.Extended)
+                    {
+                        m_rightHandState = HandState.Empty;
+                        SetArmActive(Settings.LeadHand.Right, false);
+                    }
+                }
+            }
         }
 
         // Game events
         internal void OnAvatarClear()
         {
             m_vrIK = null;
-            m_origRightHand = null;
-            m_armIK = null;
-            m_targetActive = false;
+            m_armIKLeft = null;
+            m_armIKRight = null;
+            m_armLength = 0f;
         }
 
         internal void OnAvatarSetup()
@@ -122,44 +334,30 @@ namespace ml_pam
             // Recheck if user could switch to VR
             if(m_inVR != Utils.IsInVR())
             {
-                m_target.parent = PlayerSetup.Instance.GetActiveCamera().transform;
-                m_target.localPosition = Vector3.zero;
-                m_target.localRotation = Quaternion.identity;
+                m_rootLeft.parent = PlayerSetup.Instance.GetActiveCamera().transform;
+                m_rootLeft.localPosition = Vector3.zero;
+                m_rootLeft.localRotation = Quaternion.identity;
+
+                m_rootRight.parent = PlayerSetup.Instance.GetActiveCamera().transform;
+                m_rootRight.localPosition = Vector3.zero;
+                m_rootRight.localRotation = Quaternion.identity;
             }
-
             m_inVR = Utils.IsInVR();
-            m_vrIK = PlayerSetup.Instance._animator.GetComponent<VRIK>();
 
-            if(PlayerSetup.Instance._animator.isHuman)
+            if(!m_inVR && PlayerSetup.Instance._animator.isHuman)
             {
-                Vector3 l_hipsPos = Vector3.zero;
-                Transform l_hips = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.Hips);
-                if(l_hips != null)
-                    l_hipsPos = l_hips.localPosition;
-                
-                HumanPose l_currentPose = new HumanPose();
-                HumanPoseHandler l_poseHandler = null;
+                m_vrIK = PlayerSetup.Instance._animator.GetComponent<VRIK>();
 
-                if(!m_inVR)
-                {
-                    l_poseHandler = new HumanPoseHandler(PlayerSetup.Instance._animator.avatar, PlayerSetup.Instance._avatar.transform);
-                    l_poseHandler.GetHumanPose(ref l_currentPose);
+                TPoseHelper l_tpHelper = new TPoseHelper();
+                l_tpHelper.Assign(PlayerSetup.Instance._animator);
+                l_tpHelper.Apply();
 
-                    HumanPose l_tPose = new HumanPose
-                    {
-                        bodyPosition = l_currentPose.bodyPosition,
-                        bodyRotation = l_currentPose.bodyRotation,
-                        muscles = new float[l_currentPose.muscles.Length]
-                    };
-                    for(int i = 0; i < l_tPose.muscles.Length; i++)
-                        l_tPose.muscles[i] = ms_tposeMuscles[i];
-
-                    l_poseHandler.SetHumanPose(ref l_tPose);
-                }
-
-                Transform l_hand = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightHand);
-                if(l_hand != null)
-                    m_rotationTarget.localRotation = (ms_palmToLeft * (m_inVR ? ms_offsetRight : ms_offsetRightDesktop)) * (PlayerSetup.Instance._avatar.transform.GetMatrix().inverse * l_hand.GetMatrix()).rotation;
+                Transform l_leftHand = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftHand);
+                if(l_leftHand != null)
+                    m_leftTarget.localRotation = ms_offsetLeft * (PlayerSetup.Instance._avatar.transform.GetMatrix().inverse * l_leftHand.GetMatrix()).rotation;
+                Transform l_rightHand = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightHand);
+                if(l_rightHand != null)
+                    m_rightTarget.localRotation = ms_offsetRight * (PlayerSetup.Instance._avatar.transform.GetMatrix().inverse * l_rightHand.GetMatrix()).rotation;
 
                 if(m_vrIK == null)
                 {
@@ -169,39 +367,54 @@ namespace ml_pam
                     if(l_chest == null)
                         l_chest = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.Spine);
 
-                    m_armIK = PlayerSetup.Instance._avatar.AddComponent<ArmIK>();
-                    m_armIK.solver.isLeft = false;
-                    m_armIK.solver.SetChain(
+                    m_armIKLeft = PlayerSetup.Instance._avatar.AddComponent<ArmIK>();
+                    m_armIKLeft.solver.isLeft = true;
+                    m_armIKLeft.solver.SetChain(
+                        l_chest,
+                        PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftShoulder),
+                        PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftUpperArm),
+                        PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftLowerArm),
+                        l_leftHand,
+                        PlayerSetup.Instance._animator.transform
+                    );
+                    m_armIKLeft.solver.arm.target = m_leftTarget;
+                    m_armIKLeft.solver.arm.positionWeight = 1f;
+                    m_armIKLeft.solver.arm.rotationWeight = 1f;
+                    m_armIKLeft.solver.IKPositionWeight = 0f;
+                    m_armIKLeft.solver.IKRotationWeight = 0f;
+                    m_armIKLeft.enabled = false;
+
+                    m_armLength = m_armIKLeft.solver.arm.mag * 1.25f;
+
+                    m_armIKRight = PlayerSetup.Instance._avatar.AddComponent<ArmIK>();
+                    m_armIKRight.solver.isLeft = false;
+                    m_armIKRight.solver.SetChain(
                         l_chest,
                         PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightShoulder),
                         PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightUpperArm),
                         PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightLowerArm),
-                        l_hand,
+                        l_rightHand,
                         PlayerSetup.Instance._animator.transform
                     );
-                    m_armIK.solver.arm.target = m_rotationTarget;
-                    m_armIK.solver.arm.positionWeight = 1f;
-                    m_armIK.solver.arm.rotationWeight = 1f;
-                    m_armIK.solver.IKPositionWeight = 0f;
-                    m_armIK.solver.IKRotationWeight = 0f;
-                    m_armIK.enabled = m_enabled;
+                    m_armIKRight.solver.arm.target = m_rightTarget;
+                    m_armIKRight.solver.arm.positionWeight = 1f;
+                    m_armIKRight.solver.arm.rotationWeight = 1f;
+                    m_armIKRight.solver.IKPositionWeight = 0f;
+                    m_armIKRight.solver.IKRotationWeight = 0f;
+                    m_armIKRight.enabled = false;
                 }
                 else
                 {
-                    m_origRightHand = m_vrIK.solver.rightArm.target;
+                    m_armLength = m_vrIK.solver.leftArm.mag * 1.25f;
                     m_vrIK.solver.OnPreUpdate += this.OnIKPreUpdate;
                     m_vrIK.solver.OnPostUpdate += this.OnIKPostUpdate;
                 }
 
-                l_poseHandler?.SetHumanPose(ref l_currentPose);
-                l_poseHandler?.Dispose();
-
-                if(l_hips != null)
-                    l_hips.localPosition = l_hipsPos;
+                l_tpHelper.Restore();
+                l_tpHelper.Unassign();
             }
 
-            if(m_enabled)
-                RestorePickup();
+            SetEnabled(m_enabled);
         }
 
         internal void OnPickupGrab(CVRPickupObject p_pickup, ControllerRay p_ray, Vector3 p_hit)
@@ -224,20 +437,23 @@ namespace ml_pam
                 else
                     m_offset = m_pickup.transform.GetMatrix().inverse * Matrix4x4.Translate(p_hit);
 
-                if(m_enabled)
+                switch(Settings.LeadingHand)
                 {
-                    if((m_vrIK != null) && !m_targetActive)
+                    case Settings.LeadHand.Left:
+                        m_leftHandState = HandState.Pickup;
+                        break;
+                    case Settings.LeadHand.Right:
+                        m_rightHandState = HandState.Pickup;
+                        break;
+                    case Settings.LeadHand.Both:
                     {
-                        m_vrIK.solver.rightArm.target = m_rotationTarget;
-                        m_targetActive = true;
+                        m_leftHandState = HandState.Pickup;
+                        m_rightHandState = HandState.Pickup;
                     }
-
-                    if(m_armIK != null)
-                    {
-                        m_armIK.solver.IKPositionWeight = 1f;
-                        m_armIK.solver.IKRotationWeight = 1f;
-                    }
+                    break;
                 }
+
+                SetArmActive(Settings.LeadingHand, true);
             }
         }
 
@@ -246,17 +462,22 @@ namespace ml_pam
             if(m_pickup == p_pickup)
             {
                 m_pickup = null;
-
-                if(m_enabled)
+                switch(Settings.LeadingHand)
                 {
-                    RestoreVRIK();
-
-                    if(m_armIK != null)
+                    case Settings.LeadHand.Left:
+                        m_leftHandState = HandState.Empty;
+                        break;
+                    case Settings.LeadHand.Right:
+                        m_rightHandState = HandState.Empty;
+                        break;
+                    case Settings.LeadHand.Both:
                     {
-                        m_armIK.solver.IKPositionWeight = 0f;
-                        m_armIK.solver.IKRotationWeight = 0f;
+                        m_leftHandState = HandState.Empty;
+                        m_rightHandState = HandState.Empty;
                     }
+                    break;
                 }
+                SetArmActive(Settings.LeadingHand, false);
             }
         }
 
@@ -267,33 +488,23 @@ namespace ml_pam
         }
 
         // Arbitrary
-        void RestorePickup()
+        void SetArmActive(Settings.LeadHand p_hand, bool p_state, bool p_forced = false)
         {
-            if((m_vrIK != null) && (m_pickup != null))
+            if(m_enabled || p_forced)
             {
-                m_vrIK.solver.rightArm.target = m_rotationTarget;
-                m_targetActive = true;
+                if(((p_hand == Settings.LeadHand.Left) || (p_hand == Settings.LeadHand.Both)) && (m_armIKLeft != null))
+                {
+                    m_armIKLeft.enabled = m_enabled;
+                    m_armIKLeft.solver.IKPositionWeight = (p_state ? 1f : 0f);
+                    m_armIKLeft.solver.IKRotationWeight = (p_state ? 1f : 0f);
+                }
+                if(((p_hand == Settings.LeadHand.Right) || (p_hand == Settings.LeadHand.Both)) && (m_armIKRight != null))
+                {
+                    m_armIKRight.enabled = m_enabled;
+                    m_armIKRight.solver.IKPositionWeight = (p_state ? 1f : 0f);
+                    m_armIKRight.solver.IKRotationWeight = (p_state ? 1f : 0f);
+                }
             }
-            if((m_armIK != null) && (m_pickup != null))
-            {
-                m_armIK.solver.IKPositionWeight = 1f;
-                m_armIK.solver.IKRotationWeight = 1f;
-            }
-        }
-
-        void RestoreVRIK()
-        {
-            if((m_vrIK != null) && m_targetActive)
-            {
-                m_vrIK.solver.rightArm.target = m_origRightHand;
-                m_targetActive = false;
-            }
-        }
-
-        void RefreshArmIK()
-        {
-            if(m_armIK != null)
-                m_armIK.enabled = m_enabled;
         }
     }
 }

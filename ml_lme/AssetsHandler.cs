@@ -13,8 +13,8 @@ namespace ml_lme
             "leapmotion_hands.asset"
         };
 
-        static Dictionary<string, AssetBundle> ms_loadedAssets = new Dictionary<string, AssetBundle>();
-        static Dictionary<string, GameObject> ms_loadedObjects = new Dictionary<string, GameObject>();
+        static readonly Dictionary<string, AssetBundle> ms_loadedAssets = new Dictionary<string, AssetBundle>();
+        static readonly Dictionary<string, GameObject> ms_loadedObjects = new Dictionary<string, GameObject>();
 
         public static void Load()
         {

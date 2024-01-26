@@ -14,13 +14,10 @@ namespace ml_dht
 
         bool m_enabled = false;
         bool m_headTracking = true;
-        bool m_blinking = true;
-        bool m_eyeTracking = true;
         float m_smoothing = 0.5f;
-        bool m_mirrored = false;
-        bool m_faceOverride = true;
 
         CVRAvatar m_avatarDescriptor = null;
+        Transform m_camera = null;
         LookAtIK m_lookIK = null;
         Transform m_headBone = null;
 
@@ -28,8 +25,6 @@ namespace ml_dht
         Quaternion m_headRotation;
         Vector2 m_gazeDirection;
         float m_blinkProgress = 0f;
-        Vector2 m_mouthShapes;
-        float m_eyebrowsProgress = 0f;
 
         Quaternion m_bindRotation;
         Quaternion m_lastHeadRotation;
@@ -37,35 +32,29 @@ namespace ml_dht
         // Unity events
         void Start()
         {
+            SetEnabled(Settings.Enabled);
+            SetHeadTracking(Settings.HeadTracking);
+            SetSmoothing(Settings.Smoothing);
+
             Settings.EnabledChange += this.SetEnabled;
             Settings.HeadTrackingChange += this.SetHeadTracking;
-            Settings.EyeTrackingChange += this.SetEyeTracking;
-            Settings.BlinkingChange += this.SetBlinking;
             Settings.SmoothingChange += this.SetSmoothing;
-            Settings.MirroredChange += this.SetMirrored;
-            Settings.FaceOverrideChange += this.SetFaceOverride;
         }
 
         void OnDestroy()
         {
             Settings.EnabledChange -= this.SetEnabled;
             Settings.HeadTrackingChange -= this.SetHeadTracking;
-            Settings.EyeTrackingChange -= this.SetEyeTracking;
-            Settings.BlinkingChange -= this.SetBlinking;
             Settings.SmoothingChange -= this.SetSmoothing;
-            Settings.MirroredChange -= this.SetMirrored;
-            Settings.FaceOverrideChange -= this.SetFaceOverride;
         }
 
         // Tracking updates
         public void UpdateTrackingData(ref TrackingData p_data)
         {
-            m_headPosition.Set(p_data.m_headPositionX * (m_mirrored ? -1f : 1f), p_data.m_headPositionY, p_data.m_headPositionZ);
-            m_headRotation.Set(p_data.m_headRotationX, p_data.m_headRotationY * (m_mirrored ? -1f : 1f), p_data.m_headRotationZ * (m_mirrored ? -1f : 1f), p_data.m_headRotationW);
-            m_gazeDirection.Set(m_mirrored ? (1f - p_data.m_gazeX) : p_data.m_gazeX, p_data.m_gazeY);
+            m_headPosition.Set(p_data.m_headPositionX * (Settings.Mirrored ? -1f : 1f), p_data.m_headPositionY, p_data.m_headPositionZ);
+            m_headRotation.Set(p_data.m_headRotationX, p_data.m_headRotationY * (Settings.Mirrored ? -1f : 1f), p_data.m_headRotationZ * (Settings.Mirrored ? -1f : 1f), p_data.m_headRotationW);
+            m_gazeDirection.Set(Settings.Mirrored ? (1f - p_data.m_gazeX) : p_data.m_gazeX, p_data.m_gazeY);
             m_blinkProgress = p_data.m_blink;
-            m_mouthShapes.Set(p_data.m_mouthOpen, p_data.m_mouthShape);
-            m_eyebrowsProgress = p_data.m_brows;
         }
 
         void OnLookIKPostUpdate()
@@ -80,48 +69,9 @@ namespace ml_dht
         }
 
         // Game events
-        internal void OnEyeControllerUpdate(CVREyeController p_component)
-        {
-            if(m_enabled)
-            {
-                // Gaze
-                if(m_eyeTracking)
-                {
-                    Transform l_camera = PlayerSetup.Instance.GetActiveCamera().transform;
-
-                    p_component.manualViewTarget = true;
-                    p_component.targetViewPosition = l_camera.position + l_camera.rotation * new Vector3((m_gazeDirection.x - 0.5f) * 2f, (m_gazeDirection.y - 0.5f) * 2f, 1f);
-                }
-
-                // Blink
-                if(m_blinking)
-                {
-                    p_component.manualBlinking = true;
-                    p_component.blinkProgress = m_blinkProgress;
-                }
-            }
-        }
-
-        internal void OnFaceTrackingUpdate(CVRFaceTracking p_component)
-        {
-            if(m_enabled && m_faceOverride)
-            {
-                if(m_avatarDescriptor != null)
-                    m_avatarDescriptor.useVisemeLipsync = false;
-
-                float l_weight = Mathf.Clamp01(Mathf.InverseLerp(0.25f, 1f, Mathf.Abs(m_mouthShapes.y))) * 100f;
-
-                p_component.BlendShapeValues[(int)LipShape_v2.Jaw_Open] = m_mouthShapes.x * 100f;
-                p_component.BlendShapeValues[(int)LipShape_v2.Mouth_Pout] = ((m_mouthShapes.y > 0f) ? l_weight : 0f);
-                p_component.BlendShapeValues[(int)LipShape_v2.Mouth_Smile_Left] = ((m_mouthShapes.y < 0f) ? l_weight : 0f);
-                p_component.BlendShapeValues[(int)LipShape_v2.Mouth_Smile_Right] = ((m_mouthShapes.y < 0f) ? l_weight : 0f);
-                p_component.LipSyncWasUpdated = true;
-                p_component.UpdateLipShapes();
-            }
-        }
-
         internal void OnSetupAvatar()
         {
+            m_camera = PlayerSetup.Instance.GetActiveCamera().transform;
             m_avatarDescriptor = PlayerSetup.Instance._avatar.GetComponent<CVRAvatar>();
             m_headBone = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.Head);
             m_lookIK = PlayerSetup.Instance._avatar.GetComponent<LookAtIK>();
@@ -142,44 +92,53 @@ namespace ml_dht
             m_bindRotation = Quaternion.identity;
         }
 
+        internal void OnEyeControllerUpdate(CVREyeController p_component)
+        {
+            if(m_enabled)
+            {
+                // Gaze
+                if(Settings.EyeTracking && (m_camera != null))
+                {
+                    p_component.manualViewTarget = true;
+                    p_component.targetViewPosition = m_camera.position + m_camera.rotation * new Vector3((m_gazeDirection.x - 0.5f) * 2f, (m_gazeDirection.y - 0.5f) * 2f, 1f);
+                }
+
+                // Blink
+                if(Settings.Blinking)
+                {
+                    p_component.manualBlinking = true;
+                    p_component.blinkProgress = m_blinkProgress;
+                }
+            }
+        }
+
         // Settings
-        internal void SetEnabled(bool p_state)
+        void SetEnabled(bool p_state)
         {
             if(m_enabled != p_state)
             {
                 m_enabled = p_state;
-                if(m_enabled && m_headTracking)
-                    m_lastHeadRotation = ((m_headBone != null) ? m_headBone.rotation : m_bindRotation);
+                TryRestoreHeadRotation();
             }
         }
-        internal void SetHeadTracking(bool p_state)
+        void SetHeadTracking(bool p_state)
         {
             if(m_headTracking != p_state)
             {
                 m_headTracking = p_state;
-                if(m_enabled && m_headTracking)
-                    m_lastHeadRotation = ((m_headBone != null) ? m_headBone.rotation : m_bindRotation);
+                TryRestoreHeadRotation();
             }
         }
-        internal void SetEyeTracking(bool p_state)
-        {
-            m_eyeTracking = p_state;
-        }
-        internal void SetBlinking(bool p_state)
-        {
-            m_blinking = p_state;
-        }
-        internal void SetSmoothing(float p_value)
+        void SetSmoothing(float p_value)
         {
             m_smoothing = 1f - Mathf.Clamp(p_value, 0f, 0.99f);
         }
-        internal void SetMirrored(bool p_state)
+
+        // Arbitrary
+        void TryRestoreHeadRotation()
         {
-            m_mirrored = p_state;
-        }
-        internal void SetFaceOverride(bool p_state)
-        {
-            m_faceOverride = p_state;
+            if(m_enabled && m_headTracking)
+                m_lastHeadRotation = ((m_headBone != null) ? m_headBone.rotation : m_bindRotation);
         }
     }
 }
