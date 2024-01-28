@@ -21,7 +21,6 @@ Available mod's settings in `Settings - Implementation - Desktop Head Tracking`:
 * **Use head tracking:** enables head tracking; default value - `true`.
 * **Use eyes tracking:** enables eyes tracking; default value - `true`.
 * **Use face tracking:** enables mouth shapes tracking; default value - `true`.
-  * **Note:** You need to enable desktop tracking of `Vive Face tracking` in `Settings - Implementation` menu page.
   * **Note:** Your avatar should have configured `CVR Face Tracking` component.
 * **Use blinking:** uses blinking from data; default value - `true`.
 * **Mirrored movement:** mirrors movement and gaze along 0YZ plane; default value - `false`.
