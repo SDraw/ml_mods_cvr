@@ -1,4 +1,5 @@
-﻿using ABI_RC.Core.Player;
+﻿using ABI.CCK.Components;
+using ABI_RC.Core.Player;
 using System.Collections;
 using System.Reflection;
 using UnityEngine;
@@ -41,6 +42,12 @@ namespace ml_lme
                 typeof(PlayerSetup).GetMethod("SetPlaySpaceScale", BindingFlags.NonPublic | BindingFlags.Instance),
                 null,
                 new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnPlayspaceScale_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
+            );
+            HarmonyInstance.Patch(
+
+                typeof(CVRPickupObject).GetMethod(nameof(CVRPickupObject.Grab), BindingFlags.Public | BindingFlags.Instance),
+                null,
+                new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtension).GetMethod(nameof(OnPickupGrab_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
 
             ModSupporter.Init();
@@ -115,6 +122,20 @@ namespace ml_lme
             {
                 if(m_leapManager != null)
                     m_leapManager.OnPlayspaceScale(p_relation);
+            }
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
+        }
+
+        static void OnPickupGrab_Postfix(ref CVRPickupObject __instance) => ms_instance?.OnPickupGrab(__instance);
+        void OnPickupGrab(CVRPickupObject p_pickup)
+        {
+            try
+            {
+                if(m_leapManager != null)
+                    m_leapManager.OnPickupGrab(p_pickup);
             }
             catch(System.Exception e)
             {

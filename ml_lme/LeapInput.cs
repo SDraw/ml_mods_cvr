@@ -1,4 +1,5 @@
-﻿using ABI_RC.Core.InteractionSystem;
+﻿using ABI.CCK.Components;
+using ABI_RC.Core.InteractionSystem;
 using ABI_RC.Core.Player;
 using ABI_RC.Core.Savior;
 using ABI_RC.Systems.IK;
@@ -34,11 +35,13 @@ namespace ml_lme
 
             m_handRayLeft = LeapTracking.Instance.GetLeftHand().gameObject.AddComponent<ControllerRay>();
             m_handRayLeft.hand = true;
-            m_handRayLeft.generalMask = -1485;
+            m_handRayLeft.generalMask = -269;
             m_handRayLeft.isInteractionRay = true;
             m_handRayLeft.triggerGazeEvents = false;
             m_handRayLeft.holderRoot = m_handRayLeft.gameObject;
             m_handRayLeft.attachmentDistance = 0f;
+            m_handRayLeft.uiMask = 32;
+            m_handRayLeft.isDesktopRay = true;
 
             m_lineLeft = m_handRayLeft.gameObject.AddComponent<LineRenderer>();
             m_lineLeft.endWidth = 1f;
@@ -54,11 +57,13 @@ namespace ml_lme
 
             m_handRayRight = LeapTracking.Instance.GetRightHand().gameObject.AddComponent<ControllerRay>();
             m_handRayRight.hand = false;
-            m_handRayRight.generalMask = -1485;
+            m_handRayRight.generalMask = -269;
             m_handRayRight.isInteractionRay = true;
             m_handRayRight.triggerGazeEvents = false;
             m_handRayRight.holderRoot = m_handRayRight.gameObject;
             m_handRayRight.attachmentDistance = 0f;
+            m_handRayRight.uiMask = 32;
+            m_handRayRight.isDesktopRay = true;
 
             m_lineRight = m_handRayRight.gameObject.AddComponent<LineRenderer>();
             m_lineRight.endWidth = 1f;
@@ -71,6 +76,9 @@ namespace ml_lme
             m_lineRight.enabled = false;
             m_lineRight.receiveShadows = false;
             m_handRayRight.lineRenderer = m_lineRight;
+
+            m_handRayLeft.otherRay = m_handRayRight;
+            m_handRayRight.otherRay = m_handRayLeft;
 
             Settings.EnabledChange += this.OnEnableChange;
             Settings.InteractionChange += this.OnInteractionChange;
@@ -108,8 +116,11 @@ namespace ml_lme
 
             m_lineLeft.material = PlayerSetup.Instance.vrRayLeft.lineRenderer.material;
             m_lineLeft.gameObject.layer = PlayerSetup.Instance.vrRayLeft.gameObject.layer;
+            m_handRayLeft.highlightMaterial = PlayerSetup.Instance.vrRayLeft.highlightMaterial;
+
             m_lineRight.material = PlayerSetup.Instance.vrRayLeft.lineRenderer.material;
             m_lineRight.gameObject.layer = PlayerSetup.Instance.vrRayLeft.gameObject.layer;
+            m_handRayLeft.highlightMaterial = PlayerSetup.Instance.vrRayLeft.highlightMaterial;
         }
 
         public override void ModuleDestroyed()
@@ -411,6 +422,23 @@ namespace ml_lme
         {
             m_handRayLeft.SetRayScale(p_scale);
             m_handRayRight.SetRayScale(p_scale);
+        }
+
+        internal void OnPickupGrab(CVRPickupObject p_pickup)
+        {
+            if(p_pickup.gripType == CVRPickupObject.GripType.Origin)
+            {
+                if(p_pickup._controllerRay == m_handRayLeft)
+                {
+                    m_handRayLeft.attachmentPoint.localPosition = Vector3.zero;
+                    m_handRayLeft.attachmentPoint.localRotation = Quaternion.Euler(0f, 0f, 270f);
+                }
+                if(p_pickup._controllerRay == m_handRayRight)
+                {
+                    m_handRayRight.attachmentPoint.localPosition = Vector3.zero;
+                    m_handRayRight.attachmentPoint.localRotation = Quaternion.Euler(0f, 0f, 90f);
+                }
+            }
         }
 
         // Arbitrary
