@@ -43,6 +43,7 @@ namespace ml_prm
         Vector3 m_lastPosition = Vector3.zero;
         Vector3 m_velocity = Vector3.zero;
         Vector3 m_ragdollLastPos = Vector3.zero;
+        bool m_wasSwimming = false;
 
         RagdollToggle m_avatarRagdollToggle = null;
         RagdollTrigger m_ragdollTrigger = null;
@@ -277,6 +278,7 @@ namespace ml_prm
             m_puppetRoot.localScale = Vector3.one;
             m_inAir = false;
             m_inAirDistance = 0f;
+            m_wasSwimming = false;
         }
 
         internal void OnAvatarSetup()
@@ -608,6 +610,8 @@ namespace ml_prm
                 {
                     if(CanRagdoll())
                     {
+                        m_wasSwimming = BetterBetterCharacterController.Instance.IsSwimming();
+
                         if(BetterBetterCharacterController.Instance.IsFlying())
                             BetterBetterCharacterController.Instance.ChangeFlight(false,true);
                         BetterBetterCharacterController.Instance.SetImmobilized(true);
@@ -689,6 +693,10 @@ namespace ml_prm
                         // Restore rigidbody properties that could be affected by buoyancy
                         OnMovementDragChange(Settings.MovementDrag);
                         OnAngularDragChange(Settings.AngularDrag);
+
+                        // Restore movement if was ragdolled in water and left it
+                        if(m_wasSwimming)
+                            BetterBetterCharacterController.Instance.SetMovementMode(EasyCharacterMovement.MovementMode.Swimming);
 
                         m_enabled = false;
                     }
