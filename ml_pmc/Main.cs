@@ -1,5 +1,6 @@
 ﻿using ABI_RC.Core.Networking.IO.Social;
 using ABI_RC.Core.Player;
+using ABI_RC.Systems.IK;
 using ABI_RC.Systems.Movement;
 using System;
 using System.Collections.Generic;
@@ -32,6 +33,11 @@ namespace ml_pmc
                 typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.SetupAvatar)),
                 null,
                 new HarmonyLib.HarmonyMethod(typeof(PlayerMovementCopycat).GetMethod(nameof(OnSetupAvatar_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
+            );
+            HarmonyInstance.Patch(
+                typeof(IKSystem).GetMethod(nameof(IKSystem.ReinitializeAvatar), BindingFlags.Instance | BindingFlags.Public),
+                null,
+                new HarmonyLib.HarmonyMethod(typeof(PlayerMovementCopycat).GetMethod(nameof(OnAvatarReinitialize_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
 
             MelonLoader.MelonCoroutines.Start(WaitForLocalPlayer());
@@ -129,6 +135,20 @@ namespace ml_pmc
                     m_localCopycat.OnAvatarSetup();
             }
             catch(Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
+        }
+
+        static void OnAvatarReinitialize_Postfix() => ms_instance?.OnAvatarReinitialize();
+        void OnAvatarReinitialize()
+        {
+            try
+            {
+                if(m_localCopycat != null)
+                    m_localCopycat.OnAvatarReinitialize();
+            }
+            catch(System.Exception e)
             {
                 MelonLoader.MelonLogger.Error(e);
             }

@@ -332,17 +332,7 @@ namespace ml_pam
         internal void OnAvatarSetup()
         {
             // Recheck if user could switch to VR
-            if(m_inVR != Utils.IsInVR())
-            {
-                m_rootLeft.parent = PlayerSetup.Instance.GetActiveCamera().transform;
-                m_rootLeft.localPosition = Vector3.zero;
-                m_rootLeft.localRotation = Quaternion.identity;
-
-                m_rootRight.parent = PlayerSetup.Instance.GetActiveCamera().transform;
-                m_rootRight.localPosition = Vector3.zero;
-                m_rootRight.localRotation = Quaternion.identity;
-            }
-            m_inVR = Utils.IsInVR();
+            RecheckMode();
 
             if(!m_inVR && PlayerSetup.Instance._animator.isHuman)
             {
@@ -409,8 +399,8 @@ namespace ml_pam
                 else
                 {
                     m_armLength = m_vrIK.solver.leftArm.mag * 1.25f;
-                    m_vrIK.solver.OnPreUpdate += this.OnIKPreUpdate;
-                    m_vrIK.solver.OnPostUpdate += this.OnIKPostUpdate;
+                    m_vrIK.onPreSolverUpdate.AddListener(this.OnIKPreUpdate);
+                    m_vrIK.onPostSolverUpdate.AddListener(this.OnIKPostUpdate);
                 }
 
                 l_tpHelper.Restore();
@@ -418,6 +408,19 @@ namespace ml_pam
             }
 
             SetEnabled(m_enabled);
+        }
+
+        internal void OnAvatarReinitialize()
+        {
+            // Old VRIK is destroyed by game
+            RecheckMode();
+            m_vrIK = PlayerSetup.Instance._animator.GetComponent<VRIK>();
+            if(m_vrIK != null)
+            {
+                m_armLength = m_vrIK.solver.leftArm.mag * 1.25f;
+                m_vrIK.onPreSolverUpdate.AddListener(this.OnIKPreUpdate);
+                m_vrIK.onPostSolverUpdate.AddListener(this.OnIKPostUpdate);
+            }
         }
 
         internal void OnPickupGrab(CVRPickupObject p_pickup, ControllerRay p_ray, Vector3 p_hit)
@@ -508,6 +511,21 @@ namespace ml_pam
                     m_armIKRight.solver.IKRotationWeight = (p_state ? 1f : 0f);
                 }
             }
+        }
+
+        void RecheckMode()
+        {
+            if(m_inVR != Utils.IsInVR())
+            {
+                m_rootLeft.parent = PlayerSetup.Instance.GetActiveCamera().transform;
+                m_rootLeft.localPosition = Vector3.zero;
+                m_rootLeft.localRotation = Quaternion.identity;
+
+                m_rootRight.parent = PlayerSetup.Instance.GetActiveCamera().transform;
+                m_rootRight.localPosition = Vector3.zero;
+                m_rootRight.localRotation = Quaternion.identity;
+            }
+            m_inVR = Utils.IsInVR();
         }
     }
 }

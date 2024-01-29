@@ -41,6 +41,11 @@ namespace ml_prm
                 new HarmonyLib.HarmonyMethod(typeof(PlayerRagdollMod).GetMethod(nameof(OnSetupAvatar_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
             HarmonyInstance.Patch(
+                typeof(IKSystem).GetMethod(nameof(IKSystem.ReinitializeAvatar), BindingFlags.Instance | BindingFlags.Public),
+                new HarmonyLib.HarmonyMethod(typeof(PlayerRagdollMod).GetMethod(nameof(OnAvatarReinitialize_Prefix), BindingFlags.Static | BindingFlags.NonPublic)),
+                new HarmonyLib.HarmonyMethod(typeof(PlayerRagdollMod).GetMethod(nameof(OnAvatarReinitialize_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
+            );
+            HarmonyInstance.Patch(
                 typeof(PlayerSetup).GetMethod("SetupIKScaling", BindingFlags.NonPublic | BindingFlags.Instance),
                 null,
                 new HarmonyLib.HarmonyMethod(typeof(PlayerRagdollMod).GetMethod(nameof(OnSetupIKScaling_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
@@ -132,6 +137,34 @@ namespace ml_prm
                     m_localController.OnAvatarSetup();
             }
             catch(Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
+        }
+
+        static void OnAvatarReinitialize_Prefix() => ms_instance?.OnPreAvatarReinitialize();
+        void OnPreAvatarReinitialize()
+        {
+            try
+            {
+                if(m_localController != null)
+                    m_localController.OnPreAvatarReinitialize();
+            }
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
+        }
+
+        static void OnAvatarReinitialize_Postfix() => ms_instance?.OnPostAvatarReinitialize();
+        void OnPostAvatarReinitialize()
+        {
+            try
+            {
+                if(m_localController != null)
+                    m_localController.OnPostAvatarReinitialize();
+            }
+            catch(System.Exception e)
             {
                 MelonLoader.MelonLogger.Error(e);
             }

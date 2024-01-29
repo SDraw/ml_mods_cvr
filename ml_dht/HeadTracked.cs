@@ -2,6 +2,7 @@
 using ABI_RC.Core.Player;
 using ABI_RC.Core.Player.EyeMovement;
 using ABI_RC.Systems.FaceTracking;
+using ABI_RC.Systems.VRModeSwitch;
 using RootMotion.FinalIK;
 using System;
 using System.Reflection;
@@ -65,7 +66,7 @@ namespace ml_dht
 
         void Update()
         {
-            if(m_enabled && Settings.FaceTracking)
+            if(m_lipDataSent)
                 m_lipDataSent = false;
         }
 
@@ -107,7 +108,7 @@ namespace ml_dht
                 m_bindRotation = (m_avatarDescriptor.transform.GetMatrix().inverse * m_headBone.GetMatrix()).rotation;
 
             if(m_lookIK != null)
-                m_lookIK.solver.OnPostUpdate += this.OnLookIKPostUpdate;
+                m_lookIK.onPostSolverUpdate.AddListener(this.OnLookIKPostUpdate);
 
         }
         internal void OnAvatarClear()
@@ -117,6 +118,13 @@ namespace ml_dht
             m_headBone = null;
             m_lastHeadRotation = Quaternion.identity;
             m_bindRotation = Quaternion.identity;
+        }
+        internal void OnAvatarReinitialize()
+        {
+            m_camera = PlayerSetup.Instance.GetActiveCamera().transform;
+            m_lookIK = PlayerSetup.Instance._avatar.GetComponent<LookAtIK>();
+            if(m_lookIK != null)
+                m_lookIK.onPostSolverUpdate.AddListener(this.OnLookIKPostUpdate);
         }
 
         internal void OnEyeControllerUpdate(EyeMovementController p_component)

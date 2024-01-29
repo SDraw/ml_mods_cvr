@@ -2,6 +2,7 @@ using ABI.CCK.Components;
 using ABI_RC.Core.Player;
 using ABI_RC.Core.Player.EyeMovement;
 using ABI_RC.Core.Savior;
+using ABI_RC.Systems.IK;
 using System.Reflection;
 
 namespace ml_dht
@@ -30,6 +31,11 @@ namespace ml_dht
                 typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.SetupAvatar)),
                 null,
                 new HarmonyLib.HarmonyMethod(typeof(DesktopHeadTracking).GetMethod(nameof(OnSetupAvatar_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
+            );
+            HarmonyInstance.Patch(
+                typeof(IKSystem).GetMethod(nameof(IKSystem.ReinitializeAvatar), BindingFlags.Instance | BindingFlags.Public),
+                null,
+                new HarmonyLib.HarmonyMethod(typeof(DesktopHeadTracking).GetMethod(nameof(OnAvatarReinitialize_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
 
             MelonLoader.MelonCoroutines.Start(WaitForInstances());
@@ -98,6 +104,20 @@ namespace ml_dht
             {
                 if(m_localTracked != null)
                     m_localTracked.OnAvatarClear();
+            }
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
+        }
+
+        static void OnAvatarReinitialize_Postfix() => ms_instance?.OnAvatarReinitialize();
+        void OnAvatarReinitialize()
+        {
+            try
+            {
+                if(m_localTracked != null)
+                    m_localTracked.OnAvatarReinitialize();
             }
             catch(System.Exception e)
             {

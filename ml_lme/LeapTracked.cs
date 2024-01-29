@@ -1,5 +1,6 @@
 ﻿using ABI_RC.Core.Player;
 using ABI_RC.Systems.IK;
+using ABI_RC.Systems.VRModeSwitch;
 using RootMotion.FinalIK;
 using System.Reflection;
 using UnityEngine;
@@ -121,7 +122,7 @@ namespace ml_lme
 
         void LateUpdate()
         {
-            if(m_enabled && !m_inVR && (m_poseHandler != null))
+            if(m_enabled && (m_vrIK == null) && (m_poseHandler != null))
             {
                 LeapParser.LeapData l_data = LeapManager.Instance.GetLatestData();
 
@@ -147,8 +148,7 @@ namespace ml_lme
             m_leftTargetActive = false;
             m_rightTargetActive = false;
 
-            if(!m_inVR)
-                m_poseHandler?.Dispose();
+            m_poseHandler?.Dispose();
             m_poseHandler = null;
 
             m_leftHandTarget.localPosition = Vector3.zero;
@@ -169,7 +169,7 @@ namespace ml_lme
                 if(m_hips != null)
                     l_hipsPos = m_hips.localPosition;
 
-                if(m_vrIK == null)
+                if(!m_inVR)
                 {
                     // Force desktop avatar into T-Pose
                     m_poseHandler = new HumanPoseHandler(PlayerSetup.Instance._animator.avatar, PlayerSetup.Instance._avatar.transform);
@@ -236,12 +236,24 @@ namespace ml_lme
                 }
                 else
                 {
-                    m_vrIK.solver.OnPreUpdate += this.OnIKPreUpdate;
-                    m_vrIK.solver.OnPostUpdate += this.OnIKPostUpdate;
+                    m_vrIK.onPreSolverUpdate.AddListener(this.OnIKPreUpdate);
+                    m_vrIK.onPostSolverUpdate.AddListener(this.OnIKPostUpdate);
                 }
 
                 if(m_hips != null)
                     m_hips.localPosition = l_hipsPos;
+            }
+        }
+
+        internal void OnAvatarReinitialize()
+        {
+            // Old VRIK is destroyed by game
+            m_inVR = Utils.IsInVR();
+            m_vrIK = PlayerSetup.Instance._animator.GetComponent<VRIK>();
+            if(m_vrIK != null)
+            {
+                m_vrIK.onPreSolverUpdate.AddListener(this.OnIKPreUpdate);
+                m_vrIK.onPostSolverUpdate.AddListener(this.OnIKPostUpdate);
             }
         }
 

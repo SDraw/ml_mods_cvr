@@ -3,6 +3,7 @@ using ABI_RC.Systems.IK;
 using ABI_RC.Systems.IK.SubSystems;
 using ABI_RC.Systems.InputManagement;
 using ABI_RC.Systems.Movement;
+using ABI_RC.Systems.VRModeSwitch;
 using RootMotion.FinalIK;
 using UnityEngine;
 
@@ -36,6 +37,9 @@ namespace ml_pmc
         {
             if(Instance == null)
                 Instance = this;
+
+            VRModeSwitchEvents.OnInitializeXR.AddListener(this.OnSwitchToVR);
+            VRModeSwitchEvents.OnDeinitializeXR.AddListener(this.OnSwitchToDesktop);
         }
         void OnDestroy()
         {
@@ -52,6 +56,9 @@ namespace ml_pmc
             m_animator = null;
             m_vrIk = null;
             m_lookAtIk = null;
+
+            VRModeSwitchEvents.OnInitializeXR.RemoveListener(this.OnSwitchToVR);
+            VRModeSwitchEvents.OnDeinitializeXR.RemoveListener(this.OnSwitchToDesktop);
         }
 
         // Unity events
@@ -177,8 +184,6 @@ namespace ml_pmc
             }
             m_active = false;
 
-            m_inVr = Utils.IsInVR();
-
             if(m_puppetParser != null)
                 Object.Destroy(m_puppetParser);
             m_puppetParser = null;
@@ -219,6 +224,33 @@ namespace ml_pmc
             }
             else
                 m_animator = null;
+        }
+        internal void OnAvatarReinitialize()
+        {
+            // Old VRIK and LookAtIK are destroyed by game
+            m_vrIk = PlayerSetup.Instance._avatar.GetComponent<VRIK>();
+            m_lookAtIk = PlayerSetup.Instance._avatar.GetComponent<LookAtIK>();
+
+            if(m_vrIk != null)
+            {
+                m_vrIk.onPreSolverUpdate.AddListener(this.OnVRIKPreUpdate);
+                m_vrIk.onPostSolverUpdate.AddListener(this.OnVRIKPostUpdate);
+            }
+
+            if(m_lookAtIk != null)
+            {
+                m_lookAtIk.onPreSolverUpdate.AddListener(this.OnLookAtIKPreUpdate);
+                m_lookAtIk.onPostSolverUpdate.AddListener(this.OnLookAtIKPostUpdate);
+            }
+        }
+
+        void OnSwitchToVR()
+        {
+            m_inVr = true;
+        }
+        void OnSwitchToDesktop()
+        {
+            m_inVr = false;
         }
 
         // IK updates

@@ -4,6 +4,7 @@ using ABI_RC.Core.Player;
 using ABI_RC.Core.Savior;
 using ABI_RC.Systems.IK;
 using ABI_RC.Systems.InputManagement;
+using ABI_RC.Systems.VRModeSwitch;
 using System.Collections;
 using UnityEngine;
 
@@ -41,7 +42,7 @@ namespace ml_lme
             m_handRayLeft.holderRoot = m_handRayLeft.gameObject;
             m_handRayLeft.attachmentDistance = 0f;
             m_handRayLeft.uiMask = 32;
-            m_handRayLeft.isDesktopRay = true;
+            m_handRayLeft.isDesktopRay = !m_inVR;
 
             m_lineLeft = m_handRayLeft.gameObject.AddComponent<LineRenderer>();
             m_lineLeft.endWidth = 1f;
@@ -63,7 +64,7 @@ namespace ml_lme
             m_handRayRight.holderRoot = m_handRayRight.gameObject;
             m_handRayRight.attachmentDistance = 0f;
             m_handRayRight.uiMask = 32;
-            m_handRayRight.isDesktopRay = true;
+            m_handRayRight.isDesktopRay = !m_inVR;
 
             m_lineRight = m_handRayRight.gameObject.AddComponent<LineRenderer>();
             m_lineRight.endWidth = 1f;
@@ -92,6 +93,9 @@ namespace ml_lme
 
             MelonLoader.MelonCoroutines.Start(WaitForSettings());
             MelonLoader.MelonCoroutines.Start(WaitForMaterial());
+
+            VRModeSwitchEvents.OnInitializeXR.AddListener(OnSwitchToVR);
+            VRModeSwitchEvents.OnDeinitializeXR.AddListener(OnSwitchToDesktop);
         }
 
         IEnumerator WaitForSettings()
@@ -117,10 +121,12 @@ namespace ml_lme
             m_lineLeft.material = PlayerSetup.Instance.vrRayLeft.lineRenderer.material;
             m_lineLeft.gameObject.layer = PlayerSetup.Instance.vrRayLeft.gameObject.layer;
             m_handRayLeft.highlightMaterial = PlayerSetup.Instance.vrRayLeft.highlightMaterial;
+            m_handRayLeft.SetVRActive(m_inVR);
 
             m_lineRight.material = PlayerSetup.Instance.vrRayLeft.lineRenderer.material;
             m_lineRight.gameObject.layer = PlayerSetup.Instance.vrRayLeft.gameObject.layer;
-            m_handRayLeft.highlightMaterial = PlayerSetup.Instance.vrRayLeft.highlightMaterial;
+            m_handRayRight.highlightMaterial = PlayerSetup.Instance.vrRayLeft.highlightMaterial;
+            m_handRayRight.SetVRActive(m_inVR);
         }
 
         public override void ModuleDestroyed()
@@ -149,6 +155,8 @@ namespace ml_lme
             Settings.FingersOnlyChange -= this.OnFingersOnlyChange;
 
             MetaPort.Instance.settings.settingBoolChanged.RemoveListener(this.OnGameSettingBoolChange);
+            VRModeSwitchEvents.OnInitializeXR.RemoveListener(OnSwitchToVR);
+            VRModeSwitchEvents.OnDeinitializeXR.RemoveListener(OnSwitchToDesktop);
         }
 
         public override void UpdateInput()
@@ -290,7 +298,7 @@ namespace ml_lme
             {
                 LeapParser.LeapData l_data = LeapManager.Instance.GetLatestData();
 
-                if(m_handVisibleLeft && (!m_inVR || !Utils.IsLeftHandTracked()) && !Settings.FingersOnly)
+                if(m_handVisibleLeft && !Settings.FingersOnly)
                 {
                     float l_strength = l_data.m_leftHand.m_grabStrength;
 
@@ -318,7 +326,7 @@ namespace ml_lme
                     }
                 }
 
-                if(m_handVisibleRight && (!m_inVR || !Utils.IsRightHandTracked()) && !Settings.FingersOnly)
+                if(m_handVisibleRight && !Settings.FingersOnly)
                 {
                     float l_strength = l_data.m_rightHand.m_grabStrength;
 
@@ -346,8 +354,8 @@ namespace ml_lme
                     }
                 }
 
-                ToggleHandRay(m_handVisibleLeft && (!m_inVR || !Utils.IsLeftHandTracked()) && !Settings.FingersOnly, true);
-                ToggleHandRay(m_handVisibleRight && (!m_inVR || !Utils.IsRightHandTracked()) && !Settings.FingersOnly, false);
+                ToggleHandRay(m_handVisibleLeft && !Settings.FingersOnly, true);
+                ToggleHandRay(m_handVisibleRight && !Settings.FingersOnly, false);
             }
         }
 
@@ -413,11 +421,6 @@ namespace ml_lme
         }
 
         // Game events
-        internal void OnAvatarSetup()
-        {
-            m_inVR = Utils.IsInVR();
-        }
-
         internal void OnRayScale(float p_scale)
         {
             m_handRayLeft.SetRayScale(p_scale);
@@ -439,6 +442,43 @@ namespace ml_lme
                     m_handRayRight.attachmentPoint.localRotation = Quaternion.Euler(0f, 0f, 90f);
                 }
             }
+        }
+
+        void OnSwitchToVR()
+        {
+            m_inVR = true;
+            base._inputManager.SetModuleAsLast(this);
+
+            if(m_handRayLeft != null)
+            {
+                m_handRayLeft.isDesktopRay = false;
+                m_handRayLeft.SetVRActive(true);
+            }
+            if(m_handRayRight != null)
+            {
+                m_handRayRight.isDesktopRay = false;
+                m_handRayRight.SetVRActive(true);
+            }
+
+            OnEnableChange(Settings.Enabled);
+        }
+        void OnSwitchToDesktop()
+        {
+            m_inVR = false;
+            base._inputManager.SetModuleAsLast(this);
+
+            if(m_handRayLeft != null)
+            {
+                m_handRayLeft.isDesktopRay = true;
+                m_handRayLeft.SetVRActive(false);
+            }
+            if(m_handRayRight != null)
+            {
+                m_handRayRight.isDesktopRay = true;
+                m_handRayRight.SetVRActive(false);
+            }
+
+            OnEnableChange(Settings.Enabled);
         }
 
         // Arbitrary

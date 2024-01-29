@@ -1,6 +1,7 @@
 ﻿using ABI.CCK.Components;
 using ABI_RC.Core.InteractionSystem;
 using ABI_RC.Core.Player;
+using ABI_RC.Systems.IK;
 using System;
 using System.Reflection;
 using UnityEngine;
@@ -29,6 +30,11 @@ namespace ml_pam
                 typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.SetupAvatar)),
                 null,
                 new HarmonyLib.HarmonyMethod(typeof(PickupArmMovement).GetMethod(nameof(OnSetupAvatar_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
+            );
+            HarmonyInstance.Patch(
+                typeof(IKSystem).GetMethod(nameof(IKSystem.ReinitializeAvatar), BindingFlags.Instance | BindingFlags.Public),
+                null,
+                new HarmonyLib.HarmonyMethod(typeof(PickupArmMovement).GetMethod(nameof(OnAvatarReinitialize_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
             HarmonyInstance.Patch(
                 typeof(CVRPickupObject).GetMethod(nameof(CVRPickupObject.Grab)),
@@ -90,6 +96,20 @@ namespace ml_pam
                     m_localMover.OnAvatarSetup();
             }
             catch(Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
+        }
+
+        static void OnAvatarReinitialize_Postfix() => ms_instance?.OnAvatarReinitialize();
+        void OnAvatarReinitialize()
+        {
+            try
+            {
+                if(m_localMover != null)
+                    m_localMover.OnAvatarReinitialize();
+            }
+            catch(System.Exception e)
             {
                 MelonLoader.MelonLogger.Error(e);
             }

@@ -1,4 +1,5 @@
-﻿using ABI_RC.Core.UI;
+﻿using ABI_RC.Core.Savior;
+using ABI_RC.Core.UI;
 using System.Reflection;
 using UnityEngine;
 
@@ -8,7 +9,7 @@ namespace ml_pam
     {
         static readonly FieldInfo ms_view = typeof(CohtmlControlledViewWrapper).GetField("_view", BindingFlags.NonPublic | BindingFlags.Instance);
 
-        public static bool IsInVR() => ((ABI_RC.Core.Savior.CheckVR.Instance != null) && ABI_RC.Core.Savior.CheckVR.Instance.hasVrDeviceLoaded);
+        public static bool IsInVR() => ((MetaPort.Instance != null) && MetaPort.Instance.isUsingVr);
 
         static public void ExecuteScript(this CohtmlControlledViewWrapper p_instance, string p_script) => ((cohtml.Net.View)ms_view.GetValue(p_instance)).ExecuteScript(p_script);
 

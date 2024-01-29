@@ -28,7 +28,6 @@ namespace ml_amt
         int m_locomotionLayer = 0;
         float m_avatarScale = 1f;
         Vector3 m_locomotionOffset = Vector3.zero; // Original locomotion offset
-        bool m_inVR = false;
 
         bool m_avatarReady = false;
         bool m_grounded = false;
@@ -55,8 +54,6 @@ namespace ml_amt
         // Unity events
         void Start()
         {
-            m_inVR = Utils.IsInVR();
-
             SetCrouchLimit(Settings.CrouchLimit);
             SetProneLimit(Settings.ProneLimit);
             SetIKOverrideFly(Settings.IKOverrideFly);
@@ -131,7 +128,6 @@ namespace ml_amt
 
         internal void OnSetupAvatar()
         {
-            m_inVR = Utils.IsInVR();
             m_vrIk = PlayerSetup.Instance._avatar.GetComponent<VRIK>();
             m_locomotionLayer = PlayerSetup.Instance._animator.GetLayerIndex("Locomotion/Emotes");
             m_avatarScale = Mathf.Abs(PlayerSetup.Instance._avatar.transform.localScale.y);
@@ -177,32 +173,23 @@ namespace ml_amt
             m_avatarReady = true;
         }
 
-        internal void OnCalibrate()
-        {
-            if(m_avatarReady && (m_vrIk != null) && (m_vrIk.solver.spine.pelvisTarget != null) && (m_vrIk.solver.leftLeg.target == null) && (m_vrIk.solver.rightLeg.target == null))
-            {
-                // Do not consider 4PT as FBT (!!!)
-                m_vrIk.solver.spine.bodyPosStiffness = 0.55f;
-                m_vrIk.solver.spine.bodyRotStiffness = 0.1f;
-                m_vrIk.solver.spine.neckStiffness = 0.5f;
-                m_vrIk.solver.spine.chestClampWeight = 0.55f;
-                m_vrIk.solver.spine.moveBodyBackWhenCrouching = 0.5f;
-                m_vrIk.solver.spine.maxRootAngle = 25f;
-                m_vrIk.fixTransforms = false;
-
-                BodySystem.isCalibratedAsFullBody = false;
-                BodySystem.TrackingLeftLegEnabled = false;
-                BodySystem.TrackingRightLegEnabled = false;
-                BodySystem.TrackingLocomotionEnabled = true;
-
-                IKSystem.Instance.applyOriginalHipRotation = true;
-            }
-        }
-
         internal void OnPlayspaceScale()
         {
             if((m_vrIk != null) && Settings.MassCenter)
                 m_vrIk.solver.locomotion.offset = m_massCenter * GetRelativeScale();
+        }
+
+        internal void OnAvatarReinitialize()
+        {
+            // Old VRIK is destroyed by game
+            m_vrIk = PlayerSetup.Instance._animator.GetComponent<VRIK>();
+            if(m_vrIk != null)
+            {
+                m_vrIk.solver.locomotion.offset = (Settings.MassCenter ? m_massCenter : m_locomotionOffset);
+
+                m_vrIk.onPreSolverUpdate.AddListener(this.OnIKPreUpdate);
+                m_vrIk.onPostSolverUpdate.AddListener(this.OnIKPostUpdate);
+            }
         }
 
         // IK events

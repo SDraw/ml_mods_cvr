@@ -427,6 +427,32 @@ namespace ml_prm
             OnAngularDragChange(Settings.AngularDrag);
         }
 
+        internal void OnPreAvatarReinitialize()
+        {
+            if(m_avatarReady && m_enabled)
+            {
+                m_forcedSwitch = true;
+                SwitchRagdoll();
+                m_forcedSwitch = false;
+            }
+        }
+        internal void OnPostAvatarReinitialize()
+        {
+            m_inVR = Utils.IsInVR();
+            m_vrIK = PlayerSetup.Instance._avatar.GetComponent<VRIK>();
+
+            if(m_vrIK != null)
+                m_vrIK.onPostSolverUpdate.AddListener(this.OnIKPostUpdate);
+
+            if(m_avatarReady && m_enabled)
+            {
+                m_forcedSwitch = true;
+                SwitchRagdoll();
+                m_forcedSwitch = false;
+            }
+
+        }
+
         internal void OnAvatarScaling(float p_scaleDifference)
         {
             if(m_puppetRoot != null)

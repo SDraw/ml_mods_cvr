@@ -1,4 +1,5 @@
 ﻿using ABI_RC.Core.Player;
+using ABI_RC.Systems.VRModeSwitch;
 using System.Collections;
 using UnityEngine;
 
@@ -87,6 +88,9 @@ namespace ml_lme
             OnVisualHandsChange(Settings.VisualHands);
             OnTrackingModeChange(Settings.TrackingMode);
             OnRootAngleChange(Settings.RootAngle);
+
+            VRModeSwitchEvents.OnInitializeXR.AddListener(this.OnSwitchToVR);
+            VRModeSwitchEvents.OnDeinitializeXR.AddListener(this.OnSwitchToDesktop);
         }
 
         IEnumerator WaitForLocalPlayer()
@@ -136,6 +140,9 @@ namespace ml_lme
             Settings.RootAngleChange -= this.OnRootAngleChange;
             Settings.HeadAttachChange -= this.OnHeadAttachChange;
             Settings.HeadOffsetChange -= this.OnHeadOffsetChange;
+
+            VRModeSwitchEvents.OnInitializeXR.RemoveListener(this.OnSwitchToVR);
+            VRModeSwitchEvents.OnDeinitializeXR.RemoveListener(this.OnSwitchToDesktop);
         }
 
         void Update()
@@ -263,6 +270,18 @@ namespace ml_lme
             OnHeadAttachChange(Settings.HeadAttach);
         }
 
+        void OnSwitchToVR()
+        {
+            m_inVR = true;
+            OnHeadAttachChange(Settings.HeadAttach);
+        }
+        void OnSwitchToDesktop()
+        {
+            m_inVR = false;
+            OnHeadAttachChange(Settings.HeadAttach);
+        }
+
+        // Utils
         static void OrientationAdjustment(ref Vector3 p_pos, ref Quaternion p_rot, Settings.LeapTrackingMode p_mode)
         {
             switch(p_mode)

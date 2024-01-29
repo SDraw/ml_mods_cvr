@@ -180,10 +180,14 @@ namespace ml_lme
             if(m_leapTracking != null)
                 m_leapTracking.OnAvatarSetup();
 
-            m_leapInput?.OnAvatarSetup();
-
             if(m_leapTracked != null)
                 m_leapTracked.OnAvatarSetup();
+        }
+
+        internal void OnAvatarReinitialize()
+        {
+            if(m_leapTracked != null)
+                m_leapTracked.OnAvatarReinitialize();
         }
 
         internal void OnRayScale(float p_scale)
