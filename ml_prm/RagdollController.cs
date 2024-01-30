@@ -763,7 +763,7 @@ namespace ml_prm
 
         internal bool ShoudlDisableHeadOffset()
         {
-            return (!m_inVR && m_enabled && (m_vrIK != null));
+            return (m_enabled && (m_vrIK != null));
         }
 
         static void TryRestoreMovement()
