@@ -1,8 +1,6 @@
 ﻿using ABI_RC.Core.Player;
 using ABI_RC.Systems.IK;
-using ABI_RC.Systems.VRModeSwitch;
 using RootMotion.FinalIK;
-using System.Reflection;
 using UnityEngine;
 
 namespace ml_lme
@@ -67,13 +65,7 @@ namespace ml_lme
 
         void OnDestroy()
         {
-            if(m_leftArmIK != null)
-                Destroy(m_leftArmIK);
-            m_leftArmIK = null;
-
-            if(m_rightArmIK != null)
-                Destroy(m_rightArmIK);
-            m_rightArmIK = null;
+            RemoveArmIK();
 
             if(m_leftHandTarget != null)
                 Destroy(m_leftHandTarget);
@@ -164,27 +156,11 @@ namespace ml_lme
 
             if(PlayerSetup.Instance._animator.isHuman)
             {
-                Vector3 l_hipsPos = Vector3.zero;
-                m_hips = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.Hips);
-                if(m_hips != null)
-                    l_hipsPos = m_hips.localPosition;
+                m_poseHandler = new HumanPoseHandler(PlayerSetup.Instance._animator.avatar, PlayerSetup.Instance._animator.transform);
+                m_poseHandler.GetHumanPose(ref m_pose);
 
                 if(!m_inVR)
-                {
-                    // Force desktop avatar into T-Pose
-                    m_poseHandler = new HumanPoseHandler(PlayerSetup.Instance._animator.avatar, PlayerSetup.Instance._avatar.transform);
-                    m_poseHandler.GetHumanPose(ref m_pose);
-
-                    HumanPose l_tPose = new HumanPose
-                    {
-                        bodyPosition = m_pose.bodyPosition,
-                        bodyRotation = m_pose.bodyRotation,
-                        muscles = new float[m_pose.muscles.Length]
-                    };
-                    for(int i = 0; i < l_tPose.muscles.Length; i++)
-                        l_tPose.muscles[i] = MusclePoses.TPoseMuscles[i];
-                    m_poseHandler.SetHumanPose(ref l_tPose);
-                }
+                    PoseHelper.ForceTPose(PlayerSetup.Instance._animator);
 
                 Transform l_hand = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftHand);
                 if(l_hand != null)
@@ -194,54 +170,13 @@ namespace ml_lme
                 if(l_hand != null)
                     m_rightHandTarget.localRotation = ms_offsetRight * (PlayerSetup.Instance._avatar.transform.GetMatrix().inverse * l_hand.GetMatrix()).rotation;
 
-                if(m_vrIK == null)
-                {
-                    Transform l_chest = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.UpperChest);
-                    if(l_chest == null)
-                        l_chest = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.Chest);
-                    if(l_chest == null)
-                        l_chest = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.Spine);
-
-                    m_leftArmIK = PlayerSetup.Instance._avatar.AddComponent<ArmIK>();
-                    m_leftArmIK.solver.isLeft = true;
-                    m_leftArmIK.solver.SetChain(
-                        l_chest,
-                        PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftShoulder),
-                        PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftUpperArm),
-                        PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftLowerArm),
-                        PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftHand),
-                        PlayerSetup.Instance._animator.transform
-                    );
-                    m_leftArmIK.solver.arm.target = m_leftHandTarget;
-                    m_leftArmIK.solver.arm.bendGoal = LeapTracking.Instance.GetLeftElbow();
-                    m_leftArmIK.solver.arm.bendGoalWeight = (m_trackElbows ? 1f : 0f);
-                    m_leftArmIK.enabled = (m_enabled && !m_fingersOnly);
-
-                    m_rightArmIK = PlayerSetup.Instance._avatar.AddComponent<ArmIK>();
-                    m_rightArmIK.solver.isLeft = false;
-                    m_rightArmIK.solver.SetChain(
-                        l_chest,
-                        PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightShoulder),
-                        PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightUpperArm),
-                        PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightLowerArm),
-                        PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightHand),
-                        PlayerSetup.Instance._animator.transform
-                    );
-                    m_rightArmIK.solver.arm.target = m_rightHandTarget;
-                    m_rightArmIK.solver.arm.bendGoal = LeapTracking.Instance.GetRightElbow();
-                    m_rightArmIK.solver.arm.bendGoalWeight = (m_trackElbows ? 1f : 0f);
-                    m_rightArmIK.enabled = (m_enabled && !m_fingersOnly);
-
-                    m_poseHandler?.SetHumanPose(ref m_pose);
-                }
-                else
+                if(m_vrIK != null)
                 {
                     m_vrIK.onPreSolverUpdate.AddListener(this.OnIKPreUpdate);
                     m_vrIK.onPostSolverUpdate.AddListener(this.OnIKPostUpdate);
                 }
-
-                if(m_hips != null)
-                    m_hips.localPosition = l_hipsPos;
+                else if(!m_inVR)
+                    SetupArmIK();
             }
         }
 
@@ -250,10 +185,19 @@ namespace ml_lme
             // Old VRIK is destroyed by game
             m_inVR = Utils.IsInVR();
             m_vrIK = PlayerSetup.Instance._animator.GetComponent<VRIK>();
+
+            if(m_inVR)
+                RemoveArmIK();
+
             if(m_vrIK != null)
             {
                 m_vrIK.onPreSolverUpdate.AddListener(this.OnIKPreUpdate);
                 m_vrIK.onPostSolverUpdate.AddListener(this.OnIKPostUpdate);
+            }
+            else if(!m_inVR)
+            {
+                PoseHelper.ForceTPose(PlayerSetup.Instance._animator);
+                SetupArmIK();
             }
         }
 
@@ -344,6 +288,56 @@ namespace ml_lme
         {
             m_leftTargetActive = false;
             m_rightTargetActive = false;
+        }
+
+        void SetupArmIK()
+        {
+            Transform l_chest = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.UpperChest);
+            if(l_chest == null)
+                l_chest = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.Chest);
+            if(l_chest == null)
+                l_chest = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.Spine);
+
+            m_leftArmIK = PlayerSetup.Instance._avatar.AddComponent<ArmIK>();
+            m_leftArmIK.solver.isLeft = true;
+            m_leftArmIK.solver.SetChain(
+                l_chest,
+                PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftShoulder),
+                PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftUpperArm),
+                PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftLowerArm),
+                PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftHand),
+                PlayerSetup.Instance._animator.transform
+            );
+            m_leftArmIK.solver.arm.target = m_leftHandTarget;
+            m_leftArmIK.solver.arm.bendGoal = LeapTracking.Instance.GetLeftElbow();
+            m_leftArmIK.solver.arm.bendGoalWeight = (m_trackElbows ? 1f : 0f);
+            m_leftArmIK.enabled = (m_enabled && !m_fingersOnly);
+
+            m_rightArmIK = PlayerSetup.Instance._avatar.AddComponent<ArmIK>();
+            m_rightArmIK.solver.isLeft = false;
+            m_rightArmIK.solver.SetChain(
+                l_chest,
+                PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightShoulder),
+                PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightUpperArm),
+                PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightLowerArm),
+                PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightHand),
+                PlayerSetup.Instance._animator.transform
+            );
+            m_rightArmIK.solver.arm.target = m_rightHandTarget;
+            m_rightArmIK.solver.arm.bendGoal = LeapTracking.Instance.GetRightElbow();
+            m_rightArmIK.solver.arm.bendGoalWeight = (m_trackElbows ? 1f : 0f);
+            m_rightArmIK.enabled = (m_enabled && !m_fingersOnly);
+        }
+
+        void RemoveArmIK()
+        {
+            if(m_leftArmIK != null)
+                Object.Destroy(m_leftArmIK);
+            m_leftArmIK = null;
+
+            if(m_rightArmIK != null)
+                Object.Destroy(m_rightArmIK);
+            m_rightArmIK = null;
         }
 
         void RefreshArmIK()

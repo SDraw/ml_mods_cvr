@@ -36,7 +36,7 @@ namespace ml_pmc
             );
             HarmonyInstance.Patch(
                 typeof(IKSystem).GetMethod(nameof(IKSystem.ReinitializeAvatar), BindingFlags.Instance | BindingFlags.Public),
-                null,
+                new HarmonyLib.HarmonyMethod(typeof(PlayerMovementCopycat).GetMethod(nameof(OnAvatarReinitialize_Prefix), BindingFlags.Static | BindingFlags.NonPublic)),
                 new HarmonyLib.HarmonyMethod(typeof(PlayerMovementCopycat).GetMethod(nameof(OnAvatarReinitialize_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
 
@@ -140,13 +140,27 @@ namespace ml_pmc
             }
         }
 
-        static void OnAvatarReinitialize_Postfix() => ms_instance?.OnAvatarReinitialize();
-        void OnAvatarReinitialize()
+        static void OnAvatarReinitialize_Prefix() => ms_instance?.OnPreAvatarReinitialize();
+        void OnPreAvatarReinitialize()
         {
             try
             {
                 if(m_localCopycat != null)
-                    m_localCopycat.OnAvatarReinitialize();
+                    m_localCopycat.OnPreAvatarReinitialize();
+            }
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
+        }
+
+        static void OnAvatarReinitialize_Postfix() => ms_instance?.OnPostAvatarReinitialize();
+        void OnPostAvatarReinitialize()
+        {
+            try
+            {
+                if(m_localCopycat != null)
+                    m_localCopycat.OnPostAvatarReinitialize();
             }
             catch(System.Exception e)
             {

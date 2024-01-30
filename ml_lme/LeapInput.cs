@@ -94,8 +94,8 @@ namespace ml_lme
             MelonLoader.MelonCoroutines.Start(WaitForSettings());
             MelonLoader.MelonCoroutines.Start(WaitForMaterial());
 
-            VRModeSwitchEvents.OnInitializeXR.AddListener(OnSwitchToVR);
-            VRModeSwitchEvents.OnDeinitializeXR.AddListener(OnSwitchToDesktop);
+            VRModeSwitchEvents.OnInitializeXR.AddListener(OnModeSwitch);
+            VRModeSwitchEvents.OnDeinitializeXR.AddListener(OnModeSwitch);
         }
 
         IEnumerator WaitForSettings()
@@ -155,8 +155,8 @@ namespace ml_lme
             Settings.FingersOnlyChange -= this.OnFingersOnlyChange;
 
             MetaPort.Instance.settings.settingBoolChanged.RemoveListener(this.OnGameSettingBoolChange);
-            VRModeSwitchEvents.OnInitializeXR.RemoveListener(OnSwitchToVR);
-            VRModeSwitchEvents.OnDeinitializeXR.RemoveListener(OnSwitchToDesktop);
+            VRModeSwitchEvents.OnInitializeXR.RemoveListener(OnModeSwitch);
+            VRModeSwitchEvents.OnDeinitializeXR.RemoveListener(OnModeSwitch);
         }
 
         public override void UpdateInput()
@@ -444,38 +444,20 @@ namespace ml_lme
             }
         }
 
-        void OnSwitchToVR()
+        void OnModeSwitch()
         {
-            m_inVR = true;
+            m_inVR = Utils.IsInVR();
             base._inputManager.SetModuleAsLast(this);
 
             if(m_handRayLeft != null)
             {
-                m_handRayLeft.isDesktopRay = false;
-                m_handRayLeft.SetVRActive(true);
+                m_handRayLeft.isDesktopRay = !m_inVR;
+                m_handRayLeft.SetVRActive(m_inVR);
             }
             if(m_handRayRight != null)
             {
-                m_handRayRight.isDesktopRay = false;
-                m_handRayRight.SetVRActive(true);
-            }
-
-            OnEnableChange(Settings.Enabled);
-        }
-        void OnSwitchToDesktop()
-        {
-            m_inVR = false;
-            base._inputManager.SetModuleAsLast(this);
-
-            if(m_handRayLeft != null)
-            {
-                m_handRayLeft.isDesktopRay = true;
-                m_handRayLeft.SetVRActive(false);
-            }
-            if(m_handRayRight != null)
-            {
-                m_handRayRight.isDesktopRay = true;
-                m_handRayRight.SetVRActive(false);
+                m_handRayRight.isDesktopRay = !m_inVR;
+                m_handRayRight.SetVRActive(m_inVR);
             }
 
             OnEnableChange(Settings.Enabled);

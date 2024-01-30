@@ -89,8 +89,8 @@ namespace ml_lme
             OnTrackingModeChange(Settings.TrackingMode);
             OnRootAngleChange(Settings.RootAngle);
 
-            VRModeSwitchEvents.OnInitializeXR.AddListener(this.OnSwitchToVR);
-            VRModeSwitchEvents.OnDeinitializeXR.AddListener(this.OnSwitchToDesktop);
+            VRModeSwitchEvents.OnInitializeXR.AddListener(this.OnModeSwitch);
+            VRModeSwitchEvents.OnDeinitializeXR.AddListener(this.OnModeSwitch);
         }
 
         IEnumerator WaitForLocalPlayer()
@@ -141,8 +141,8 @@ namespace ml_lme
             Settings.HeadAttachChange -= this.OnHeadAttachChange;
             Settings.HeadOffsetChange -= this.OnHeadOffsetChange;
 
-            VRModeSwitchEvents.OnInitializeXR.RemoveListener(this.OnSwitchToVR);
-            VRModeSwitchEvents.OnDeinitializeXR.RemoveListener(this.OnSwitchToDesktop);
+            VRModeSwitchEvents.OnInitializeXR.RemoveListener(this.OnModeSwitch);
+            VRModeSwitchEvents.OnDeinitializeXR.RemoveListener(this.OnModeSwitch);
         }
 
         void Update()
@@ -270,14 +270,9 @@ namespace ml_lme
             OnHeadAttachChange(Settings.HeadAttach);
         }
 
-        void OnSwitchToVR()
+        void OnModeSwitch()
         {
-            m_inVR = true;
-            OnHeadAttachChange(Settings.HeadAttach);
-        }
-        void OnSwitchToDesktop()
-        {
-            m_inVR = false;
+            m_inVR = Utils.IsInVR();
             OnHeadAttachChange(Settings.HeadAttach);
         }
 

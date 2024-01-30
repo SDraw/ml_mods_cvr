@@ -152,12 +152,12 @@ namespace ml_dht
             bool l_result = false;
             if(m_enabled && Settings.FaceTracking)
             {
-                p_component.LipSyncWasUpdated = true;
                 if(!m_lipDataSent)
                 {
                     FaceTrackingManager.Instance.SubmitNewFacialData(m_lipData);
                     m_lipDataSent = true;
                 }
+                p_component.LipSyncWasUpdated = true;
                 p_component.UpdateShapesLocal_Private();
 
                 l_result = true;

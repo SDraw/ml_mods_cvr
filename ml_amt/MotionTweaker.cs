@@ -98,11 +98,8 @@ namespace ml_amt
                     m_emoteActive = (l_animState.tagHash == ms_emoteHash);
                 }
 
-                if(m_parameters.Count > 0)
-                {
-                    foreach(AvatarParameter l_param in m_parameters)
-                        l_param.Update(this);
-                }
+                foreach(AvatarParameter l_param in m_parameters)
+                    l_param.Update(this);
             }
         }
 
@@ -214,7 +211,6 @@ namespace ml_amt
                     m_vrIk.solver.rightLeg.useAnimatedBendNormal = true;
                     l_locomotionOverride = true;
                 }
-
                 if(m_ikOverrideFly && BetterBetterCharacterController.Instance.IsFlying())
                 {
                     m_vrIk.solver.locomotion.weight = 0f;

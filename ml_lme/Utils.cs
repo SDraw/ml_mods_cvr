@@ -40,11 +40,12 @@ namespace ml_lme
         public static void SetModuleAsLast(this CVRInputManager p_instance, CVRInputModule p_module)
         {
             List<CVRInputModule> l_modules = ms_inputModules.GetValue(p_instance) as List<CVRInputModule>;
+            int l_lastIndex = l_modules.Count - 1;
             int l_index = l_modules.FindIndex(p => p == p_module);
-            if(l_index != -1)
+            if((l_index != -1) && (l_index != l_lastIndex))
             {
-                l_modules[l_index] = l_modules[l_modules.Count - 1];
-                l_modules[l_modules.Count - 1] = p_module;
+                l_modules[l_index] = l_modules[l_lastIndex];
+                l_modules[l_lastIndex] = p_module;
             }
         }
 

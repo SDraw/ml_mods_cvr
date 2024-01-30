@@ -37,9 +37,6 @@ namespace ml_pmc
         {
             if(Instance == null)
                 Instance = this;
-
-            VRModeSwitchEvents.OnInitializeXR.AddListener(this.OnSwitchToVR);
-            VRModeSwitchEvents.OnDeinitializeXR.AddListener(this.OnSwitchToDesktop);
         }
         void OnDestroy()
         {
@@ -56,9 +53,6 @@ namespace ml_pmc
             m_animator = null;
             m_vrIk = null;
             m_lookAtIk = null;
-
-            VRModeSwitchEvents.OnInitializeXR.RemoveListener(this.OnSwitchToVR);
-            VRModeSwitchEvents.OnDeinitializeXR.RemoveListener(this.OnSwitchToDesktop);
         }
 
         // Unity events
@@ -201,6 +195,7 @@ namespace ml_pmc
         }
         internal void OnAvatarSetup()
         {
+            m_inVr = Utils.IsInVR();
             m_animator = PlayerSetup.Instance._animator;
             m_vrIk = PlayerSetup.Instance._avatar.GetComponent<VRIK>();
             m_lookAtIk = PlayerSetup.Instance._avatar.GetComponent<LookAtIK>();
@@ -225,8 +220,16 @@ namespace ml_pmc
             else
                 m_animator = null;
         }
-        internal void OnAvatarReinitialize()
+
+        internal void OnPreAvatarReinitialize()
         {
+            if(m_active)
+                SetTarget(null);
+        }
+        internal void OnPostAvatarReinitialize()
+        {
+            m_inVr = Utils.IsInVR();
+
             // Old VRIK and LookAtIK are destroyed by game
             m_vrIk = PlayerSetup.Instance._avatar.GetComponent<VRIK>();
             m_lookAtIk = PlayerSetup.Instance._avatar.GetComponent<LookAtIK>();
@@ -242,15 +245,6 @@ namespace ml_pmc
                 m_lookAtIk.onPreSolverUpdate.AddListener(this.OnLookAtIKPreUpdate);
                 m_lookAtIk.onPostSolverUpdate.AddListener(this.OnLookAtIKPostUpdate);
             }
-        }
-
-        void OnSwitchToVR()
-        {
-            m_inVr = true;
-        }
-        void OnSwitchToDesktop()
-        {
-            m_inVr = false;
         }
 
         // IK updates

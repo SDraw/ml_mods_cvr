@@ -111,6 +111,7 @@ namespace ml_prm
             if(m_puppetRoot != null)
                 Object.Destroy(m_puppetRoot);
             m_puppetRoot = null;
+
             m_puppet = null;
             m_rigidBodies.Clear();
             m_colliders.Clear();
@@ -443,14 +444,6 @@ namespace ml_prm
 
             if(m_vrIK != null)
                 m_vrIK.onPostSolverUpdate.AddListener(this.OnIKPostUpdate);
-
-            if(m_avatarReady && m_enabled)
-            {
-                m_forcedSwitch = true;
-                SwitchRagdoll();
-                m_forcedSwitch = false;
-            }
-
         }
 
         internal void OnAvatarScaling(float p_scaleDifference)
@@ -536,7 +529,7 @@ namespace ml_prm
             }
         }
 
-        // IK updates
+        // VRIK updates
         void OnIKPostUpdate()
         {
             if(!m_enabled)
