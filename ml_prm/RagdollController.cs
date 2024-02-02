@@ -678,7 +678,7 @@ namespace ml_prm
                 {
                     if(CanUnragdoll())
                     {
-                        BetterBetterCharacterController.Instance.TeleportPlayerTo(m_puppetReferences.hips.position, PlayerSetup.Instance.transform.rotation.eulerAngles, false, false);
+                        BetterBetterCharacterController.Instance.TeleportPlayerTo(m_puppetReferences.hips.position, PlayerSetup.Instance.GetPlayerRotation().eulerAngles, false, false);
                         TryRestoreMovement();
                         if(!Utils.IsWorldSafe())
                         {
