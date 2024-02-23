@@ -381,6 +381,7 @@ namespace ml_prm
                             l_physicsInfluencer.fluidAngularDrag = 1f;
                             l_physicsInfluencer.enableBuoyancy = true;
                             l_physicsInfluencer.enableInfluence = false;
+                            l_physicsInfluencer.forceAlignUpright = false;
                             float mass = l_body.mass;
                             l_physicsInfluencer.UpdateDensity();
                             l_body.mass = mass;
@@ -715,7 +716,7 @@ namespace ml_prm
 
                         // Restore movement if was ragdolled in water and left it
                         if(m_wasSwimming)
-                            BetterBetterCharacterController.Instance.SetMovementMode(EasyCharacterMovement.MovementMode.Swimming);
+                            BetterBetterCharacterController.Instance.SetMovementMode(ECM2.Character.MovementMode.Swimming);
 
                         m_enabled = false;
                     }

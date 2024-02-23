@@ -63,15 +63,10 @@
       <Private>false</Private>
       <SpecificVersion>false</SpecificVersion>
     </Reference>
-    <Reference Include="EasyCharacterMovement.CharacterMovement">
-      <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\EasyCharacterMovement.CharacterMovement.dll</HintPath>
-      <Private>false</Private>
+    <Reference Include="ECM2">
+      <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\ECM2.dll</HintPath>
       <SpecificVersion>false</SpecificVersion>
-    </Reference>
-    <Reference Include="EasyCharacterMovement.Characters">
-      <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\EasyCharacterMovement.Characters.dll</HintPath>
       <Private>false</Private>
-      <SpecificVersion>false</SpecificVersion>
     </Reference>
     <Reference Include="MelonLoader">
       <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\MelonLoader\net35\MelonLoader.dll</HintPath>
