@@ -156,6 +156,7 @@ namespace ml_lme
 
             if(PlayerSetup.Instance._animator.isHuman)
             {
+                m_hips = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.Hips);
                 m_poseHandler = new HumanPoseHandler(PlayerSetup.Instance._animator.avatar, PlayerSetup.Instance._animator.transform);
                 m_poseHandler.GetHumanPose(ref m_pose);
 
