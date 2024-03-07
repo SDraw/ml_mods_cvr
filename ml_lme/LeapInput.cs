@@ -1,8 +1,10 @@
-﻿using ABI_RC.Core.InteractionSystem;
+﻿using ABI.CCK.Components;
+using ABI_RC.Core.InteractionSystem;
 using ABI_RC.Core.Player;
 using ABI_RC.Core.Savior;
 using ABI_RC.Systems.IK;
 using ABI_RC.Systems.InputManagement;
+using ABI_RC.Systems.VRModeSwitch;
 using System.Collections;
 using UnityEngine;
 
@@ -32,13 +34,15 @@ namespace ml_lme
 
             m_inVR = Utils.IsInVR();
 
-            m_handRayLeft = LeapTracking.Instance.GetLeftHand().gameObject.AddComponent<ControllerRay>();
+            m_handRayLeft = LeapTracking.Instance.GetLeftHand().GetRoot().gameObject.AddComponent<ControllerRay>();
             m_handRayLeft.hand = true;
-            m_handRayLeft.generalMask = -1485;
+            m_handRayLeft.generalMask = -269;
             m_handRayLeft.isInteractionRay = true;
             m_handRayLeft.triggerGazeEvents = false;
             m_handRayLeft.holderRoot = m_handRayLeft.gameObject;
             m_handRayLeft.attachmentDistance = 0f;
+            m_handRayLeft.uiMask = 32;
+            m_handRayLeft.isDesktopRay = !m_inVR;
 
             m_lineLeft = m_handRayLeft.gameObject.AddComponent<LineRenderer>();
             m_lineLeft.endWidth = 1f;
@@ -52,13 +56,15 @@ namespace ml_lme
             m_lineLeft.receiveShadows = false;
             m_handRayLeft.lineRenderer = m_lineLeft;
 
-            m_handRayRight = LeapTracking.Instance.GetRightHand().gameObject.AddComponent<ControllerRay>();
+            m_handRayRight = LeapTracking.Instance.GetRightHand().GetRoot().gameObject.AddComponent<ControllerRay>();
             m_handRayRight.hand = false;
-            m_handRayRight.generalMask = -1485;
+            m_handRayRight.generalMask = -269;
             m_handRayRight.isInteractionRay = true;
             m_handRayRight.triggerGazeEvents = false;
             m_handRayRight.holderRoot = m_handRayRight.gameObject;
             m_handRayRight.attachmentDistance = 0f;
+            m_handRayRight.uiMask = 32;
+            m_handRayRight.isDesktopRay = !m_inVR;
 
             m_lineRight = m_handRayRight.gameObject.AddComponent<LineRenderer>();
             m_lineRight.endWidth = 1f;
@@ -72,6 +78,9 @@ namespace ml_lme
             m_lineRight.receiveShadows = false;
             m_handRayRight.lineRenderer = m_lineRight;
 
+            m_handRayLeft.otherRay = m_handRayRight;
+            m_handRayRight.otherRay = m_handRayLeft;
+
             Settings.EnabledChange += this.OnEnableChange;
             Settings.InteractionChange += this.OnInteractionChange;
             Settings.GesturesChange += this.OnGesturesChange;
@@ -84,6 +93,9 @@ namespace ml_lme
 
             MelonLoader.MelonCoroutines.Start(WaitForSettings());
             MelonLoader.MelonCoroutines.Start(WaitForMaterial());
+
+            VRModeSwitchEvents.OnInitializeXR.AddListener(OnModeSwitch);
+            VRModeSwitchEvents.OnDeinitializeXR.AddListener(OnModeSwitch);
         }
 
         IEnumerator WaitForSettings()
@@ -108,8 +120,13 @@ namespace ml_lme
 
             m_lineLeft.material = PlayerSetup.Instance.vrRayLeft.lineRenderer.material;
             m_lineLeft.gameObject.layer = PlayerSetup.Instance.vrRayLeft.gameObject.layer;
+            m_handRayLeft.highlightMaterial = PlayerSetup.Instance.vrRayLeft.highlightMaterial;
+            m_handRayLeft.SetVRActive(m_inVR);
+
             m_lineRight.material = PlayerSetup.Instance.vrRayLeft.lineRenderer.material;
             m_lineRight.gameObject.layer = PlayerSetup.Instance.vrRayLeft.gameObject.layer;
+            m_handRayRight.highlightMaterial = PlayerSetup.Instance.vrRayLeft.highlightMaterial;
+            m_handRayRight.SetVRActive(m_inVR);
         }
 
         public override void ModuleDestroyed()
@@ -138,6 +155,8 @@ namespace ml_lme
             Settings.FingersOnlyChange -= this.OnFingersOnlyChange;
 
             MetaPort.Instance.settings.settingBoolChanged.RemoveListener(this.OnGameSettingBoolChange);
+            VRModeSwitchEvents.OnInitializeXR.RemoveListener(OnModeSwitch);
+            VRModeSwitchEvents.OnDeinitializeXR.RemoveListener(OnModeSwitch);
         }
 
         public override void UpdateInput()
@@ -157,36 +176,36 @@ namespace ml_lme
                         base._inputManager.gestureLeftRaw = 0f;
 
                         // Finger Point & Finger Gun
-                        if((base._inputManager.fingerCurlLeftIndex < 0.2f) && (base._inputManager.fingerCurlLeftMiddle > 0.75f) &&
-                            (base._inputManager.fingerCurlLeftRing > 0.75f) && (base._inputManager.fingerCurlLeftPinky > 0.75f))
+                        if((base._inputManager.fingerFullCurlNormalizedLeftIndex < 0.2f) && (base._inputManager.fingerFullCurlNormalizedLeftMiddle > 0.75f) &&
+                            (base._inputManager.fingerFullCurlNormalizedLeftRing > 0.75f) && (base._inputManager.fingerFullCurlNormalizedLeftPinky > 0.75f))
                         {
-                            base._inputManager.gestureLeftRaw = (base._inputManager.fingerCurlLeftThumb >= 0.5f) ? 4f : 3f;
+                            base._inputManager.gestureLeftRaw = (base._inputManager.fingerFullCurlNormalizedLeftThumb >= 0.5f) ? 4f : 3f;
                         }
 
                         // Peace Sign
-                        if((base._inputManager.fingerCurlLeftIndex < 0.2f) && (base._inputManager.fingerCurlLeftMiddle < 0.2f) &&
-                            (base._inputManager.fingerCurlLeftRing > 0.75f) && (base._inputManager.fingerCurlLeftPinky > 0.75f))
+                        if((base._inputManager.fingerFullCurlNormalizedLeftIndex < 0.2f) && (base._inputManager.fingerFullCurlNormalizedLeftMiddle < 0.2f) &&
+                            (base._inputManager.fingerFullCurlNormalizedLeftRing > 0.75f) && (base._inputManager.fingerFullCurlNormalizedLeftPinky > 0.75f))
                         {
                             base._inputManager.gestureLeftRaw = 5f;
                         }
 
                         // Rock and Roll
-                        if((base._inputManager.fingerCurlLeftIndex < 0.2f) && (base._inputManager.fingerCurlLeftMiddle > 0.75f) &&
-                            (base._inputManager.fingerCurlLeftRing > 0.75f) && (base._inputManager.fingerCurlLeftPinky < 0.5f))
+                        if((base._inputManager.fingerFullCurlNormalizedLeftIndex < 0.2f) && (base._inputManager.fingerFullCurlNormalizedLeftMiddle > 0.75f) &&
+                            (base._inputManager.fingerFullCurlNormalizedLeftRing > 0.75f) && (base._inputManager.fingerFullCurlNormalizedLeftPinky < 0.5f))
                         {
                             base._inputManager.gestureLeftRaw = 6f;
                         }
 
                         // Fist & Thumbs Up
-                        if((base._inputManager.fingerCurlLeftIndex > 0.5f) && (base._inputManager.fingerCurlLeftMiddle > 0.5f) &&
-                            (base._inputManager.fingerCurlLeftRing > 0.5f) && (base._inputManager.fingerCurlLeftPinky > 0.5f))
+                        if((base._inputManager.fingerFullCurlNormalizedLeftIndex > 0.5f) && (base._inputManager.fingerFullCurlNormalizedLeftMiddle > 0.5f) &&
+                            (base._inputManager.fingerFullCurlNormalizedLeftRing > 0.5f) && (base._inputManager.fingerFullCurlNormalizedLeftPinky > 0.5f))
                         {
-                            base._inputManager.gestureLeftRaw = (base._inputManager.fingerCurlLeftThumb >= 0.5f) ? ((l_data.m_leftHand.m_grabStrength - 0.5f) * 2f) : 2f;
+                            base._inputManager.gestureLeftRaw = (base._inputManager.fingerFullCurlNormalizedLeftThumb >= 0.5f) ? ((l_data.m_leftHand.m_grabStrength - 0.5f) * 2f) : 2f;
                         }
 
                         // Open Hand
-                        if((base._inputManager.fingerCurlLeftIndex < 0.2f) && (base._inputManager.fingerCurlLeftMiddle < 0.2f) &&
-                            (base._inputManager.fingerCurlLeftRing < 0.2f) && (base._inputManager.fingerCurlLeftPinky < 0.2f))
+                        if((base._inputManager.fingerFullCurlNormalizedLeftIndex < 0.2f) && (base._inputManager.fingerFullCurlNormalizedLeftMiddle < 0.2f) &&
+                            (base._inputManager.fingerFullCurlNormalizedLeftRing < 0.2f) && (base._inputManager.fingerFullCurlNormalizedLeftPinky < 0.2f))
                         {
                             base._inputManager.gestureLeftRaw = -1f;
                         }
@@ -217,36 +236,36 @@ namespace ml_lme
                         base._inputManager.gestureRightRaw = 0f;
 
                         // Finger Point & Finger Gun
-                        if((base._inputManager.fingerCurlRightIndex < 0.2f) && (base._inputManager.fingerCurlRightMiddle > 0.75f) &&
-                            (base._inputManager.fingerCurlRightRing > 0.75f) && (base._inputManager.fingerCurlRightPinky > 0.75f))
+                        if((base._inputManager.fingerFullCurlNormalizedRightIndex < 0.2f) && (base._inputManager.fingerFullCurlNormalizedRightMiddle > 0.75f) &&
+                            (base._inputManager.fingerFullCurlNormalizedRightRing > 0.75f) && (base._inputManager.fingerFullCurlNormalizedRightPinky > 0.75f))
                         {
-                            base._inputManager.gestureRightRaw = (base._inputManager.fingerCurlRightThumb >= 0.5f) ? 4f : 3f;
+                            base._inputManager.gestureRightRaw = (base._inputManager.fingerFullCurlNormalizedRightThumb >= 0.5f) ? 4f : 3f;
                         }
 
                         // Peace Sign
-                        if((base._inputManager.fingerCurlRightIndex < 0.2f) && (base._inputManager.fingerCurlRightMiddle < 0.2f) &&
-                            (base._inputManager.fingerCurlRightRing > 0.75f) && (base._inputManager.fingerCurlRightPinky > 0.75f))
+                        if((base._inputManager.fingerFullCurlNormalizedRightIndex < 0.2f) && (base._inputManager.fingerFullCurlNormalizedRightMiddle < 0.2f) &&
+                            (base._inputManager.fingerFullCurlNormalizedRightRing > 0.75f) && (base._inputManager.fingerFullCurlNormalizedRightPinky > 0.75f))
                         {
                             base._inputManager.gestureRightRaw = 5f;
                         }
 
                         // Rock and Roll
-                        if((base._inputManager.fingerCurlRightIndex < 0.2f) && (base._inputManager.fingerCurlRightMiddle > 0.75f) &&
-                            (base._inputManager.fingerCurlRightRing > 0.75f) && (base._inputManager.fingerCurlRightPinky < 0.5f))
+                        if((base._inputManager.fingerFullCurlNormalizedRightIndex < 0.2f) && (base._inputManager.fingerFullCurlNormalizedRightMiddle > 0.75f) &&
+                            (base._inputManager.fingerFullCurlNormalizedRightRing > 0.75f) && (base._inputManager.fingerFullCurlNormalizedRightPinky < 0.5f))
                         {
                             base._inputManager.gestureRightRaw = 6f;
                         }
 
                         // Fist & Thumbs Up
-                        if((base._inputManager.fingerCurlRightIndex > 0.5f) && (base._inputManager.fingerCurlRightMiddle > 0.5f) &&
-                            (base._inputManager.fingerCurlRightRing > 0.5f) && (base._inputManager.fingerCurlRightPinky > 0.5f))
+                        if((base._inputManager.fingerFullCurlNormalizedRightIndex > 0.5f) && (base._inputManager.fingerFullCurlNormalizedRightMiddle > 0.5f) &&
+                            (base._inputManager.fingerFullCurlNormalizedRightRing > 0.5f) && (base._inputManager.fingerFullCurlNormalizedRightPinky > 0.5f))
                         {
-                            base._inputManager.gestureRightRaw = (base._inputManager.fingerCurlRightThumb >= 0.5f) ? ((l_data.m_rightHand.m_grabStrength - 0.5f) * 2f) : 2f;
+                            base._inputManager.gestureRightRaw = (base._inputManager.fingerFullCurlNormalizedRightThumb >= 0.5f) ? ((l_data.m_rightHand.m_grabStrength - 0.5f) * 2f) : 2f;
                         }
 
                         // Open Hand
-                        if((base._inputManager.fingerCurlRightIndex < 0.2f) && (base._inputManager.fingerCurlRightMiddle < 0.2f) &&
-                            (base._inputManager.fingerCurlRightRing < 0.2f) && (base._inputManager.fingerCurlRightPinky < 0.2f))
+                        if((base._inputManager.fingerFullCurlNormalizedRightIndex < 0.2f) && (base._inputManager.fingerFullCurlNormalizedRightMiddle < 0.2f) &&
+                            (base._inputManager.fingerFullCurlNormalizedRightRing < 0.2f) && (base._inputManager.fingerFullCurlNormalizedRightPinky < 0.2f))
                         {
                             base._inputManager.gestureRightRaw = -1f;
                         }
@@ -279,7 +298,7 @@ namespace ml_lme
             {
                 LeapParser.LeapData l_data = LeapManager.Instance.GetLatestData();
 
-                if(m_handVisibleLeft && (!m_inVR || !Utils.IsLeftHandTracked()) && !Settings.FingersOnly)
+                if(m_handVisibleLeft && !Settings.FingersOnly)
                 {
                     float l_strength = l_data.m_leftHand.m_grabStrength;
 
@@ -307,7 +326,7 @@ namespace ml_lme
                     }
                 }
 
-                if(m_handVisibleRight && (!m_inVR || !Utils.IsRightHandTracked()) && !Settings.FingersOnly)
+                if(m_handVisibleRight && !Settings.FingersOnly)
                 {
                     float l_strength = l_data.m_rightHand.m_grabStrength;
 
@@ -335,8 +354,8 @@ namespace ml_lme
                     }
                 }
 
-                ToggleHandRay(m_handVisibleLeft && (!m_inVR || !Utils.IsLeftHandTracked()) && !Settings.FingersOnly, true);
-                ToggleHandRay(m_handVisibleRight && (!m_inVR || !Utils.IsRightHandTracked()) && !Settings.FingersOnly, false);
+                ToggleHandRay(m_handVisibleLeft && !Settings.FingersOnly, true);
+                ToggleHandRay(m_handVisibleRight && !Settings.FingersOnly, false);
             }
         }
 
@@ -402,47 +421,116 @@ namespace ml_lme
         }
 
         // Game events
-        internal void OnAvatarSetup()
-        {
-            m_inVR = Utils.IsInVR();
-        }
-
         internal void OnRayScale(float p_scale)
         {
             m_handRayLeft.SetRayScale(p_scale);
             m_handRayRight.SetRayScale(p_scale);
         }
 
+        internal void OnPickupGrab(CVRPickupObject p_pickup)
+        {
+            if(p_pickup.gripType == CVRPickupObject.GripType.Origin)
+            {
+                if(p_pickup._controllerRay == m_handRayLeft)
+                {
+                    m_handRayLeft.attachmentPoint.localPosition = Vector3.zero;
+                    m_handRayLeft.attachmentPoint.localRotation = Quaternion.Euler(0f, 0f, 270f);
+                }
+                if(p_pickup._controllerRay == m_handRayRight)
+                {
+                    m_handRayRight.attachmentPoint.localPosition = Vector3.zero;
+                    m_handRayRight.attachmentPoint.localRotation = Quaternion.Euler(0f, 0f, 90f);
+                }
+            }
+        }
+
+        void OnModeSwitch()
+        {
+            m_inVR = Utils.IsInVR();
+            base._inputManager.SetModuleAsLast(this);
+
+            if(m_handRayLeft != null)
+            {
+                m_handRayLeft.isDesktopRay = !m_inVR;
+                m_handRayLeft.SetVRActive(m_inVR);
+            }
+            if(m_handRayRight != null)
+            {
+                m_handRayRight.isDesktopRay = !m_inVR;
+                m_handRayRight.SetVRActive(m_inVR);
+            }
+
+            OnEnableChange(Settings.Enabled);
+        }
+
         // Arbitrary
         void SetFingersInput(LeapParser.HandData p_hand, bool p_left)
         {
-            // Game has spreads in range of [0;1], but mod now operates in range of [-1;1]
-            // So spreads will be normalized towards game's range
             if(p_left)
             {
-                base._inputManager.fingerCurlLeftThumb = p_hand.m_bends[0];
-                base._inputManager.fingerCurlLeftIndex = p_hand.m_bends[1];
-                base._inputManager.fingerCurlLeftMiddle = p_hand.m_bends[2];
-                base._inputManager.fingerCurlLeftRing = p_hand.m_bends[3];
-                base._inputManager.fingerCurlLeftPinky = p_hand.m_bends[4];
-                base._inputManager.fingerSpreadLeftThumb = 1f - (p_hand.m_spreads[0] * 0.5f + 0.5f);
-                base._inputManager.fingerSpreadLeftIndex = 1f - (p_hand.m_spreads[1] * 0.5f + 0.5f);
-                base._inputManager.fingerSpreadLeftMiddle = 1f - (p_hand.m_spreads[2] * 0.5f + 0.5f);
-                base._inputManager.fingerSpreadLeftRing = 1f - (p_hand.m_spreads[3] * 0.5f + 0.5f);
-                base._inputManager.fingerSpreadLeftPinky = 1f - (p_hand.m_spreads[4] * 0.5f + 0.5f);
+                base._inputManager.finger1StretchedLeftThumb = LeapTracked.ms_lastLeftFingerBones[0];
+                base._inputManager.finger2StretchedLeftThumb = LeapTracked.ms_lastLeftFingerBones[1];
+                base._inputManager.finger3StretchedLeftThumb = LeapTracked.ms_lastLeftFingerBones[2];
+                base._inputManager.fingerSpreadLeftThumb = LeapTracked.ms_lastLeftFingerBones[3];
+
+                base._inputManager.finger1StretchedLeftIndex = LeapTracked.ms_lastLeftFingerBones[4];
+                base._inputManager.finger2StretchedLeftIndex = LeapTracked.ms_lastLeftFingerBones[5];
+                base._inputManager.finger3StretchedLeftIndex = LeapTracked.ms_lastLeftFingerBones[6];
+                base._inputManager.fingerSpreadLeftIndex = LeapTracked.ms_lastLeftFingerBones[7];
+
+                base._inputManager.finger1StretchedLeftMiddle = LeapTracked.ms_lastLeftFingerBones[8];
+                base._inputManager.finger2StretchedLeftMiddle = LeapTracked.ms_lastLeftFingerBones[9];
+                base._inputManager.finger3StretchedLeftMiddle = LeapTracked.ms_lastLeftFingerBones[10];
+                base._inputManager.fingerSpreadLeftMiddle = LeapTracked.ms_lastLeftFingerBones[11];
+
+                base._inputManager.finger1StretchedLeftRing = LeapTracked.ms_lastLeftFingerBones[12];
+                base._inputManager.finger2StretchedLeftRing = LeapTracked.ms_lastLeftFingerBones[13];
+                base._inputManager.finger3StretchedLeftRing = LeapTracked.ms_lastLeftFingerBones[14];
+                base._inputManager.fingerSpreadLeftRing = LeapTracked.ms_lastLeftFingerBones[15];
+
+                base._inputManager.finger1StretchedLeftPinky = LeapTracked.ms_lastLeftFingerBones[16];
+                base._inputManager.finger2StretchedLeftPinky = LeapTracked.ms_lastLeftFingerBones[17];
+                base._inputManager.finger3StretchedLeftPinky = LeapTracked.ms_lastLeftFingerBones[18];
+                base._inputManager.fingerSpreadLeftPinky = LeapTracked.ms_lastLeftFingerBones[19];
+
+                base._inputManager.fingerFullCurlNormalizedLeftThumb = p_hand.m_bends[0];
+                base._inputManager.fingerFullCurlNormalizedLeftIndex = p_hand.m_bends[1];
+                base._inputManager.fingerFullCurlNormalizedLeftMiddle = p_hand.m_bends[2];
+                base._inputManager.fingerFullCurlNormalizedLeftRing = p_hand.m_bends[3];
+                base._inputManager.fingerFullCurlNormalizedLeftPinky = p_hand.m_bends[4];
             }
             else
             {
-                base._inputManager.fingerCurlRightThumb = p_hand.m_bends[0];
-                base._inputManager.fingerCurlRightIndex = p_hand.m_bends[1];
-                base._inputManager.fingerCurlRightMiddle = p_hand.m_bends[2];
-                base._inputManager.fingerCurlRightRing = p_hand.m_bends[3];
-                base._inputManager.fingerCurlRightPinky = p_hand.m_bends[4];
-                base._inputManager.fingerSpreadRightThumb = 1f - (p_hand.m_spreads[0] * 0.5f + 0.5f);
-                base._inputManager.fingerSpreadRightIndex = 1f - (p_hand.m_spreads[1] * 0.5f + 0.5f);
-                base._inputManager.fingerSpreadRightMiddle = 1f - (p_hand.m_spreads[2] * 0.5f + 0.5f);
-                base._inputManager.fingerSpreadRightRing = 1f - (p_hand.m_spreads[3] * 0.5f + 0.5f);
-                base._inputManager.fingerSpreadRightPinky = 1f - (p_hand.m_spreads[4] * 0.5f + 0.5f);
+                base._inputManager.finger1StretchedRightThumb = LeapTracked.ms_lastRightFingerBones[0];
+                base._inputManager.finger2StretchedRightThumb = LeapTracked.ms_lastRightFingerBones[1];
+                base._inputManager.finger3StretchedRightThumb = LeapTracked.ms_lastRightFingerBones[2];
+                base._inputManager.fingerSpreadRightThumb = LeapTracked.ms_lastRightFingerBones[3];
+
+                base._inputManager.finger1StretchedRightIndex = LeapTracked.ms_lastRightFingerBones[4];
+                base._inputManager.finger2StretchedRightIndex = LeapTracked.ms_lastRightFingerBones[5];
+                base._inputManager.finger3StretchedRightIndex = LeapTracked.ms_lastRightFingerBones[6];
+                base._inputManager.fingerSpreadRightIndex = LeapTracked.ms_lastRightFingerBones[7];
+
+                base._inputManager.finger1StretchedRightMiddle = LeapTracked.ms_lastRightFingerBones[8];
+                base._inputManager.finger2StretchedRightMiddle = LeapTracked.ms_lastRightFingerBones[9];
+                base._inputManager.finger3StretchedRightMiddle = LeapTracked.ms_lastRightFingerBones[10];
+                base._inputManager.fingerSpreadRightMiddle = LeapTracked.ms_lastRightFingerBones[11];
+
+                base._inputManager.finger1StretchedRightRing = LeapTracked.ms_lastRightFingerBones[12];
+                base._inputManager.finger2StretchedRightRing = LeapTracked.ms_lastRightFingerBones[13];
+                base._inputManager.finger3StretchedRightRing = LeapTracked.ms_lastRightFingerBones[14];
+                base._inputManager.fingerSpreadRightRing = LeapTracked.ms_lastRightFingerBones[15];
+
+                base._inputManager.finger1StretchedRightPinky = LeapTracked.ms_lastRightFingerBones[16];
+                base._inputManager.finger2StretchedRightPinky = LeapTracked.ms_lastRightFingerBones[17];
+                base._inputManager.finger3StretchedRightPinky = LeapTracked.ms_lastRightFingerBones[18];
+                base._inputManager.fingerSpreadRightPinky = LeapTracked.ms_lastRightFingerBones[19];
+
+                base._inputManager.fingerFullCurlNormalizedRightThumb = p_hand.m_bends[0];
+                base._inputManager.fingerFullCurlNormalizedRightIndex = p_hand.m_bends[1];
+                base._inputManager.fingerFullCurlNormalizedRightMiddle = p_hand.m_bends[2];
+                base._inputManager.fingerFullCurlNormalizedRightRing = p_hand.m_bends[3];
+                base._inputManager.fingerFullCurlNormalizedRightPinky = p_hand.m_bends[4];
             }
         }
 
@@ -450,29 +538,69 @@ namespace ml_lme
         {
             if(p_left)
             {
-                base._inputManager.fingerCurlLeftThumb = 0f;
-                base._inputManager.fingerCurlLeftIndex = 0f;
-                base._inputManager.fingerCurlLeftMiddle = 0f;
-                base._inputManager.fingerCurlLeftRing = 0f;
-                base._inputManager.fingerCurlLeftPinky = 0f;
-                base._inputManager.fingerSpreadLeftThumb = 0.5f;
-                base._inputManager.fingerSpreadLeftIndex = 0.5f;
-                base._inputManager.fingerSpreadLeftMiddle = 0.5f;
-                base._inputManager.fingerSpreadLeftRing = 0.5f;
-                base._inputManager.fingerSpreadLeftPinky = 0.5f;
+                base._inputManager.finger1StretchedLeftThumb = -0.5f;
+                base._inputManager.finger2StretchedLeftThumb = 0.7f;
+                base._inputManager.finger3StretchedLeftThumb = 0.7f;
+                base._inputManager.fingerSpreadLeftThumb = 0f;
+
+                base._inputManager.finger1StretchedLeftIndex = 0.5f;
+                base._inputManager.finger2StretchedLeftIndex = 0.7f;
+                base._inputManager.finger3StretchedLeftIndex = 0.7f;
+                base._inputManager.fingerSpreadLeftIndex = 0f;
+
+                base._inputManager.finger1StretchedLeftMiddle = 0.5f;
+                base._inputManager.finger2StretchedLeftMiddle = 0.7f;
+                base._inputManager.finger3StretchedLeftMiddle = 0.7f;
+                base._inputManager.fingerSpreadLeftMiddle = 0f;
+
+                base._inputManager.finger1StretchedLeftRing = 0.5f;
+                base._inputManager.finger2StretchedLeftRing = 0.7f;
+                base._inputManager.finger3StretchedLeftRing = 0.7f;
+                base._inputManager.fingerSpreadLeftRing = 0f;
+
+                base._inputManager.finger1StretchedLeftPinky = 0.5f;
+                base._inputManager.finger2StretchedLeftPinky = 0.7f;
+                base._inputManager.finger3StretchedLeftPinky = 0.7f;
+                base._inputManager.fingerSpreadLeftPinky = 0f;
+
+                base._inputManager.fingerFullCurlNormalizedLeftThumb = 0f;
+                base._inputManager.fingerFullCurlNormalizedLeftIndex = 0f;
+                base._inputManager.fingerFullCurlNormalizedLeftMiddle = 0f;
+                base._inputManager.fingerFullCurlNormalizedLeftRing = 0f;
+                base._inputManager.fingerFullCurlNormalizedLeftPinky = 0f;
             }
             else
             {
-                base._inputManager.fingerCurlRightThumb = 0f;
-                base._inputManager.fingerCurlRightIndex = 0f;
-                base._inputManager.fingerCurlRightMiddle = 0f;
-                base._inputManager.fingerCurlRightRing = 0f;
-                base._inputManager.fingerCurlRightPinky = 0f;
-                base._inputManager.fingerSpreadRightThumb = 0.5f;
-                base._inputManager.fingerSpreadRightIndex = 0.5f;
-                base._inputManager.fingerSpreadRightMiddle = 0.5f;
-                base._inputManager.fingerSpreadRightRing = 0.5f;
-                base._inputManager.fingerSpreadRightPinky = 0.5f;
+                base._inputManager.finger1StretchedRightThumb = -0.5f;
+                base._inputManager.finger2StretchedRightThumb = 0.7f;
+                base._inputManager.finger3StretchedRightThumb = 0.7f;
+                base._inputManager.fingerSpreadRightThumb = 0f;
+
+                base._inputManager.finger1StretchedRightIndex = 0.5f;
+                base._inputManager.finger2StretchedRightIndex = 0.7f;
+                base._inputManager.finger3StretchedRightIndex = 0.7f;
+                base._inputManager.fingerSpreadRightIndex = 0f;
+
+                base._inputManager.finger1StretchedRightMiddle = 0.5f;
+                base._inputManager.finger2StretchedRightMiddle = 0.7f;
+                base._inputManager.finger3StretchedRightMiddle = 0.7f;
+                base._inputManager.fingerSpreadRightMiddle = 0f;
+
+                base._inputManager.finger1StretchedRightRing = 0.5f;
+                base._inputManager.finger2StretchedRightRing = 0.7f;
+                base._inputManager.finger3StretchedRightRing = 0.7f;
+                base._inputManager.fingerSpreadRightRing = 0f;
+
+                base._inputManager.finger1StretchedRightPinky = 0.5f;
+                base._inputManager.finger2StretchedRightPinky = 0.7f;
+                base._inputManager.finger3StretchedRightPinky = 0.7f;
+                base._inputManager.fingerSpreadRightPinky = 0f;
+
+                base._inputManager.fingerFullCurlNormalizedRightThumb = 0f;
+                base._inputManager.fingerFullCurlNormalizedRightIndex = 0f;
+                base._inputManager.fingerFullCurlNormalizedRightMiddle = 0f;
+                base._inputManager.fingerFullCurlNormalizedRightRing = 0f;
+                base._inputManager.fingerFullCurlNormalizedRightPinky = 0f;
             }
         }
 

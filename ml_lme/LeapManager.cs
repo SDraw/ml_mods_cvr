@@ -1,4 +1,5 @@
-﻿using ABI_RC.Core.Player;
+﻿using ABI.CCK.Components;
+using ABI_RC.Core.Player;
 using ABI_RC.Systems.InputManagement;
 using System.Collections;
 using UnityEngine;
@@ -179,10 +180,14 @@ namespace ml_lme
             if(m_leapTracking != null)
                 m_leapTracking.OnAvatarSetup();
 
-            m_leapInput?.OnAvatarSetup();
-
             if(m_leapTracked != null)
                 m_leapTracked.OnAvatarSetup();
+        }
+
+        internal void OnAvatarReinitialize()
+        {
+            if(m_leapTracked != null)
+                m_leapTracked.OnAvatarReinitialize();
         }
 
         internal void OnRayScale(float p_scale)
@@ -194,6 +199,11 @@ namespace ml_lme
         {
             if(m_leapTracking != null)
                 m_leapTracking.OnPlayspaceScale(p_relation);
+        }
+
+        internal void OnPickupGrab(CVRPickupObject p_pickup)
+        {
+            m_leapInput?.OnPickupGrab(p_pickup);
         }
 
         // Arbitrary

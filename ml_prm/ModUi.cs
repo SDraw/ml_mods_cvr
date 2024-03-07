@@ -90,19 +90,19 @@ namespace ml_prm
             ms_uiElements.Add(l_modCategory.AddToggle("Fall damage", "Enable ragdoll when falling from height", Settings.FallDamage));
             (ms_uiElements[(int)UiIndex.FallDamage] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate(UiIndex.FallDamage, state);
 
-            ms_uiElements.Add(l_modRoot.AddSlider("Velocity multiplier", "Velocity multiplier upon entering ragdoll state", Settings.VelocityMultiplier, 1f, 50f));
+            ms_uiElements.Add(l_modCategory.AddSlider("Velocity multiplier", "Velocity multiplier upon entering ragdoll state", Settings.VelocityMultiplier, 1f, 50f));
             (ms_uiElements[(int)UiIndex.VelocityMultiplier] as BTKUILib.UIObjects.Components.SliderFloat).OnValueUpdated += (value) => OnSliderUpdate(UiIndex.VelocityMultiplier, value);
 
-            ms_uiElements.Add(l_modRoot.AddSlider("Movement drag", "Movement resistance", Settings.MovementDrag, 0f, 50f));
+            ms_uiElements.Add(l_modCategory.AddSlider("Movement drag", "Movement resistance", Settings.MovementDrag, 0f, 50f));
             (ms_uiElements[(int)UiIndex.MovementDrag] as BTKUILib.UIObjects.Components.SliderFloat).OnValueUpdated += (value) => OnSliderUpdate(UiIndex.MovementDrag, value);
 
-            ms_uiElements.Add(l_modRoot.AddSlider("Angular movement drag", "Rotation movement resistance", Settings.AngularDrag, 0f, 50f));
+            ms_uiElements.Add(l_modCategory.AddSlider("Angular movement drag", "Rotation movement resistance", Settings.AngularDrag, 0f, 50f));
             (ms_uiElements[(int)UiIndex.AngularDrag] as BTKUILib.UIObjects.Components.SliderFloat).OnValueUpdated += (value) => OnSliderUpdate(UiIndex.AngularDrag, value);
 
-            ms_uiElements.Add(l_modRoot.AddSlider("Recover delay (seconds)", "Recover delay for automatic recover", Settings.RecoverDelay, 1f, 10f));
+            ms_uiElements.Add(l_modCategory.AddSlider("Recover delay (seconds)", "Recover delay for automatic recover", Settings.RecoverDelay, 1f, 10f));
             (ms_uiElements[(int)UiIndex.RecoverDelay] as BTKUILib.UIObjects.Components.SliderFloat).OnValueUpdated += (value) => OnSliderUpdate(UiIndex.RecoverDelay, value);
 
-            ms_uiElements.Add(l_modRoot.AddSlider("Fall limit", "Height limit for fall damage", Settings.FallLimit, 0f, 100f));
+            ms_uiElements.Add(l_modCategory.AddSlider("Fall limit", "Height limit for fall damage", Settings.FallLimit, 0f, 100f));
             (ms_uiElements[(int)UiIndex.FallLimit] as BTKUILib.UIObjects.Components.SliderFloat).OnValueUpdated += (value) => OnSliderUpdate(UiIndex.FallLimit, value);
 
             l_modCategory.AddButton("Reset settings", "", "Reset mod settings to default").OnPress += Reset;

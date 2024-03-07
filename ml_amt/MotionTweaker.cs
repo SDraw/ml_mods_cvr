@@ -1,7 +1,7 @@
 ﻿using ABI_RC.Core.Player;
 using ABI_RC.Systems.IK;
 using ABI_RC.Systems.IK.SubSystems;
-using ABI_RC.Systems.MovementSystem;
+using ABI_RC.Systems.Movement;
 using RootMotion.FinalIK;
 using System.Collections.Generic;
 using UnityEngine;
@@ -28,11 +28,9 @@ namespace ml_amt
         int m_locomotionLayer = 0;
         float m_avatarScale = 1f;
         Vector3 m_locomotionOffset = Vector3.zero; // Original locomotion offset
-        bool m_inVR = false;
 
         bool m_avatarReady = false;
         bool m_grounded = false;
-        bool m_groundedRaw = false;
         bool m_moving = false;
         bool m_locomotionOverride = false;
 
@@ -56,8 +54,6 @@ namespace ml_amt
         // Unity events
         void Start()
         {
-            m_inVR = Utils.IsInVR();
-
             SetCrouchLimit(Settings.CrouchLimit);
             SetProneLimit(Settings.ProneLimit);
             SetIKOverrideFly(Settings.IKOverrideFly);
@@ -90,9 +86,8 @@ namespace ml_amt
         {
             if(m_avatarReady)
             {
-                m_grounded = MovementSystem.Instance.IsGrounded();
-                m_groundedRaw = MovementSystem.Instance.IsGroundedRaw();
-                m_moving = !Mathf.Approximately(MovementSystem.Instance.movementVector.magnitude, 0f);
+                m_grounded = BetterBetterCharacterController.Instance.IsGrounded();
+                m_moving = BetterBetterCharacterController.Instance.IsMoving();
 
                 UpdateIKLimits();
 
@@ -103,11 +98,8 @@ namespace ml_amt
                     m_emoteActive = (l_animState.tagHash == ms_emoteHash);
                 }
 
-                if(m_parameters.Count > 0)
-                {
-                    foreach(AvatarParameter l_param in m_parameters)
-                        l_param.Update(this);
-                }
+                foreach(AvatarParameter l_param in m_parameters)
+                    l_param.Update(this);
             }
         }
 
@@ -117,7 +109,6 @@ namespace ml_amt
             m_vrIk = null;
             m_locomotionLayer = -1;
             m_grounded = false;
-            m_groundedRaw = false;
             m_avatarReady = false;
             m_avatarScale = 1f;
             m_locomotionOffset = Vector3.zero;
@@ -128,19 +119,17 @@ namespace ml_amt
             m_ikLimits = null;
             m_parameters.Clear();
 
-            PlayerSetup.Instance.avatarCrouchLimit = Mathf.Clamp01(Settings.CrouchLimit);
-            PlayerSetup.Instance.avatarProneLimit = Mathf.Clamp01(Settings.ProneLimit);
+            BetterBetterCharacterController.Instance.avatarCrouchLimit = Mathf.Clamp01(Settings.CrouchLimit);
+            BetterBetterCharacterController.Instance.avatarProneLimit = Mathf.Clamp01(Settings.ProneLimit);
         }
 
         internal void OnSetupAvatar()
         {
-            m_inVR = Utils.IsInVR();
             m_vrIk = PlayerSetup.Instance._avatar.GetComponent<VRIK>();
             m_locomotionLayer = PlayerSetup.Instance._animator.GetLayerIndex("Locomotion/Emotes");
             m_avatarScale = Mathf.Abs(PlayerSetup.Instance._avatar.transform.localScale.y);
 
             // Parse animator parameters
-            m_parameters.Add(new AvatarParameter(AvatarParameter.ParameterType.GroundedRaw, PlayerSetup.Instance.animatorManager));
             m_parameters.Add(new AvatarParameter(AvatarParameter.ParameterType.Moving, PlayerSetup.Instance.animatorManager));
             m_parameters.RemoveAll(p => !p.IsValid());
 
@@ -181,32 +170,23 @@ namespace ml_amt
             m_avatarReady = true;
         }
 
-        internal void OnCalibrate()
-        {
-            if(m_avatarReady && (m_vrIk != null) && (m_vrIk.solver.spine.pelvisTarget != null) && (m_vrIk.solver.leftLeg.target == null) && (m_vrIk.solver.rightLeg.target == null))
-            {
-                // Do not consider 4PT as FBT (!!!)
-                m_vrIk.solver.spine.bodyPosStiffness = 0.55f;
-                m_vrIk.solver.spine.bodyRotStiffness = 0.1f;
-                m_vrIk.solver.spine.neckStiffness = 0.5f;
-                m_vrIk.solver.spine.chestClampWeight = 0.55f;
-                m_vrIk.solver.spine.moveBodyBackWhenCrouching = 0.5f;
-                m_vrIk.solver.spine.maxRootAngle = 25f;
-                m_vrIk.fixTransforms = false;
-
-                BodySystem.isCalibratedAsFullBody = false;
-                BodySystem.TrackingLeftLegEnabled = false;
-                BodySystem.TrackingRightLegEnabled = false;
-                BodySystem.TrackingLocomotionEnabled = true;
-
-                IKSystem.Instance.applyOriginalHipRotation = true;
-            }
-        }
-
         internal void OnPlayspaceScale()
         {
             if((m_vrIk != null) && Settings.MassCenter)
                 m_vrIk.solver.locomotion.offset = m_massCenter * GetRelativeScale();
+        }
+
+        internal void OnAvatarReinitialize()
+        {
+            // Old VRIK is destroyed by game
+            m_vrIk = PlayerSetup.Instance._animator.GetComponent<VRIK>();
+            if(m_vrIk != null)
+            {
+                m_vrIk.solver.locomotion.offset = (Settings.MassCenter ? m_massCenter : m_locomotionOffset);
+
+                m_vrIk.onPreSolverUpdate.AddListener(this.OnIKPreUpdate);
+                m_vrIk.onPostSolverUpdate.AddListener(this.OnIKPostUpdate);
+            }
         }
 
         // IK events
@@ -225,21 +205,20 @@ namespace ml_amt
 
             if(!BodySystem.isCalibratedAsFullBody)
             {
-                if(PlayerSetup.Instance.avatarUpright <= PlayerSetup.Instance.avatarCrouchLimit)
+                if(BetterBetterCharacterController.Instance.AvatarUpright <= BetterBetterCharacterController.Instance.avatarCrouchLimit)
                 {
                     m_vrIk.solver.leftLeg.useAnimatedBendNormal = true;
                     m_vrIk.solver.rightLeg.useAnimatedBendNormal = true;
                     l_locomotionOverride = true;
                 }
-
-                if(m_ikOverrideFly && MovementSystem.Instance.flying)
+                if(m_ikOverrideFly && BetterBetterCharacterController.Instance.IsFlying())
                 {
                     m_vrIk.solver.locomotion.weight = 0f;
                     m_vrIk.solver.leftLeg.useAnimatedBendNormal = true;
                     m_vrIk.solver.rightLeg.useAnimatedBendNormal = true;
                     l_locomotionOverride = true;
                 }
-                if(m_ikOverrideJump && !m_grounded && !MovementSystem.Instance.flying)
+                if(m_ikOverrideJump && !m_grounded && !BetterBetterCharacterController.Instance.IsFlying())
                 {
                     m_vrIk.solver.locomotion.weight = 0f;
                     m_vrIk.solver.leftLeg.useAnimatedBendNormal = true;
@@ -266,12 +245,12 @@ namespace ml_amt
         internal void SetCrouchLimit(float p_value)
         {
             if(m_ikLimits == null)
-                PlayerSetup.Instance.avatarCrouchLimit = Mathf.Clamp01(p_value);
+                BetterBetterCharacterController.Instance.avatarCrouchLimit = Mathf.Clamp01(p_value);
         }
         internal void SetProneLimit(float p_value)
         {
             if(m_ikLimits == null)
-                PlayerSetup.Instance.avatarProneLimit = Mathf.Clamp01(p_value);
+                BetterBetterCharacterController.Instance.avatarProneLimit = Mathf.Clamp01(p_value);
         }
         internal void SetIKOverrideFly(bool p_state)
         {
@@ -302,14 +281,12 @@ namespace ml_amt
             if(m_ikLimits != null)
             {
                 Vector3 l_values = m_ikLimits.localPosition;
-                PlayerSetup.Instance.avatarCrouchLimit = Mathf.Clamp01(l_values.x);
-                PlayerSetup.Instance.avatarProneLimit = Mathf.Clamp01(l_values.y);
+                BetterBetterCharacterController.Instance.avatarCrouchLimit = Mathf.Clamp01(l_values.x);
+                BetterBetterCharacterController.Instance.avatarProneLimit = Mathf.Clamp01(l_values.y);
             }
         }
 
         // Parameters access
-        public float GetUpright() => PlayerSetup.Instance.avatarUpright;
-        public bool GetGroundedRaw() => m_groundedRaw;
         public bool GetMoving() => m_moving;
     }
 }

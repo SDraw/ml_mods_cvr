@@ -4,8 +4,9 @@ using ABI_RC.Core.InteractionSystem;
 using ABI_RC.Core.Player;
 using ABI_RC.Core.Util.AssetFiltering;
 using ABI_RC.Systems.Camera.VisualMods;
+using ABI_RC.Systems.IK;
 using ABI_RC.Systems.IK.SubSystems;
-using ABI_RC.Systems.MovementSystem;
+using ABI_RC.Systems.Movement;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,8 @@ namespace ml_prm
 {
     public class PlayerRagdollMod : MelonLoader.MelonMod
     {
+        static readonly Type[] ms_teleportTypes = { typeof(UnityEngine.Vector3), typeof(bool), typeof(bool), typeof(UnityEngine.Quaternion?) };
+
         static PlayerRagdollMod ms_instance = null;
 
         RagdollController m_localController = null;
@@ -36,6 +39,11 @@ namespace ml_prm
                 typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.SetupAvatar)),
                 null,
                 new HarmonyLib.HarmonyMethod(typeof(PlayerRagdollMod).GetMethod(nameof(OnSetupAvatar_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
+            );
+            HarmonyInstance.Patch(
+                typeof(IKSystem).GetMethod(nameof(IKSystem.ReinitializeAvatar), BindingFlags.Instance | BindingFlags.Public),
+                new HarmonyLib.HarmonyMethod(typeof(PlayerRagdollMod).GetMethod(nameof(OnAvatarReinitialize_Prefix), BindingFlags.Static | BindingFlags.NonPublic)),
+                new HarmonyLib.HarmonyMethod(typeof(PlayerRagdollMod).GetMethod(nameof(OnAvatarReinitialize_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
             HarmonyInstance.Patch(
                 typeof(PlayerSetup).GetMethod("SetupIKScaling", BindingFlags.NonPublic | BindingFlags.Instance),
@@ -63,19 +71,13 @@ namespace ml_prm
                 null
             );
             HarmonyInstance.Patch(
-                typeof(MovementSystem).GetMethod(nameof(MovementSystem.ChangeFlight)),
+                typeof(BetterBetterCharacterController).GetMethod(nameof(BetterBetterCharacterController.ChangeFlight)),
                 null,
                 new HarmonyLib.HarmonyMethod(typeof(PlayerRagdollMod).GetMethod(nameof(OnChangeFlight_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
             HarmonyInstance.Patch(
-                typeof(MovementSystem).GetMethod(nameof(MovementSystem.TeleportToPosRot)),
-                null,
-                new HarmonyLib.HarmonyMethod(typeof(PlayerRagdollMod).GetMethod(nameof(OnPlayerTeleport_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
-            );
-            HarmonyInstance.Patch(
-                typeof(DroneMode).GetMethod(nameof(DroneMode.Disable)),
-                null,
-                new HarmonyLib.HarmonyMethod(typeof(PlayerRagdollMod).GetMethod(nameof(OnDroneModeDisable_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
+                typeof(IKSystem).GetMethod("OnPreSolverUpdateActiveOffset", BindingFlags.Instance | BindingFlags.NonPublic),
+                new HarmonyLib.HarmonyMethod(typeof(PlayerRagdollMod).GetMethod(nameof(OnOffsetUpdate_Prefix), BindingFlags.Static | BindingFlags.NonPublic))
             );
 
             // Whitelist the toggle script
@@ -135,6 +137,34 @@ namespace ml_prm
                     m_localController.OnAvatarSetup();
             }
             catch(Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
+        }
+
+        static void OnAvatarReinitialize_Prefix() => ms_instance?.OnPreAvatarReinitialize();
+        void OnPreAvatarReinitialize()
+        {
+            try
+            {
+                if(m_localController != null)
+                    m_localController.OnPreAvatarReinitialize();
+            }
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
+        }
+
+        static void OnAvatarReinitialize_Postfix() => ms_instance?.OnPostAvatarReinitialize();
+        void OnPostAvatarReinitialize()
+        {
+            try
+            {
+                if(m_localController != null)
+                    m_localController.OnPostAvatarReinitialize();
+            }
+            catch(System.Exception e)
             {
                 MelonLoader.MelonLogger.Error(e);
             }
@@ -228,32 +258,20 @@ namespace ml_prm
             }
         }
 
-        static void OnPlayerTeleport_Postfix() => ms_instance?.OnPlayerTeleport();
-        void OnPlayerTeleport()
+        static bool OnOffsetUpdate_Prefix(ref IKSystem __instance) => ms_instance.OnOffsetUpdate(__instance);
+        bool OnOffsetUpdate(IKSystem p_instance)
         {
+            bool l_result = true;
             try
             {
                 if(m_localController != null)
-                    m_localController.OnPlayerTeleport();
+                    l_result = !m_localController.ShoudlDisableHeadOffset();
             }
             catch(Exception e)
             {
                 MelonLoader.MelonLogger.Error(e);
             }
-        }
-
-        static void OnDroneModeDisable_Postfix() => ms_instance?.OnDroneModeDisable();
-        void OnDroneModeDisable()
-        {
-            try
-            {
-                if(m_localController != null)
-                    m_localController.OnDroneModeDisable();
-            }
-            catch(Exception e)
-            {
-                MelonLoader.MelonLogger.Error(e);
-            }
+            return l_result;
         }
     }
 }

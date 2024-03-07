@@ -1,6 +1,8 @@
+using ABI.CCK.Components;
 using ABI_RC.Core.Player;
+using ABI_RC.Core.Player.EyeMovement;
 using ABI_RC.Core.Savior;
-using ABI_RC.Systems.FaceTracking;
+using ABI_RC.Systems.IK;
 using System.Reflection;
 
 namespace ml_dht
@@ -9,7 +11,7 @@ namespace ml_dht
     {
         static DesktopHeadTracking ms_instance = null;
 
-        TrackingModule m_trackingModule = null;
+        DataParser m_dataParser = null;
         HeadTracked m_localTracked = null;
 
         public override void OnInitializeMelon()
@@ -18,8 +20,6 @@ namespace ml_dht
                 ms_instance = this;
 
             Settings.Init();
-
-            m_trackingModule = new TrackingModule();
 
             // Patches
             HarmonyInstance.Patch(
@@ -31,6 +31,11 @@ namespace ml_dht
                 typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.SetupAvatar)),
                 null,
                 new HarmonyLib.HarmonyMethod(typeof(DesktopHeadTracking).GetMethod(nameof(OnSetupAvatar_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
+            );
+            HarmonyInstance.Patch(
+                typeof(IKSystem).GetMethod(nameof(IKSystem.ReinitializeAvatar), BindingFlags.Instance | BindingFlags.Public),
+                null,
+                new HarmonyLib.HarmonyMethod(typeof(DesktopHeadTracking).GetMethod(nameof(OnAvatarReinitialize_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
 
             MelonLoader.MelonCoroutines.Start(WaitForInstances());
@@ -44,14 +49,18 @@ namespace ml_dht
             while(PlayerSetup.Instance == null)
                 yield return null;
 
+            m_dataParser = new DataParser();
             m_localTracked = PlayerSetup.Instance.gameObject.AddComponent<HeadTracked>();
-            FaceTrackingManager.Instance.RegisterModule(m_trackingModule);
 
             // If you think it's a joke to put patch here, go on, try to put it in OnInitializeMelon, you melon :>
             HarmonyInstance.Patch(
-                typeof(CVREyeController).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic),
+                typeof(EyeMovementController).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic),
                 null,
                 new HarmonyLib.HarmonyMethod(typeof(DesktopHeadTracking).GetMethod(nameof(OnEyeControllerUpdate_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
+            );
+            HarmonyInstance.Patch(
+                typeof(CVRFaceTracking).GetMethod("UpdateLocalData", BindingFlags.Instance | BindingFlags.NonPublic),
+                new HarmonyLib.HarmonyMethod(typeof(DesktopHeadTracking).GetMethod(nameof(OnFaceTrackingLocalUpdate_Prefix), BindingFlags.Static | BindingFlags.NonPublic))
             );
         }
 
@@ -60,17 +69,17 @@ namespace ml_dht
             if(ms_instance == this)
                 ms_instance = null;
 
-            m_trackingModule = null;
+            m_dataParser = null;
             m_localTracked = null;
         }
 
         public override void OnUpdate()
         {
-            if(Settings.Enabled && (m_trackingModule != null))
+            if(Settings.Enabled && (m_dataParser != null))
             {
-                m_trackingModule.Update();
+                m_dataParser.Update();
                 if(m_localTracked != null)
-                    m_localTracked.UpdateTrackingData(ref m_trackingModule.GetLatestTrackingData());
+                    m_localTracked.UpdateTrackingData(ref m_dataParser.GetLatestTrackingData());
             }
         }
 
@@ -102,18 +111,45 @@ namespace ml_dht
             }
         }
 
-        static void OnEyeControllerUpdate_Postfix(ref CVREyeController __instance) => ms_instance?.OnEyeControllerUpdate(__instance);
-        void OnEyeControllerUpdate(CVREyeController p_component)
+        static void OnAvatarReinitialize_Postfix() => ms_instance?.OnAvatarReinitialize();
+        void OnAvatarReinitialize()
         {
             try
             {
-                if(p_component.isLocal && (m_localTracked != null))
+                if(m_localTracked != null)
+                    m_localTracked.OnAvatarReinitialize();
+            }
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
+        }
+
+        static void OnEyeControllerUpdate_Postfix(ref EyeMovementController __instance) => ms_instance?.OnEyeControllerUpdate(__instance);
+        void OnEyeControllerUpdate(EyeMovementController p_component)
+        {
+            try
+            {
+                if(p_component.IsLocal && (m_localTracked != null))
                     m_localTracked.OnEyeControllerUpdate(p_component);
             }
             catch(System.Exception e)
             {
                 MelonLoader.MelonLogger.Error(e);
             }
+        }
+
+        static bool OnFaceTrackingLocalUpdate_Prefix(ref CVRFaceTracking __instance)
+        {
+            bool? l_result = ms_instance?.OnFaceTrackingLocalUpdate(__instance);
+            return l_result.GetValueOrDefault(true);
+        }
+        bool OnFaceTrackingLocalUpdate(CVRFaceTracking p_component)
+        {
+            bool l_result = true;
+            if(p_component.UseFacialTracking && (m_localTracked != null))
+                l_result = !m_localTracked.UpdateFaceTracking(p_component);
+            return l_result;
         }
     }
 }

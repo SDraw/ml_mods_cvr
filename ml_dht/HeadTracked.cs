@@ -1,6 +1,10 @@
 ﻿using ABI.CCK.Components;
 using ABI_RC.Core.Player;
+using ABI_RC.Core.Player.EyeMovement;
+using ABI_RC.Systems.FaceTracking;
+using ABI_RC.Systems.VRModeSwitch;
 using RootMotion.FinalIK;
+using System;
 using System.Reflection;
 using UnityEngine;
 using ViveSR.anipal.Lip;
@@ -25,9 +29,21 @@ namespace ml_dht
         Quaternion m_headRotation;
         Vector2 m_gazeDirection;
         float m_blinkProgress = 0f;
+        LipData_v2 m_lipData;
+        bool m_lipDataSent = false;
 
         Quaternion m_bindRotation;
         Quaternion m_lastHeadRotation;
+
+        internal HeadTracked()
+        {
+            m_lipData = new LipData_v2();
+            m_lipData.frame = 0;
+            m_lipData.time = 0;
+            m_lipData.image = IntPtr.Zero;
+            m_lipData.prediction_data = new PredictionData_v2();
+            m_lipData.prediction_data.blend_shape_weight = new float[(int)LipShape_v2.Max];
+        }
 
         // Unity events
         void Start()
@@ -48,6 +64,12 @@ namespace ml_dht
             Settings.SmoothingChange -= this.SetSmoothing;
         }
 
+        void Update()
+        {
+            if(m_lipDataSent)
+                m_lipDataSent = false;
+        }
+
         // Tracking updates
         public void UpdateTrackingData(ref TrackingData p_data)
         {
@@ -55,6 +77,12 @@ namespace ml_dht
             m_headRotation.Set(p_data.m_headRotationX, p_data.m_headRotationY * (Settings.Mirrored ? -1f : 1f), p_data.m_headRotationZ * (Settings.Mirrored ? -1f : 1f), p_data.m_headRotationW);
             m_gazeDirection.Set(Settings.Mirrored ? (1f - p_data.m_gazeX) : p_data.m_gazeX, p_data.m_gazeY);
             m_blinkProgress = p_data.m_blink;
+
+            float l_weight = Mathf.Clamp01(Mathf.InverseLerp(0.25f, 1f, Mathf.Abs(p_data.m_mouthShape)));
+            m_lipData.prediction_data.blend_shape_weight[(int)LipShape_v2.Jaw_Open] = p_data.m_mouthOpen;
+            m_lipData.prediction_data.blend_shape_weight[(int)LipShape_v2.Mouth_Pout] = ((p_data.m_mouthShape > 0f) ? l_weight : 0f);
+            m_lipData.prediction_data.blend_shape_weight[(int)LipShape_v2.Mouth_Smile_Left] = ((p_data.m_mouthShape < 0f) ? l_weight : 0f);
+            m_lipData.prediction_data.blend_shape_weight[(int)LipShape_v2.Mouth_Smile_Right] = ((p_data.m_mouthShape < 0f) ? l_weight : 0f);
         }
 
         void OnLookIKPostUpdate()
@@ -80,7 +108,7 @@ namespace ml_dht
                 m_bindRotation = (m_avatarDescriptor.transform.GetMatrix().inverse * m_headBone.GetMatrix()).rotation;
 
             if(m_lookIK != null)
-                m_lookIK.solver.OnPostUpdate += this.OnLookIKPostUpdate;
+                m_lookIK.onPostSolverUpdate.AddListener(this.OnLookIKPostUpdate);
 
         }
         internal void OnAvatarClear()
@@ -91,8 +119,15 @@ namespace ml_dht
             m_lastHeadRotation = Quaternion.identity;
             m_bindRotation = Quaternion.identity;
         }
+        internal void OnAvatarReinitialize()
+        {
+            m_camera = PlayerSetup.Instance.GetActiveCamera().transform;
+            m_lookIK = PlayerSetup.Instance._avatar.GetComponent<LookAtIK>();
+            if(m_lookIK != null)
+                m_lookIK.onPostSolverUpdate.AddListener(this.OnLookIKPostUpdate);
+        }
 
-        internal void OnEyeControllerUpdate(CVREyeController p_component)
+        internal void OnEyeControllerUpdate(EyeMovementController p_component)
         {
             if(m_enabled)
             {
@@ -110,6 +145,24 @@ namespace ml_dht
                     p_component.blinkProgress = m_blinkProgress;
                 }
             }
+        }
+
+        internal bool UpdateFaceTracking(CVRFaceTracking p_component)
+        {
+            bool l_result = false;
+            if(m_enabled && Settings.FaceTracking)
+            {
+                if(!m_lipDataSent)
+                {
+                    FaceTrackingManager.Instance.SubmitNewFacialData(m_lipData);
+                    m_lipDataSent = true;
+                }
+                p_component.LipSyncWasUpdated = true;
+                p_component.UpdateShapesLocal_Private();
+
+                l_result = true;
+            }
+            return l_result;
         }
 
         // Settings

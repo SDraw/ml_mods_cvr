@@ -1,4 +1,5 @@
 ﻿using ABI_RC.Core.Player;
+using ABI_RC.Systems.IK;
 using ABI_RC.Systems.IK.SubSystems;
 using System;
 using System.Collections;
@@ -30,9 +31,9 @@ namespace ml_amt
                 new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnSetupAvatar_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
             HarmonyInstance.Patch(
-                typeof(BodySystem).GetMethod(nameof(BodySystem.Calibrate)),
+                typeof(IKSystem).GetMethod(nameof(IKSystem.ReinitializeAvatar), BindingFlags.Instance | BindingFlags.Public),
                 null,
-                new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnCalibrate_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
+                new HarmonyLib.HarmonyMethod(typeof(AvatarMotionTweaker).GetMethod(nameof(OnAvatarReinitialize_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
             HarmonyInstance.Patch(
                 typeof(PlayerSetup).GetMethod("SetPlaySpaceScale", BindingFlags.NonPublic | BindingFlags.Instance),
@@ -89,17 +90,17 @@ namespace ml_amt
             }
         }
 
-        static void OnCalibrate_Postfix() => ms_instance?.OnCalibrate();
-        void OnCalibrate()
+        static void OnAvatarReinitialize_Postfix() => ms_instance?.OnAvatarReinitialize();
+        void OnAvatarReinitialize()
         {
             try
             {
                 if(m_localTweaker != null)
-                    m_localTweaker.OnCalibrate();
+                    m_localTweaker.OnAvatarReinitialize();
             }
-            catch(Exception l_exception)
+            catch(System.Exception e)
             {
-                MelonLoader.MelonLogger.Error(l_exception);
+                MelonLoader.MelonLogger.Error(e);
             }
         }
 

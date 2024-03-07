@@ -41,25 +41,28 @@ namespace ml_pin
         {
             try
             {
-                bool l_isFriend = Friends.FriendsWith(p_player.ownerId);
-                bool l_notify = false;
-
-                switch(Settings.NotifyType)
+                if(p_player != null) // This happens sometimes, no idea why
                 {
-                    case Settings.NotificationType.None:
-                        l_notify = false;
-                        break;
-                    case Settings.NotificationType.Friends:
-                        l_notify = (l_isFriend && ShouldNotifyInCurrentInstance());
-                        break;
-                    case Settings.NotificationType.All:
-                        l_notify = ShouldNotifyInCurrentInstance();
-                        break;
-                }
-                l_notify |= (l_isFriend && Settings.FriendsAlways);
+                    bool l_isFriend = Friends.FriendsWith(p_player.ownerId);
+                    bool l_notify = false;
 
-                if(l_notify)
-                    m_soundManager?.PlaySound(l_isFriend ? SoundManager.SoundType.FriendJoin : SoundManager.SoundType.PlayerJoin);
+                    switch(Settings.NotifyType)
+                    {
+                        case Settings.NotificationType.None:
+                            l_notify = false;
+                            break;
+                        case Settings.NotificationType.Friends:
+                            l_notify = (l_isFriend && ShouldNotifyInCurrentInstance());
+                            break;
+                        case Settings.NotificationType.All:
+                            l_notify = ShouldNotifyInCurrentInstance();
+                            break;
+                    }
+                    l_notify |= (l_isFriend && Settings.FriendsAlways);
+
+                    if(l_notify)
+                        m_soundManager?.PlaySound(l_isFriend ? SoundManager.SoundType.FriendJoin : SoundManager.SoundType.PlayerJoin);
+                }
             }
             catch(Exception e)
             {
@@ -70,25 +73,28 @@ namespace ml_pin
         {
             try
             {
-                bool l_isFriend = Friends.FriendsWith(p_player.ownerId);
-                bool l_notify = false;
-
-                switch(Settings.NotifyType)
+                if(p_player != null) // This happens sometimes, no idea why
                 {
-                    case Settings.NotificationType.None:
-                        l_notify = false;
-                        break;
-                    case Settings.NotificationType.Friends:
-                        l_notify = (l_isFriend && ShouldNotifyInCurrentInstance());
-                        break;
-                    case Settings.NotificationType.All:
-                        l_notify = ShouldNotifyInCurrentInstance();
-                        break;
-                }
-                l_notify |= (l_isFriend && Settings.FriendsAlways);
+                    bool l_isFriend = Friends.FriendsWith(p_player.ownerId);
+                    bool l_notify = false;
 
-                if(l_notify)
-                    m_soundManager?.PlaySound(l_isFriend ? SoundManager.SoundType.FriendLeave : SoundManager.SoundType.PlayerLeave);
+                    switch(Settings.NotifyType)
+                    {
+                        case Settings.NotificationType.None:
+                            l_notify = false;
+                            break;
+                        case Settings.NotificationType.Friends:
+                            l_notify = (l_isFriend && ShouldNotifyInCurrentInstance());
+                            break;
+                        case Settings.NotificationType.All:
+                            l_notify = ShouldNotifyInCurrentInstance();
+                            break;
+                    }
+                    l_notify |= (l_isFriend && Settings.FriendsAlways);
+
+                    if(l_notify)
+                        m_soundManager?.PlaySound(l_isFriend ? SoundManager.SoundType.FriendLeave : SoundManager.SoundType.PlayerLeave);
+                }
             }
             catch(Exception e)
             {

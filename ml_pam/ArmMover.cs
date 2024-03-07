@@ -83,13 +83,7 @@ namespace ml_pam
 
         void OnDestroy()
         {
-            if(m_armIKLeft != null)
-                Destroy(m_armIKLeft);
-            m_armIKLeft = null;
-
-            if(m_armIKRight != null)
-                Destroy(m_armIKRight);
-            m_armIKRight = null;
+            RemoveArmIK();
 
             if(m_rootLeft != null)
                 Destroy(m_rootLeft);
@@ -331,26 +325,15 @@ namespace ml_pam
 
         internal void OnAvatarSetup()
         {
-            // Recheck if user could switch to VR
-            if(m_inVR != Utils.IsInVR())
-            {
-                m_rootLeft.parent = PlayerSetup.Instance.GetActiveCamera().transform;
-                m_rootLeft.localPosition = Vector3.zero;
-                m_rootLeft.localRotation = Quaternion.identity;
-
-                m_rootRight.parent = PlayerSetup.Instance.GetActiveCamera().transform;
-                m_rootRight.localPosition = Vector3.zero;
-                m_rootRight.localRotation = Quaternion.identity;
-            }
             m_inVR = Utils.IsInVR();
+            m_vrIK = PlayerSetup.Instance._animator.GetComponent<VRIK>();
 
-            if(!m_inVR && PlayerSetup.Instance._animator.isHuman)
+            ReparentRoots();
+
+            if(PlayerSetup.Instance._animator.isHuman)
             {
-                m_vrIK = PlayerSetup.Instance._animator.GetComponent<VRIK>();
-
-                TPoseHelper l_tpHelper = new TPoseHelper();
-                l_tpHelper.Assign(PlayerSetup.Instance._animator);
-                l_tpHelper.Apply();
+                if(!m_inVR)
+                    PoseHelper.ForceTPose(PlayerSetup.Instance._animator);
 
                 Transform l_leftHand = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftHand);
                 if(l_leftHand != null)
@@ -359,60 +342,37 @@ namespace ml_pam
                 if(l_rightHand != null)
                     m_rightTarget.localRotation = ms_offsetRight * (PlayerSetup.Instance._avatar.transform.GetMatrix().inverse * l_rightHand.GetMatrix()).rotation;
 
-                if(m_vrIK == null)
-                {
-                    Transform l_chest = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.UpperChest);
-                    if(l_chest == null)
-                        l_chest = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.Chest);
-                    if(l_chest == null)
-                        l_chest = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.Spine);
-
-                    m_armIKLeft = PlayerSetup.Instance._avatar.AddComponent<ArmIK>();
-                    m_armIKLeft.solver.isLeft = true;
-                    m_armIKLeft.solver.SetChain(
-                        l_chest,
-                        PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftShoulder),
-                        PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftUpperArm),
-                        PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftLowerArm),
-                        l_leftHand,
-                        PlayerSetup.Instance._animator.transform
-                    );
-                    m_armIKLeft.solver.arm.target = m_leftTarget;
-                    m_armIKLeft.solver.arm.positionWeight = 1f;
-                    m_armIKLeft.solver.arm.rotationWeight = 1f;
-                    m_armIKLeft.solver.IKPositionWeight = 0f;
-                    m_armIKLeft.solver.IKRotationWeight = 0f;
-                    m_armIKLeft.enabled = false;
-
-                    m_armLength = m_armIKLeft.solver.arm.mag * 1.25f;
-
-                    m_armIKRight = PlayerSetup.Instance._avatar.AddComponent<ArmIK>();
-                    m_armIKRight.solver.isLeft = false;
-                    m_armIKRight.solver.SetChain(
-                        l_chest,
-                        PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightShoulder),
-                        PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightUpperArm),
-                        PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightLowerArm),
-                        l_rightHand,
-                        PlayerSetup.Instance._animator.transform
-                    );
-                    m_armIKRight.solver.arm.target = m_rightTarget;
-                    m_armIKRight.solver.arm.positionWeight = 1f;
-                    m_armIKRight.solver.arm.rotationWeight = 1f;
-                    m_armIKRight.solver.IKPositionWeight = 0f;
-                    m_armIKRight.solver.IKRotationWeight = 0f;
-                    m_armIKRight.enabled = false;
-                }
-                else
+                if(m_vrIK != null)
                 {
                     m_armLength = m_vrIK.solver.leftArm.mag * 1.25f;
-                    m_vrIK.solver.OnPreUpdate += this.OnIKPreUpdate;
-                    m_vrIK.solver.OnPostUpdate += this.OnIKPostUpdate;
+                    m_vrIK.onPreSolverUpdate.AddListener(this.OnIKPreUpdate);
+                    m_vrIK.onPostSolverUpdate.AddListener(this.OnIKPostUpdate);
                 }
-
-                l_tpHelper.Restore();
-                l_tpHelper.Unassign();
+                else if(!m_inVR)
+                    SetupArmIK();
             }
+
+            SetEnabled(m_enabled);
+        }
+
+        internal void OnAvatarReinitialize()
+        {
+            // Old VRIK is destroyed by game
+            m_inVR = Utils.IsInVR();
+            m_vrIK = PlayerSetup.Instance._animator.GetComponent<VRIK>();
+
+            ReparentRoots();
+
+            if(m_inVR)
+                RemoveArmIK();
+
+            if(m_vrIK != null)
+            {
+                m_vrIK.onPreSolverUpdate.AddListener(this.OnIKPreUpdate);
+                m_vrIK.onPostSolverUpdate.AddListener(this.OnIKPostUpdate);
+            }
+            else if(!m_inVR)
+                SetupArmIK();
 
             SetEnabled(m_enabled);
         }
@@ -488,6 +448,62 @@ namespace ml_pam
         }
 
         // Arbitrary
+        void SetupArmIK()
+        {
+            Transform l_chest = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.UpperChest);
+            if(l_chest == null)
+                l_chest = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.Chest);
+            if(l_chest == null)
+                l_chest = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.Spine);
+
+            m_armIKLeft = PlayerSetup.Instance._avatar.AddComponent<ArmIK>();
+            m_armIKLeft.solver.isLeft = true;
+            m_armIKLeft.solver.SetChain(
+                l_chest,
+                PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftShoulder),
+                PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftUpperArm),
+                PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftLowerArm),
+                PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftHand),
+                PlayerSetup.Instance._animator.transform
+            );
+            m_armIKLeft.solver.arm.target = m_leftTarget;
+            m_armIKLeft.solver.arm.positionWeight = 1f;
+            m_armIKLeft.solver.arm.rotationWeight = 1f;
+            m_armIKLeft.solver.IKPositionWeight = 0f;
+            m_armIKLeft.solver.IKRotationWeight = 0f;
+            m_armIKLeft.enabled = false;
+
+            m_armLength = m_armIKLeft.solver.arm.mag * 1.25f;
+
+            m_armIKRight = PlayerSetup.Instance._avatar.AddComponent<ArmIK>();
+            m_armIKRight.solver.isLeft = false;
+            m_armIKRight.solver.SetChain(
+                l_chest,
+                PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightShoulder),
+                PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightUpperArm),
+                PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightLowerArm),
+                PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightHand),
+                PlayerSetup.Instance._animator.transform
+            );
+            m_armIKRight.solver.arm.target = m_rightTarget;
+            m_armIKRight.solver.arm.positionWeight = 1f;
+            m_armIKRight.solver.arm.rotationWeight = 1f;
+            m_armIKRight.solver.IKPositionWeight = 0f;
+            m_armIKRight.solver.IKRotationWeight = 0f;
+            m_armIKRight.enabled = false;
+        }
+
+        void RemoveArmIK()
+        {
+            if(m_armIKLeft != null)
+                Object.Destroy(m_armIKLeft);
+            m_armIKLeft = null;
+
+            if(m_armIKRight != null)
+                Object.Destroy(m_armIKRight);
+            m_armIKRight = null;
+        }
+
         void SetArmActive(Settings.LeadHand p_hand, bool p_state, bool p_forced = false)
         {
             if(m_enabled || p_forced)
@@ -505,6 +521,17 @@ namespace ml_pam
                     m_armIKRight.solver.IKRotationWeight = (p_state ? 1f : 0f);
                 }
             }
+        }
+
+        void ReparentRoots()
+        {
+            m_rootLeft.parent = PlayerSetup.Instance.GetActiveCamera().transform;
+            m_rootLeft.localPosition = Vector3.zero;
+            m_rootLeft.localRotation = Quaternion.identity;
+
+            m_rootRight.parent = PlayerSetup.Instance.GetActiveCamera().transform;
+            m_rootRight.localPosition = Vector3.zero;
+            m_rootRight.localRotation = Quaternion.identity;
         }
     }
 }

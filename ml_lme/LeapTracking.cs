@@ -1,4 +1,5 @@
 ﻿using ABI_RC.Core.Player;
+using ABI_RC.Systems.VRModeSwitch;
 using System.Collections;
 using UnityEngine;
 
@@ -14,14 +15,12 @@ namespace ml_lme
 
         bool m_inVR = false;
 
-        GameObject m_leapHandLeft = null;
-        GameObject m_leapHandRight = null;
+        GameObject m_leapHands = null;
+        LeapHand m_leapHandLeft = null;
+        LeapHand m_leapHandRight = null;
         GameObject m_leapElbowLeft = null;
         GameObject m_leapElbowRight = null;
         GameObject m_leapControllerModel = null;
-        GameObject m_visualHands = null;
-        VisualHand m_visualHandLeft = null;
-        VisualHand m_visualHandRight = null;
 
         float m_scaleRelation = 1f;
 
@@ -31,16 +30,6 @@ namespace ml_lme
                 Instance = this;
 
             m_inVR = Utils.IsInVR();
-
-            m_leapHandLeft = new GameObject("LeapHandLeft");
-            m_leapHandLeft.transform.parent = this.transform;
-            m_leapHandLeft.transform.localPosition = Vector3.zero;
-            m_leapHandLeft.transform.localRotation = Quaternion.identity;
-
-            m_leapHandRight = new GameObject("LeapHandRight");
-            m_leapHandRight.transform.parent = this.transform;
-            m_leapHandRight.transform.localPosition = Vector3.zero;
-            m_leapHandRight.transform.localRotation = Quaternion.identity;
 
             m_leapElbowLeft = new GameObject("LeapElbowLeft");
             m_leapElbowLeft.transform.parent = this.transform;
@@ -61,16 +50,16 @@ namespace ml_lme
                 m_leapControllerModel.transform.localRotation = Quaternion.identity;
             }
 
-            m_visualHands = AssetsHandler.GetAsset("assets/models/hands/leaphands.prefab");
-            if(m_visualHands != null)
+            m_leapHands = AssetsHandler.GetAsset("assets/models/leaphands/leaphands.prefab");
+            if(m_leapHands != null)
             {
-                m_visualHands.name = "VisualHands";
-                m_visualHands.transform.parent = this.transform;
-                m_visualHands.transform.localPosition = Vector3.zero;
-                m_visualHands.transform.localRotation = Quaternion.identity;
+                m_leapHands.name = "LeapHands";
+                m_leapHands.transform.parent = this.transform;
+                m_leapHands.transform.localPosition = Vector3.zero;
+                m_leapHands.transform.localRotation = Quaternion.identity;
 
-                m_visualHandLeft = new VisualHand(m_visualHands.transform.Find("HandL"), true);
-                m_visualHandRight = new VisualHand(m_visualHands.transform.Find("HandR"), false);
+                m_leapHandLeft = new LeapHand(m_leapHands.transform.Find("HandL"), true);
+                m_leapHandRight = new LeapHand(m_leapHands.transform.Find("HandR"), false);
             }
 
             Settings.DesktopOffsetChange += this.OnDesktopOffsetChange;
@@ -87,6 +76,9 @@ namespace ml_lme
             OnVisualHandsChange(Settings.VisualHands);
             OnTrackingModeChange(Settings.TrackingMode);
             OnRootAngleChange(Settings.RootAngle);
+
+            VRModeSwitchEvents.OnInitializeXR.AddListener(this.OnModeSwitch);
+            VRModeSwitchEvents.OnDeinitializeXR.AddListener(this.OnModeSwitch);
         }
 
         IEnumerator WaitForLocalPlayer()
@@ -102,12 +94,10 @@ namespace ml_lme
             if(Instance == this)
                 Instance = null;
 
-            if(m_leapHandLeft != null)
-                Object.Destroy(m_leapHandLeft);
+            if(m_leapHands != null)
+                Object.Destroy(m_leapHands);
+            m_leapHands = null;
             m_leapHandLeft = null;
-
-            if(m_leapHandRight != null)
-                Object.Destroy(m_leapHandRight);
             m_leapHandRight = null;
 
             if(m_leapElbowLeft != null)
@@ -122,13 +112,6 @@ namespace ml_lme
                 Object.Destroy(m_leapControllerModel);
             m_leapControllerModel = null;
 
-            if(m_visualHands != null)
-                Object.Destroy(m_visualHands);
-            m_visualHands = null;
-
-            m_visualHandLeft = null;
-            m_visualHandRight = null;
-
             Settings.DesktopOffsetChange -= this.OnDesktopOffsetChange;
             Settings.ModelVisibilityChange -= this.OnModelVisibilityChange;
             Settings.VisualHandsChange -= this.OnVisualHandsChange;
@@ -136,6 +119,9 @@ namespace ml_lme
             Settings.RootAngleChange -= this.OnRootAngleChange;
             Settings.HeadAttachChange -= this.OnHeadAttachChange;
             Settings.HeadOffsetChange -= this.OnHeadOffsetChange;
+
+            VRModeSwitchEvents.OnInitializeXR.RemoveListener(this.OnModeSwitch);
+            VRModeSwitchEvents.OnDeinitializeXR.RemoveListener(this.OnModeSwitch);
         }
 
         void Update()
@@ -150,14 +136,13 @@ namespace ml_lme
                     for(int i = 0; i < 20; i++)
                         OrientationAdjustment(ref l_data.m_leftHand.m_fingerPosition[i], ref l_data.m_leftHand.m_fingerRotation[i], Settings.TrackingMode);
 
-                    m_leapHandLeft.transform.localPosition = l_data.m_leftHand.m_position;
-                    m_leapHandLeft.transform.localRotation = l_data.m_leftHand.m_rotation;
+                    m_leapHandLeft.GetRoot().localPosition = l_data.m_leftHand.m_position;
+                    m_leapHandLeft.GetRoot().localRotation = l_data.m_leftHand.m_rotation;
 
                     OrientationAdjustment(ref l_data.m_leftHand.m_elbowPosition, ref ms_dummyRotation, Settings.TrackingMode);
                     m_leapElbowLeft.transform.localPosition = l_data.m_leftHand.m_elbowPosition;
 
-                    if(Settings.VisualHands)
-                        m_visualHandLeft?.Update(l_data.m_leftHand);
+                    m_leapHandLeft?.Update(l_data.m_leftHand);
                 }
 
                 if(l_data.m_rightHand.m_present)
@@ -166,20 +151,19 @@ namespace ml_lme
                     for(int i = 0; i < 20; i++)
                         OrientationAdjustment(ref l_data.m_rightHand.m_fingerPosition[i], ref l_data.m_rightHand.m_fingerRotation[i], Settings.TrackingMode);
 
-                    m_leapHandRight.transform.localPosition = l_data.m_rightHand.m_position;
-                    m_leapHandRight.transform.localRotation = l_data.m_rightHand.m_rotation;
+                    m_leapHandRight.GetRoot().localPosition = l_data.m_rightHand.m_position;
+                    m_leapHandRight.GetRoot().localRotation = l_data.m_rightHand.m_rotation;
 
                     OrientationAdjustment(ref l_data.m_rightHand.m_elbowPosition, ref ms_dummyRotation, Settings.TrackingMode);
                     m_leapElbowRight.transform.localPosition = l_data.m_rightHand.m_elbowPosition;
 
-                    if(Settings.VisualHands)
-                        m_visualHandRight?.Update(l_data.m_rightHand);
+                    m_leapHandRight?.Update(l_data.m_rightHand);
                 }
             }
         }
 
-        public Transform GetLeftHand() => m_leapHandLeft.transform;
-        public Transform GetRightHand() => m_leapHandRight.transform;
+        public LeapHand GetLeftHand() => m_leapHandLeft;
+        public LeapHand GetRightHand() => m_leapHandRight;
         public Transform GetLeftElbow() => m_leapElbowLeft.transform;
         public Transform GetRightElbow() => m_leapElbowRight.transform;
 
@@ -197,7 +181,8 @@ namespace ml_lme
 
         void OnVisualHandsChange(bool p_state)
         {
-            m_visualHands.SetActive(p_state);
+            m_leapHandLeft?.SetMeshActive(p_state);
+            m_leapHandRight?.SetMeshActive(p_state);
         }
 
         void OnTrackingModeChange(Settings.LeapTrackingMode p_mode)
@@ -263,6 +248,13 @@ namespace ml_lme
             OnHeadAttachChange(Settings.HeadAttach);
         }
 
+        void OnModeSwitch()
+        {
+            m_inVR = Utils.IsInVR();
+            OnHeadAttachChange(Settings.HeadAttach);
+        }
+
+        // Utils
         static void OrientationAdjustment(ref Vector3 p_pos, ref Quaternion p_rot, Settings.LeapTrackingMode p_mode)
         {
             switch(p_mode)
