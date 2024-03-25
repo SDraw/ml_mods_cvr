@@ -538,29 +538,29 @@ namespace ml_lme
         {
             if(p_left)
             {
-                base._inputManager.finger1StretchedLeftThumb = -0.5f;
-                base._inputManager.finger2StretchedLeftThumb = 0.7f;
-                base._inputManager.finger3StretchedLeftThumb = 0.7f;
+                base._inputManager.finger1StretchedLeftThumb = 0f;
+                base._inputManager.finger2StretchedLeftThumb = 0f;
+                base._inputManager.finger3StretchedLeftThumb = 0f;
                 base._inputManager.fingerSpreadLeftThumb = 0f;
 
-                base._inputManager.finger1StretchedLeftIndex = 0.5f;
-                base._inputManager.finger2StretchedLeftIndex = 0.7f;
-                base._inputManager.finger3StretchedLeftIndex = 0.7f;
+                base._inputManager.finger1StretchedLeftIndex = 0f;
+                base._inputManager.finger2StretchedLeftIndex =0f;
+                base._inputManager.finger3StretchedLeftIndex = 0f;
                 base._inputManager.fingerSpreadLeftIndex = 0f;
 
-                base._inputManager.finger1StretchedLeftMiddle = 0.5f;
-                base._inputManager.finger2StretchedLeftMiddle = 0.7f;
-                base._inputManager.finger3StretchedLeftMiddle = 0.7f;
+                base._inputManager.finger1StretchedLeftMiddle = 0f;
+                base._inputManager.finger2StretchedLeftMiddle = 0f;
+                base._inputManager.finger3StretchedLeftMiddle = 0f;
                 base._inputManager.fingerSpreadLeftMiddle = 0f;
 
-                base._inputManager.finger1StretchedLeftRing = 0.5f;
-                base._inputManager.finger2StretchedLeftRing = 0.7f;
-                base._inputManager.finger3StretchedLeftRing = 0.7f;
+                base._inputManager.finger1StretchedLeftRing = 0f;
+                base._inputManager.finger2StretchedLeftRing = 0f;
+                base._inputManager.finger3StretchedLeftRing = 0f;
                 base._inputManager.fingerSpreadLeftRing = 0f;
 
-                base._inputManager.finger1StretchedLeftPinky = 0.5f;
-                base._inputManager.finger2StretchedLeftPinky = 0.7f;
-                base._inputManager.finger3StretchedLeftPinky = 0.7f;
+                base._inputManager.finger1StretchedLeftPinky = 0f;
+                base._inputManager.finger2StretchedLeftPinky = 0f;
+                base._inputManager.finger3StretchedLeftPinky = 0f;
                 base._inputManager.fingerSpreadLeftPinky = 0f;
 
                 base._inputManager.fingerFullCurlNormalizedLeftThumb = 0f;
@@ -571,29 +571,29 @@ namespace ml_lme
             }
             else
             {
-                base._inputManager.finger1StretchedRightThumb = -0.5f;
-                base._inputManager.finger2StretchedRightThumb = 0.7f;
-                base._inputManager.finger3StretchedRightThumb = 0.7f;
+                base._inputManager.finger1StretchedRightThumb = 0f;
+                base._inputManager.finger2StretchedRightThumb = 0f;
+                base._inputManager.finger3StretchedRightThumb = 0f;
                 base._inputManager.fingerSpreadRightThumb = 0f;
 
-                base._inputManager.finger1StretchedRightIndex = 0.5f;
-                base._inputManager.finger2StretchedRightIndex = 0.7f;
-                base._inputManager.finger3StretchedRightIndex = 0.7f;
+                base._inputManager.finger1StretchedRightIndex = 0f;
+                base._inputManager.finger2StretchedRightIndex = 0f;
+                base._inputManager.finger3StretchedRightIndex = 0f;
                 base._inputManager.fingerSpreadRightIndex = 0f;
 
-                base._inputManager.finger1StretchedRightMiddle = 0.5f;
-                base._inputManager.finger2StretchedRightMiddle = 0.7f;
-                base._inputManager.finger3StretchedRightMiddle = 0.7f;
+                base._inputManager.finger1StretchedRightMiddle = 0f;
+                base._inputManager.finger2StretchedRightMiddle = 0f;
+                base._inputManager.finger3StretchedRightMiddle = 0f;
                 base._inputManager.fingerSpreadRightMiddle = 0f;
 
-                base._inputManager.finger1StretchedRightRing = 0.5f;
-                base._inputManager.finger2StretchedRightRing = 0.7f;
-                base._inputManager.finger3StretchedRightRing = 0.7f;
+                base._inputManager.finger1StretchedRightRing = 0f;
+                base._inputManager.finger2StretchedRightRing = 0f;
+                base._inputManager.finger3StretchedRightRing = 0f;
                 base._inputManager.fingerSpreadRightRing = 0f;
 
-                base._inputManager.finger1StretchedRightPinky = 0.5f;
-                base._inputManager.finger2StretchedRightPinky = 0.7f;
-                base._inputManager.finger3StretchedRightPinky = 0.7f;
+                base._inputManager.finger1StretchedRightPinky = 0f;
+                base._inputManager.finger2StretchedRightPinky = 0f;
+                base._inputManager.finger3StretchedRightPinky = 0f;
                 base._inputManager.fingerSpreadRightPinky = 0f;
 
                 base._inputManager.fingerFullCurlNormalizedRightThumb = 0f;

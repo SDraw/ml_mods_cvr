@@ -10,6 +10,11 @@
     <Version>1.0.1</Version>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <DebugType>embedded</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Remove="resources\mod_menu.js" />
   </ItemGroup>

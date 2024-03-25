@@ -10,6 +10,11 @@
     <Version>1.0.5</Version>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <DebugType>embedded</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="copy /y &quot;$(TargetPath)&quot; &quot;D:\Games\Steam\steamapps\common\ChilloutVR\Mods\&quot;" />
   </Target>

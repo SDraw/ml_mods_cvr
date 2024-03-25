@@ -5,6 +5,7 @@ Merged set of MelonLoader mods for ChilloutVR.
 |:---------:|:----------:|:--------------:| :----------------------------------------------------------------|
 | [Avatar Motion Tweaker](/ml_amt/README.md) | ml_amt | 1.3.7 [:arrow_down:](../../releases/latest/download/ml_amt.dll)| ✔ Yes |
 | [Avatar Synced Look](/ml_asl/README.md) | ml_asl | 1.0.1 [:arrow_down:](../../releases/latest/download/ml_asl.dll)| ✔ Yes |
+| [Better Fingers Tracking](/ml_bft/README.md) | ml_bft | 1.0.0 [:arrow_down:](../../releases/latest/download/ml_bft.dll)| On review |
 | [Desktop Head Tracking](/ml_dht/README.md) | ml_dht | 1.2.1 [:arrow_down:](../../releases/latest/download/ml_dht.dll) | ✔ Yes |
 | [Leap Motion Extension](/ml_lme/README.md)| ml_lme | 1.4.6 [:arrow_down:](../../releases/latest/download/ml_lme.dll)| ✔ Yes |
 | [Pickup Arm Movement](/ml_pam/README.md)| ml_pam | 1.1.0 [:arrow_down:](../../releases/latest/download/ml_pam.dll)| ✔ Yes |

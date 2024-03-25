@@ -24,6 +24,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_pin", "ml_pin\ml_pin.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_dht", "ml_dht\ml_dht.csproj", "{31987392-989C-40C1-A48B-7F6099816EBE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ml_bft", "ml_bft\ml_bft.csproj", "{331C995D-9648-44AD-8B02-D5F3A89FDC1F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -60,6 +62,9 @@ Global
 		{31987392-989C-40C1-A48B-7F6099816EBE}.Debug|x64.Build.0 = Debug|x64
 		{31987392-989C-40C1-A48B-7F6099816EBE}.Release|x64.ActiveCfg = Release|x64
 		{31987392-989C-40C1-A48B-7F6099816EBE}.Release|x64.Build.0 = Release|x64
+		{331C995D-9648-44AD-8B02-D5F3A89FDC1F}.Debug|x64.ActiveCfg = Debug|x64
+		{331C995D-9648-44AD-8B02-D5F3A89FDC1F}.Release|x64.ActiveCfg = Release|x64
+		{331C995D-9648-44AD-8B02-D5F3A89FDC1F}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

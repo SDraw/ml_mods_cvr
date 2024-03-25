@@ -10,6 +10,11 @@
     <Version>1.0.2</Version>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <DebugType>embedded</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Remove="resources\Chime.wav" />
     <None Remove="resources\DoorClose.wav" />
