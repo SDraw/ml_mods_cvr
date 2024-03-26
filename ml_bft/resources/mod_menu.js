@@ -2,7 +2,7 @@
     let l_block = document.createElement('div');
     l_block.innerHTML = `
         <div class ="settings-subcategory">
-            <div class ="subcategory-name">Better Finger Tracking</div>
+            <div class ="subcategory-name">Better Fingers Tracking</div>
             <div class ="subcategory-description"></div>
         </div>
 

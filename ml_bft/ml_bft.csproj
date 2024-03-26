@@ -15,21 +15,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="resources\mod_menu.js" />
-    <None Remove="resources\ovr_fingers.asset" />
-    <None Remove="resources\ovr_fingers_left.asset" />
-    <None Remove="resources\ovr_fingers_right.asset" />
-    <None Remove="resources\oxr_fingers.asset" />
-  </ItemGroup>
-
-  <ItemGroup>
     <EmbeddedResource Include="resources\mod_menu.js" />
     <EmbeddedResource Include="resources\ovr_fingers.asset" />
     <EmbeddedResource Include="resources\oxr_fingers.asset" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\js\mods_extension.js" Link="resources\mods_extension.js" />
+    <EmbeddedResource Include="..\js\mods_extension.js" Link="resources\mods_extension.js" />
   </ItemGroup>
 
   <ItemGroup>
