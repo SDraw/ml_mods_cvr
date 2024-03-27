@@ -13,4 +13,4 @@ Available mod's settings in `Settings - Input & Key-Bindings - Better Fingers Tr
 
 # Notes
 * Currently supports only SteamVR environment, OpenXR support is planned.
-* Fingers tracking quaity is highly dependant on avatar's hand state in Unity's T-pose, possible solutions are in search.
+* Fingers tracking quality is highly dependant on avatar's hand state in Unity's T-pose, possible solutions are in search.
