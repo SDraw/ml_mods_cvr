@@ -7,14 +7,14 @@
         </div>
 
         <div class ="row-wrapper">
-            <div class ="option-caption">Force SteamVR/OpenXR skeletal input: </div>
+            <div class ="option-caption">Force SteamVR skeletal input: </div>
             <div class ="option-input">
                 <div id="SkeletalInput" class ="inp_toggle no-scroll" data-current="false"></div>
             </div>
         </div>
 
         <div class ="row-wrapper">
-            <div class ="option-caption">Motion range (SteamVR only): </div>
+            <div class ="option-caption">Motion range: </div>
             <div class ="option-input">
                 <div id="MotionRange" class ="inp_dropdown no-scroll" data-options="0:With controller,1:Without controller" data-current="0"></div>
             </div>

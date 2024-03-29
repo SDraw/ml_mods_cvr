@@ -44,13 +44,8 @@ namespace ml_bft
             {
                 m_leftHandHandler = new HandHandlerVR(CVRInputManager.Instance.leftHandTransform, true);
                 m_rightHandHandler = new HandHandlerVR(CVRInputManager.Instance.rightHandTransform, false);
+                m_active = true;
             }
-            else
-            {
-                m_leftHandHandler = new HandHandlerXR(CVRInputManager.Instance.leftHandTransform, true);
-                m_rightHandHandler = new HandHandlerXR(CVRInputManager.Instance.rightHandTransform, false);
-            }
-            m_active = true;
         }
         void RemoveHandlers()
         {
