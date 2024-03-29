@@ -60,6 +60,11 @@
       <SpecificVersion>false</SpecificVersion>
       <Private>false</Private>
     </Reference>
+    <Reference Include="Unity.XR.OpenVR">
+      <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\Unity.XR.OpenVR.dll</HintPath>
+      <SpecificVersion>false</SpecificVersion>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="Unity.XR.OpenXR">
       <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\Unity.XR.OpenXR.dll</HintPath>
       <SpecificVersion>false</SpecificVersion>

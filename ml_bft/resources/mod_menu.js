@@ -7,9 +7,16 @@
         </div>
 
         <div class ="row-wrapper">
-            <div class ="option-caption">Force SteamVR skeletal input: </div>
+            <div class ="option-caption">Force SteamVR/OpenXR skeletal input: </div>
             <div class ="option-input">
                 <div id="SkeletalInput" class ="inp_toggle no-scroll" data-current="false"></div>
+            </div>
+        </div>
+
+        <div class ="row-wrapper">
+            <div class ="option-caption">Motion range (SteamVR only): </div>
+            <div class ="option-input">
+                <div id="MotionRange" class ="inp_dropdown no-scroll" data-options="0:With controller,1:Without controller" data-current="0"></div>
             </div>
         </div>
         
@@ -25,4 +32,8 @@
     // Toggles
     for (let l_toggle of l_block.querySelectorAll('.inp_toggle'))
         modsExtension.addSetting('BFT', l_toggle.id, modsExtension.createToggle(l_toggle, 'OnToggleUpdate_BFT'));
+
+    // Dropdowns
+    for (let l_dropdown of l_block.querySelectorAll('.inp_dropdown'))
+        modsExtension.addSetting('BFT', l_dropdown.id, modsExtension.createDropdown(l_dropdown, 'OnDropdownUpdate_BFT'));
 }

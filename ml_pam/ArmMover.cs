@@ -332,8 +332,7 @@ namespace ml_pam
 
             if(PlayerSetup.Instance._animator.isHuman)
             {
-                if(!m_inVR)
-                    PoseHelper.ForceTPose(PlayerSetup.Instance._animator);
+                Utils.SetAvatarTPose();
 
                 Transform l_leftHand = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftHand);
                 if(l_leftHand != null)

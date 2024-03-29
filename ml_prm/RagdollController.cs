@@ -288,6 +288,8 @@ namespace ml_prm
 
             if(PlayerSetup.Instance._animator.isHuman)
             {
+                Utils.SetAvatarTPose();
+
                 BipedRagdollReferences l_avatarReferences = BipedRagdollReferences.FromAvatar(PlayerSetup.Instance._animator);
 
                 m_puppet = new GameObject("Root").transform;

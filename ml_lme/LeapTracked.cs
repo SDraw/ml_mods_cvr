@@ -1,7 +1,6 @@
 ﻿using ABI_RC.Core.Player;
 using ABI_RC.Systems.IK;
 using RootMotion.FinalIK;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -195,22 +194,17 @@ namespace ml_lme
                 }
 
                 m_poseHandler.GetHumanPose(ref m_pose);
-                if(l_data.m_leftHand.m_present)
+                if(l_data.m_leftHand.m_present || l_data.m_rightHand.m_present)
                 {
                     for(int i = 0; i < 5; i++)
                     {
                         int l_offset = i * 4;
+
                         ms_lastLeftFingerBones[l_offset] = m_pose.muscles[(int)MuscleIndex.LeftThumb1Stretched + l_offset];
                         ms_lastLeftFingerBones[l_offset + 1] = m_pose.muscles[(int)MuscleIndex.LeftThumb2Stretched + l_offset];
                         ms_lastLeftFingerBones[l_offset + 2] = m_pose.muscles[(int)MuscleIndex.LeftThumb3Stretched + l_offset];
                         ms_lastLeftFingerBones[l_offset + 3] = m_pose.muscles[(int)MuscleIndex.LeftThumbSpread + l_offset];
-                    }
-                }
-                if(l_data.m_rightHand.m_present)
-                {
-                    for(int i = 0; i < 5; i++)
-                    {
-                        int l_offset = i * 4;
+
                         ms_lastRightFingerBones[l_offset] = m_pose.muscles[(int)MuscleIndex.RightThumb1Stretched + l_offset];
                         ms_lastRightFingerBones[l_offset + 1] = m_pose.muscles[(int)MuscleIndex.RightThumb2Stretched + l_offset];
                         ms_lastRightFingerBones[l_offset + 2] = m_pose.muscles[(int)MuscleIndex.RightThumb3Stretched + l_offset];
@@ -249,20 +243,13 @@ namespace ml_lme
         internal void OnAvatarSetup()
         {
             m_inVR = Utils.IsInVR();
-            m_vrIK = PlayerSetup.Instance._animator.GetComponent<VRIK>();
 
             if(PlayerSetup.Instance._animator.isHuman)
             {
+                Utils.SetAvatarTPose();
+
                 m_poseHandler = new HumanPoseHandler(PlayerSetup.Instance._animator.avatar, PlayerSetup.Instance._animator.transform);
                 m_poseHandler.GetHumanPose(ref m_pose);
-
-                if(m_inVR)
-                {
-                    PlayerSetup.Instance._avatar.transform.localPosition = Vector3.zero;
-                    PlayerSetup.Instance._avatar.transform.localRotation = Quaternion.identity;
-                }
-                else
-                    PoseHelper.ForceTPose(PlayerSetup.Instance._animator);
 
                 m_leftHand = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftHand);
                 m_leftHandTarget.localRotation = ms_offsetLeft * (Quaternion.Inverse(PlayerSetup.Instance._avatar.transform.rotation) * m_leftHand.rotation);
@@ -272,6 +259,7 @@ namespace ml_lme
 
                 ParseFingersBones();
 
+                m_vrIK = PlayerSetup.Instance._animator.GetComponent<VRIK>();
                 if(m_vrIK != null)
                 {
                     m_vrIK.onPreSolverUpdate.AddListener(this.OnIKPreUpdate);
@@ -298,7 +286,7 @@ namespace ml_lme
             }
             else
             {
-                PoseHelper.ForceTPose(PlayerSetup.Instance._animator);
+                Utils.SetAvatarTPose();
                 SetupArmIK();
             }
         }

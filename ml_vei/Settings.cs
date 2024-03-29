@@ -26,9 +26,9 @@ namespace ml_vei
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
 
-        static public event Action<bool> GesturesChange;
-        static public event Action<bool> GripTriggerChange;
-        static public event Action<PriorityAxis> AxisPriorityChange;
+        public static event Action<bool> GesturesChange;
+        public static event Action<bool> GripTriggerChange;
+        public static event Action<PriorityAxis> AxisPriorityChange;
 
         internal static void Init()
         {

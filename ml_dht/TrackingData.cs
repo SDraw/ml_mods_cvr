@@ -17,7 +17,7 @@ struct TrackingData
     public float m_mouthShape; // Range - [-1;1], -1 - wide, 1 - narrow
     public float m_brows; // Range - [-1;1], -1 - up, 1 - down; not used yet
 
-    static public byte[] ToBytes(TrackingData p_faceData)
+    public static byte[] ToBytes(TrackingData p_faceData)
     {
         int l_size = Marshal.SizeOf(p_faceData);
         byte[] l_arr = new byte[l_size];
@@ -29,7 +29,7 @@ struct TrackingData
         return l_arr;
     }
 
-    static public TrackingData ToObject(byte[] p_buffer)
+    public static TrackingData ToObject(byte[] p_buffer)
     {
         TrackingData l_faceData = new TrackingData();
 

@@ -6,20 +6,28 @@ namespace ml_bft
 {
     static class Settings
     {
+        public enum MotionRangeType
+        {
+            WithController = 0,
+            WithoutController
+        }
         enum ModSetting
         {
             SkeletalInput = 0,
+            MotionRange,
             ShowHands
         }
 
         public static bool SkeletalInput { get; private set; } = false;
+        public static MotionRangeType MotionRange { get; private set; } = MotionRangeType.WithController;
         public static bool ShowHands { get; private set; } = false;
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
 
-        static public event Action<bool> SkeletalInputChange;
-        static public event Action<bool> ShowHandsChange;
+        public static event Action<bool> SkeletalInputChange;
+        public static event Action<MotionRangeType> MotionRangeChange;
+        public static event Action<bool> ShowHandsChange;
 
         internal static void Init()
         {
@@ -28,10 +36,12 @@ namespace ml_bft
             ms_entries = new List<MelonLoader.MelonPreferences_Entry>()
             {
                 ms_category.CreateEntry(ModSetting.SkeletalInput.ToString(), SkeletalInput),
+                ms_category.CreateEntry(ModSetting.MotionRange.ToString(), (int)MotionRange),
                 ms_category.CreateEntry(ModSetting.ShowHands.ToString(), ShowHands)
             };
 
             SkeletalInput = (bool)ms_entries[(int)ModSetting.SkeletalInput].BoxedValue;
+            MotionRange = (MotionRangeType)(int)ms_entries[(int)ModSetting.MotionRange].BoxedValue;
             ShowHands = (bool)ms_entries[(int)ModSetting.ShowHands].BoxedValue;
 
             MelonLoader.MelonCoroutines.Start(WaitMainMenuUi());
@@ -49,6 +59,7 @@ namespace ml_bft
             ViewManager.Instance.gameMenuView.Listener.ReadyForBindings += () =>
             {
                 ViewManager.Instance.gameMenuView.View.BindCall("OnToggleUpdate_" + ms_category.Identifier, new Action<string, string>(OnToggleUpdate));
+                ViewManager.Instance.gameMenuView.View.BindCall("OnDropdownUpdate_" + ms_category.Identifier, new Action<string, string>(OnDropdownUpdate));
             };
             ViewManager.Instance.gameMenuView.Listener.FinishLoad += (_) =>
             {
@@ -71,7 +82,7 @@ namespace ml_bft
                         SkeletalInputChange?.Invoke(SkeletalInput);
                     }
                     break;
-                    
+
                     case ModSetting.ShowHands:
                     {
                         ShowHands = bool.Parse(p_value);
@@ -81,6 +92,24 @@ namespace ml_bft
                 }
 
                 ms_entries[(int)l_setting].BoxedValue = bool.Parse(p_value);
+            }
+        }
+
+        static void OnDropdownUpdate(string p_name, string p_value)
+        {
+            if(Enum.TryParse(p_name, out ModSetting l_setting))
+            {
+                switch(l_setting)
+                {
+                    case ModSetting.MotionRange:
+                    {
+                        MotionRange = (MotionRangeType)int.Parse(p_value);
+                        MotionRangeChange?.Invoke(MotionRange);
+                    }
+                    break;
+                }
+
+                ms_entries[(int)l_setting].BoxedValue = int.Parse(p_value);
             }
         }
     }

@@ -56,20 +56,20 @@ namespace ml_lme
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
 
-        static public event Action<bool> EnabledChange;
-        static public event Action<Vector3> DesktopOffsetChange;
-        static public event Action<bool> FingersOnlyChange;
-        static public event Action<bool> ModelVisibilityChange;
-        static public event Action<LeapTrackingMode> TrackingModeChange;
-        static public event Action<Vector3> RootAngleChange;
-        static public event Action<bool> HeadAttachChange;
-        static public event Action<Vector3> HeadOffsetChange;
-        static public event Action<bool> TrackElbowsChange;
-        static public event Action<bool> InteractionChange;
-        static public event Action<bool> GesturesChange;
-        static public event Action<float> InteractThreadholdChange;
-        static public event Action<float> GripThreadholdChange;
-        static public event Action<bool> VisualHandsChange;
+        public static event Action<bool> EnabledChange;
+        public static event Action<Vector3> DesktopOffsetChange;
+        public static event Action<bool> FingersOnlyChange;
+        public static event Action<bool> ModelVisibilityChange;
+        public static event Action<LeapTrackingMode> TrackingModeChange;
+        public static event Action<Vector3> RootAngleChange;
+        public static event Action<bool> HeadAttachChange;
+        public static event Action<Vector3> HeadOffsetChange;
+        public static event Action<bool> TrackElbowsChange;
+        public static event Action<bool> InteractionChange;
+        public static event Action<bool> GesturesChange;
+        public static event Action<float> InteractThreadholdChange;
+        public static event Action<float> GripThreadholdChange;
+        public static event Action<bool> VisualHandsChange;
 
         internal static void Init()
         {

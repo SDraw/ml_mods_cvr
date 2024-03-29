@@ -28,14 +28,13 @@ namespace ml_dht
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
 
-        static public event Action<bool> EnabledChange;
-        static public event Action<bool> HeadTrackingChange;
-        static public event Action<bool> EyeTrackingChange;
-        static public event Action<bool> FaceTrackingChange;
-        static public event Action<bool> BlinkingChange;
-        static public event Action<bool> MirroredChange;
-        static public event Action<float> SmoothingChange;
-        
+        public static event Action<bool> EnabledChange;
+        public static event Action<bool> HeadTrackingChange;
+        public static event Action<bool> EyeTrackingChange;
+        public static event Action<bool> FaceTrackingChange;
+        public static event Action<bool> BlinkingChange;
+        public static event Action<bool> MirroredChange;
+        public static event Action<float> SmoothingChange;
 
         internal static void Init()
         {

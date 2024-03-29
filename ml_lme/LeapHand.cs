@@ -91,7 +91,7 @@ namespace ml_lme
                 {
                     if(m_fingersBones[i] != null)
                     {
-                        //m_fingers[i].position = p_data.m_fingerPosition[i];
+                        //m_fingersBones[i].position = p_data.m_fingerPosition[i];
                         m_fingersBones[i].rotation = p_data.m_fingerRotation[i];
                     }
                 }

@@ -2,7 +2,6 @@
 using ABI_RC.Core.Player;
 using ABI_RC.Core.Player.EyeMovement;
 using ABI_RC.Systems.FaceTracking;
-using ABI_RC.Systems.VRModeSwitch;
 using RootMotion.FinalIK;
 using System;
 using System.Reflection;
@@ -99,13 +98,15 @@ namespace ml_dht
         // Game events
         internal void OnSetupAvatar()
         {
+            Utils.SetAvatarTPose();
+
             m_camera = PlayerSetup.Instance.GetActiveCamera().transform;
             m_avatarDescriptor = PlayerSetup.Instance._avatar.GetComponent<CVRAvatar>();
             m_headBone = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.Head);
             m_lookIK = PlayerSetup.Instance._avatar.GetComponent<LookAtIK>();
 
             if(m_headBone != null)
-                m_bindRotation = (m_avatarDescriptor.transform.GetMatrix().inverse * m_headBone.GetMatrix()).rotation;
+                m_bindRotation = Quaternion.Inverse(m_avatarDescriptor.transform.rotation) * m_headBone.rotation;
 
             if(m_lookIK != null)
                 m_lookIK.onPostSolverUpdate.AddListener(this.OnLookIKPostUpdate);

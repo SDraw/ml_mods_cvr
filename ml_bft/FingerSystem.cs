@@ -70,9 +70,7 @@ namespace ml_bft
         {
             if(PlayerSetup.Instance._animator.isHuman)
             {
-                IKSystem.Instance.SetAvatarPose(IKSystem.AvatarPose.TPose);
-                PlayerSetup.Instance._avatar.transform.localPosition = Vector3.zero;
-                PlayerSetup.Instance._avatar.transform.localRotation = Quaternion.identity;
+                Utils.SetAvatarTPose();
                 InputHandler.Instance?.Rebind(PlayerSetup.Instance.transform.rotation);
 
                 m_leftHandOffset.m_source = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftHand);
@@ -135,8 +133,6 @@ namespace ml_bft
         {
             if(m_ready && MetaPort.Instance.isUsingVr && (p_handler != null) && Settings.SkeletalInput)
             {
-                // Virtually allign controllers wrist bone to avatar hands with offset and apply global rotation to avatar finger bones with individial offset
-                // This is done to apply rotation changes from controller bones to avatar finger bones as in local space
                 if(CVRInputManager.Instance._leftController != ABI_RC.Systems.InputManagement.XR.eXRControllerType.None)
                 {
                     Quaternion l_turnBack = (m_leftHandOffset.m_source.rotation * m_leftHandOffset.m_offset) * Quaternion.Inverse(m_leftHandOffset.m_target.rotation);
@@ -151,7 +147,6 @@ namespace ml_bft
                         l_offset.m_target.rotation = l_turnBack * (l_offset.m_source.rotation * l_offset.m_offset);
                 }
 
-                // No matter if hands are tracked, fill muscles values
                 p_handler.GetHumanPose(ref m_pose);
                 m_lastValues[0] = m_pose.muscles[(int)MuscleIndex.LeftThumb1Stretched];
                 m_lastValues[1] = m_pose.muscles[(int)MuscleIndex.LeftThumb2Stretched];
