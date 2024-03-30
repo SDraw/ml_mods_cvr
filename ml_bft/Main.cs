@@ -125,12 +125,12 @@ namespace ml_bft
             }
         }
 
-        static void OnIKSystemLateUpdate_Postfix(HumanPoseHandler ____humanPoseHandler) => ms_instance?.OnIKSystemLateUpdate(____humanPoseHandler);
-        void OnIKSystemLateUpdate(HumanPoseHandler p_handler)
+        static void OnIKSystemLateUpdate_Postfix(HumanPoseHandler ____humanPoseHandler, Transform ____hipTransform) => ms_instance?.OnIKSystemLateUpdate(____humanPoseHandler, ____hipTransform);
+        void OnIKSystemLateUpdate(HumanPoseHandler p_handler, Transform p_hips)
         {
             try
             {
-                m_fingerSystem?.OnIKSystemLateUpdate(p_handler);
+                m_fingerSystem?.OnIKSystemLateUpdate(p_handler, p_hips);
             }
             catch(Exception e)
             {

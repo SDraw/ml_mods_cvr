@@ -238,7 +238,7 @@ namespace ml_bft
             }
 
             if(m_bones[(int)SteamVR_Skeleton_JointIndexEnum.root] != null)
-                m_bones[(int)SteamVR_Skeleton_JointIndexEnum.root].rotation = p_base * (m_left ? Quaternion.Euler(0f, -90f, 0f) : Quaternion.Euler(0f, 90f, 0f));
+                m_bones[(int)SteamVR_Skeleton_JointIndexEnum.root].rotation = p_base * (m_left ? Quaternion.Euler(0f, -90f, -90f) : Quaternion.Euler(0f, 90f, 90f));
         }
 
         void OnMotionRangeChange(Settings.MotionRangeType p_mode)

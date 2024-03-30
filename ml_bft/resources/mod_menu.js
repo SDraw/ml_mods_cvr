@@ -21,6 +21,13 @@
         </div>
         
         <div class ="row-wrapper">
+            <div class ="option-caption">Filter humanoid limits: </div>
+            <div class ="option-input">
+                <div id="MechanimFilter" class ="inp_toggle no-scroll" data-current="false"></div>
+            </div>
+        </div>
+        
+        <div class ="row-wrapper">
             <div class ="option-caption">Show hands model: </div>
             <div class ="option-input">
                 <div id="ShowHands" class ="inp_toggle no-scroll" data-current="false"></div>

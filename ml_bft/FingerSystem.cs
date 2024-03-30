@@ -129,7 +129,7 @@ namespace ml_bft
             OnAvatarSetup();
         }
 
-        internal void OnIKSystemLateUpdate(HumanPoseHandler p_handler)
+        internal void OnIKSystemLateUpdate(HumanPoseHandler p_handler, Transform p_hips)
         {
             if(m_ready && MetaPort.Instance.isUsingVr && (p_handler != null) && Settings.SkeletalInput)
             {
@@ -188,6 +188,15 @@ namespace ml_bft
                 m_lastValues[37] = m_pose.muscles[(int)MuscleIndex.RightLittle2Stretched];
                 m_lastValues[38] = m_pose.muscles[(int)MuscleIndex.RightLittle3Stretched];
                 m_lastValues[39] = m_pose.muscles[(int)MuscleIndex.RightLittleSpread];
+
+                if(Settings.MechanimFilter && (p_hips != null))
+                {
+                    // Yoinked from IKSystem.OnPostSolverUpdateGeneral
+                    Vector3 l_pos = p_hips.position;
+                    Quaternion l_rot = p_hips.rotation;
+                    p_handler.SetHumanPose(ref m_pose);
+                    p_hips.SetPositionAndRotation(l_pos, l_rot);
+                }
             }
         }
     }

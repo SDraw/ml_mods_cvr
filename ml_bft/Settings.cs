@@ -15,12 +15,14 @@ namespace ml_bft
         {
             SkeletalInput = 0,
             MotionRange,
-            ShowHands
+            ShowHands,
+            MechanimFilter
         }
 
         public static bool SkeletalInput { get; private set; } = false;
         public static MotionRangeType MotionRange { get; private set; } = MotionRangeType.WithController;
         public static bool ShowHands { get; private set; } = false;
+        public static bool MechanimFilter { get; private set; } = false;
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
@@ -28,6 +30,7 @@ namespace ml_bft
         public static event Action<bool> SkeletalInputChange;
         public static event Action<MotionRangeType> MotionRangeChange;
         public static event Action<bool> ShowHandsChange;
+        public static event Action<bool> MechanimFilterChange;
 
         internal static void Init()
         {
@@ -37,7 +40,8 @@ namespace ml_bft
             {
                 ms_category.CreateEntry(ModSetting.SkeletalInput.ToString(), SkeletalInput),
                 ms_category.CreateEntry(ModSetting.MotionRange.ToString(), (int)MotionRange),
-                ms_category.CreateEntry(ModSetting.ShowHands.ToString(), ShowHands)
+                ms_category.CreateEntry(ModSetting.ShowHands.ToString(), ShowHands),
+                ms_category.CreateEntry(ModSetting.MechanimFilter.ToString(), MechanimFilter)
             };
 
             SkeletalInput = (bool)ms_entries[(int)ModSetting.SkeletalInput].BoxedValue;
@@ -87,6 +91,13 @@ namespace ml_bft
                     {
                         ShowHands = bool.Parse(p_value);
                         ShowHandsChange?.Invoke(ShowHands);
+                    }
+                    break;
+                    
+                    case ModSetting.MechanimFilter:
+                    {
+                        MechanimFilter = bool.Parse(p_value);
+                        MechanimFilterChange?.Invoke(MechanimFilter);
                     }
                     break;
                 }
