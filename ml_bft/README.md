@@ -9,6 +9,7 @@ Mod that overhauls behaviour of fingers tracking.
 # Usage
 Available mod's settings in `Settings - Input & Key-Bindings - Better Fingers Tracking`:
 * **Force SteamVR skeletal input:** forced usage of SteamVR skeletal input (works as long as controllers' driver supplies skeletal pose throught OpenVR interfaces); `false` by default
+* **Motion range:** fingers tracking motion range/mode/type; `With controller` by default
 * **Show hands model:** shows transparent hands model (mostly as debug option); `false` by default
 
 # Notes
