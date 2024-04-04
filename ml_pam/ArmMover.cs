@@ -376,9 +376,9 @@ namespace ml_pam
             SetEnabled(m_enabled);
         }
 
-        internal void OnPickupGrab(CVRPickupObject p_pickup, ControllerRay p_ray, Vector3 p_hit)
+        internal void OnPickupGrab(CVRPickupObject p_pickup, Vector3 p_hit)
         {
-            if(p_ray == ViewManager.Instance.desktopControllerRay)
+            if(p_pickup.ControllerRay == ViewManager.Instance.desktopControllerRay)
             {
                 m_pickup = p_pickup;
 

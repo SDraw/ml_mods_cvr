@@ -431,12 +431,12 @@ namespace ml_lme
         {
             if(p_pickup.gripType == CVRPickupObject.GripType.Origin)
             {
-                if(p_pickup._controllerRay == m_handRayLeft)
+                if(p_pickup.ControllerRay == m_handRayLeft)
                 {
                     m_handRayLeft.attachmentPoint.localPosition = Vector3.zero;
                     m_handRayLeft.attachmentPoint.localRotation = Quaternion.Euler(0f, 0f, 270f);
                 }
-                if(p_pickup._controllerRay == m_handRayRight)
+                if(p_pickup.ControllerRay == m_handRayRight)
                 {
                     m_handRayRight.attachmentPoint.localPosition = Vector3.zero;
                     m_handRayRight.attachmentPoint.localRotation = Quaternion.Euler(0f, 0f, 90f);
