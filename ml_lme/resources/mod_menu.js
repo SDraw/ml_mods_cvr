@@ -145,6 +145,13 @@
                 <div id="GripThreadhold" class ="inp_slider no-scroll" data-min="0" data-max="100" data-current="40"></div>
             </div>
         </div>
+
+        <div class ="row-wrapper">
+            <div class ="option-caption">Filter humanoid limits: </div>
+            <div class ="option-input">
+                <div id="MechanimFilter" class ="inp_toggle no-scroll" data-current="true"></div>
+            </div>
+        </div>
     `;
     document.getElementById('settings-implementation').appendChild(l_block);
 

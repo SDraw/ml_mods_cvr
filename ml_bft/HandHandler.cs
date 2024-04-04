@@ -30,7 +30,7 @@ namespace ml_bft
             m_bones.Clear();
             m_localRotations.Clear();
             m_renderers.Clear();
-            
+
             Settings.ShowHandsChange -= this.OnShowHandsChange;
         }
 

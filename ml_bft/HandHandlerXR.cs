@@ -200,13 +200,13 @@ namespace ml_bft
                 l_tracking.GetHandJoints(m_left ? HandTrackingFeature.Hand_Index.L : HandTrackingFeature.Hand_Index.R, out var l_positions, out var l_rotations, out _);
                 if(l_positions.Length >= c_fingerBonesCount)
                 {
-                    // Joints rotations are in global space, locations are in local space ... wth is wrong with OpenXR?
+                    // Joints rotations are in global space, locations are in ... space??? ... wth is wrong with OpenXR?
                     Quaternion l_prefabRot = m_prefabRoot.rotation;
                     for(int i = 0; i < c_fingerBonesCount; i++)
                     {
                         if(m_bones[i] != null)
                         {
-                            m_bones[i].localPosition = l_positions[i];
+                            //m_bones[i].localPosition = l_positions[i];
                             m_bones[i].rotation = l_prefabRot * (l_handInv * l_rotations[i]);
                         }
                     }

@@ -25,3 +25,5 @@ Available mod's settings in `Settings - Implementation - Leap Motion Tracking`:
 * **Recognize gestures:** sets avatar gestures (fist, gun, rock'n'roll and etc.) based on current fingers pose; `false` by default.
 * **Interact gesture threadhold:** activation limit for interaction based on hand gesture; 80 by default.
 * **Grip gesture threadhold:** activation limit for grip based on hand gesture; 40 by default.
+* **Filter humanoid limits:** Limits fingers rotations to be valid for Unity's Mechanim; `true` by default
+  * Note: Enabling this option ensures that visual representation of your fingers will be same for you and remote players, but it cancels out additional finger segments rotations that can be better visually in most cases.

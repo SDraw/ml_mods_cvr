@@ -22,7 +22,7 @@ namespace ml_bft
         public static bool SkeletalInput { get; private set; } = false;
         public static MotionRangeType MotionRange { get; private set; } = MotionRangeType.WithController;
         public static bool ShowHands { get; private set; } = false;
-        public static bool MechanimFilter { get; private set; } = false;
+        public static bool MechanimFilter { get; private set; } = true;
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;

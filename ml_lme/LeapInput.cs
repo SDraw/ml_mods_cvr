@@ -38,7 +38,7 @@ namespace ml_lme
             m_handRayLeft.hand = true;
             m_handRayLeft.generalMask = -269;
             m_handRayLeft.isInteractionRay = true;
-            m_handRayLeft.triggerGazeEvents = false;
+            //m_handRayLeft.triggerGazeEvents = false;
             m_handRayLeft.holderRoot = m_handRayLeft.gameObject;
             m_handRayLeft.attachmentDistance = 0f;
             m_handRayLeft.uiMask = 32;
@@ -60,7 +60,7 @@ namespace ml_lme
             m_handRayRight.hand = false;
             m_handRayRight.generalMask = -269;
             m_handRayRight.isInteractionRay = true;
-            m_handRayRight.triggerGazeEvents = false;
+            //m_handRayRight.triggerGazeEvents = false;
             m_handRayRight.holderRoot = m_handRayRight.gameObject;
             m_handRayRight.attachmentDistance = 0f;
             m_handRayRight.uiMask = 32;

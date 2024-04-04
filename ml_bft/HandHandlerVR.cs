@@ -110,121 +110,113 @@ namespace ml_bft
         public override Transform GetSourceForBone(HumanBodyBones p_bone)
         {
             Transform l_result = null;
-            if(m_left)
+            switch(p_bone)
             {
-                switch(p_bone)
-                {
-                    case HumanBodyBones.LeftHand:
-                        l_result = m_bones[(int)SteamVR_Skeleton_JointIndexEnum.wrist];
-                        break;
-                    case HumanBodyBones.LeftThumbProximal:
-                        l_result = m_bones[(int)SteamVR_Skeleton_JointIndexEnum.thumbProximal];
-                        break;
-                    case HumanBodyBones.LeftThumbIntermediate:
-                        l_result = m_bones[(int)SteamVR_Skeleton_JointIndexEnum.thumbMiddle];
-                        break;
-                    case HumanBodyBones.LeftThumbDistal:
-                        l_result = m_bones[(int)SteamVR_Skeleton_JointIndexEnum.thumbDistal];
-                        break;
+                case HumanBodyBones.LeftHand:
+                    l_result = (m_left ? m_bones[(int)SteamVR_Skeleton_JointIndexEnum.wrist] : null);
+                    break;
+                case HumanBodyBones.LeftThumbProximal:
+                    l_result = (m_left ? m_bones[(int)SteamVR_Skeleton_JointIndexEnum.thumbProximal] : null);
+                    break;
+                case HumanBodyBones.LeftThumbIntermediate:
+                    l_result = (m_left ? m_bones[(int)SteamVR_Skeleton_JointIndexEnum.thumbMiddle] : null);
+                    break;
+                case HumanBodyBones.LeftThumbDistal:
+                    l_result = (m_left ? m_bones[(int)SteamVR_Skeleton_JointIndexEnum.thumbDistal] : null);
+                    break;
 
-                    case HumanBodyBones.LeftIndexProximal:
-                        l_result = m_bones[(int)SteamVR_Skeleton_JointIndexEnum.indexProximal];
-                        break;
-                    case HumanBodyBones.LeftIndexIntermediate:
-                        l_result = m_bones[(int)SteamVR_Skeleton_JointIndexEnum.indexMiddle];
-                        break;
-                    case HumanBodyBones.LeftIndexDistal:
-                        l_result = m_bones[(int)SteamVR_Skeleton_JointIndexEnum.indexDistal];
-                        break;
+                case HumanBodyBones.LeftIndexProximal:
+                    l_result = (m_left ? m_bones[(int)SteamVR_Skeleton_JointIndexEnum.indexProximal] : null);
+                    break;
+                case HumanBodyBones.LeftIndexIntermediate:
+                    l_result = (m_left ? m_bones[(int)SteamVR_Skeleton_JointIndexEnum.indexMiddle] : null);
+                    break;
+                case HumanBodyBones.LeftIndexDistal:
+                    l_result = (m_left ? m_bones[(int)SteamVR_Skeleton_JointIndexEnum.indexDistal] : null);
+                    break;
 
-                    case HumanBodyBones.LeftMiddleProximal:
-                        l_result = m_bones[(int)SteamVR_Skeleton_JointIndexEnum.middleProximal];
-                        break;
-                    case HumanBodyBones.LeftMiddleIntermediate:
-                        l_result = m_bones[(int)SteamVR_Skeleton_JointIndexEnum.middleMiddle];
-                        break;
-                    case HumanBodyBones.LeftMiddleDistal:
-                        l_result = m_bones[(int)SteamVR_Skeleton_JointIndexEnum.middleDistal];
-                        break;
+                case HumanBodyBones.LeftMiddleProximal:
+                    l_result = (m_left ? m_bones[(int)SteamVR_Skeleton_JointIndexEnum.middleProximal] : null);
+                    break;
+                case HumanBodyBones.LeftMiddleIntermediate:
+                    l_result = (m_left ? m_bones[(int)SteamVR_Skeleton_JointIndexEnum.middleMiddle] : null);
+                    break;
+                case HumanBodyBones.LeftMiddleDistal:
+                    l_result = (m_left ? m_bones[(int)SteamVR_Skeleton_JointIndexEnum.middleDistal] : null);
+                    break;
 
-                    case HumanBodyBones.LeftRingProximal:
-                        l_result = m_bones[(int)SteamVR_Skeleton_JointIndexEnum.ringProximal];
-                        break;
-                    case HumanBodyBones.LeftRingIntermediate:
-                        l_result = m_bones[(int)SteamVR_Skeleton_JointIndexEnum.ringMiddle];
-                        break;
-                    case HumanBodyBones.LeftRingDistal:
-                        l_result = m_bones[(int)SteamVR_Skeleton_JointIndexEnum.ringDistal];
-                        break;
+                case HumanBodyBones.LeftRingProximal:
+                    l_result = (m_left ? m_bones[(int)SteamVR_Skeleton_JointIndexEnum.ringProximal] : null);
+                    break;
+                case HumanBodyBones.LeftRingIntermediate:
+                    l_result = (m_left ? m_bones[(int)SteamVR_Skeleton_JointIndexEnum.ringMiddle] : null);
+                    break;
+                case HumanBodyBones.LeftRingDistal:
+                    l_result = (m_left ? m_bones[(int)SteamVR_Skeleton_JointIndexEnum.ringDistal] : null);
+                    break;
 
-                    case HumanBodyBones.LeftLittleProximal:
-                        l_result = m_bones[(int)SteamVR_Skeleton_JointIndexEnum.pinkyProximal];
-                        break;
-                    case HumanBodyBones.LeftLittleIntermediate:
-                        l_result = m_bones[(int)SteamVR_Skeleton_JointIndexEnum.pinkyMiddle];
-                        break;
-                    case HumanBodyBones.LeftLittleDistal:
-                        l_result = m_bones[(int)SteamVR_Skeleton_JointIndexEnum.pinkyDistal];
-                        break;
-                }
-            }
-            else
-            {
-                switch(p_bone)
-                {
-                    case HumanBodyBones.RightHand:
-                        l_result = m_bones[(int)SteamVR_Skeleton_JointIndexEnum.wrist];
-                        break;
-                    case HumanBodyBones.RightThumbProximal:
-                        l_result = m_bones[(int)SteamVR_Skeleton_JointIndexEnum.thumbProximal];
-                        break;
-                    case HumanBodyBones.RightThumbIntermediate:
-                        l_result = m_bones[(int)SteamVR_Skeleton_JointIndexEnum.thumbMiddle];
-                        break;
-                    case HumanBodyBones.RightThumbDistal:
-                        l_result = m_bones[(int)SteamVR_Skeleton_JointIndexEnum.thumbDistal];
-                        break;
+                case HumanBodyBones.LeftLittleProximal:
+                    l_result = (m_left ? m_bones[(int)SteamVR_Skeleton_JointIndexEnum.pinkyProximal] : null);
+                    break;
+                case HumanBodyBones.LeftLittleIntermediate:
+                    l_result = (m_left ? m_bones[(int)SteamVR_Skeleton_JointIndexEnum.pinkyMiddle] : null);
+                    break;
+                case HumanBodyBones.LeftLittleDistal:
+                    l_result = (m_left ? m_bones[(int)SteamVR_Skeleton_JointIndexEnum.pinkyDistal] : null);
+                    break;
 
-                    case HumanBodyBones.RightIndexProximal:
-                        l_result = m_bones[(int)SteamVR_Skeleton_JointIndexEnum.indexProximal];
-                        break;
-                    case HumanBodyBones.RightIndexIntermediate:
-                        l_result = m_bones[(int)SteamVR_Skeleton_JointIndexEnum.indexMiddle];
-                        break;
-                    case HumanBodyBones.RightIndexDistal:
-                        l_result = m_bones[(int)SteamVR_Skeleton_JointIndexEnum.indexDistal];
-                        break;
+                case HumanBodyBones.RightHand:
+                    l_result = (!m_left ? m_bones[(int)SteamVR_Skeleton_JointIndexEnum.wrist] : null);
+                    break;
+                case HumanBodyBones.RightThumbProximal:
+                    l_result = (!m_left ? m_bones[(int)SteamVR_Skeleton_JointIndexEnum.thumbProximal] : null);
+                    break;
+                case HumanBodyBones.RightThumbIntermediate:
+                    l_result = (!m_left ? m_bones[(int)SteamVR_Skeleton_JointIndexEnum.thumbMiddle] : null);
+                    break;
+                case HumanBodyBones.RightThumbDistal:
+                    l_result = (!m_left ? m_bones[(int)SteamVR_Skeleton_JointIndexEnum.thumbDistal] : null);
+                    break;
 
-                    case HumanBodyBones.RightMiddleProximal:
-                        l_result = m_bones[(int)SteamVR_Skeleton_JointIndexEnum.middleProximal];
-                        break;
-                    case HumanBodyBones.RightMiddleIntermediate:
-                        l_result = m_bones[(int)SteamVR_Skeleton_JointIndexEnum.middleMiddle];
-                        break;
-                    case HumanBodyBones.RightMiddleDistal:
-                        l_result = m_bones[(int)SteamVR_Skeleton_JointIndexEnum.middleDistal];
-                        break;
+                case HumanBodyBones.RightIndexProximal:
+                    l_result = (!m_left ? m_bones[(int)SteamVR_Skeleton_JointIndexEnum.indexProximal] : null);
+                    break;
+                case HumanBodyBones.RightIndexIntermediate:
+                    l_result = (!m_left ? m_bones[(int)SteamVR_Skeleton_JointIndexEnum.indexMiddle] : null);
+                    break;
+                case HumanBodyBones.RightIndexDistal:
+                    l_result = (!m_left ? m_bones[(int)SteamVR_Skeleton_JointIndexEnum.indexDistal] : null);
+                    break;
 
-                    case HumanBodyBones.RightRingProximal:
-                        l_result = m_bones[(int)SteamVR_Skeleton_JointIndexEnum.ringProximal];
-                        break;
-                    case HumanBodyBones.RightRingIntermediate:
-                        l_result = m_bones[(int)SteamVR_Skeleton_JointIndexEnum.ringMiddle];
-                        break;
-                    case HumanBodyBones.RightRingDistal:
-                        l_result = m_bones[(int)SteamVR_Skeleton_JointIndexEnum.ringDistal];
-                        break;
+                case HumanBodyBones.RightMiddleProximal:
+                    l_result = (!m_left ? m_bones[(int)SteamVR_Skeleton_JointIndexEnum.middleProximal] : null);
+                    break;
+                case HumanBodyBones.RightMiddleIntermediate:
+                    l_result = (!m_left ? m_bones[(int)SteamVR_Skeleton_JointIndexEnum.middleMiddle] : null);
+                    break;
+                case HumanBodyBones.RightMiddleDistal:
+                    l_result = (!m_left ? m_bones[(int)SteamVR_Skeleton_JointIndexEnum.middleDistal] : null);
+                    break;
 
-                    case HumanBodyBones.RightLittleProximal:
-                        l_result = m_bones[(int)SteamVR_Skeleton_JointIndexEnum.pinkyProximal];
-                        break;
-                    case HumanBodyBones.RightLittleIntermediate:
-                        l_result = m_bones[(int)SteamVR_Skeleton_JointIndexEnum.pinkyMiddle];
-                        break;
-                    case HumanBodyBones.RightLittleDistal:
-                        l_result = m_bones[(int)SteamVR_Skeleton_JointIndexEnum.pinkyDistal];
-                        break;
-                }
+                case HumanBodyBones.RightRingProximal:
+                    l_result = (!m_left ? m_bones[(int)SteamVR_Skeleton_JointIndexEnum.ringProximal] : null);
+                    break;
+                case HumanBodyBones.RightRingIntermediate:
+                    l_result = (!m_left ? m_bones[(int)SteamVR_Skeleton_JointIndexEnum.ringMiddle] : null);
+                    break;
+                case HumanBodyBones.RightRingDistal:
+                    l_result = (!m_left ? m_bones[(int)SteamVR_Skeleton_JointIndexEnum.ringDistal] : null);
+                    break;
+
+                case HumanBodyBones.RightLittleProximal:
+                    l_result = (!m_left ? m_bones[(int)SteamVR_Skeleton_JointIndexEnum.pinkyProximal] : null);
+                    break;
+                case HumanBodyBones.RightLittleIntermediate:
+                    l_result = (!m_left ? m_bones[(int)SteamVR_Skeleton_JointIndexEnum.pinkyMiddle] : null);
+                    break;
+                case HumanBodyBones.RightLittleDistal:
+                    l_result = (!m_left ? m_bones[(int)SteamVR_Skeleton_JointIndexEnum.pinkyDistal] : null);
+                    break;
             }
             return l_result;
         }

@@ -35,7 +35,8 @@ namespace ml_lme
             Gestures,
             InteractThreadhold,
             GripThreadhold,
-            VisualHands
+            VisualHands,
+            MechanimFilter
         };
 
         public static bool Enabled { get; private set; } = false;
@@ -52,6 +53,7 @@ namespace ml_lme
         public static float InteractThreadhold { get; private set; } = 0.8f;
         public static float GripThreadhold { get; private set; } = 0.4f;
         public static bool VisualHands { get; private set; } = false;
+        public static bool MechanimFilter { get; private set; } = true;
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
@@ -70,6 +72,7 @@ namespace ml_lme
         public static event Action<float> InteractThreadholdChange;
         public static event Action<float> GripThreadholdChange;
         public static event Action<bool> VisualHandsChange;
+        public static event Action<bool> MechanimFilterChange;
 
         internal static void Init()
         {
@@ -96,7 +99,8 @@ namespace ml_lme
                 ms_category.CreateEntry(ModSetting.Gestures.ToString(), Gestures),
                 ms_category.CreateEntry(ModSetting.InteractThreadhold.ToString(), (int)(InteractThreadhold * 100f)),
                 ms_category.CreateEntry(ModSetting.GripThreadhold.ToString(), (int)(GripThreadhold * 100f)),
-                ms_category.CreateEntry(ModSetting.VisualHands.ToString(), VisualHands)
+                ms_category.CreateEntry(ModSetting.VisualHands.ToString(), VisualHands),
+                ms_category.CreateEntry(ModSetting.MechanimFilter.ToString(), MechanimFilter)
             };
 
             Load();
@@ -156,6 +160,7 @@ namespace ml_lme
             InteractThreadhold = (int)ms_entries[(int)ModSetting.InteractThreadhold].BoxedValue * 0.01f;
             GripThreadhold = (int)ms_entries[(int)ModSetting.GripThreadhold].BoxedValue * 0.01f;
             VisualHands = (bool)ms_entries[(int)ModSetting.VisualHands].BoxedValue;
+            MechanimFilter = (bool)ms_entries[(int)ModSetting.MechanimFilter].BoxedValue;
         }
 
         static void OnToggleUpdate(string p_name, string p_value)
@@ -217,6 +222,13 @@ namespace ml_lme
                     {
                         VisualHands = bool.Parse(p_value);
                         VisualHandsChange?.Invoke(VisualHands);
+                    }
+                    break;
+                    
+                    case ModSetting.MechanimFilter:
+                    {
+                        MechanimFilter = bool.Parse(p_value);
+                        MechanimFilterChange?.Invoke(MechanimFilter);
                     }
                     break;
                 }

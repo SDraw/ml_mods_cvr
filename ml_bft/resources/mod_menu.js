@@ -23,7 +23,7 @@
         <div class ="row-wrapper">
             <div class ="option-caption">Filter humanoid limits: </div>
             <div class ="option-input">
-                <div id="MechanimFilter" class ="inp_toggle no-scroll" data-current="false"></div>
+                <div id="MechanimFilter" class ="inp_toggle no-scroll" data-current="true"></div>
             </div>
         </div>
         
