@@ -26,12 +26,12 @@ namespace ml_amt
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
 
-        static public event Action<float> CrouchLimitChange;
-        static public event Action<float> ProneLimitChange;
-        static public event Action<bool> IKOverrideFlyChange;
-        static public event Action<bool> IKOverrideJumpChange;
-        static public event Action<bool> DetectEmotesChange;
-        static public event Action<bool> MassCenterChange;
+        public static event Action<float> CrouchLimitChange;
+        public static event Action<float> ProneLimitChange;
+        public static event Action<bool> IKOverrideFlyChange;
+        public static event Action<bool> IKOverrideJumpChange;
+        public static event Action<bool> DetectEmotesChange;
+        public static event Action<bool> MassCenterChange;
 
         internal static void Init()
         {

@@ -16,7 +16,7 @@ namespace ml_asl
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
 
-        static public event Action<bool> EnabledChange;
+        public static event Action<bool> EnabledChange;
 
         internal static void Init()
         {

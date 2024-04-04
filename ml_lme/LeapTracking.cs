@@ -18,8 +18,8 @@ namespace ml_lme
         GameObject m_leapHands = null;
         LeapHand m_leapHandLeft = null;
         LeapHand m_leapHandRight = null;
-        GameObject m_leapElbowLeft = null;
-        GameObject m_leapElbowRight = null;
+        Transform m_leapElbowLeft = null;
+        Transform m_leapElbowRight = null;
         GameObject m_leapControllerModel = null;
 
         float m_scaleRelation = 1f;
@@ -31,15 +31,15 @@ namespace ml_lme
 
             m_inVR = Utils.IsInVR();
 
-            m_leapElbowLeft = new GameObject("LeapElbowLeft");
-            m_leapElbowLeft.transform.parent = this.transform;
-            m_leapElbowLeft.transform.localPosition = Vector3.zero;
-            m_leapElbowLeft.transform.localRotation = Quaternion.identity;
+            m_leapElbowLeft = new GameObject("LeapElbowLeft").transform;
+            m_leapElbowLeft.parent = this.transform;
+            m_leapElbowLeft.localPosition = Vector3.zero;
+            m_leapElbowLeft.localRotation = Quaternion.identity;
 
-            m_leapElbowRight = new GameObject("LeapElbowRight");
-            m_leapElbowRight.transform.parent = this.transform;
-            m_leapElbowRight.transform.localPosition = Vector3.zero;
-            m_leapElbowRight.transform.localRotation = Quaternion.identity;
+            m_leapElbowRight = new GameObject("LeapElbowRight").transform;
+            m_leapElbowRight.parent = this.transform;
+            m_leapElbowRight.localPosition = Vector3.zero;
+            m_leapElbowRight.localRotation = Quaternion.identity;
 
             m_leapControllerModel = AssetsHandler.GetAsset("assets/models/leapmotion/leap_motion_1_0.obj");
             if(m_leapControllerModel != null)
@@ -101,11 +101,11 @@ namespace ml_lme
             m_leapHandRight = null;
 
             if(m_leapElbowLeft != null)
-                Object.Destroy(m_leapElbowLeft);
+                Object.Destroy(m_leapElbowLeft.gameObject);
             m_leapElbowLeft = null;
 
             if(m_leapElbowRight != null)
-                Object.Destroy(m_leapElbowRight);
+                Object.Destroy(m_leapElbowRight.gameObject);
             m_leapElbowRight = null;
 
             if(m_leapControllerModel != null)
@@ -140,7 +140,7 @@ namespace ml_lme
                     m_leapHandLeft.GetRoot().localRotation = l_data.m_leftHand.m_rotation;
 
                     OrientationAdjustment(ref l_data.m_leftHand.m_elbowPosition, ref ms_dummyRotation, Settings.TrackingMode);
-                    m_leapElbowLeft.transform.localPosition = l_data.m_leftHand.m_elbowPosition;
+                    m_leapElbowLeft.localPosition = l_data.m_leftHand.m_elbowPosition;
 
                     m_leapHandLeft?.Update(l_data.m_leftHand);
                 }
@@ -155,7 +155,7 @@ namespace ml_lme
                     m_leapHandRight.GetRoot().localRotation = l_data.m_rightHand.m_rotation;
 
                     OrientationAdjustment(ref l_data.m_rightHand.m_elbowPosition, ref ms_dummyRotation, Settings.TrackingMode);
-                    m_leapElbowRight.transform.localPosition = l_data.m_rightHand.m_elbowPosition;
+                    m_leapElbowRight.localPosition = l_data.m_rightHand.m_elbowPosition;
 
                     m_leapHandRight?.Update(l_data.m_rightHand);
                 }
@@ -164,8 +164,13 @@ namespace ml_lme
 
         public LeapHand GetLeftHand() => m_leapHandLeft;
         public LeapHand GetRightHand() => m_leapHandRight;
-        public Transform GetLeftElbow() => m_leapElbowLeft.transform;
-        public Transform GetRightElbow() => m_leapElbowRight.transform;
+        public Transform GetLeftElbow() => m_leapElbowLeft;
+        public Transform GetRightElbow() => m_leapElbowRight;
+        public void Rebind(Quaternion p_base)
+        {
+            m_leapHandLeft?.Rebind(p_base);
+            m_leapHandRight?.Rebind(p_base);
+        }
 
         // Settings
         void OnDesktopOffsetChange(Vector3 p_offset)

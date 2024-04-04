@@ -1,6 +1,5 @@
 ﻿using ABI_RC.Core.Player;
 using ABI_RC.Systems.IK;
-using ABI_RC.Systems.IK.SubSystems;
 using System;
 using System.Collections;
 using System.Reflection;
@@ -98,7 +97,7 @@ namespace ml_amt
                 if(m_localTweaker != null)
                     m_localTweaker.OnAvatarReinitialize();
             }
-            catch(System.Exception e)
+            catch(Exception e)
             {
                 MelonLoader.MelonLogger.Error(e);
             }

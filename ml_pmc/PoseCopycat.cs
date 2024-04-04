@@ -3,7 +3,6 @@ using ABI_RC.Systems.IK;
 using ABI_RC.Systems.IK.SubSystems;
 using ABI_RC.Systems.InputManagement;
 using ABI_RC.Systems.Movement;
-using ABI_RC.Systems.VRModeSwitch;
 using RootMotion.FinalIK;
 using UnityEngine;
 
@@ -14,8 +13,8 @@ namespace ml_pmc
     {
         static readonly Vector4 ms_pointVector = new Vector4(0f, 0f, 0f, 1f);
 
-        static public PoseCopycat Instance { get; private set; } = null;
-        static internal System.Action<bool> OnActivityChange;
+        public static PoseCopycat Instance { get; private set; } = null;
+        internal static System.Action<bool> OnActivityChange;
 
         Animator m_animator = null;
         VRIK m_vrIk = null;
@@ -372,29 +371,29 @@ namespace ml_pmc
             if(!CVRInputManager.Instance.individualFingerTracking)
             {
                 // Left hand
-                CVRInputManager.Instance.finger1StretchedLeftThumb = -0.5f;
-                CVRInputManager.Instance.finger2StretchedLeftThumb = 0.7f;
-                CVRInputManager.Instance.finger3StretchedLeftThumb = 0.7f;
+                CVRInputManager.Instance.finger1StretchedLeftThumb = -0f;
+                CVRInputManager.Instance.finger2StretchedLeftThumb = 0f;
+                CVRInputManager.Instance.finger3StretchedLeftThumb = 0f;
                 CVRInputManager.Instance.fingerSpreadLeftThumb = 0f;
 
-                CVRInputManager.Instance.finger1StretchedLeftIndex = 0.5f;
-                CVRInputManager.Instance.finger2StretchedLeftIndex = 0.7f;
-                CVRInputManager.Instance.finger3StretchedLeftIndex = 0.7f;
+                CVRInputManager.Instance.finger1StretchedLeftIndex = 0f;
+                CVRInputManager.Instance.finger2StretchedLeftIndex = 0f;
+                CVRInputManager.Instance.finger3StretchedLeftIndex = 0f;
                 CVRInputManager.Instance.fingerSpreadLeftIndex = 0f;
 
-                CVRInputManager.Instance.finger1StretchedLeftMiddle = 0.5f;
-                CVRInputManager.Instance.finger2StretchedLeftMiddle = 0.7f;
-                CVRInputManager.Instance.finger3StretchedLeftMiddle = 0.7f;
+                CVRInputManager.Instance.finger1StretchedLeftMiddle = 0;
+                CVRInputManager.Instance.finger2StretchedLeftMiddle = 0f;
+                CVRInputManager.Instance.finger3StretchedLeftMiddle = 0f;
                 CVRInputManager.Instance.fingerSpreadLeftMiddle = 0f;
 
-                CVRInputManager.Instance.finger1StretchedLeftRing = 0.5f;
-                CVRInputManager.Instance.finger2StretchedLeftRing = 0.7f;
-                CVRInputManager.Instance.finger3StretchedLeftRing = 0.7f;
+                CVRInputManager.Instance.finger1StretchedLeftRing = 0f;
+                CVRInputManager.Instance.finger2StretchedLeftRing = 0f;
+                CVRInputManager.Instance.finger3StretchedLeftRing = 0f;
                 CVRInputManager.Instance.fingerSpreadLeftRing = 0f;
 
-                CVRInputManager.Instance.finger1StretchedLeftPinky = 0.5f;
-                CVRInputManager.Instance.finger2StretchedLeftPinky = 0.7f;
-                CVRInputManager.Instance.finger3StretchedLeftPinky = 0.7f;
+                CVRInputManager.Instance.finger1StretchedLeftPinky = 0f;
+                CVRInputManager.Instance.finger2StretchedLeftPinky = 0f;
+                CVRInputManager.Instance.finger3StretchedLeftPinky = 0f;
                 CVRInputManager.Instance.fingerSpreadLeftPinky = 0f;
 
                 CVRInputManager.Instance.fingerFullCurlNormalizedLeftThumb = 0f;
@@ -404,29 +403,29 @@ namespace ml_pmc
                 CVRInputManager.Instance.fingerFullCurlNormalizedLeftPinky = 0f;
 
                 // Right hand
-                CVRInputManager.Instance.finger1StretchedRightThumb = -0.5f;
-                CVRInputManager.Instance.finger2StretchedRightThumb = 0.7f;
-                CVRInputManager.Instance.finger3StretchedRightThumb = 0.7f;
+                CVRInputManager.Instance.finger1StretchedRightThumb = 0f;
+                CVRInputManager.Instance.finger2StretchedRightThumb = 0f;
+                CVRInputManager.Instance.finger3StretchedRightThumb = 0f;
                 CVRInputManager.Instance.fingerSpreadRightThumb = 0f;
 
-                CVRInputManager.Instance.finger1StretchedRightIndex = 0.5f;
-                CVRInputManager.Instance.finger2StretchedRightIndex = 0.7f;
-                CVRInputManager.Instance.finger3StretchedRightIndex = 0.7f;
+                CVRInputManager.Instance.finger1StretchedRightIndex = 0f;
+                CVRInputManager.Instance.finger2StretchedRightIndex = 0f;
+                CVRInputManager.Instance.finger3StretchedRightIndex = 0f;
                 CVRInputManager.Instance.fingerSpreadRightIndex = 0f;
 
-                CVRInputManager.Instance.finger1StretchedRightMiddle = 0.5f;
-                CVRInputManager.Instance.finger2StretchedRightMiddle = 0.7f;
-                CVRInputManager.Instance.finger3StretchedRightMiddle = 0.7f;
+                CVRInputManager.Instance.finger1StretchedRightMiddle = 0f;
+                CVRInputManager.Instance.finger2StretchedRightMiddle = 0f;
+                CVRInputManager.Instance.finger3StretchedRightMiddle = 0f;
                 CVRInputManager.Instance.fingerSpreadRightMiddle = 0f;
 
-                CVRInputManager.Instance.finger1StretchedRightRing = 0.5f;
-                CVRInputManager.Instance.finger2StretchedRightRing = 0.7f;
-                CVRInputManager.Instance.finger3StretchedRightRing = 0.7f;
+                CVRInputManager.Instance.finger1StretchedRightRing = 0f;
+                CVRInputManager.Instance.finger2StretchedRightRing = 0f;
+                CVRInputManager.Instance.finger3StretchedRightRing = 0f;
                 CVRInputManager.Instance.fingerSpreadRightRing = 0f;
 
-                CVRInputManager.Instance.finger1StretchedRightPinky = 0.5f;
-                CVRInputManager.Instance.finger2StretchedRightPinky = 0.7f;
-                CVRInputManager.Instance.finger3StretchedRightPinky = 0.7f;
+                CVRInputManager.Instance.finger1StretchedRightPinky = 0f;
+                CVRInputManager.Instance.finger2StretchedRightPinky = 0f;
+                CVRInputManager.Instance.finger3StretchedRightPinky = 0f;
                 CVRInputManager.Instance.fingerSpreadRightPinky = 0f;
 
                 CVRInputManager.Instance.fingerFullCurlNormalizedRightThumb = 0f;

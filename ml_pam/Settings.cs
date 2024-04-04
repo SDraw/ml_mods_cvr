@@ -28,10 +28,10 @@ namespace ml_pam
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
 
-        static public event Action<bool> EnabledChange;
-        static public event Action<float> GrabOffsetChange;
-        static public event Action<LeadHand> LeadingHandChange;
-        static public event Action<bool> HandsExtensionChange;
+        public static event Action<bool> EnabledChange;
+        public static event Action<float> GrabOffsetChange;
+        public static event Action<LeadHand> LeadingHandChange;
+        public static event Action<bool> HandsExtensionChange;
 
         internal static void Init()
         {

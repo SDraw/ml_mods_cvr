@@ -33,12 +33,12 @@ namespace ml_pin
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
 
-        static public event Action<NotificationType> NotifyTypeChange;
-        static public event Action<float> VolumeChange;
-        static public event Action<bool> NotifyInPublicChange;
-        static public event Action<bool> NotifyInFriendsChange;
-        static public event Action<bool> NotifyInPrivateChange;
-        static public event Action<bool> FriendsAlwaysChange;
+        public static event Action<NotificationType> NotifyTypeChange;
+        public static event Action<float> VolumeChange;
+        public static event Action<bool> NotifyInPublicChange;
+        public static event Action<bool> NotifyInFriendsChange;
+        public static event Action<bool> NotifyInPrivateChange;
+        public static event Action<bool> FriendsAlwaysChange;
 
         internal static void Init()
         {

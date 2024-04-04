@@ -1,5 +1,7 @@
 ﻿using ABI.CCK.Components;
+using ABI_RC.Core.Player;
 using ABI_RC.Core.Savior;
+using ABI_RC.Systems.IK;
 using ABI_RC.Systems.Movement;
 using System.Collections.Generic;
 using System.Reflection;
@@ -45,6 +47,13 @@ namespace ml_prm
         {
             (ms_influencerTouchingVolumes.GetValue(p_instance) as List<FluidVolume>)?.Clear();
             (ms_influencerSubmergedColliders.GetValue(p_instance) as Dictionary<FluidVolume, int>)?.Clear();
+        }
+
+        public static void SetAvatarTPose()
+        {
+            IKSystem.Instance.SetAvatarPose(IKSystem.AvatarPose.TPose);
+            PlayerSetup.Instance._avatar.transform.localPosition = Vector3.zero;
+            PlayerSetup.Instance._avatar.transform.localRotation = Quaternion.identity;
         }
     }
 }

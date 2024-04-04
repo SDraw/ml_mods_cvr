@@ -1,5 +1,4 @@
 ﻿using ABI_RC.Core.Player;
-using ABI_RC.Systems.IK;
 using ABI_RC.Systems.IK.SubSystems;
 using ABI_RC.Systems.Movement;
 using RootMotion.FinalIK;
@@ -125,6 +124,8 @@ namespace ml_amt
 
         internal void OnSetupAvatar()
         {
+            Utils.SetAvatarTPose();
+
             m_vrIk = PlayerSetup.Instance._avatar.GetComponent<VRIK>();
             m_locomotionLayer = PlayerSetup.Instance._animator.GetLayerIndex("Locomotion/Emotes");
             m_avatarScale = Mathf.Abs(PlayerSetup.Instance._avatar.transform.localScale.y);
@@ -179,6 +180,8 @@ namespace ml_amt
         internal void OnAvatarReinitialize()
         {
             // Old VRIK is destroyed by game
+            Utils.SetAvatarTPose();
+
             m_vrIk = PlayerSetup.Instance._animator.GetComponent<VRIK>();
             if(m_vrIk != null)
             {
@@ -242,25 +245,25 @@ namespace ml_amt
         }
 
         // Settings
-        internal void SetCrouchLimit(float p_value)
+        void SetCrouchLimit(float p_value)
         {
             if(m_ikLimits == null)
                 BetterBetterCharacterController.Instance.avatarCrouchLimit = Mathf.Clamp01(p_value);
         }
-        internal void SetProneLimit(float p_value)
+        void SetProneLimit(float p_value)
         {
             if(m_ikLimits == null)
                 BetterBetterCharacterController.Instance.avatarProneLimit = Mathf.Clamp01(p_value);
         }
-        internal void SetIKOverrideFly(bool p_state)
+        void SetIKOverrideFly(bool p_state)
         {
             m_ikOverrideFly = p_state;
         }
-        internal void SetIKOverrideJump(bool p_state)
+        void SetIKOverrideJump(bool p_state)
         {
             m_ikOverrideJump = p_state;
         }
-        internal void SetDetectEmotes(bool p_state)
+        void SetDetectEmotes(bool p_state)
         {
             m_detectEmotes = p_state;
         }

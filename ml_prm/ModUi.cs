@@ -29,7 +29,7 @@ namespace ml_prm
             FallLimit
         }
 
-        static public event Action SwitchChange;
+        public static event Action SwitchChange;
 
         static List<object> ms_uiElements = null;
 
