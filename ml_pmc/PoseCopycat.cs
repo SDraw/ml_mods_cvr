@@ -312,9 +312,9 @@ namespace ml_pmc
             {
                 if(!m_active)
                 {
-                    if((p_target != null) && (p_target.animatorManager != null) && (p_target.animatorManager.animator != null) && p_target.animatorManager.animator.isHuman)
+                    if((p_target != null) && (p_target.animatorManager != null) && (p_target.animatorManager.Animator != null) && p_target.animatorManager.Animator.isHuman)
                     {
-                        m_puppetParser = p_target.animatorManager.animator.gameObject.AddComponent<PuppetParser>();
+                        m_puppetParser = p_target.animatorManager.Animator.gameObject.AddComponent<PuppetParser>();
                         m_puppetParser.m_puppetMaster = p_target;
                         m_distanceLimit = Utils.GetWorldMovementLimit();
 

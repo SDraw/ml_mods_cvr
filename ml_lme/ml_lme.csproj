@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <Platforms>x64</Platforms>
     <PackageId>LeapMotionExtension</PackageId>
-    <Version>1.4.7</Version>
+    <Version>1.4.8</Version>
     <Authors>SDraw</Authors>
     <Company>None</Company>
     <Product>LeapMotionExtension</Product>

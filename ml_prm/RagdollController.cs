@@ -644,7 +644,7 @@ namespace ml_prm
                         m_applyHipsRotation = IKSystem.Instance.applyOriginalHipRotation;
                         IKSystem.Instance.applyOriginalHipRotation = true;
 
-                        PlayerSetup.Instance.animatorManager.SetAnimatorParameterTrigger("CancelEmote");
+                        PlayerSetup.Instance.animatorManager.CancelEmote = true;
                         m_ragdolledParameter.SetValue(true);
 
                         if(!Utils.IsWorldSafe())

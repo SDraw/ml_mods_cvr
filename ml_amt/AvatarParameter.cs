@@ -1,4 +1,4 @@
-﻿using ABI_RC.Core;
+﻿using ABI_RC.Core.Util.AnimatorManager;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
@@ -16,16 +16,16 @@ namespace ml_amt
         readonly int m_hash = 0;
         readonly bool m_sync;
         readonly AnimatorControllerParameterType m_innerType;
-        readonly CVRAnimatorManager m_manager = null;
+        readonly AvatarAnimatorManager m_manager = null;
 
-        public AvatarParameter(ParameterType p_type, CVRAnimatorManager p_manager)
+        public AvatarParameter(ParameterType p_type, AvatarAnimatorManager p_manager)
         {
             m_type = p_type;
             m_name = p_type.ToString();
             m_manager = p_manager;
 
             Regex l_regex = new Regex("^#?" + m_name + '$');
-            foreach(var l_param in m_manager.animator.parameters)
+            foreach(var l_param in m_manager.Animator.parameters)
             {
                 if(l_regex.IsMatch(l_param.name))
                 {
@@ -55,9 +55,9 @@ namespace ml_amt
             if(m_innerType == AnimatorControllerParameterType.Float)
             {
                 if(m_sync)
-                    m_manager.SetAnimatorParameterFloat(m_name, p_value);
+                    m_manager.SetParameter(m_name, p_value);
                 else
-                    m_manager.animator.SetFloat(m_hash, p_value);
+                    m_manager.Animator.SetFloat(m_hash, p_value);
             }
         }
 
@@ -66,9 +66,9 @@ namespace ml_amt
             if(m_innerType == AnimatorControllerParameterType.Bool)
             {
                 if(m_sync)
-                    m_manager.SetAnimatorParameterBool(m_name, p_value);
+                    m_manager.SetParameter(m_name, p_value);
                 else
-                    m_manager.animator.SetBool(m_hash, p_value);
+                    m_manager.Animator.SetBool(m_hash, p_value);
             }
         }
     }
