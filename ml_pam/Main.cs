@@ -37,12 +37,12 @@ namespace ml_pam
                 new HarmonyLib.HarmonyMethod(typeof(PickupArmMovement).GetMethod(nameof(OnAvatarReinitialize_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
             HarmonyInstance.Patch(
-                typeof(CVRPickupObject).GetMethod(nameof(CVRPickupObject.Grab)),
+                typeof(CVRPickupObject).GetMethod("OnGrab", BindingFlags.Instance | BindingFlags.NonPublic),
                 null,
                 new HarmonyLib.HarmonyMethod(typeof(PickupArmMovement).GetMethod(nameof(OnCVRPickupObjectGrab_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
             HarmonyInstance.Patch(
-                typeof(CVRPickupObject).GetMethod(nameof(CVRPickupObject.Drop)),
+                typeof(CVRPickupObject).GetMethod("OnDrop", BindingFlags.Instance | BindingFlags.NonPublic),
                 null,
                 new HarmonyLib.HarmonyMethod(typeof(PickupArmMovement).GetMethod(nameof(OnCVRPickupObjectDrop_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
@@ -115,13 +115,13 @@ namespace ml_pam
             }
         }
 
-        static void OnCVRPickupObjectGrab_Postfix(ref CVRPickupObject __instance, ControllerRay __1, Vector3 __2) => ms_instance?.OnCVRPickupObjectGrab(__instance, __1, __2);
-        void OnCVRPickupObjectGrab(CVRPickupObject p_pickup, ControllerRay p_ray, Vector3 p_hit)
+        static void OnCVRPickupObjectGrab_Postfix(ref CVRPickupObject __instance, Vector3 __0) => ms_instance?.OnCVRPickupObjectGrab(__instance, __0);
+        void OnCVRPickupObjectGrab(CVRPickupObject p_pickup, Vector3 p_hit)
         {
             try
             {
-                if(p_pickup.IsGrabbedByMe() && (m_localMover != null))
-                    m_localMover.OnPickupGrab(p_pickup, p_ray, p_hit);
+                if(p_pickup.IsGrabbedByMe && (m_localMover != null))
+                    m_localMover.OnPickupGrab(p_pickup, p_hit);
             }
             catch(Exception e)
             {
