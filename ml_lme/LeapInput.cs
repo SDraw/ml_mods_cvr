@@ -81,21 +81,24 @@ namespace ml_lme
             m_handRayLeft.otherRay = m_handRayRight;
             m_handRayRight.otherRay = m_handRayLeft;
 
-            Settings.EnabledChange += this.OnEnableChange;
-            Settings.InteractionChange += this.OnInteractionChange;
-            Settings.GesturesChange += this.OnGesturesChange;
-            Settings.FingersOnlyChange += this.OnFingersOnlyChange;
-
-            OnEnableChange(Settings.Enabled);
-            OnInteractionChange(Settings.Interaction);
-            OnGesturesChange(Settings.Gestures);
-            OnFingersOnlyChange(Settings.FingersOnly);
+            OnEnableChanged(Settings.Enabled);
+            OnInteractionChanged(Settings.Interaction);
+            OnGesturesChanged(Settings.Gestures);
+            OnFingersOnlyChanged(Settings.FingersOnly);
 
             MelonLoader.MelonCoroutines.Start(WaitForSettings());
             MelonLoader.MelonCoroutines.Start(WaitForMaterial());
 
             VRModeSwitchEvents.OnInitializeXR.AddListener(OnModeSwitch);
             VRModeSwitchEvents.OnDeinitializeXR.AddListener(OnModeSwitch);
+
+            Settings.OnEnabledChanged.AddHandler(this.OnEnableChanged);
+            Settings.OnInteractionChanged.AddHandler(this.OnInteractionChanged);
+            Settings.OnGesturesChanged.AddHandler(this.OnGesturesChanged);
+            Settings.OnFingersOnlyChanged.AddHandler(this.OnFingersOnlyChanged);
+
+            GameEvents.OnRayScale.AddHandler(this.OnRayScale);
+            GameEvents.OnPickupGrab.AddHandler(this.OnPickupGrab);
         }
 
         IEnumerator WaitForSettings()
@@ -149,14 +152,17 @@ namespace ml_lme
                 Object.Destroy(m_lineRight);
             m_lineRight = null;
 
-            Settings.EnabledChange -= this.OnEnableChange;
-            Settings.InteractionChange -= this.OnInteractionChange;
-            Settings.GesturesChange -= this.OnGesturesChange;
-            Settings.FingersOnlyChange -= this.OnFingersOnlyChange;
-
             MetaPort.Instance.settings.settingBoolChanged.RemoveListener(this.OnGameSettingBoolChange);
             VRModeSwitchEvents.OnInitializeXR.RemoveListener(OnModeSwitch);
             VRModeSwitchEvents.OnDeinitializeXR.RemoveListener(OnModeSwitch);
+
+            Settings.OnEnabledChanged.RemoveHandler(this.OnEnableChanged);
+            Settings.OnInteractionChanged.RemoveHandler(this.OnInteractionChanged);
+            Settings.OnGesturesChanged.RemoveHandler(this.OnGesturesChanged);
+            Settings.OnFingersOnlyChanged.RemoveHandler(this.OnFingersOnlyChanged);
+
+            GameEvents.OnRayScale.RemoveHandler(this.OnRayScale);
+            GameEvents.OnPickupGrab.RemoveHandler(this.OnPickupGrab);
         }
 
         public override void UpdateInput()
@@ -360,7 +366,7 @@ namespace ml_lme
         }
 
         // Settings changes
-        void OnEnableChange(bool p_state)
+        void OnEnableChanged(bool p_state)
         {
             base.InputEnabled = p_state;
 
@@ -382,10 +388,10 @@ namespace ml_lme
                 SetGameFingersTracking(m_inVR && Utils.AreKnucklesInUse() && !CVRInputManager._moduleXR.GestureToggleValue);
             }
 
-            OnInteractionChange(Settings.Interaction);
+            OnInteractionChanged(Settings.Interaction);
         }
 
-        void OnInteractionChange(bool p_state)
+        void OnInteractionChanged(bool p_state)
         {
             bool l_state = (p_state && Settings.Enabled && !Settings.FingersOnly);
 
@@ -407,7 +413,7 @@ namespace ml_lme
             }
         }
 
-        void OnGesturesChange(bool p_state)
+        void OnGesturesChanged(bool p_state)
         {
             base._inputManager.gestureLeft = 0f;
             base._inputManager.gestureLeftRaw = 0f;
@@ -415,19 +421,19 @@ namespace ml_lme
             base._inputManager.gestureRightRaw = 0f;
         }
 
-        void OnFingersOnlyChange(bool p_state)
+        void OnFingersOnlyChanged(bool p_state)
         {
-            OnInteractionChange(Settings.Interaction);
+            OnInteractionChanged(Settings.Interaction);
         }
 
         // Game events
-        internal void OnRayScale(float p_scale)
+        void OnRayScale(float p_scale)
         {
             m_handRayLeft.SetRayScale(p_scale);
             m_handRayRight.SetRayScale(p_scale);
         }
 
-        internal void OnPickupGrab(CVRPickupObject p_pickup)
+        void OnPickupGrab(CVRPickupObject p_pickup)
         {
             if(p_pickup.gripType == CVRPickupObject.GripType.Origin)
             {
@@ -460,7 +466,7 @@ namespace ml_lme
                 m_handRayRight.SetVRActive(m_inVR);
             }
 
-            OnEnableChange(Settings.Enabled);
+            OnEnableChanged(Settings.Enabled);
         }
 
         // Arbitrary
@@ -493,11 +499,11 @@ namespace ml_lme
                 base._inputManager.finger3StretchedLeftPinky = LeapTracked.ms_lastLeftFingerBones[18];
                 base._inputManager.fingerSpreadLeftPinky = LeapTracked.ms_lastLeftFingerBones[19];
 
-                base._inputManager.fingerFullCurlNormalizedLeftThumb = p_hand.m_bends[0];
-                base._inputManager.fingerFullCurlNormalizedLeftIndex = p_hand.m_bends[1];
-                base._inputManager.fingerFullCurlNormalizedLeftMiddle = p_hand.m_bends[2];
-                base._inputManager.fingerFullCurlNormalizedLeftRing = p_hand.m_bends[3];
-                base._inputManager.fingerFullCurlNormalizedLeftPinky = p_hand.m_bends[4];
+                base._inputManager.fingerFullCurlNormalizedLeftThumb = p_hand.m_normalizedCurls[0];
+                base._inputManager.fingerFullCurlNormalizedLeftIndex = p_hand.m_normalizedCurls[1];
+                base._inputManager.fingerFullCurlNormalizedLeftMiddle = p_hand.m_normalizedCurls[2];
+                base._inputManager.fingerFullCurlNormalizedLeftRing = p_hand.m_normalizedCurls[3];
+                base._inputManager.fingerFullCurlNormalizedLeftPinky = p_hand.m_normalizedCurls[4];
             }
             else
             {
@@ -526,11 +532,11 @@ namespace ml_lme
                 base._inputManager.finger3StretchedRightPinky = LeapTracked.ms_lastRightFingerBones[18];
                 base._inputManager.fingerSpreadRightPinky = LeapTracked.ms_lastRightFingerBones[19];
 
-                base._inputManager.fingerFullCurlNormalizedRightThumb = p_hand.m_bends[0];
-                base._inputManager.fingerFullCurlNormalizedRightIndex = p_hand.m_bends[1];
-                base._inputManager.fingerFullCurlNormalizedRightMiddle = p_hand.m_bends[2];
-                base._inputManager.fingerFullCurlNormalizedRightRing = p_hand.m_bends[3];
-                base._inputManager.fingerFullCurlNormalizedRightPinky = p_hand.m_bends[4];
+                base._inputManager.fingerFullCurlNormalizedRightThumb = p_hand.m_normalizedCurls[0];
+                base._inputManager.fingerFullCurlNormalizedRightIndex = p_hand.m_normalizedCurls[1];
+                base._inputManager.fingerFullCurlNormalizedRightMiddle = p_hand.m_normalizedCurls[2];
+                base._inputManager.fingerFullCurlNormalizedRightRing = p_hand.m_normalizedCurls[3];
+                base._inputManager.fingerFullCurlNormalizedRightPinky = p_hand.m_normalizedCurls[4];
             }
         }
 

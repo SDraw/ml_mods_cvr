@@ -42,7 +42,7 @@ namespace ml_amt
             switch(m_type)
             {
                 case ParameterType.Moving:
-                    SetBoolean(p_tweaker.GetMoving());
+                    SetBoolean(p_tweaker.IsMoving());
                     break;
             }
         }

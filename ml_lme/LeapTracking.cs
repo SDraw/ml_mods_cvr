@@ -62,23 +62,27 @@ namespace ml_lme
                 m_leapHandRight = new LeapHand(m_leapHands.transform.Find("HandR"), false);
             }
 
-            Settings.DesktopOffsetChange += this.OnDesktopOffsetChange;
-            Settings.ModelVisibilityChange += this.OnModelVisibilityChange;
-            Settings.VisualHandsChange += this.OnVisualHandsChange;
-            Settings.TrackingModeChange += this.OnTrackingModeChange;
-            Settings.RootAngleChange += this.OnRootAngleChange;
-            Settings.HeadAttachChange += this.OnHeadAttachChange;
-            Settings.HeadOffsetChange += this.OnHeadOffsetChange;
+            OnModelVisibilityChanged(Settings.ModelVisibility);
+            OnVisualHandsChanged(Settings.VisualHands);
+            OnTrackingModeChanged(Settings.TrackingMode);
+            OnRootAngleChanged(Settings.RootAngle);
 
             MelonLoader.MelonCoroutines.Start(WaitForLocalPlayer());
 
-            OnModelVisibilityChange(Settings.ModelVisibility);
-            OnVisualHandsChange(Settings.VisualHands);
-            OnTrackingModeChange(Settings.TrackingMode);
-            OnRootAngleChange(Settings.RootAngle);
+            VRModeSwitchEvents.OnInitializeXR.AddListener(this.OnAvatarSetup);
+            VRModeSwitchEvents.OnDeinitializeXR.AddListener(this.OnAvatarSetup);
 
-            VRModeSwitchEvents.OnInitializeXR.AddListener(this.OnModeSwitch);
-            VRModeSwitchEvents.OnDeinitializeXR.AddListener(this.OnModeSwitch);
+            Settings.OnDesktopOffsetChanged.AddHandler(this.OnDesktopOffsetChanged);
+            Settings.OnModelVisibilityChanged.AddHandler(this.OnModelVisibilityChanged);
+            Settings.OnVisualHandsChanged.AddHandler(this.OnVisualHandsChanged);
+            Settings.OnTrackingModeChanged.AddHandler(this.OnTrackingModeChanged);
+            Settings.OnRootAngleChanged.AddHandler(this.OnRootAngleChanged);
+            Settings.OnHeadAttachChanged.AddHandler(this.OnHeadAttachChanged);
+            Settings.OnHeadOffsetChanged.AddHandler(this.OnHeadOffsetChanged);
+
+            GameEvents.OnAvatarClear.AddHandler(this.OnAvatarClear);
+            GameEvents.OnAvatarSetup.AddHandler(this.OnAvatarSetup);
+            GameEvents.OnPlayspaceScale.AddHandler(this.OnPlayspaceScale);
         }
 
         IEnumerator WaitForLocalPlayer()
@@ -86,7 +90,7 @@ namespace ml_lme
             while(PlayerSetup.Instance == null)
                 yield return null;
 
-            OnHeadAttachChange(Settings.HeadAttach);
+            OnHeadAttachChanged(Settings.HeadAttach);
         }
 
         void OnDestroy()
@@ -112,16 +116,20 @@ namespace ml_lme
                 Object.Destroy(m_leapControllerModel);
             m_leapControllerModel = null;
 
-            Settings.DesktopOffsetChange -= this.OnDesktopOffsetChange;
-            Settings.ModelVisibilityChange -= this.OnModelVisibilityChange;
-            Settings.VisualHandsChange -= this.OnVisualHandsChange;
-            Settings.TrackingModeChange -= this.OnTrackingModeChange;
-            Settings.RootAngleChange -= this.OnRootAngleChange;
-            Settings.HeadAttachChange -= this.OnHeadAttachChange;
-            Settings.HeadOffsetChange -= this.OnHeadOffsetChange;
+            VRModeSwitchEvents.OnInitializeXR.RemoveListener(this.OnAvatarSetup);
+            VRModeSwitchEvents.OnDeinitializeXR.RemoveListener(this.OnAvatarSetup);
 
-            VRModeSwitchEvents.OnInitializeXR.RemoveListener(this.OnModeSwitch);
-            VRModeSwitchEvents.OnDeinitializeXR.RemoveListener(this.OnModeSwitch);
+            Settings.OnDesktopOffsetChanged.RemoveHandler(this.OnDesktopOffsetChanged);
+            Settings.OnModelVisibilityChanged.RemoveHandler(this.OnModelVisibilityChanged);
+            Settings.OnVisualHandsChanged.RemoveHandler(this.OnVisualHandsChanged);
+            Settings.OnTrackingModeChanged.RemoveHandler(this.OnTrackingModeChanged);
+            Settings.OnRootAngleChanged.RemoveHandler(this.OnRootAngleChanged);
+            Settings.OnHeadAttachChanged.RemoveHandler(this.OnHeadAttachChanged);
+            Settings.OnHeadOffsetChanged.RemoveHandler(this.OnHeadOffsetChanged);
+
+            GameEvents.OnAvatarClear.RemoveHandler(this.OnAvatarClear);
+            GameEvents.OnAvatarSetup.RemoveHandler(this.OnAvatarSetup);
+            GameEvents.OnPlayspaceScale.RemoveHandler(this.OnPlayspaceScale);
         }
 
         void Update()
@@ -142,7 +150,7 @@ namespace ml_lme
                     OrientationAdjustment(ref l_data.m_leftHand.m_elbowPosition, ref ms_dummyRotation, Settings.TrackingMode);
                     m_leapElbowLeft.localPosition = l_data.m_leftHand.m_elbowPosition;
 
-                    m_leapHandLeft?.Update(l_data.m_leftHand);
+                    m_leapHandLeft.Update(l_data.m_leftHand);
                 }
 
                 if(l_data.m_rightHand.m_present)
@@ -157,7 +165,7 @@ namespace ml_lme
                     OrientationAdjustment(ref l_data.m_rightHand.m_elbowPosition, ref ms_dummyRotation, Settings.TrackingMode);
                     m_leapElbowRight.localPosition = l_data.m_rightHand.m_elbowPosition;
 
-                    m_leapHandRight?.Update(l_data.m_rightHand);
+                    m_leapHandRight.Update(l_data.m_rightHand);
                 }
             }
         }
@@ -173,24 +181,24 @@ namespace ml_lme
         }
 
         // Settings
-        void OnDesktopOffsetChange(Vector3 p_offset)
+        void OnDesktopOffsetChanged(Vector3 p_offset)
         {
             if(!Settings.HeadAttach)
                 this.transform.localPosition = p_offset * (!m_inVR ? m_scaleRelation : 1f);
         }
 
-        void OnModelVisibilityChange(bool p_state)
+        void OnModelVisibilityChanged(bool p_state)
         {
             m_leapControllerModel.SetActive(p_state);
         }
 
-        void OnVisualHandsChange(bool p_state)
+        void OnVisualHandsChanged(bool p_state)
         {
             m_leapHandLeft?.SetMeshActive(p_state);
             m_leapHandRight?.SetMeshActive(p_state);
         }
 
-        void OnTrackingModeChange(Settings.LeapTrackingMode p_mode)
+        void OnTrackingModeChanged(Settings.LeapTrackingMode p_mode)
         {
             switch(p_mode)
             {
@@ -206,12 +214,12 @@ namespace ml_lme
             }
         }
 
-        void OnRootAngleChange(Vector3 p_angle)
+        void OnRootAngleChanged(Vector3 p_angle)
         {
             this.transform.localRotation = Quaternion.Euler(p_angle);
         }
 
-        void OnHeadAttachChange(bool p_state)
+        void OnHeadAttachChanged(bool p_state)
         {
             if(!m_inVR)
             {
@@ -228,35 +236,29 @@ namespace ml_lme
             this.transform.localRotation = Quaternion.Euler(Settings.RootAngle);
         }
 
-        void OnHeadOffsetChange(Vector3 p_offset)
+        void OnHeadOffsetChanged(Vector3 p_offset)
         {
             if(Settings.HeadAttach)
                 this.transform.localPosition = p_offset * (!m_inVR ? m_scaleRelation : 1f);
         }
 
         // Game events
-        internal void OnAvatarClear()
+        void OnAvatarClear()
         {
             m_scaleRelation = 1f;
-            OnHeadAttachChange(Settings.HeadAttach);
+            OnHeadAttachChanged(Settings.HeadAttach);
         }
 
-        internal void OnAvatarSetup()
+        void OnAvatarSetup()
         {
             m_inVR = Utils.IsInVR();
-            OnHeadAttachChange(Settings.HeadAttach);
+            OnHeadAttachChanged(Settings.HeadAttach);
         }
 
-        internal void OnPlayspaceScale(float p_relation)
+        void OnPlayspaceScale(float p_relation)
         {
             m_scaleRelation = p_relation;
-            OnHeadAttachChange(Settings.HeadAttach);
-        }
-
-        void OnModeSwitch()
-        {
-            m_inVR = Utils.IsInVR();
-            OnHeadAttachChange(Settings.HeadAttach);
+            OnHeadAttachChanged(Settings.HeadAttach);
         }
 
         // Utils

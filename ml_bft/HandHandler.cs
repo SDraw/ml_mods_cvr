@@ -18,7 +18,7 @@ namespace ml_bft
             m_localRotations = new List<Quaternion>();
             m_renderers = new List<Renderer>();
 
-            Settings.ShowHandsChange += this.OnShowHandsChange;
+            Settings.OnShowHandsChanged.AddHandler(this.OnShowHandsChanged);
         }
 
         public virtual void Cleanup()
@@ -31,7 +31,7 @@ namespace ml_bft
             m_localRotations.Clear();
             m_renderers.Clear();
 
-            Settings.ShowHandsChange -= this.OnShowHandsChange;
+            Settings.OnShowHandsChanged.RemoveHandler(this.OnShowHandsChanged);
         }
 
         public virtual void Update()
@@ -47,7 +47,7 @@ namespace ml_bft
         {
         }
 
-        protected void OnShowHandsChange(bool p_state)
+        protected void OnShowHandsChanged(bool p_state)
         {
             foreach(var l_render in m_renderers)
             {

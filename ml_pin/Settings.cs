@@ -6,6 +6,14 @@ namespace ml_pin
 {
     static class Settings
     {
+        internal class SettingEvent<T>
+        {
+            event Action<T> m_action;
+            public void AddHandler(Action<T> p_listener) => m_action += p_listener;
+            public void RemoveHandler(Action<T> p_listener) => m_action -= p_listener;
+            public void Invoke(T p_value) => m_action?.Invoke(p_value);
+        }
+
         public enum NotificationType
         {
             None = 0,
@@ -33,12 +41,12 @@ namespace ml_pin
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
 
-        public static event Action<NotificationType> NotifyTypeChange;
-        public static event Action<float> VolumeChange;
-        public static event Action<bool> NotifyInPublicChange;
-        public static event Action<bool> NotifyInFriendsChange;
-        public static event Action<bool> NotifyInPrivateChange;
-        public static event Action<bool> FriendsAlwaysChange;
+        public static readonly SettingEvent<NotificationType> OnNotifyTypeChanged = new SettingEvent<NotificationType>();
+        public static readonly SettingEvent<float> OnVolumeChanged = new SettingEvent<float>();
+        public static readonly SettingEvent<bool> OnNotifyInPublicChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<bool> OnNotifyInFriendsChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<bool> OnNotifyInPrivateChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<bool> OnFriendsAlwaysChanged = new SettingEvent<bool>();
 
         internal static void Init()
         {
@@ -90,76 +98,97 @@ namespace ml_pin
 
         static void OnToggleUpdate(string p_name, string p_value)
         {
-            if(Enum.TryParse(p_name, out ModSetting l_setting))
+            try
             {
-                switch(l_setting)
+                if(Enum.TryParse(p_name, out ModSetting l_setting))
                 {
-                    case ModSetting.NotifyInPublic:
+                    switch(l_setting)
                     {
-                        NotifyInPublic = bool.Parse(p_value);
-                        NotifyInPublicChange?.Invoke(NotifyInPublic);
-                    }
-                    break;
+                        case ModSetting.NotifyInPublic:
+                        {
+                            NotifyInPublic = bool.Parse(p_value);
+                            OnNotifyInPublicChanged.Invoke(NotifyInPublic);
+                        }
+                        break;
 
-                    case ModSetting.NotifyInFriends:
-                    {
-                        NotifyInFriends = bool.Parse(p_value);
-                        NotifyInFriendsChange?.Invoke(NotifyInFriends);
-                    }
-                    break;
+                        case ModSetting.NotifyInFriends:
+                        {
+                            NotifyInFriends = bool.Parse(p_value);
+                            OnNotifyInFriendsChanged.Invoke(NotifyInFriends);
+                        }
+                        break;
 
-                    case ModSetting.NotifyInPrivate:
-                    {
-                        NotifyInPrivate = bool.Parse(p_value);
-                        NotifyInPrivateChange?.Invoke(NotifyInPrivate);
+                        case ModSetting.NotifyInPrivate:
+                        {
+                            NotifyInPrivate = bool.Parse(p_value);
+                            OnNotifyInPrivateChanged.Invoke(NotifyInPrivate);
+                        }
+                        break;
+
+                        case ModSetting.FriendsAlways:
+                        {
+                            FriendsAlways = bool.Parse(p_value);
+                            OnFriendsAlwaysChanged.Invoke(FriendsAlways);
+                        }
+                        break;
                     }
-                    break;
-                    
-                    case ModSetting.FriendsAlways:
-                    {
-                        FriendsAlways = bool.Parse(p_value);
-                        FriendsAlwaysChange?.Invoke(FriendsAlways);
-                    }
-                    break;
+
+                    ms_entries[(int)l_setting].BoxedValue = bool.Parse(p_value);
                 }
-
-                ms_entries[(int)l_setting].BoxedValue = bool.Parse(p_value);
+            }
+            catch(Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
             }
         }
 
         static void OnSliderUpdate(string p_name, string p_value)
         {
-            if(Enum.TryParse(p_name, out ModSetting l_setting))
+            try
             {
-                switch(l_setting)
+                if(Enum.TryParse(p_name, out ModSetting l_setting))
                 {
-                    case ModSetting.Volume:
+                    switch(l_setting)
                     {
-                        Volume = int.Parse(p_value) * 0.01f;
-                        VolumeChange?.Invoke(Volume);
+                        case ModSetting.Volume:
+                        {
+                            Volume = int.Parse(p_value) * 0.01f;
+                            OnVolumeChanged.Invoke(Volume);
+                        }
+                        break;
                     }
-                    break;
-                }
 
-                ms_entries[(int)l_setting].BoxedValue = int.Parse(p_value);
+                    ms_entries[(int)l_setting].BoxedValue = int.Parse(p_value);
+                }
+            }
+            catch(Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
             }
         }
 
         static void OnDropdownUpdate(string p_name, string p_value)
         {
-            if(Enum.TryParse(p_name, out ModSetting l_setting))
+            try
             {
-                switch(l_setting)
+                if(Enum.TryParse(p_name, out ModSetting l_setting))
                 {
-                    case ModSetting.NotifyType:
+                    switch(l_setting)
                     {
-                        NotifyType = (NotificationType)int.Parse(p_value);
-                        NotifyTypeChange?.Invoke(NotifyType);
+                        case ModSetting.NotifyType:
+                        {
+                            NotifyType = (NotificationType)int.Parse(p_value);
+                            OnNotifyTypeChanged.Invoke(NotifyType);
+                        }
+                        break;
                     }
-                    break;
-                }
 
-                ms_entries[(int)l_setting].BoxedValue = int.Parse(p_value);
+                    ms_entries[(int)l_setting].BoxedValue = int.Parse(p_value);
+                }
+            }
+            catch(Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
             }
         }
     }

@@ -1,4 +1,4 @@
-﻿[assembly: MelonLoader.MelonInfo(typeof(ml_lme.LeapMotionExtension), "LeapMotionExtension", "1.4.9", "SDraw", "https://github.com/SDraw/ml_mods_cvr")]
+﻿[assembly: MelonLoader.MelonInfo(typeof(ml_lme.LeapMotionExtension), "LeapMotionExtension", "1.5.0", "SDraw", "https://github.com/SDraw/ml_mods_cvr")]
 [assembly: MelonLoader.MelonGame(null, "ChilloutVR")]
 [assembly: MelonLoader.MelonOptionalDependencies("ml_pmc")]
 [assembly: MelonLoader.MelonPlatform(MelonLoader.MelonPlatformAttribute.CompatiblePlatforms.WINDOWS_X64)]

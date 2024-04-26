@@ -8,6 +8,14 @@ namespace ml_prm
 {
     static class ModUi
     {
+        internal class UiEvent
+        {
+            event Action m_action;
+            public void AddHandler(Action p_listener) => m_action += p_listener;
+            public void RemoveHandler(Action p_listener) => m_action -= p_listener;
+            public void Invoke() => m_action?.Invoke();
+        }
+
         enum UiIndex
         {
             Hotkey = 0,
@@ -29,7 +37,7 @@ namespace ml_prm
             FallLimit
         }
 
-        public static event Action SwitchChange;
+        internal static readonly UiEvent OnSwitchChanged = new UiEvent();
 
         static List<object> ms_uiElements = null;
 
@@ -52,7 +60,7 @@ namespace ml_prm
 
             var l_modCategory = l_modRoot.AddCategory("Settings");
 
-            l_modCategory.AddButton("Switch ragdoll", "PRM-Person", "Switch between normal and ragdoll state.").OnPress += () => SwitchChange?.Invoke();
+            l_modCategory.AddButton("Switch ragdoll", "PRM-Person", "Switch between normal and ragdoll state.").OnPress += OnSwitch;
 
             ms_uiElements.Add(l_modCategory.AddToggle("Use hotkey", "Switch ragdoll mode with 'R' key", Settings.Hotkey));
             (ms_uiElements[(int)UiIndex.Hotkey] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate(UiIndex.Hotkey, state);
@@ -108,90 +116,116 @@ namespace ml_prm
             l_modCategory.AddButton("Reset settings", "", "Reset mod settings to default").OnPress += Reset;
         }
 
+        static void OnSwitch()
+        {
+            try
+            {
+                OnSwitchChanged.Invoke();
+            }
+            catch(Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
+        }
+
         static void OnToggleUpdate(UiIndex p_index, bool p_state, bool p_force = false)
         {
-            switch(p_index)
+            try
             {
-                case UiIndex.Hotkey:
-                    Settings.SetSetting(Settings.ModSetting.Hotkey, p_state);
-                    break;
+                switch(p_index)
+                {
+                    case UiIndex.Hotkey:
+                        Settings.SetSetting(Settings.ModSetting.Hotkey, p_state);
+                        break;
 
-                case UiIndex.Gravity:
-                    Settings.SetSetting(Settings.ModSetting.Gravity, p_state);
-                    break;
+                    case UiIndex.Gravity:
+                        Settings.SetSetting(Settings.ModSetting.Gravity, p_state);
+                        break;
 
-                case UiIndex.PointersReaction:
-                    Settings.SetSetting(Settings.ModSetting.PointersReaction, p_state);
-                    break;
+                    case UiIndex.PointersReaction:
+                        Settings.SetSetting(Settings.ModSetting.PointersReaction, p_state);
+                        break;
 
-                case UiIndex.IgnoreLocal:
-                    Settings.SetSetting(Settings.ModSetting.IgnoreLocal, p_state);
-                    break;
+                    case UiIndex.IgnoreLocal:
+                        Settings.SetSetting(Settings.ModSetting.IgnoreLocal, p_state);
+                        break;
 
-                case UiIndex.CombatReaction:
-                    Settings.SetSetting(Settings.ModSetting.CombatReaction, p_state);
-                    break;
+                    case UiIndex.CombatReaction:
+                        Settings.SetSetting(Settings.ModSetting.CombatReaction, p_state);
+                        break;
 
-                case UiIndex.AutoRecover:
-                    Settings.SetSetting(Settings.ModSetting.AutoRecover, p_state);
-                    break;
+                    case UiIndex.AutoRecover:
+                        Settings.SetSetting(Settings.ModSetting.AutoRecover, p_state);
+                        break;
 
-                case UiIndex.Slipperiness:
-                    Settings.SetSetting(Settings.ModSetting.Slipperiness, p_state);
-                    break;
+                    case UiIndex.Slipperiness:
+                        Settings.SetSetting(Settings.ModSetting.Slipperiness, p_state);
+                        break;
 
-                case UiIndex.Bounciness:
-                    Settings.SetSetting(Settings.ModSetting.Bounciness, p_state);
-                    break;
+                    case UiIndex.Bounciness:
+                        Settings.SetSetting(Settings.ModSetting.Bounciness, p_state);
+                        break;
 
-                case UiIndex.ViewVelocity:
-                    Settings.SetSetting(Settings.ModSetting.ViewVelocity, p_state);
-                    break;
+                    case UiIndex.ViewVelocity:
+                        Settings.SetSetting(Settings.ModSetting.ViewVelocity, p_state);
+                        break;
 
-                case UiIndex.JumpRecover:
-                    Settings.SetSetting(Settings.ModSetting.JumpRecover, p_state);
-                    break;
+                    case UiIndex.JumpRecover:
+                        Settings.SetSetting(Settings.ModSetting.JumpRecover, p_state);
+                        break;
 
-                case UiIndex.Buoyancy:
-                    Settings.SetSetting(Settings.ModSetting.Buoyancy, p_state);
-                    break;
+                    case UiIndex.Buoyancy:
+                        Settings.SetSetting(Settings.ModSetting.Buoyancy, p_state);
+                        break;
 
-                case UiIndex.FallDamage:
-                    Settings.SetSetting(Settings.ModSetting.FallDamage, p_state);
-                    break;
+                    case UiIndex.FallDamage:
+                        Settings.SetSetting(Settings.ModSetting.FallDamage, p_state);
+                        break;
+                }
+
+                if(p_force)
+                    (ms_uiElements[(int)p_index] as BTKUILib.UIObjects.Components.ToggleButton).ToggleValue = p_state;
             }
-
-            if(p_force)
-                (ms_uiElements[(int)p_index] as BTKUILib.UIObjects.Components.ToggleButton).ToggleValue = p_state;
+            catch(Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
         }
 
         static void OnSliderUpdate(UiIndex p_index, float p_value, bool p_force = false)
         {
-            switch(p_index)
+            try
             {
-                case UiIndex.VelocityMultiplier:
-                    Settings.SetSetting(Settings.ModSetting.VelocityMultiplier, p_value);
-                    break;
+                switch(p_index)
+                {
+                    case UiIndex.VelocityMultiplier:
+                        Settings.SetSetting(Settings.ModSetting.VelocityMultiplier, p_value);
+                        break;
 
-                case UiIndex.MovementDrag:
-                    Settings.SetSetting(Settings.ModSetting.MovementDrag, p_value);
-                    break;
+                    case UiIndex.MovementDrag:
+                        Settings.SetSetting(Settings.ModSetting.MovementDrag, p_value);
+                        break;
 
-                case UiIndex.AngularDrag:
-                    Settings.SetSetting(Settings.ModSetting.AngularDrag, p_value);
-                    break;
+                    case UiIndex.AngularDrag:
+                        Settings.SetSetting(Settings.ModSetting.AngularDrag, p_value);
+                        break;
 
-                case UiIndex.RecoverDelay:
-                    Settings.SetSetting(Settings.ModSetting.RecoverDelay, p_value);
-                    break;
+                    case UiIndex.RecoverDelay:
+                        Settings.SetSetting(Settings.ModSetting.RecoverDelay, p_value);
+                        break;
 
-                case UiIndex.FallLimit:
-                    Settings.SetSetting(Settings.ModSetting.FallLimit, p_value);
-                    break;
+                    case UiIndex.FallLimit:
+                        Settings.SetSetting(Settings.ModSetting.FallLimit, p_value);
+                        break;
+                }
+
+                if(p_force)
+                    (ms_uiElements[(int)p_index] as BTKUILib.UIObjects.Components.SliderFloat).SetSliderValue(p_value);
             }
-
-            if(p_force)
-                (ms_uiElements[(int)p_index] as BTKUILib.UIObjects.Components.SliderFloat).SetSliderValue(p_value);
+            catch(Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
         }
 
         static void Reset()

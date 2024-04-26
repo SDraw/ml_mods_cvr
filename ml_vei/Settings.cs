@@ -6,6 +6,14 @@ namespace ml_vei
 {
     static class Settings
     {
+        internal class SettingEvent<T>
+        {
+            event Action<T> m_action;
+            public void AddHandler(Action<T> p_listener) => m_action += p_listener;
+            public void RemoveHandler(Action<T> p_listener) => m_action -= p_listener;
+            public void Invoke(T p_value) => m_action?.Invoke(p_value);
+        }
+
         enum ModSetting
         {
             Gestures = 0,
@@ -26,9 +34,9 @@ namespace ml_vei
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
 
-        public static event Action<bool> GesturesChange;
-        public static event Action<bool> GripTriggerChange;
-        public static event Action<PriorityAxis> AxisPriorityChange;
+        public static readonly SettingEvent<bool> OnGesturesChanged;
+        public static readonly SettingEvent<bool> OnGripTriggerChanged;
+        public static readonly SettingEvent<PriorityAxis> OnAxisPriorityChanged;
 
         internal static void Init()
         {
@@ -73,44 +81,58 @@ namespace ml_vei
 
         static void OnToggleUpdate(string p_name, string p_value)
         {
-            if(Enum.TryParse(p_name, out ModSetting l_setting))
+            try
             {
-                switch(l_setting)
+                if(Enum.TryParse(p_name, out ModSetting l_setting))
                 {
-                    case ModSetting.Gestures:
+                    switch(l_setting)
                     {
-                        Gestures = bool.Parse(p_value);
-                        GesturesChange?.Invoke(Gestures);
-                    }
-                    break;
+                        case ModSetting.Gestures:
+                        {
+                            Gestures = bool.Parse(p_value);
+                            OnGesturesChanged.Invoke(Gestures);
+                        }
+                        break;
 
-                    case ModSetting.GripTrigger:
-                    {
-                        GripTrigger = bool.Parse(p_value);
-                        GripTriggerChange?.Invoke(GripTrigger);
+                        case ModSetting.GripTrigger:
+                        {
+                            GripTrigger = bool.Parse(p_value);
+                            OnGripTriggerChanged.Invoke(GripTrigger);
+                        }
+                        break;
                     }
-                    break;
+
+                    ms_entries[(int)l_setting].BoxedValue = bool.Parse(p_value);
                 }
-
-                ms_entries[(int)l_setting].BoxedValue = bool.Parse(p_value);
+            }
+            catch(Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
             }
         }
 
         static void OnDropdownUpdate(string p_name, string p_value)
         {
-            if(Enum.TryParse(p_name, out ModSetting l_setting))
+            try
             {
-                switch(l_setting)
+                if(Enum.TryParse(p_name, out ModSetting l_setting))
                 {
-                    case ModSetting.AxisPriority:
+                    switch(l_setting)
                     {
-                        AxisPriority = (PriorityAxis)int.Parse(p_value);
-                        AxisPriorityChange?.Invoke(AxisPriority);
+                        case ModSetting.AxisPriority:
+                        {
+                            AxisPriority = (PriorityAxis)int.Parse(p_value);
+                            OnAxisPriorityChanged.Invoke(AxisPriority);
+                        }
+                        break;
                     }
-                    break;
-                }
 
-                ms_entries[(int)l_setting].BoxedValue = int.Parse(p_value);
+                    ms_entries[(int)l_setting].BoxedValue = int.Parse(p_value);
+                }
+            }
+            catch(Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
             }
         }
     }

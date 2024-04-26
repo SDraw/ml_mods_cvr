@@ -6,6 +6,14 @@ namespace ml_prm
 {
     static class Settings
     {
+        internal class SettingEvent<T>
+        {
+            event Action<T> m_action;
+            public void AddHandler(Action<T> p_listener) => m_action += p_listener;
+            public void RemoveHandler(Action<T> p_listener) => m_action -= p_listener;
+            public void Invoke(T p_value) => m_action?.Invoke(p_value);
+        }
+
         public enum ModSetting
         {
             Hotkey = 0,
@@ -47,24 +55,24 @@ namespace ml_prm
         public static bool FallDamage { get; private set; } = true;
         public static float FallLimit { get; private set; } = 5f;
 
-        public static event Action<bool> HotkeyChange;
-        public static event Action<KeyCode> HotkeyKeyChange;
-        public static event Action<float> VelocityMultiplierChange;
-        public static event Action<float> MovementDragChange;
-        public static event Action<float> AngularDragChange;
-        public static event Action<bool> GravityChange;
-        public static event Action<bool> PointersReactionChange;
-        public static event Action<bool> IgnoreLocalChange;
-        public static event Action<bool> CombatReactionChange;
-        public static event Action<bool> AutoRecoverChange;
-        public static event Action<float> RecoverDelayChange;
-        public static event Action<bool> SlipperinessChange;
-        public static event Action<bool> BouncinessChange;
-        public static event Action<bool> ViewVelocityChange;
-        public static event Action<bool> JumpRecoverChange;
-        public static event Action<bool> BuoyancyChange;
-        public static event Action<bool> FallDamageChange;
-        public static event Action<float> FallLimitChange;
+        public static readonly SettingEvent<bool> OnHotkeyChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<KeyCode> OnHotkeyKeyChanged = new SettingEvent<KeyCode>();
+        public static readonly SettingEvent<float> OnVelocityMultiplierChanged = new SettingEvent<float>();
+        public static readonly SettingEvent<float> OnMovementDragChanged = new SettingEvent<float>();
+        public static readonly SettingEvent<float> OnAngularDragChanged = new SettingEvent<float>();
+        public static readonly SettingEvent<bool> OnGravityChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<bool> OnPointersReactionChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<bool> OnIgnoreLocalChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<bool> OnCombatReactionChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<bool> OnAutoRecoverChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<float> OnRecoverDelayChanged = new SettingEvent<float>();
+        public static readonly SettingEvent<bool> OnSlipperinessChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<bool> OnBouncinessChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<bool> OnViewVelocityChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<bool> OnJumpRecoverChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<bool> OnBuoyancyChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<bool> OnFallDamageChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<float> OnFallLimitChanged = new SettingEvent<float>();
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
@@ -119,141 +127,155 @@ namespace ml_prm
 
         static void OnMelonSettingSave_HotkeyKey(object p_oldValue, object p_newValue)
         {
-            if(p_newValue is KeyCode)
+            try
             {
-                HotkeyKey = (KeyCode)p_newValue;
-                HotkeyKeyChange?.Invoke(HotkeyKey);
+                if(p_newValue is KeyCode)
+                {
+                    HotkeyKey = (KeyCode)p_newValue;
+                    OnHotkeyKeyChanged.Invoke(HotkeyKey);
+                }
+            }
+            catch(Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
             }
         }
 
         public static void SetSetting(ModSetting p_settings, object p_value)
         {
-            switch(p_settings)
+            try
             {
-                // Booleans
-                case ModSetting.Hotkey:
+                switch(p_settings)
                 {
-                    Hotkey = (bool)p_value;
-                    HotkeyChange?.Invoke((bool)p_value);
-                }
-                break;
+                    // Booleans
+                    case ModSetting.Hotkey:
+                    {
+                        Hotkey = (bool)p_value;
+                        OnHotkeyChanged.Invoke(Hotkey);
+                    }
+                    break;
 
-                case ModSetting.Gravity:
-                {
-                    Gravity = (bool)p_value;
-                    GravityChange?.Invoke((bool)p_value);
-                }
-                break;
+                    case ModSetting.Gravity:
+                    {
+                        Gravity = (bool)p_value;
+                        OnGravityChanged.Invoke(Gravity);
+                    }
+                    break;
 
-                case ModSetting.PointersReaction:
-                {
-                    PointersReaction = (bool)p_value;
-                    PointersReactionChange?.Invoke((bool)p_value);
-                }
-                break;
+                    case ModSetting.PointersReaction:
+                    {
+                        PointersReaction = (bool)p_value;
+                        OnPointersReactionChanged.Invoke(PointersReaction);
+                    }
+                    break;
 
-                case ModSetting.IgnoreLocal:
-                {
-                    IgnoreLocal = (bool)p_value;
-                    IgnoreLocalChange?.Invoke((bool)p_value);
-                }
-                break;
+                    case ModSetting.IgnoreLocal:
+                    {
+                        IgnoreLocal = (bool)p_value;
+                        OnIgnoreLocalChanged.Invoke(IgnoreLocal);
+                    }
+                    break;
 
-                case ModSetting.CombatReaction:
-                {
-                    CombatReaction = (bool)p_value;
-                    CombatReactionChange?.Invoke((bool)p_value);
-                }
-                break;
+                    case ModSetting.CombatReaction:
+                    {
+                        CombatReaction = (bool)p_value;
+                        OnCombatReactionChanged.Invoke(CombatReaction);
+                    }
+                    break;
 
-                case ModSetting.AutoRecover:
-                {
-                    AutoRecover = (bool)p_value;
-                    AutoRecoverChange?.Invoke((bool)p_value);
-                }
-                break;
+                    case ModSetting.AutoRecover:
+                    {
+                        AutoRecover = (bool)p_value;
+                        OnAutoRecoverChanged.Invoke(AutoRecover);
+                    }
+                    break;
 
-                case ModSetting.Slipperiness:
-                {
-                    Slipperiness = (bool)p_value;
-                    SlipperinessChange?.Invoke((bool)p_value);
-                }
-                break;
+                    case ModSetting.Slipperiness:
+                    {
+                        Slipperiness = (bool)p_value;
+                        OnSlipperinessChanged.Invoke(Slipperiness);
+                    }
+                    break;
 
-                case ModSetting.Bounciness:
-                {
-                    Bounciness = (bool)p_value;
-                    BouncinessChange?.Invoke((bool)p_value);
-                }
-                break;
+                    case ModSetting.Bounciness:
+                    {
+                        Bounciness = (bool)p_value;
+                        OnBouncinessChanged.Invoke(Bounciness);
+                    }
+                    break;
 
-                case ModSetting.ViewVelocity:
-                {
-                    ViewVelocity = (bool)p_value;
-                    ViewVelocityChange?.Invoke((bool)p_value);
-                }
-                break;
+                    case ModSetting.ViewVelocity:
+                    {
+                        ViewVelocity = (bool)p_value;
+                        OnViewVelocityChanged.Invoke(ViewVelocity);
+                    }
+                    break;
 
-                case ModSetting.JumpRecover:
-                {
-                    JumpRecover = (bool)p_value;
-                    JumpRecoverChange?.Invoke((bool)p_value);
-                }
-                break;
+                    case ModSetting.JumpRecover:
+                    {
+                        JumpRecover = (bool)p_value;
+                        OnJumpRecoverChanged.Invoke(JumpRecover);
+                    }
+                    break;
 
-                case ModSetting.Buoyancy:
-                {
-                    Buoyancy = (bool)p_value;
-                    BuoyancyChange?.Invoke((bool)p_value);
-                }
-                break;
+                    case ModSetting.Buoyancy:
+                    {
+                        Buoyancy = (bool)p_value;
+                        OnBuoyancyChanged.Invoke(Buoyancy);
+                    }
+                    break;
 
-                case ModSetting.FallDamage:
-                {
-                    FallDamage = (bool)p_value;
-                    FallDamageChange?.Invoke((bool)p_value);
-                }
-                break;
+                    case ModSetting.FallDamage:
+                    {
+                        FallDamage = (bool)p_value;
+                        OnFallDamageChanged.Invoke(FallDamage);
+                    }
+                    break;
 
-                // Floats
-                case ModSetting.VelocityMultiplier:
-                {
-                    VelocityMultiplier = (float)p_value;
-                    VelocityMultiplierChange?.Invoke((float)p_value);
-                }
-                break;
+                    // Floats
+                    case ModSetting.VelocityMultiplier:
+                    {
+                        VelocityMultiplier = (float)p_value;
+                        OnVelocityMultiplierChanged.Invoke(VelocityMultiplier);
+                    }
+                    break;
 
-                case ModSetting.MovementDrag:
-                {
-                    MovementDrag = (float)p_value;
-                    MovementDragChange?.Invoke((float)p_value);
-                }
-                break;
+                    case ModSetting.MovementDrag:
+                    {
+                        MovementDrag = (float)p_value;
+                        OnMovementDragChanged.Invoke(MovementDrag);
+                    }
+                    break;
 
-                case ModSetting.AngularDrag:
-                {
-                    AngularDrag = (float)p_value;
-                    AngularDragChange?.Invoke((float)p_value);
-                }
-                break;
+                    case ModSetting.AngularDrag:
+                    {
+                        AngularDrag = (float)p_value;
+                        OnAngularDragChanged.Invoke(AngularDrag);
+                    }
+                    break;
 
-                case ModSetting.RecoverDelay:
-                {
-                    RecoverDelay = (float)p_value;
-                    RecoverDelayChange?.Invoke((float)p_value);
-                }
-                break;
+                    case ModSetting.RecoverDelay:
+                    {
+                        RecoverDelay = (float)p_value;
+                        OnRecoverDelayChanged.Invoke(RecoverDelay);
+                    }
+                    break;
 
-                case ModSetting.FallLimit:
-                {
-                    FallLimit = (float)p_value;
-                    FallLimitChange?.Invoke((float)p_value);
+                    case ModSetting.FallLimit:
+                    {
+                        FallLimit = (float)p_value;
+                        OnFallLimitChanged.Invoke(FallLimit);
+                    }
+                    break;
                 }
-                break;
+
+                if(ms_entries != null)
+                    ms_entries[(int)p_settings].BoxedValue = p_value;
             }
-
-            if(ms_entries != null)
-                ms_entries[(int)p_settings].BoxedValue = p_value;
+            catch(Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
         }
     }
 }

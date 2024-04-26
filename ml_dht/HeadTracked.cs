@@ -47,20 +47,32 @@ namespace ml_dht
         // Unity events
         void Start()
         {
-            SetEnabled(Settings.Enabled);
-            SetHeadTracking(Settings.HeadTracking);
-            SetSmoothing(Settings.Smoothing);
+            OnEnabledChanged(Settings.Enabled);
+            OnHeadTrackingChanged(Settings.HeadTracking);
+            OnSmoothingChanged(Settings.Smoothing);
 
-            Settings.EnabledChange += this.SetEnabled;
-            Settings.HeadTrackingChange += this.SetHeadTracking;
-            Settings.SmoothingChange += this.SetSmoothing;
+            Settings.OnEnabledChanged.AddHandler(this.OnEnabledChanged);
+            Settings.OnHeadTrackingChanged.AddHandler(this.OnHeadTrackingChanged);
+            Settings.OnSmoothingChanged.AddHandler(this.OnSmoothingChanged);
+
+            GameEvents.OnAvatarClear.AddHandler(this.OnAvatarClear);
+            GameEvents.OnAvatarSetup.AddHandler(this.OnAvatarSetup);
+            GameEvents.OnAvatarReuse.AddHandler(this.OnAvatarReuse);
+            GameEvents.OnEyeControllerUpdate.AddHandler(this.OnEyeControllerUpdate);
+            GameEvents.OnFaceTrackingUpdate.AddHandler(this.UpdateFaceTracking);
         }
 
         void OnDestroy()
         {
-            Settings.EnabledChange -= this.SetEnabled;
-            Settings.HeadTrackingChange -= this.SetHeadTracking;
-            Settings.SmoothingChange -= this.SetSmoothing;
+            Settings.OnEnabledChanged.RemoveHandler(this.OnEnabledChanged);
+            Settings.OnHeadTrackingChanged.RemoveHandler(this.OnHeadTrackingChanged);
+            Settings.OnSmoothingChanged.RemoveHandler(this.OnSmoothingChanged);
+
+            GameEvents.OnAvatarClear.RemoveHandler(this.OnAvatarClear);
+            GameEvents.OnAvatarSetup.RemoveHandler(this.OnAvatarSetup);
+            GameEvents.OnAvatarReuse.RemoveHandler(this.OnAvatarReuse);
+            GameEvents.OnEyeControllerUpdate.RemoveHandler(this.OnEyeControllerUpdate);
+            GameEvents.OnFaceTrackingUpdate.RemoveHandler(this.UpdateFaceTracking);
         }
 
         void Update()
@@ -96,7 +108,7 @@ namespace ml_dht
         }
 
         // Game events
-        internal void OnSetupAvatar()
+        internal void OnAvatarSetup()
         {
             Utils.SetAvatarTPose();
 
@@ -112,7 +124,7 @@ namespace ml_dht
                 m_lookIK.onPostSolverUpdate.AddListener(this.OnLookIKPostUpdate);
 
         }
-        internal void OnAvatarClear()
+        void OnAvatarClear()
         {
             m_avatarDescriptor = null;
             m_lookIK = null;
@@ -120,7 +132,7 @@ namespace ml_dht
             m_lastHeadRotation = Quaternion.identity;
             m_bindRotation = Quaternion.identity;
         }
-        internal void OnAvatarReinitialize()
+        void OnAvatarReuse()
         {
             m_camera = PlayerSetup.Instance.GetActiveCamera().transform;
             m_lookIK = PlayerSetup.Instance._avatar.GetComponent<LookAtIK>();
@@ -128,7 +140,7 @@ namespace ml_dht
                 m_lookIK.onPostSolverUpdate.AddListener(this.OnLookIKPostUpdate);
         }
 
-        internal void OnEyeControllerUpdate(EyeMovementController p_component)
+        void OnEyeControllerUpdate(EyeMovementController p_component)
         {
             if(m_enabled)
             {
@@ -148,10 +160,9 @@ namespace ml_dht
             }
         }
 
-        internal bool UpdateFaceTracking(CVRFaceTracking p_component)
+        void UpdateFaceTracking(CVRFaceTracking p_component, GameEvents.EventResult p_result)
         {
-            bool l_result = false;
-            if(m_enabled && Settings.FaceTracking)
+            if(p_component.isLocal && p_component.UseFacialTracking && m_enabled && Settings.FaceTracking)
             {
                 if(!m_lipDataSent)
                 {
@@ -161,13 +172,12 @@ namespace ml_dht
                 p_component.LipSyncWasUpdated = true;
                 p_component.UpdateShapesLocal_Private();
 
-                l_result = true;
+                p_result.m_result |= true;
             }
-            return l_result;
         }
 
         // Settings
-        void SetEnabled(bool p_state)
+        void OnEnabledChanged(bool p_state)
         {
             if(m_enabled != p_state)
             {
@@ -175,7 +185,7 @@ namespace ml_dht
                 TryRestoreHeadRotation();
             }
         }
-        void SetHeadTracking(bool p_state)
+        void OnHeadTrackingChanged(bool p_state)
         {
             if(m_headTracking != p_state)
             {
@@ -183,7 +193,7 @@ namespace ml_dht
                 TryRestoreHeadRotation();
             }
         }
-        void SetSmoothing(float p_value)
+        void OnSmoothingChanged(float p_value)
         {
             m_smoothing = 1f - Mathf.Clamp(p_value, 0f, 0.99f);
         }

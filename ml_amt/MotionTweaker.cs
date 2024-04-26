@@ -31,12 +31,8 @@ namespace ml_amt
         bool m_avatarReady = false;
         bool m_grounded = false;
         bool m_moving = false;
+
         bool m_locomotionOverride = false;
-
-        bool m_ikOverrideFly = true;
-        bool m_ikOverrideJump = true;
-
-        bool m_detectEmotes = true;
         bool m_emoteActive = false;
 
         Vector3 m_massCenter = Vector3.zero;
@@ -53,18 +49,17 @@ namespace ml_amt
         // Unity events
         void Start()
         {
-            SetCrouchLimit(Settings.CrouchLimit);
-            SetProneLimit(Settings.ProneLimit);
-            SetIKOverrideFly(Settings.IKOverrideFly);
-            SetIKOverrideJump(Settings.IKOverrideJump);
-            SetDetectEmotes(Settings.DetectEmotes);
+            OnCrouchLimitChanged(Settings.CrouchLimit);
+            OnProneLimitChanged(Settings.ProneLimit);
 
-            Settings.CrouchLimitChange += this.SetCrouchLimit;
-            Settings.ProneLimitChange += this.SetProneLimit;
-            Settings.IKOverrideFlyChange += this.SetIKOverrideFly;
-            Settings.IKOverrideJumpChange += this.SetIKOverrideJump;
-            Settings.DetectEmotesChange += this.SetDetectEmotes;
-            Settings.MassCenterChange += this.OnMassCenterChange;
+            Settings.OnCrouchLimitChanged.AddHandler(this.OnCrouchLimitChanged);
+            Settings.OnProneLimitChanged.AddHandler(this.OnProneLimitChanged);
+            Settings.OnMassCenterChanged.AddHandler(this.OnMassCenterChanged);
+
+            GameEvents.OnAvatarSetup.AddHandler(this.OnAvatarSetup);
+            GameEvents.OnAvatarClear.AddHandler(this.OnAvatarClear);
+            GameEvents.OnAvatarReuse.AddHandler(this.OnAvatarReuse);
+            GameEvents.OnPlayspaceScale.AddHandler(this.OnPlayspaceScale);
         }
 
         void OnDestroy()
@@ -73,12 +68,14 @@ namespace ml_amt
             m_ikLimits = null;
             m_parameters.Clear();
 
-            Settings.CrouchLimitChange -= this.SetCrouchLimit;
-            Settings.ProneLimitChange -= this.SetProneLimit;
-            Settings.IKOverrideFlyChange -= this.SetIKOverrideFly;
-            Settings.IKOverrideJumpChange -= this.SetIKOverrideJump;
-            Settings.DetectEmotesChange -= this.SetDetectEmotes;
-            Settings.MassCenterChange -= this.OnMassCenterChange;
+            Settings.OnCrouchLimitChanged.RemoveHandler(this.OnCrouchLimitChanged);
+            Settings.OnProneLimitChanged.RemoveHandler(this.OnProneLimitChanged);
+            Settings.OnMassCenterChanged.RemoveHandler(this.OnMassCenterChanged);
+
+            GameEvents.OnAvatarSetup.RemoveHandler(this.OnAvatarSetup);
+            GameEvents.OnAvatarClear.RemoveHandler(this.OnAvatarClear);
+            GameEvents.OnAvatarReuse.RemoveHandler(this.OnAvatarReuse);
+            GameEvents.OnPlayspaceScale.RemoveHandler(this.OnPlayspaceScale);
         }
 
         void Update()
@@ -91,7 +88,7 @@ namespace ml_amt
                 UpdateIKLimits();
 
                 m_emoteActive = false;
-                if(m_detectEmotes && (m_locomotionLayer >= 0))
+                if(Settings.DetectEmotes && (m_locomotionLayer >= 0))
                 {
                     AnimatorStateInfo l_animState = PlayerSetup.Instance._animator.GetCurrentAnimatorStateInfo(m_locomotionLayer);
                     m_emoteActive = (l_animState.tagHash == ms_emoteHash);
@@ -103,7 +100,7 @@ namespace ml_amt
         }
 
         // Game events
-        internal void OnAvatarClear()
+        void OnAvatarClear()
         {
             m_vrIk = null;
             m_locomotionLayer = -1;
@@ -122,7 +119,7 @@ namespace ml_amt
             BetterBetterCharacterController.Instance.avatarProneLimit = Mathf.Clamp01(Settings.ProneLimit);
         }
 
-        internal void OnSetupAvatar()
+        void OnAvatarSetup()
         {
             Utils.SetAvatarTPose();
 
@@ -164,20 +161,20 @@ namespace ml_amt
 
                 m_vrIk.solver.locomotion.offset = (Settings.MassCenter ? m_massCenter : m_locomotionOffset);
 
-                m_vrIk.onPreSolverUpdate.AddListener(this.OnIKPreUpdate);
-                m_vrIk.onPostSolverUpdate.AddListener(this.OnIKPostUpdate);
+                m_vrIk.onPreSolverUpdate.AddListener(this.OnIKPreSolverUpdate);
+                m_vrIk.onPostSolverUpdate.AddListener(this.OnIKPostSolverUpdate);
             }
 
             m_avatarReady = true;
         }
 
-        internal void OnPlayspaceScale()
+        void OnPlayspaceScale()
         {
             if((m_vrIk != null) && Settings.MassCenter)
                 m_vrIk.solver.locomotion.offset = m_massCenter * GetRelativeScale();
         }
 
-        internal void OnAvatarReinitialize()
+        void OnAvatarReuse()
         {
             // Old VRIK is destroyed by game
             Utils.SetAvatarTPose();
@@ -187,13 +184,13 @@ namespace ml_amt
             {
                 m_vrIk.solver.locomotion.offset = (Settings.MassCenter ? m_massCenter : m_locomotionOffset);
 
-                m_vrIk.onPreSolverUpdate.AddListener(this.OnIKPreUpdate);
-                m_vrIk.onPostSolverUpdate.AddListener(this.OnIKPostUpdate);
+                m_vrIk.onPreSolverUpdate.AddListener(this.OnIKPreSolverUpdate);
+                m_vrIk.onPostSolverUpdate.AddListener(this.OnIKPostSolverUpdate);
             }
         }
 
         // IK events
-        void OnIKPreUpdate()
+        void OnIKPreSolverUpdate()
         {
             bool l_locomotionOverride = false;
 
@@ -203,7 +200,7 @@ namespace ml_amt
             m_ikState.m_bendNormalLeft = m_vrIk.solver.leftLeg.useAnimatedBendNormal;
             m_ikState.m_bendNormalRight = m_vrIk.solver.rightLeg.useAnimatedBendNormal;
 
-            if(m_detectEmotes && m_emoteActive)
+            if(Settings.DetectEmotes && m_emoteActive)
                 m_vrIk.solver.IKPositionWeight = 0f;
 
             if(!BodySystem.isCalibratedAsFullBody)
@@ -214,14 +211,14 @@ namespace ml_amt
                     m_vrIk.solver.rightLeg.useAnimatedBendNormal = true;
                     l_locomotionOverride = true;
                 }
-                if(m_ikOverrideFly && BetterBetterCharacterController.Instance.IsFlying())
+                if(Settings.IKOverrideFly && BetterBetterCharacterController.Instance.IsFlying())
                 {
                     m_vrIk.solver.locomotion.weight = 0f;
                     m_vrIk.solver.leftLeg.useAnimatedBendNormal = true;
                     m_vrIk.solver.rightLeg.useAnimatedBendNormal = true;
                     l_locomotionOverride = true;
                 }
-                if(m_ikOverrideJump && !m_grounded && !BetterBetterCharacterController.Instance.IsFlying())
+                if(Settings.IKOverrideJump && !m_grounded && !BetterBetterCharacterController.Instance.IsFlying())
                 {
                     m_vrIk.solver.locomotion.weight = 0f;
                     m_vrIk.solver.leftLeg.useAnimatedBendNormal = true;
@@ -235,7 +232,7 @@ namespace ml_amt
             m_locomotionOverride = l_locomotionOverride;
         }
 
-        void OnIKPostUpdate()
+        void OnIKPostSolverUpdate()
         {
             m_vrIk.solver.IKPositionWeight = m_ikState.m_weight;
             m_vrIk.solver.locomotion.weight = m_ikState.m_locomotionWeight;
@@ -245,29 +242,17 @@ namespace ml_amt
         }
 
         // Settings
-        void SetCrouchLimit(float p_value)
+        void OnCrouchLimitChanged(float p_value)
         {
             if(m_ikLimits == null)
                 BetterBetterCharacterController.Instance.avatarCrouchLimit = Mathf.Clamp01(p_value);
         }
-        void SetProneLimit(float p_value)
+        void OnProneLimitChanged(float p_value)
         {
             if(m_ikLimits == null)
                 BetterBetterCharacterController.Instance.avatarProneLimit = Mathf.Clamp01(p_value);
         }
-        void SetIKOverrideFly(bool p_state)
-        {
-            m_ikOverrideFly = p_state;
-        }
-        void SetIKOverrideJump(bool p_state)
-        {
-            m_ikOverrideJump = p_state;
-        }
-        void SetDetectEmotes(bool p_state)
-        {
-            m_detectEmotes = p_state;
-        }
-        void OnMassCenterChange(bool p_state)
+        void OnMassCenterChanged(bool p_state)
         {
             if(m_vrIk != null)
                 m_vrIk.solver.locomotion.offset = (Settings.MassCenter ? (m_massCenter * GetRelativeScale()) : m_locomotionOffset);
@@ -290,6 +275,6 @@ namespace ml_amt
         }
 
         // Parameters access
-        public bool GetMoving() => m_moving;
+        public bool IsMoving() => m_moving;
     }
 }

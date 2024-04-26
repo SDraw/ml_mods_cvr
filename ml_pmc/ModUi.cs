@@ -9,6 +9,14 @@ namespace ml_pmc
 {
     static class ModUi
     {
+        internal class UiEvent<T>
+        {
+            event Action<T> m_action;
+            public void AddHandler(Action<T> p_listener) => m_action += p_listener;
+            public void RemoveHandler(Action<T> p_listener) => m_action -= p_listener;
+            public void Invoke(T p_value) => m_action?.Invoke(p_value);
+        }
+
         enum UiIndex
         {
             Toggle,
@@ -22,7 +30,7 @@ namespace ml_pmc
             Reset
         }
 
-        internal static Action<string> CopySwitch;
+        public static readonly UiEvent<string> OnTargetSelect = new UiEvent<string>();
 
         static List<QMUIElement> ms_uiElements = null;
         static string ms_selectedPlayer;
@@ -64,10 +72,10 @@ namespace ml_pmc
             (ms_uiElements[(int)UiIndex.Reset] as Button).OnPress += Reset;
 
             BTKUILib.QuickMenuAPI.OnPlayerSelected += (_, id) => ms_selectedPlayer = id;
-            PoseCopycat.OnActivityChange += UpdateToggleColor;
+            PoseCopycat.OnCopycatChanged.AddHandler(OnCopycatChanged);
         }
 
-        static void OnCopySwitch() => CopySwitch?.Invoke(ms_selectedPlayer);
+        static void OnCopySwitch() => OnTargetSelect.Invoke(ms_selectedPlayer);
 
         static void OnToggleUpdate(UiIndex p_index, bool p_value, bool p_force = false)
         {
@@ -119,8 +127,7 @@ namespace ml_pmc
 
         internal static void ShowAlert(string p_text) => BTKUILib.QuickMenuAPI.ShowAlertToast(p_text, 2);
 
-        // Currently broken in BTKUILib, waiting for fix
-        static void UpdateToggleColor(bool p_state)
+        static void OnCopycatChanged(bool p_state)
         {
             (ms_uiElements[(int)UiIndex.Toggle] as Button).ButtonIcon = (p_state ? "PMC-Dancing-On" : "PMC-Dancing");
         }

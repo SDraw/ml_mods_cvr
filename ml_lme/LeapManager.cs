@@ -1,5 +1,4 @@
-﻿using ABI.CCK.Components;
-using ABI_RC.Core.Player;
+﻿using ABI_RC.Core.Player;
 using ABI_RC.Systems.InputManagement;
 using System.Collections;
 using UnityEngine;
@@ -23,6 +22,8 @@ namespace ml_lme
             if(Instance == null)
                 Instance = this;
 
+            ScriptableObject.CreateInstance<Leap.Unity.UltraleapSettings>().ResetToDefaults();
+
             m_leapController = new Leap.Controller();
             m_leapData = new LeapParser.LeapData();
 
@@ -34,14 +35,14 @@ namespace ml_lme
             m_leapController.Connect += this.OnLeapServiceConnect;
             m_leapController.Disconnect += this.OnLeapServiceDisconnect;
 
-            Settings.EnabledChange += this.OnEnableChange;
-            Settings.TrackingModeChange += this.OnTrackingModeChange;
+            Settings.OnEnabledChanged.AddHandler(this.OnEnableChanged);
+            Settings.OnTrackingModeChanged.AddHandler(this.OnTrackingModeChanged);
 
             m_leapTracking = new GameObject("[LeapTrackingRoot]").AddComponent<LeapTracking>();
             m_leapTracking.transform.parent = this.transform;
 
-            OnEnableChange(Settings.Enabled);
-            OnTrackingModeChange(Settings.TrackingMode);
+            OnEnableChanged(Settings.Enabled);
+            OnTrackingModeChanged(Settings.TrackingMode);
 
             MelonLoader.MelonCoroutines.Start(WaitForObjects());
         }
@@ -77,8 +78,8 @@ namespace ml_lme
             }
             m_leapInput = null;
 
-            Settings.EnabledChange -= this.OnEnableChange;
-            Settings.TrackingModeChange -= this.OnTrackingModeChange;
+            Settings.OnEnabledChanged.RemoveHandler(this.OnEnableChanged);
+            Settings.OnTrackingModeChanged.RemoveHandler(this.OnTrackingModeChanged);
         }
 
         IEnumerator WaitForObjects()
@@ -149,7 +150,7 @@ namespace ml_lme
         }
 
         // Settings
-        void OnEnableChange(bool p_state)
+        void OnEnableChanged(bool p_state)
         {
             if(p_state)
             {
@@ -160,50 +161,10 @@ namespace ml_lme
                 m_leapController.StopConnection();
         }
 
-        void OnTrackingModeChange(Settings.LeapTrackingMode p_mode)
+        void OnTrackingModeChanged(Settings.LeapTrackingMode p_mode)
         {
             if(Settings.Enabled)
                 UpdateDeviceTrackingMode();
-        }
-
-        // Game events
-        internal void OnAvatarClear()
-        {
-            if(m_leapTracking != null)
-                m_leapTracking.OnAvatarClear();
-            if(m_leapTracked != null)
-                m_leapTracked.OnAvatarClear();
-        }
-
-        internal void OnAvatarSetup()
-        {
-            if(m_leapTracking != null)
-                m_leapTracking.OnAvatarSetup();
-
-            if(m_leapTracked != null)
-                m_leapTracked.OnAvatarSetup();
-        }
-
-        internal void OnAvatarReinitialize()
-        {
-            if(m_leapTracked != null)
-                m_leapTracked.OnAvatarReinitialize();
-        }
-
-        internal void OnRayScale(float p_scale)
-        {
-            m_leapInput?.OnRayScale(p_scale);
-        }
-
-        internal void OnPlayspaceScale(float p_relation)
-        {
-            if(m_leapTracking != null)
-                m_leapTracking.OnPlayspaceScale(p_relation);
-        }
-
-        internal void OnPickupGrab(CVRPickupObject p_pickup)
-        {
-            m_leapInput?.OnPickupGrab(p_pickup);
         }
 
         // Arbitrary

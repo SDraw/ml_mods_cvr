@@ -75,10 +75,10 @@ namespace ml_bft
 
             m_skeletonAction = SteamVR_Input.GetAction<SteamVR_Action_Skeleton>(p_left ? "SkeletonLeftHand" : "SkeletonRightHand");
 
-            base.OnShowHandsChange(Settings.ShowHands);
-            OnMotionRangeChange(Settings.MotionRange);
+            base.OnShowHandsChanged(Settings.ShowHands);
+            OnMotionRangeChanged(Settings.MotionRange);
 
-            Settings.MotionRangeChange += this.OnMotionRangeChange;
+            Settings.OnMotionRangeChanged.AddHandler(this.OnMotionRangeChanged);
         }
 
         public override void Cleanup()
@@ -87,7 +87,7 @@ namespace ml_bft
 
             m_skeletonAction = null;
 
-            Settings.MotionRangeChange -= this.OnMotionRangeChange;
+            Settings.OnMotionRangeChanged.RemoveHandler(this.OnMotionRangeChanged);
         }
 
         public override void Update()
@@ -233,7 +233,7 @@ namespace ml_bft
                 m_bones[(int)SteamVR_Skeleton_JointIndexEnum.root].rotation = p_base * (m_left ? Quaternion.Euler(0f, -90f, -90f) : Quaternion.Euler(0f, 90f, 90f));
         }
 
-        void OnMotionRangeChange(Settings.MotionRangeType p_mode)
+        void OnMotionRangeChanged(Settings.MotionRangeType p_mode)
         {
             switch(p_mode)
             {

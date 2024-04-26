@@ -6,6 +6,14 @@ namespace ml_dht
 {
     static class Settings
     {
+        internal class SettingEvent<T>
+        {
+            event Action<T> m_action;
+            public void AddHandler(Action<T> p_listener) => m_action += p_listener;
+            public void RemoveHandler(Action<T> p_listener) => m_action -= p_listener;
+            public void Invoke(T p_value) => m_action?.Invoke(p_value);
+        }
+
         enum ModSetting
         {
             Enabled = 0,
@@ -28,13 +36,13 @@ namespace ml_dht
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
 
-        public static event Action<bool> EnabledChange;
-        public static event Action<bool> HeadTrackingChange;
-        public static event Action<bool> EyeTrackingChange;
-        public static event Action<bool> FaceTrackingChange;
-        public static event Action<bool> BlinkingChange;
-        public static event Action<bool> MirroredChange;
-        public static event Action<float> SmoothingChange;
+        public static readonly SettingEvent<bool> OnEnabledChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<bool> OnHeadTrackingChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<bool> OnEyeTrackingChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<bool> OnFaceTrackingChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<bool> OnBlinkingChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<bool> OnMirroredChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<float> OnSmoothingChanged = new SettingEvent<float>();
 
         internal static void Init()
         {
@@ -87,72 +95,86 @@ namespace ml_dht
 
         static void OnSliderUpdate(string p_name, string p_value)
         {
-            if(Enum.TryParse(p_name, out ModSetting l_setting))
+            try
             {
-                switch(l_setting)
+                if(Enum.TryParse(p_name, out ModSetting l_setting))
                 {
-                    case ModSetting.Smoothing:
+                    switch(l_setting)
                     {
-                        Smoothing = int.Parse(p_value) * 0.01f;
-                        SmoothingChange?.Invoke(Smoothing);
+                        case ModSetting.Smoothing:
+                        {
+                            Smoothing = int.Parse(p_value) * 0.01f;
+                            OnSmoothingChanged.Invoke(Smoothing);
+                        }
+                        break;
                     }
-                    break;
-                }
 
-                ms_entries[(int)l_setting].BoxedValue = int.Parse(p_value);
+                    ms_entries[(int)l_setting].BoxedValue = int.Parse(p_value);
+                }
+            }
+            catch(Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
             }
         }
 
         static void OnToggleUpdate(string p_name, string p_value)
         {
-            if(Enum.TryParse(p_name, out ModSetting l_setting))
+            try
             {
-                switch(l_setting)
+                if(Enum.TryParse(p_name, out ModSetting l_setting))
                 {
-                    case ModSetting.Enabled:
+                    switch(l_setting)
                     {
-                        Enabled = bool.Parse(p_value);
-                        EnabledChange?.Invoke(Enabled);
-                    }
-                    break;
+                        case ModSetting.Enabled:
+                        {
+                            Enabled = bool.Parse(p_value);
+                            OnEnabledChanged.Invoke(Enabled);
+                        }
+                        break;
 
-                    case ModSetting.HeadTracking:
-                    {
-                        HeadTracking = bool.Parse(p_value);
-                        HeadTrackingChange?.Invoke(HeadTracking);
-                    }
-                    break;
+                        case ModSetting.HeadTracking:
+                        {
+                            HeadTracking = bool.Parse(p_value);
+                            OnHeadTrackingChanged.Invoke(HeadTracking);
+                        }
+                        break;
 
-                    case ModSetting.EyeTracking:
-                    {
-                        EyeTracking = bool.Parse(p_value);
-                        EyeTrackingChange?.Invoke(EyeTracking);
-                    }
-                    break;
+                        case ModSetting.EyeTracking:
+                        {
+                            EyeTracking = bool.Parse(p_value);
+                            OnEyeTrackingChanged.Invoke(EyeTracking);
+                        }
+                        break;
 
-                    case ModSetting.FaceTracking:
-                    {
-                        FaceTracking = bool.Parse(p_value);
-                        FaceTrackingChange?.Invoke(FaceTracking);
-                    }
-                    break;
+                        case ModSetting.FaceTracking:
+                        {
+                            FaceTracking = bool.Parse(p_value);
+                            OnFaceTrackingChanged.Invoke(FaceTracking);
+                        }
+                        break;
 
-                    case ModSetting.Blinking:
-                    {
-                        Blinking = bool.Parse(p_value);
-                        BlinkingChange?.Invoke(Blinking);
-                    }
-                    break;
+                        case ModSetting.Blinking:
+                        {
+                            Blinking = bool.Parse(p_value);
+                            OnBlinkingChanged.Invoke(Blinking);
+                        }
+                        break;
 
-                    case ModSetting.Mirrored:
-                    {
-                        Mirrored = bool.Parse(p_value);
-                        MirroredChange?.Invoke(Mirrored);
+                        case ModSetting.Mirrored:
+                        {
+                            Mirrored = bool.Parse(p_value);
+                            OnMirroredChanged.Invoke(Mirrored);
+                        }
+                        break;
                     }
-                    break;
+
+                    ms_entries[(int)l_setting].BoxedValue = bool.Parse(p_value);
                 }
-
-                ms_entries[(int)l_setting].BoxedValue = bool.Parse(p_value);
+            }
+            catch(Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
             }
         }
     }

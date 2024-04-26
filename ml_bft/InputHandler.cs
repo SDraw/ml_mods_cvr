@@ -28,7 +28,9 @@ namespace ml_bft
             VRModeSwitchEvents.OnInitializeXR.AddListener(this.OnSwitchToVR);
             VRModeSwitchEvents.OnDeinitializeXR.AddListener(this.OnSwitchToDesktop);
 
-            Settings.SkeletalInputChange += this.OnSkeletalInputChange;
+            Settings.OnSkeletalInputChanged.AddHandler(this.OnSkeletalInputChanged);
+
+            GameEvents.OnInputUpdate.AddHandler(this.OnInputUpdate);
         }
         internal void Cleanup()
         {
@@ -36,6 +38,10 @@ namespace ml_bft
                 Instance = null;
 
             RemoveHandlers();
+
+            Settings.OnSkeletalInputChanged.RemoveHandler(this.OnSkeletalInputChanged);
+
+            GameEvents.OnInputUpdate.RemoveHandler(this.OnInputUpdate);
         }
 
         void SetupHandlers()
@@ -152,7 +158,7 @@ namespace ml_bft
         }
 
         // Settings
-        void OnSkeletalInputChange(bool p_value)
+        void OnSkeletalInputChanged(bool p_value)
         {
             if(!p_value)
                 CVRInputManager.Instance.individualFingerTracking = Utils.AreKnucklesInUse();

@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <Platforms>x64</Platforms>
     <PackageId>LeapMotionExtension</PackageId>
-    <Version>1.4.9</Version>
+    <Version>1.5.0</Version>
     <Authors>SDraw</Authors>
     <Company>None</Company>
     <Product>LeapMotionExtension</Product>
@@ -92,6 +92,11 @@
       <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       <Private>false</Private>
       <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="UnityEngine.JSONSerializeModule">
+      <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\UnityEngine.JSONSerializeModule.dll</HintPath>
+      <SpecificVersion>false</SpecificVersion>
+      <Private>false</Private>
     </Reference>
     <Reference Include="UnityEngine.XRModule">
       <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\UnityEngine.XRModule.dll</HintPath>

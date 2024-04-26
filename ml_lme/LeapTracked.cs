@@ -94,7 +94,6 @@ namespace ml_lme
         public static readonly float[] ms_lastLeftFingerBones = new float[20];
         public static readonly float[] ms_lastRightFingerBones = new float[20];
 
-        bool m_inVR = false;
         VRIK m_vrIK = null;
         Transform m_hips = null;
 
@@ -126,8 +125,6 @@ namespace ml_lme
         // Unity events
         void Start()
         {
-            m_inVR = Utils.IsInVR();
-
             m_leftHandTarget = new GameObject("RotationTarget").transform;
             m_leftHandTarget.parent = LeapTracking.Instance.GetLeftHand().GetRoot();
             m_leftHandTarget.localPosition = Vector3.zero;
@@ -138,13 +135,17 @@ namespace ml_lme
             m_rightHandTarget.localPosition = Vector3.zero;
             m_rightHandTarget.localRotation = Quaternion.identity;
 
-            Settings.EnabledChange += this.OnEnabledChange;
-            Settings.FingersOnlyChange += this.OnFingersOnlyChange;
-            Settings.TrackElbowsChange += this.OnTrackElbowsChange;
+            OnEnabledChanged(Settings.Enabled);
+            OnFingersOnlyChanged(Settings.FingersOnly);
+            OnTrackElbowsChanged(Settings.TrackElbows);
 
-            OnEnabledChange(Settings.Enabled);
-            OnFingersOnlyChange(Settings.FingersOnly);
-            OnTrackElbowsChange(Settings.TrackElbows);
+            Settings.OnEnabledChanged.AddHandler(this.OnEnabledChanged);
+            Settings.OnFingersOnlyChanged.AddHandler(this.OnFingersOnlyChanged);
+            Settings.OnTrackElbowsChanged.AddHandler(this.OnTrackElbowsChanged);
+
+            GameEvents.OnAvatarClear.AddHandler(this.OnAvatarClear);
+            GameEvents.OnAvatarSetup.AddHandler(this.OnAvatarSetup);
+            GameEvents.OnAvatarReuse.AddHandler(this.OnAvatarReuse);
         }
 
         void OnDestroy()
@@ -164,9 +165,13 @@ namespace ml_lme
 
             m_vrIK = null;
 
-            Settings.EnabledChange -= this.OnEnabledChange;
-            Settings.FingersOnlyChange -= this.OnFingersOnlyChange;
-            Settings.TrackElbowsChange -= this.OnTrackElbowsChange;
+            Settings.OnEnabledChanged.RemoveHandler(this.OnEnabledChanged);
+            Settings.OnFingersOnlyChanged.RemoveHandler(this.OnFingersOnlyChanged);
+            Settings.OnTrackElbowsChanged.RemoveHandler(this.OnTrackElbowsChanged);
+
+            GameEvents.OnAvatarClear.RemoveHandler(this.OnAvatarClear);
+            GameEvents.OnAvatarSetup.RemoveHandler(this.OnAvatarSetup);
+            GameEvents.OnAvatarReuse.RemoveHandler(this.OnAvatarReuse);
         }
 
         void Update()
@@ -245,7 +250,7 @@ namespace ml_lme
         }
 
         // Game events
-        internal void OnAvatarClear()
+        void OnAvatarClear()
         {
             m_vrIK = null;
             m_hips = null;
@@ -269,10 +274,8 @@ namespace ml_lme
             m_rightFingerOffsets.Clear();
         }
 
-        internal void OnAvatarSetup()
+        void OnAvatarSetup()
         {
-            m_inVR = Utils.IsInVR();
-
             if(PlayerSetup.Instance._animator.isHuman)
             {
                 Utils.SetAvatarTPose();
@@ -293,27 +296,26 @@ namespace ml_lme
                 m_vrIK = PlayerSetup.Instance._animator.GetComponent<VRIK>();
                 if(m_vrIK != null)
                 {
-                    m_vrIK.onPreSolverUpdate.AddListener(this.OnIKPreUpdate);
-                    m_vrIK.onPostSolverUpdate.AddListener(this.OnIKPostUpdate);
+                    m_vrIK.onPreSolverUpdate.AddListener(this.OnIKPreSolverUpdate);
+                    m_vrIK.onPostSolverUpdate.AddListener(this.OnIKPostSolverUpdate);
                 }
                 else
                     SetupArmIK();
             }
         }
 
-        internal void OnAvatarReinitialize()
+        void OnAvatarReuse()
         {
             // Old VRIK is destroyed by game
-            m_inVR = Utils.IsInVR();
             m_vrIK = PlayerSetup.Instance._animator.GetComponent<VRIK>();
 
-            if(m_inVR)
+            if(Utils.IsInVR())
                 RemoveArmIK();
 
             if(m_vrIK != null)
             {
-                m_vrIK.onPreSolverUpdate.AddListener(this.OnIKPreUpdate);
-                m_vrIK.onPostSolverUpdate.AddListener(this.OnIKPostUpdate);
+                m_vrIK.onPreSolverUpdate.AddListener(this.OnIKPreSolverUpdate);
+                m_vrIK.onPostSolverUpdate.AddListener(this.OnIKPostSolverUpdate);
             }
             else
             {
@@ -323,7 +325,7 @@ namespace ml_lme
         }
 
         // VRIK updates
-        void OnIKPreUpdate()
+        void OnIKPreSolverUpdate()
         {
             if(m_leftTargetActive)
             {
@@ -354,7 +356,7 @@ namespace ml_lme
                 m_vrIK.solver.rightArm.bendGoalWeight = (m_trackElbows ? 1f : 0f);
             }
         }
-        void OnIKPostUpdate()
+        void OnIKPostSolverUpdate()
         {
             if(m_leftTargetActive)
             {
@@ -375,7 +377,7 @@ namespace ml_lme
         }
 
         // Settings
-        void OnEnabledChange(bool p_state)
+        void OnEnabledChanged(bool p_state)
         {
             m_enabled = p_state;
 
@@ -383,7 +385,7 @@ namespace ml_lme
             ResetTargetsStates();
         }
 
-        void OnFingersOnlyChange(bool p_state)
+        void OnFingersOnlyChanged(bool p_state)
         {
             m_fingersOnly = p_state;
 
@@ -391,7 +393,7 @@ namespace ml_lme
             ResetTargetsStates();
         }
 
-        void OnTrackElbowsChange(bool p_state)
+        void OnTrackElbowsChanged(bool p_state)
         {
             m_trackElbows = p_state;
 

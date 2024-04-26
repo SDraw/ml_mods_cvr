@@ -23,6 +23,9 @@ namespace ml_pin
         public override void OnDeinitializeMelon()
         {
             m_soundManager = null;
+
+            CVRGameEventSystem.Player.OnJoin.RemoveListener(OnPlayerJoin);
+            CVRGameEventSystem.Player.OnLeave.RemoveListener(OnPlayerLeave);
         }
 
         IEnumerator WaitForInstances()

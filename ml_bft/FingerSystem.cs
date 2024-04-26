@@ -81,6 +81,11 @@ namespace ml_bft
 
             m_pose = new HumanPose();
             m_lastValues = new float[40];
+
+            GameEvents.OnAvatarSetup.AddHandler(this.OnAvatarSetup);
+            GameEvents.OnAvatarClear.AddHandler(this.OnAvatarClear);
+            GameEvents.OnAvatarReuse.AddHandler(this.OnAvatarReuse);
+            GameEvents.OnIKSystemLateUpdate.AddHandler(this.OnIKSystemLateUpdate);
         }
         internal void Cleanup()
         {
@@ -90,6 +95,11 @@ namespace ml_bft
             m_leftFingerOffsets.Clear();
             m_rightFingerOffsets.Clear();
             m_ready = false;
+
+            GameEvents.OnAvatarSetup.RemoveHandler(this.OnAvatarSetup);
+            GameEvents.OnAvatarClear.RemoveHandler(this.OnAvatarClear);
+            GameEvents.OnAvatarReuse.RemoveHandler(this.OnAvatarReuse);
+            GameEvents.OnIKSystemLateUpdate.RemoveHandler(this.OnIKSystemLateUpdate);
         }
 
         internal void OnAvatarSetup()
@@ -173,7 +183,7 @@ namespace ml_bft
             m_rightFingerOffsets.Clear();
         }
 
-        internal void OnReinitializeAvatar()
+        internal void OnAvatarReuse()
         {
             OnAvatarClear();
             OnAvatarSetup();

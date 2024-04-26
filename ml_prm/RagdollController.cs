@@ -20,7 +20,6 @@ namespace ml_prm
 
         public static RagdollController Instance { get; private set; } = null;
 
-        bool m_inVR = false;
         VRIK m_vrIK = null;
         bool m_applyHipsPosition = false;
         bool m_applyHipsRotation = false;
@@ -88,15 +87,28 @@ namespace ml_prm
             m_ragdollTrigger = BetterBetterCharacterController.Instance.NonKinematicProxy.gameObject.AddComponent<RagdollTrigger>();
             m_ragdollTrigger.enabled = false;
 
-            Settings.MovementDragChange += this.OnMovementDragChange;
-            Settings.AngularDragChange += this.OnAngularDragChange;
-            Settings.GravityChange += this.OnGravityChange;
-            Settings.SlipperinessChange += this.OnPhysicsMaterialChange;
-            Settings.BouncinessChange += this.OnPhysicsMaterialChange;
-            Settings.BuoyancyChange += this.OnBuoyancyChange;
-            Settings.FallDamageChange += this.OnFallDamageChange;
+            Settings.OnMovementDragChanged.AddHandler(this.OnMovementDragChanged);
+            Settings.OnAngularDragChanged.AddHandler(this.OnAngularDragChanged);
+            Settings.OnGravityChanged.AddHandler(this.OnGravityChanged);
+            Settings.OnSlipperinessChanged.AddHandler(this.OnPhysicsMaterialChanged);
+            Settings.OnBouncinessChanged.AddHandler(this.OnPhysicsMaterialChanged);
+            Settings.OnBuoyancyChanged.AddHandler(this.OnBuoyancyChanged);
+            Settings.OnFallDamageChanged.AddHandler(this.OnFallDamageChanged);
 
+            GameEvents.OnAvatarClear.AddHandler(this.OnAvatarClear);
+            GameEvents.OnAvatarSetup.AddHandler(this.OnAvatarSetup);
+            GameEvents.OnAvatarPreReuse.AddHandler(this.OnAvatarPreReuse);
+            GameEvents.OnAvatarPostReuse.AddHandler(this.OnAvatarPostReuse);
+            GameEvents.OnIKScaling.AddHandler(this.OnAvatarScaling);
+            GameEvents.OnSeatPreSit.AddHandler(this.OnSeatPreSit);
+            GameEvents.OnCalibrationStart.AddHandler(this.OnCalibrationStart);
+            GameEvents.OnWorldPreSpawn.AddHandler(this.OnWorldPreSpawn);
+            GameEvents.OnCombatPreDown.AddHandler(this.OnCombatPreDown);
+            GameEvents.OnFlightChange.AddHandler(this.OnFlightChange);
+            GameEvents.OnIKOffsetUpdate.AddHandler(this.OnIKOffsetUpdate);
             BetterBetterCharacterController.OnTeleport.AddListener(this.OnPlayerTeleport);
+
+            ModUi.OnSwitchChanged.AddHandler(this.SwitchRagdoll);
         }
 
         void OnDestroy()
@@ -128,15 +140,28 @@ namespace ml_prm
                 Object.Destroy(m_physicsMaterial);
             m_physicsMaterial = null;
 
-            Settings.MovementDragChange -= this.OnMovementDragChange;
-            Settings.AngularDragChange -= this.OnAngularDragChange;
-            Settings.GravityChange -= this.OnGravityChange;
-            Settings.SlipperinessChange -= this.OnPhysicsMaterialChange;
-            Settings.BouncinessChange -= this.OnPhysicsMaterialChange;
-            Settings.BuoyancyChange -= this.OnBuoyancyChange;
-            Settings.FallDamageChange -= this.OnFallDamageChange;
+            Settings.OnMovementDragChanged.RemoveHandler(this.OnMovementDragChanged);
+            Settings.OnAngularDragChanged.RemoveHandler(this.OnAngularDragChanged);
+            Settings.OnGravityChanged.RemoveHandler(this.OnGravityChanged);
+            Settings.OnSlipperinessChanged.RemoveHandler(this.OnPhysicsMaterialChanged);
+            Settings.OnBouncinessChanged.RemoveHandler(this.OnPhysicsMaterialChanged);
+            Settings.OnBuoyancyChanged.RemoveHandler(this.OnBuoyancyChanged);
+            Settings.OnFallDamageChanged.RemoveHandler(this.OnFallDamageChanged);
 
+            GameEvents.OnAvatarClear.RemoveHandler(this.OnAvatarClear);
+            GameEvents.OnAvatarSetup.RemoveHandler(this.OnAvatarSetup);
+            GameEvents.OnAvatarPreReuse.RemoveHandler(this.OnAvatarPreReuse);
+            GameEvents.OnAvatarPostReuse.RemoveHandler(this.OnAvatarPostReuse);
+            GameEvents.OnIKScaling.RemoveHandler(this.OnAvatarScaling);
+            GameEvents.OnSeatPreSit.RemoveHandler(this.OnSeatPreSit);
+            GameEvents.OnCalibrationStart.RemoveHandler(this.OnCalibrationStart);
+            GameEvents.OnWorldPreSpawn.RemoveHandler(this.OnWorldPreSpawn);
+            GameEvents.OnCombatPreDown.RemoveHandler(this.OnCombatPreDown);
+            GameEvents.OnFlightChange.RemoveHandler(this.OnFlightChange);
+            GameEvents.OnIKOffsetUpdate.RemoveHandler(this.OnIKOffsetUpdate);
             BetterBetterCharacterController.OnTeleport.RemoveListener(this.OnPlayerTeleport);
+
+            ModUi.OnSwitchChanged.RemoveHandler(this.SwitchRagdoll);
         }
 
         void Update()
@@ -234,10 +259,8 @@ namespace ml_prm
         }
 
         // Game events
-        internal void OnAvatarClear()
+        void OnAvatarClear()
         {
-            m_inVR = Utils.IsInVR();
-
             if(m_initCoroutine != null)
             {
                 StopCoroutine(m_initCoroutine);
@@ -282,10 +305,8 @@ namespace ml_prm
             m_wasSwimming = false;
         }
 
-        internal void OnAvatarSetup()
+        void OnAvatarSetup()
         {
-            m_inVR = Utils.IsInVR();
-
             if(PlayerSetup.Instance._animator.isHuman)
             {
                 Utils.SetAvatarTPose();
@@ -405,7 +426,7 @@ namespace ml_prm
 
                 m_vrIK = PlayerSetup.Instance._avatar.GetComponent<VRIK>();
                 if(m_vrIK != null)
-                    m_vrIK.onPostSolverUpdate.AddListener(this.OnIKPostUpdate);
+                    m_vrIK.onPostSolverUpdate.AddListener(this.OnIKPostSolverUpdate);
 
                 m_avatarRagdollToggle = PlayerSetup.Instance._avatar.GetComponentInChildren<RagdollToggle>(true);
                 m_ragdolledParameter = new AvatarBoolParameter("Ragdolled", PlayerSetup.Instance.animatorManager);
@@ -425,13 +446,13 @@ namespace ml_prm
             m_avatarReady = true;
             m_initCoroutine = null;
 
-            OnGravityChange(Settings.Gravity);
-            OnBuoyancyChange(Settings.Buoyancy);
-            OnMovementDragChange(Settings.MovementDrag);
-            OnAngularDragChange(Settings.AngularDrag);
+            OnGravityChanged(Settings.Gravity);
+            OnBuoyancyChanged(Settings.Buoyancy);
+            OnMovementDragChanged(Settings.MovementDrag);
+            OnAngularDragChanged(Settings.AngularDrag);
         }
 
-        internal void OnPreAvatarReinitialize()
+        void OnAvatarPreReuse()
         {
             if(m_avatarReady && m_enabled)
             {
@@ -440,16 +461,15 @@ namespace ml_prm
                 m_forcedSwitch = false;
             }
         }
-        internal void OnPostAvatarReinitialize()
+        void OnAvatarPostReuse()
         {
-            m_inVR = Utils.IsInVR();
             m_vrIK = PlayerSetup.Instance._avatar.GetComponent<VRIK>();
 
             if(m_vrIK != null)
-                m_vrIK.onPostSolverUpdate.AddListener(this.OnIKPostUpdate);
+                m_vrIK.onPostSolverUpdate.AddListener(this.OnIKPostSolverUpdate);
         }
 
-        internal void OnAvatarScaling(float p_scaleDifference)
+        void OnAvatarScaling(float p_scaleDifference)
         {
             if(m_puppetRoot != null)
                 m_puppetRoot.localScale = Vector3.one * p_scaleDifference;
@@ -458,7 +478,7 @@ namespace ml_prm
                 l_pair.Item1.connectedAnchor = l_pair.Item2 * p_scaleDifference;
         }
 
-        internal void OnSeatSitDown(CVRSeat p_seat)
+        void OnSeatPreSit(CVRSeat p_seat)
         {
             if(m_avatarReady && m_enabled && !p_seat.occupied)
             {
@@ -469,7 +489,7 @@ namespace ml_prm
             }
         }
 
-        internal void OnStartCalibration()
+        void OnCalibrationStart()
         {
             if(m_avatarReady && m_enabled)
             {
@@ -480,22 +500,22 @@ namespace ml_prm
             }
         }
 
-        internal void OnWorldSpawn()
+        void OnWorldPreSpawn()
         {
             if(m_avatarReady && m_enabled)
                 SwitchRagdoll();
 
             ResetStates();
 
-            OnGravityChange(Settings.Gravity);
-            OnPhysicsMaterialChange(true);
-            OnMovementDragChange(Settings.MovementDrag);
-            OnBuoyancyChange(Settings.Buoyancy);
+            OnGravityChanged(Settings.Gravity);
+            OnPhysicsMaterialChanged(true);
+            OnMovementDragChanged(Settings.MovementDrag);
+            OnBuoyancyChanged(Settings.Buoyancy);
         }
 
-        internal void OnCombatDown()
+        void OnCombatPreDown()
         {
-            if(m_avatarReady && !m_enabled && Settings.CombatReaction)
+            if(m_avatarReady && !m_enabled && CombatSystem.Instance.isDown && Settings.CombatReaction)
             {
                 m_reachedGround = true;
                 m_forcedSwitch = true;
@@ -505,7 +525,7 @@ namespace ml_prm
             }
         }
 
-        internal void OnChangeFlight()
+        void OnFlightChange()
         {
             if(m_avatarReady && m_enabled && BetterBetterCharacterController.Instance.IsFlying())
             {
@@ -532,8 +552,13 @@ namespace ml_prm
             }
         }
 
+        void OnIKOffsetUpdate(GameEvents.EventResult p_result)
+        {
+            p_result.m_result |= (m_enabled && (m_vrIK != null));
+        }
+
         // VRIK updates
-        void OnIKPostUpdate()
+        void OnIKPostSolverUpdate()
         {
             if(!m_enabled)
             {
@@ -543,7 +568,7 @@ namespace ml_prm
         }
 
         // Settings
-        void OnMovementDragChange(float p_value)
+        void OnMovementDragChanged(float p_value)
         {
             if(m_avatarReady)
             {
@@ -558,7 +583,7 @@ namespace ml_prm
                     l_influencer.airDrag = l_drag;
             }
         }
-        void OnAngularDragChange(float p_value)
+        void OnAngularDragChanged(float p_value)
         {
             if(m_avatarReady)
             {
@@ -572,7 +597,7 @@ namespace ml_prm
                     l_influencer.airAngularDrag = p_value;
             }
         }
-        void OnGravityChange(bool p_state)
+        void OnGravityChanged(bool p_state)
         {
             if(m_avatarReady)
             {
@@ -584,12 +609,12 @@ namespace ml_prm
 
                 if(!l_gravity)
                 {
-                    OnMovementDragChange(Settings.MovementDrag);
-                    OnAngularDragChange(Settings.AngularDrag);
+                    OnMovementDragChanged(Settings.MovementDrag);
+                    OnAngularDragChanged(Settings.AngularDrag);
                 }
             }
         }
-        void OnPhysicsMaterialChange(bool p_state)
+        void OnPhysicsMaterialChanged(bool p_state)
         {
             if(m_physicsMaterial != null)
             {
@@ -602,7 +627,7 @@ namespace ml_prm
                 m_physicsMaterial.bounceCombine = (l_bounciness ? PhysicMaterialCombine.Maximum : PhysicMaterialCombine.Average);
             }
         }
-        void OnBuoyancyChange(bool p_state)
+        void OnBuoyancyChanged(bool p_state)
         {
             if(m_avatarReady)
             {
@@ -612,12 +637,12 @@ namespace ml_prm
 
                 if(!l_buoyancy)
                 {
-                    OnMovementDragChange(Settings.MovementDrag);
-                    OnAngularDragChange(Settings.AngularDrag);
+                    OnMovementDragChanged(Settings.MovementDrag);
+                    OnAngularDragChanged(Settings.AngularDrag);
                 }
             }
         }
-        void OnFallDamageChange(bool p_state)
+        void OnFallDamageChanged(bool p_state)
         {
             m_inAir = false;
             m_inAirDistance = 0f;
@@ -635,7 +660,7 @@ namespace ml_prm
                         m_wasSwimming = BetterBetterCharacterController.Instance.IsSwimming();
 
                         if(BetterBetterCharacterController.Instance.IsFlying())
-                            BetterBetterCharacterController.Instance.ChangeFlight(false,true);
+                            BetterBetterCharacterController.Instance.ChangeFlight(false, true);
                         BetterBetterCharacterController.Instance.SetImmobilized(true);
                         BetterBetterCharacterController.Instance.ClearFluidVolumes();
                         BodySystem.TrackingPositionWeight = 0f;
@@ -713,8 +738,8 @@ namespace ml_prm
                         m_downTime = float.MinValue;
 
                         // Restore rigidbody properties that could be affected by buoyancy
-                        OnMovementDragChange(Settings.MovementDrag);
-                        OnAngularDragChange(Settings.AngularDrag);
+                        OnMovementDragChanged(Settings.MovementDrag);
+                        OnAngularDragChanged(Settings.AngularDrag);
 
                         // Restore movement if was ragdolled in water and left it
                         if(m_wasSwimming)
@@ -762,11 +787,6 @@ namespace ml_prm
             bool l_result = true;
             l_result &= ((CombatSystem.Instance == null) || !CombatSystem.Instance.isDown);
             return (l_result || m_forcedSwitch);
-        }
-
-        internal bool ShoudlDisableHeadOffset()
-        {
-            return (m_enabled && (m_vrIK != null));
         }
 
         static void TryRestoreMovement()

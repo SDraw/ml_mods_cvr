@@ -13,31 +13,20 @@ namespace ml_lme
             new Vector2(0f, 180f)
         };
 
-        readonly static Vector2[] ms_spreadLimits =
-        {
-            new Vector2(-25f, 25f), // Unity's default limits 
-            new Vector2(-20f, 20f),
-            new Vector2(-7.5f, 7.5f),
-            new Vector2(-7.5f, 7.5f),
-            new Vector2(-20f, 20f)
-        };
-
         public class HandData
         {
             public bool m_present = false;
             public Vector3 m_position = Vector3.zero;
             public Quaternion m_rotation = Quaternion.identity;
             public Vector3 m_elbowPosition = Vector3.zero;
-            public readonly float[] m_spreads = null;
-            public readonly float[] m_bends = null;
+            public readonly float[] m_normalizedCurls = null;
             public float m_grabStrength = 0f;
             public Vector3[] m_fingerPosition;
             public Quaternion[] m_fingerRotation;
 
             public HandData()
             {
-                m_spreads = new float[5];
-                m_bends = new float[5];
+                m_normalizedCurls = new float[5];
                 m_fingerPosition = new Vector3[20];
                 m_fingerRotation = new Quaternion[20];
             }
@@ -45,17 +34,16 @@ namespace ml_lme
             public void Reset()
             {
                 m_present = false;
+                m_grabStrength = 0f;
+
                 for(int i = 0; i < 5; i++)
-                {
-                    m_bends[i] = 0f;
-                    m_spreads[i] = 0f;
-                }
+                    m_normalizedCurls[i] = 0f;
+
                 for(int i = 0; i < 20; i++)
                 {
                     m_fingerPosition[i].Set(0f, 0f, 0f);
                     m_fingerRotation[i].Set(0f, 0f, 0f, 1f);
                 }
-                m_grabStrength = 0f;
             }
         }
 
@@ -99,7 +87,7 @@ namespace ml_lme
             p_data.m_rotation = p_hand.Rotation;
             p_data.m_elbowPosition = p_hand.Arm.ElbowPosition;
 
-            // Bends
+            // Curls
             foreach(Leap.Finger l_finger in p_hand.Fingers)
             {
                 Quaternion l_parentRot = Quaternion.identity;
@@ -126,30 +114,10 @@ namespace ml_lme
                     l_parentRot = l_bone.Rotation;
                 }
 
-                p_data.m_bends[(int)l_finger.Type] = Utils.InverseLerpUnclamped(ms_bendLimits[(int)l_finger.Type].x, ms_bendLimits[(int)l_finger.Type].y, l_angle);
+                p_data.m_normalizedCurls[(int)l_finger.Type] = Utils.InverseLerpUnclamped(ms_bendLimits[(int)l_finger.Type].x, ms_bendLimits[(int)l_finger.Type].y, l_angle);
             }
 
-            // Spreads
-            foreach(Leap.Finger l_finger in p_hand.Fingers)
-            {
-                Leap.Bone l_parent = l_finger.Bone(Leap.Bone.BoneType.TYPE_METACARPAL);
-                Leap.Bone l_child = l_finger.Bone(Leap.Bone.BoneType.TYPE_PROXIMAL);
-                Quaternion l_diff = Quaternion.Inverse(l_parent.Rotation) * l_child.Rotation;
-
-                // Spread - local Y rotation
-                float l_angle = l_diff.eulerAngles.y;
-                if(l_angle > 180f)
-                    l_angle -= 360f;
-
-                if(p_hand.IsRight)
-                    l_angle *= -1f;
-
-                p_data.m_spreads[(int)l_finger.Type] = Utils.InverseLerpUnclamped(ms_spreadLimits[(int)l_finger.Type].x, ms_spreadLimits[(int)l_finger.Type].y, l_angle) * 2f - 1f;
-                if((l_finger.Type != Leap.Finger.FingerType.TYPE_THUMB) && (p_data.m_bends[(int)l_finger.Type] >= 0.8f))
-                    p_data.m_spreads[(int)l_finger.Type] = Mathf.Lerp(p_data.m_spreads[(int)l_finger.Type], 0f, (p_data.m_bends[(int)l_finger.Type] - 0.8f) * 5f);
-            }
-
-            p_data.m_grabStrength = Mathf.Clamp01((p_data.m_bends[1] + p_data.m_bends[2] + p_data.m_bends[3] + p_data.m_bends[4]) * 0.25f);
+            p_data.m_grabStrength = Mathf.Clamp01((p_data.m_normalizedCurls[1] + p_data.m_normalizedCurls[2] + p_data.m_normalizedCurls[3] + p_data.m_normalizedCurls[4]) * 0.25f);
         }
     }
 }

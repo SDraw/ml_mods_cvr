@@ -1,4 +1,5 @@
-﻿using ABI_RC.Core.Player;
+﻿using ABI_RC.Core.Networking.IO.Social;
+using ABI_RC.Core.Player;
 using ABI_RC.Systems.IK;
 using ABI_RC.Systems.IK.SubSystems;
 using ABI_RC.Systems.InputManagement;
@@ -11,10 +12,18 @@ namespace ml_pmc
     [DisallowMultipleComponent]
     public class PoseCopycat : MonoBehaviour
     {
+        public class CopycatEvent<T1>
+        {
+            event System.Action<T1> m_action;
+            public void AddHandler(System.Action<T1> p_listener) => m_action += p_listener;
+            public void RemoveHandler(System.Action<T1> p_listener) => m_action -= p_listener;
+            public void Invoke(T1 p_value) => m_action?.Invoke(p_value);
+        }
+
         static readonly Vector4 ms_pointVector = new Vector4(0f, 0f, 0f, 1f);
 
         public static PoseCopycat Instance { get; private set; } = null;
-        internal static System.Action<bool> OnActivityChange;
+        internal static readonly CopycatEvent<bool> OnCopycatChanged = new CopycatEvent<bool>();
 
         Animator m_animator = null;
         VRIK m_vrIk = null;
@@ -36,6 +45,13 @@ namespace ml_pmc
         {
             if(Instance == null)
                 Instance = this;
+
+            GameEvents.OnAvatarClear.AddHandler(this.OnAvatarClear);
+            GameEvents.OnAvatarSetup.AddHandler(this.OnAvatarSetup);
+            GameEvents.OnAvatarPreReuse.AddHandler(this.OnAvatarPreReuse);
+            GameEvents.OnAvatarPostReuse.AddHandler(this.OnAvatarPostReuse);
+
+            ModUi.OnTargetSelect.AddHandler(this.OnTargetSelect);
         }
         void OnDestroy()
         {
@@ -52,6 +68,13 @@ namespace ml_pmc
             m_animator = null;
             m_vrIk = null;
             m_lookAtIk = null;
+
+            GameEvents.OnAvatarClear.RemoveHandler(this.OnAvatarClear);
+            GameEvents.OnAvatarSetup.RemoveHandler(this.OnAvatarSetup);
+            GameEvents.OnAvatarPreReuse.RemoveHandler(this.OnAvatarPreReuse);
+            GameEvents.OnAvatarPostReuse.RemoveHandler(this.OnAvatarPostReuse);
+
+            ModUi.OnTargetSelect.RemoveHandler(this.OnTargetSelect);
         }
 
         // Unity events
@@ -196,14 +219,14 @@ namespace ml_pmc
             }
         }
 
-        // Patches
-        internal void OnAvatarClear()
+        // Game events
+        void OnAvatarClear()
         {
             if(m_active)
             {
                 RestoreIK();
                 RestoreFingerTracking();
-                OnActivityChange?.Invoke(false);
+                OnCopycatChanged.Invoke(false);
             }
             m_active = false;
 
@@ -222,7 +245,8 @@ namespace ml_pmc
             m_fingerTracking = false;
             m_pose = new HumanPose();
         }
-        internal void OnAvatarSetup()
+
+        void OnAvatarSetup()
         {
             m_inVr = Utils.IsInVR();
             m_animator = PlayerSetup.Instance._animator;
@@ -250,12 +274,12 @@ namespace ml_pmc
                 m_animator = null;
         }
 
-        internal void OnPreAvatarReinitialize()
+        void OnAvatarPreReuse()
         {
             if(m_active)
                 SetTarget(null);
         }
-        internal void OnPostAvatarReinitialize()
+        void OnAvatarPostReuse()
         {
             m_inVr = Utils.IsInVR();
 
@@ -273,6 +297,35 @@ namespace ml_pmc
             {
                 m_lookAtIk.onPreSolverUpdate.AddListener(this.OnLookAtIKPreUpdate);
                 m_lookAtIk.onPostSolverUpdate.AddListener(this.OnLookAtIKPostUpdate);
+            }
+        }
+
+        // Ui events
+        void OnTargetSelect(string p_id)
+        {
+            if(m_active)
+                SetTarget(null);
+            else
+            {
+                if(m_animator != null)
+                {
+                    if(Friends.FriendsWith(p_id))
+                    {
+                        if(CVRPlayerManager.Instance.GetPlayerPuppetMaster(p_id, out PuppetMaster l_puppetMaster))
+                        {
+                            if(Utils.IsInSight(BetterBetterCharacterController.Instance.KinematicTriggerProxy.Collider, l_puppetMaster.GetComponent<CapsuleCollider>(), Utils.GetWorldMovementLimit()))
+                                SetTarget(l_puppetMaster);
+                            else
+                                ModUi.ShowAlert("Selected player is too far away or obstructed");
+                        }
+                        else
+                            ModUi.ShowAlert("Selected player isn't connected or ready yet");
+                    }
+                    else
+                        ModUi.ShowAlert("Selected player isn't your friend");
+                }
+                else
+                    ModUi.ShowAlert("Local avatar isn't ready yet");
             }
         }
 
@@ -319,7 +372,7 @@ namespace ml_pmc
                         m_distanceLimit = Utils.GetWorldMovementLimit();
 
                         m_active = true;
-                        OnActivityChange?.Invoke(m_active);
+                        OnCopycatChanged.Invoke(m_active);
                     }
                 }
                 else
@@ -341,7 +394,7 @@ namespace ml_pmc
                         m_fingerTracking = false;
 
                         m_active = false;
-                        OnActivityChange?.Invoke(m_active);
+                        OnCopycatChanged.Invoke(m_active);
                     }
                 }
             }
@@ -371,7 +424,7 @@ namespace ml_pmc
             if(!CVRInputManager.Instance.individualFingerTracking)
             {
                 // Left hand
-                CVRInputManager.Instance.finger1StretchedLeftThumb = -0f;
+                CVRInputManager.Instance.finger1StretchedLeftThumb = 0f;
                 CVRInputManager.Instance.finger2StretchedLeftThumb = 0f;
                 CVRInputManager.Instance.finger3StretchedLeftThumb = 0f;
                 CVRInputManager.Instance.fingerSpreadLeftThumb = 0f;

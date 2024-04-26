@@ -6,6 +6,14 @@ namespace ml_bft
 {
     static class Settings
     {
+        internal class SettingEvent<T>
+        {
+            event Action<T> m_action;
+            public void AddHandler(Action<T> p_listener) => m_action += p_listener;
+            public void RemoveHandler(Action<T> p_listener) => m_action -= p_listener;
+            public void Invoke(T p_value) => m_action?.Invoke(p_value);
+        }
+
         public enum MotionRangeType
         {
             WithController = 0,
@@ -27,10 +35,10 @@ namespace ml_bft
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
 
-        public static event Action<bool> SkeletalInputChange;
-        public static event Action<MotionRangeType> MotionRangeChange;
-        public static event Action<bool> ShowHandsChange;
-        public static event Action<bool> MechanimFilterChange;
+        public static readonly SettingEvent<bool> OnSkeletalInputChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<MotionRangeType> OnMotionRangeChanged = new SettingEvent<MotionRangeType>();
+        public static readonly SettingEvent<bool> OnShowHandsChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<bool> OnMechanimFilterChanged = new SettingEvent<bool>();
 
         internal static void Init()
         {
@@ -76,51 +84,65 @@ namespace ml_bft
 
         static void OnToggleUpdate(string p_name, string p_value)
         {
-            if(Enum.TryParse(p_name, out ModSetting l_setting))
+            try
             {
-                switch(l_setting)
+                if(Enum.TryParse(p_name, out ModSetting l_setting))
                 {
-                    case ModSetting.SkeletalInput:
+                    switch(l_setting)
                     {
-                        SkeletalInput = bool.Parse(p_value);
-                        SkeletalInputChange?.Invoke(SkeletalInput);
-                    }
-                    break;
+                        case ModSetting.SkeletalInput:
+                        {
+                            SkeletalInput = bool.Parse(p_value);
+                            OnSkeletalInputChanged.Invoke(SkeletalInput);
+                        }
+                        break;
 
-                    case ModSetting.ShowHands:
-                    {
-                        ShowHands = bool.Parse(p_value);
-                        ShowHandsChange?.Invoke(ShowHands);
+                        case ModSetting.ShowHands:
+                        {
+                            ShowHands = bool.Parse(p_value);
+                            OnShowHandsChanged.Invoke(ShowHands);
+                        }
+                        break;
+
+                        case ModSetting.MechanimFilter:
+                        {
+                            MechanimFilter = bool.Parse(p_value);
+                            OnMechanimFilterChanged.Invoke(MechanimFilter);
+                        }
+                        break;
                     }
-                    break;
-                    
-                    case ModSetting.MechanimFilter:
-                    {
-                        MechanimFilter = bool.Parse(p_value);
-                        MechanimFilterChange?.Invoke(MechanimFilter);
-                    }
-                    break;
+
+                    ms_entries[(int)l_setting].BoxedValue = bool.Parse(p_value);
                 }
-
-                ms_entries[(int)l_setting].BoxedValue = bool.Parse(p_value);
+            }
+            catch(Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
             }
         }
 
         static void OnDropdownUpdate(string p_name, string p_value)
         {
-            if(Enum.TryParse(p_name, out ModSetting l_setting))
+            try
             {
-                switch(l_setting)
+                if(Enum.TryParse(p_name, out ModSetting l_setting))
                 {
-                    case ModSetting.MotionRange:
+                    switch(l_setting)
                     {
-                        MotionRange = (MotionRangeType)int.Parse(p_value);
-                        MotionRangeChange?.Invoke(MotionRange);
+                        case ModSetting.MotionRange:
+                        {
+                            MotionRange = (MotionRangeType)int.Parse(p_value);
+                            OnMotionRangeChanged.Invoke(MotionRange);
+                        }
+                        break;
                     }
-                    break;
-                }
 
-                ms_entries[(int)l_setting].BoxedValue = int.Parse(p_value);
+                    ms_entries[(int)l_setting].BoxedValue = int.Parse(p_value);
+                }
+            }
+            catch(Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
             }
         }
     }

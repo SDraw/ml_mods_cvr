@@ -5,6 +5,14 @@ namespace ml_pmc
 {
     static class Settings
     {
+        internal class SettingEvent<T>
+        {
+            event Action<T> m_action;
+            public void AddHandler(Action<T> p_listener) => m_action += p_listener;
+            public void RemoveHandler(Action<T> p_listener) => m_action -= p_listener;
+            public void Invoke(T p_value) => m_action?.Invoke(p_value);
+        }
+
         public enum ModSetting
         {
             Position,
@@ -24,13 +32,13 @@ namespace ml_pmc
         public static bool MirrorPosition { get; private set; } = false;
         public static bool MirrorRotation { get; private set; } = false;
 
-        public static Action<bool> PositionChange;
-        public static Action<bool> RotationChange;
-        public static Action<bool> GesturesChange;
-        public static Action<bool> LookAtMixChange;
-        public static Action<bool> MirrorPoseChange;
-        public static Action<bool> MirrorPositionChange;
-        public static Action<bool> MirrorRotationChange;
+        public static readonly SettingEvent<bool> OnPositionChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<bool> OnRotationChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<bool> OnGesturesChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<bool> OnLookAtMixChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<bool> OnMirrorPoseChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<bool> OnMirrorPositionChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<bool> OnMirrorRotationChanged = new SettingEvent<bool>();
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
@@ -60,61 +68,68 @@ namespace ml_pmc
 
         public static void SetSetting(ModSetting p_setting, object p_value)
         {
-            switch(p_setting)
+            try
             {
-                case ModSetting.Position:
+                switch(p_setting)
                 {
-                    Position = (bool)p_value;
-                    PositionChange?.Invoke((bool)p_value);
-                }
-                break;
+                    case ModSetting.Position:
+                    {
+                        Position = (bool)p_value;
+                        OnPositionChanged.Invoke(Position);
+                    }
+                    break;
 
-                case ModSetting.Rotation:
-                {
-                    Rotation = (bool)p_value;
-                    RotationChange?.Invoke((bool)p_value);
+                    case ModSetting.Rotation:
+                    {
+                        Rotation = (bool)p_value;
+                        OnRotationChanged.Invoke(Rotation);
+                        break;
+                    }
+
+                    case ModSetting.Gestures:
+                    {
+                        Gestures = (bool)p_value;
+                        OnGesturesChanged.Invoke(Gestures);
+                    }
+                    break;
+
+                    case ModSetting.LookAtMix:
+                    {
+                        LookAtMix = (bool)p_value;
+                        OnLookAtMixChanged.Invoke(LookAtMix);
+                    }
+                    break;
+
+                    //
+                    case ModSetting.MirrorPose:
+                    {
+                        MirrorPose = (bool)p_value;
+                        OnMirrorPoseChanged.Invoke(MirrorPose);
+                    }
+                    break;
+
+                    case ModSetting.MirrorPosition:
+                    {
+                        MirrorPosition = (bool)p_value;
+                        OnMirrorPositionChanged.Invoke(MirrorPosition);
+                    }
+                    break;
+
+                    case ModSetting.MirrorRotation:
+                    {
+                        MirrorRotation = (bool)p_value;
+                        OnMirrorRotationChanged.Invoke(MirrorRotation);
+                    }
                     break;
                 }
 
-                case ModSetting.Gestures:
-                {
-                    Gestures = (bool)p_value;
-                    GesturesChange?.Invoke((bool)p_value);
-                }
-                break;
-
-                case ModSetting.LookAtMix:
-                {
-                    LookAtMix = (bool)p_value;
-                    LookAtMixChange?.Invoke((bool)p_value);
-                }
-                break;
-
-                //
-                case ModSetting.MirrorPose:
-                {
-                    MirrorPose = (bool)p_value;
-                    MirrorPoseChange?.Invoke((bool)p_value);
-                }
-                break;
-
-                case ModSetting.MirrorPosition:
-                {
-                    MirrorPosition = (bool)p_value;
-                    MirrorPositionChange?.Invoke((bool)p_value);
-                }
-                break;
-
-                case ModSetting.MirrorRotation:
-                {
-                    MirrorRotation = (bool)p_value;
-                    MirrorRotationChange?.Invoke((bool)p_value);
-                }
-                break;
+                if(ms_entries != null)
+                    ms_entries[(int)p_setting].BoxedValue = p_value;
             }
-
-            if(ms_entries != null)
-                ms_entries[(int)p_setting].BoxedValue = p_value;
+            catch(Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
         }
     }
 }

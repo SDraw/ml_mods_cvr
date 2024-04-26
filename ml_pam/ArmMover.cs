@@ -75,10 +75,17 @@ namespace ml_pam
 
             m_enabled = Settings.Enabled;
 
-            Settings.EnabledChange += this.SetEnabled;
-            Settings.GrabOffsetChange += this.SetGrabOffset;
-            Settings.LeadingHandChange += this.OnLeadingHandChange;
-            Settings.HandsExtensionChange += this.OnHandsExtensionChange;
+            Settings.OnEnabledChanged.AddHandler(this.OnEnabledChanged);
+            Settings.OnGrabOffsetChanged.AddHandler(this.OnGrabOffsetChanged);
+            Settings.OnLeadingHandChanged.AddHandler(this.OnLeadingHandChanged);
+            Settings.OnHandsExtensionChanged.AddHandler(this.OnHandsExtensionChanged);
+
+            GameEvents.OnAvatarClear.AddHandler(this.OnAvatarClear);
+            GameEvents.OnAvatarSetup.AddHandler(this.OnAvatarSetup);
+            GameEvents.OnAvatarReuse.AddHandler(this.OnAvatarReuse);
+            GameEvents.OnPlayspaceScale.AddHandler(this.OnPlayspaceScale);
+            GameEvents.OnPickupGrab.AddHandler(this.OnPickupGrab);
+            GameEvents.OnPickupDrop.AddHandler(this.OnPickupDrop);
         }
 
         void OnDestroy()
@@ -98,10 +105,17 @@ namespace ml_pam
             m_pickup = null;
             m_vrIK = null;
 
-            Settings.EnabledChange -= this.SetEnabled;
-            Settings.GrabOffsetChange -= this.SetGrabOffset;
-            Settings.LeadingHandChange -= this.OnLeadingHandChange;
-            Settings.HandsExtensionChange -= this.OnHandsExtensionChange;
+            Settings.OnEnabledChanged.RemoveHandler(this.OnEnabledChanged);
+            Settings.OnGrabOffsetChanged.RemoveHandler(this.OnGrabOffsetChanged);
+            Settings.OnLeadingHandChanged.RemoveHandler(this.OnLeadingHandChanged);
+            Settings.OnHandsExtensionChanged.RemoveHandler(this.OnHandsExtensionChanged);
+
+            GameEvents.OnAvatarClear.RemoveHandler(this.OnAvatarClear);
+            GameEvents.OnAvatarSetup.RemoveHandler(this.OnAvatarSetup);
+            GameEvents.OnAvatarReuse.RemoveHandler(this.OnAvatarReuse);
+            GameEvents.OnPlayspaceScale.RemoveHandler(this.OnPlayspaceScale);
+            GameEvents.OnPickupGrab.RemoveHandler(this.OnPickupGrab);
+            GameEvents.OnPickupDrop.RemoveHandler(this.OnPickupDrop);
         }
 
         void Update()
@@ -221,7 +235,7 @@ namespace ml_pam
         }
 
         // Settings
-        void SetEnabled(bool p_state)
+        void OnEnabledChanged(bool p_state)
         {
             m_enabled = p_state;
 
@@ -232,13 +246,13 @@ namespace ml_pam
                 if(m_rightHandState != HandState.Empty)
                     SetArmActive(Settings.LeadHand.Right, true);
 
-                OnHandsExtensionChange(Settings.HandsExtension);
+                OnHandsExtensionChanged(Settings.HandsExtension);
             }
             else
                 SetArmActive(Settings.LeadHand.Both, false, true);
         }
 
-        void SetGrabOffset(float p_value)
+        void OnGrabOffsetChanged(float p_value)
         {
             if(m_leftTarget != null)
                 m_leftTarget.localPosition = new Vector3(c_offsetLimit * m_playspaceScale * -p_value, 0f, 0f);
@@ -246,7 +260,7 @@ namespace ml_pam
                 m_rightTarget.localPosition = new Vector3(c_offsetLimit * m_playspaceScale * p_value, 0f, 0f);
         }
 
-        void OnLeadingHandChange(Settings.LeadHand p_hand)
+        void OnLeadingHandChanged(Settings.LeadHand p_hand)
         {
             if(m_pickup != null)
             {
@@ -281,7 +295,7 @@ namespace ml_pam
             }
         }
 
-        void OnHandsExtensionChange(bool p_state)
+        void OnHandsExtensionChanged(bool p_state)
         {
             if(m_enabled)
             {
@@ -315,7 +329,7 @@ namespace ml_pam
         }
 
         // Game events
-        internal void OnAvatarClear()
+        void OnAvatarClear()
         {
             m_vrIK = null;
             m_armIKLeft = null;
@@ -323,7 +337,7 @@ namespace ml_pam
             m_armLength = 0f;
         }
 
-        internal void OnAvatarSetup()
+        void OnAvatarSetup()
         {
             m_inVR = Utils.IsInVR();
             m_vrIK = PlayerSetup.Instance._animator.GetComponent<VRIK>();
@@ -351,10 +365,10 @@ namespace ml_pam
                     SetupArmIK();
             }
 
-            SetEnabled(m_enabled);
+            OnEnabledChanged(m_enabled);
         }
 
-        internal void OnAvatarReinitialize()
+        void OnAvatarReuse()
         {
             // Old VRIK is destroyed by game
             m_inVR = Utils.IsInVR();
@@ -373,12 +387,12 @@ namespace ml_pam
             else if(!m_inVR)
                 SetupArmIK();
 
-            SetEnabled(m_enabled);
+            OnEnabledChanged(m_enabled);
         }
 
-        internal void OnPickupGrab(CVRPickupObject p_pickup, Vector3 p_hit)
+        void OnPickupGrab(CVRPickupObject p_pickup, Vector3 p_hit)
         {
-            if(p_pickup.ControllerRay == ViewManager.Instance.desktopControllerRay)
+            if(p_pickup.IsGrabbedByMe && (p_pickup.ControllerRay == ViewManager.Instance.desktopControllerRay))
             {
                 m_pickup = p_pickup;
 
@@ -416,7 +430,7 @@ namespace ml_pam
             }
         }
 
-        internal void OnPickupDrop(CVRPickupObject p_pickup)
+        void OnPickupDrop(CVRPickupObject p_pickup)
         {
             if(m_pickup == p_pickup)
             {
@@ -440,10 +454,10 @@ namespace ml_pam
             }
         }
 
-        internal void OnPlayspaceScale(float p_relation)
+        void OnPlayspaceScale(float p_relation)
         {
             m_playspaceScale = p_relation;
-            SetGrabOffset(Settings.GrabOffset);
+            OnGrabOffsetChanged(Settings.GrabOffset);
         }
 
         // Arbitrary

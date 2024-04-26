@@ -6,6 +6,14 @@ namespace ml_amt
 {
     static class Settings
     {
+        internal class SettingEvent<T>
+        {
+            event Action<T> m_action;
+            public void AddHandler(Action<T> p_listener) => m_action += p_listener;
+            public void RemoveHandler(Action<T> p_listener) => m_action -= p_listener;
+            public void Invoke(T p_value) => m_action?.Invoke(p_value);
+        }
+
         enum ModSetting
         {
             CrouchLimit,
@@ -26,12 +34,12 @@ namespace ml_amt
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
 
-        public static event Action<float> CrouchLimitChange;
-        public static event Action<float> ProneLimitChange;
-        public static event Action<bool> IKOverrideFlyChange;
-        public static event Action<bool> IKOverrideJumpChange;
-        public static event Action<bool> DetectEmotesChange;
-        public static event Action<bool> MassCenterChange;
+        public static readonly SettingEvent<float> OnCrouchLimitChanged = new SettingEvent<float>();
+        public static readonly SettingEvent<float> OnProneLimitChanged = new SettingEvent<float>();
+        public static readonly SettingEvent<bool> OnIKOverrideFlyChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<bool> OnIKOverrideJumpChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<bool> OnDetectEmotesChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<bool> OnMassCenterChanged = new SettingEvent<bool>();
 
         internal static void Init()
         {
@@ -82,65 +90,79 @@ namespace ml_amt
 
         static void OnSliderUpdate(string p_name, string p_value)
         {
-            if(Enum.TryParse(p_name, out ModSetting l_setting))
+            try
             {
-                switch(l_setting)
+                if(Enum.TryParse(p_name, out ModSetting l_setting))
                 {
-                    case ModSetting.CrouchLimit:
+                    switch(l_setting)
                     {
-                        CrouchLimit = int.Parse(p_value) * 0.01f;
-                        CrouchLimitChange?.Invoke(CrouchLimit);
-                    }
-                    break;
+                        case ModSetting.CrouchLimit:
+                        {
+                            CrouchLimit = int.Parse(p_value) * 0.01f;
+                            OnCrouchLimitChanged.Invoke(CrouchLimit);
+                        }
+                        break;
 
-                    case ModSetting.ProneLimit:
-                    {
-                        ProneLimit = int.Parse(p_value) * 0.01f;
-                        ProneLimitChange?.Invoke(ProneLimit);
+                        case ModSetting.ProneLimit:
+                        {
+                            ProneLimit = int.Parse(p_value) * 0.01f;
+                            OnProneLimitChanged.Invoke(ProneLimit);
+                        }
+                        break;
                     }
-                    break;
+
+                    ms_entries[(int)l_setting].BoxedValue = int.Parse(p_value);
                 }
-
-                ms_entries[(int)l_setting].BoxedValue = int.Parse(p_value);
+            }
+            catch(Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
             }
         }
 
         static void OnToggleUpdate(string p_name, string p_value)
         {
-            if(Enum.TryParse(p_name, out ModSetting l_setting))
+            try
             {
-                switch(l_setting)
+                if(Enum.TryParse(p_name, out ModSetting l_setting))
                 {
-                    case ModSetting.IKOverrideFly:
+                    switch(l_setting)
                     {
-                        IKOverrideFly = bool.Parse(p_value);
-                        IKOverrideFlyChange?.Invoke(IKOverrideFly);
-                    }
-                    break;
+                        case ModSetting.IKOverrideFly:
+                        {
+                            IKOverrideFly = bool.Parse(p_value);
+                            OnIKOverrideFlyChanged.Invoke(IKOverrideFly);
+                        }
+                        break;
 
-                    case ModSetting.IKOverrideJump:
-                    {
-                        IKOverrideJump = bool.Parse(p_value);
-                        IKOverrideJumpChange?.Invoke(IKOverrideJump);
-                    }
-                    break;
+                        case ModSetting.IKOverrideJump:
+                        {
+                            IKOverrideJump = bool.Parse(p_value);
+                            OnIKOverrideJumpChanged.Invoke(IKOverrideJump);
+                        }
+                        break;
 
-                    case ModSetting.DetectEmotes:
-                    {
-                        DetectEmotes = bool.Parse(p_value);
-                        DetectEmotesChange?.Invoke(DetectEmotes);
-                    }
-                    break;
+                        case ModSetting.DetectEmotes:
+                        {
+                            DetectEmotes = bool.Parse(p_value);
+                            OnDetectEmotesChanged.Invoke(DetectEmotes);
+                        }
+                        break;
 
-                    case ModSetting.MassCenter:
-                    {
-                        MassCenter = bool.Parse(p_value);
-                        MassCenterChange?.Invoke(MassCenter);
+                        case ModSetting.MassCenter:
+                        {
+                            MassCenter = bool.Parse(p_value);
+                            OnMassCenterChanged.Invoke(MassCenter);
+                        }
+                        break;
                     }
-                    break;
+
+                    ms_entries[(int)l_setting].BoxedValue = bool.Parse(p_value);
                 }
-
-                ms_entries[(int)l_setting].BoxedValue = bool.Parse(p_value);
+            }
+            catch(Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
             }
         }
     }

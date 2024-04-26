@@ -1,56 +1,15 @@
-﻿using ABI.CCK.Components;
-using ABI_RC.Core.InteractionSystem;
-using ABI_RC.Core.Player;
-using ABI_RC.Systems.IK;
-using System;
-using System.Reflection;
-using UnityEngine;
+﻿using ABI_RC.Core.Player;
 
 namespace ml_pam
 {
     public class PickupArmMovement : MelonLoader.MelonMod
     {
-        static PickupArmMovement ms_instance = null;
-
         ArmMover m_localMover = null;
 
         public override void OnInitializeMelon()
         {
-            if(ms_instance == null)
-                ms_instance = this;
-
             Settings.Init();
-
-            HarmonyInstance.Patch(
-                typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.ClearAvatar)),
-                null,
-                new HarmonyLib.HarmonyMethod(typeof(PickupArmMovement).GetMethod(nameof(OnAvatarClear_Postfix), BindingFlags.NonPublic | BindingFlags.Static))
-            );
-            HarmonyInstance.Patch(
-                typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.SetupAvatar)),
-                null,
-                new HarmonyLib.HarmonyMethod(typeof(PickupArmMovement).GetMethod(nameof(OnSetupAvatar_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
-            );
-            HarmonyInstance.Patch(
-                typeof(IKSystem).GetMethod(nameof(IKSystem.ReinitializeAvatar), BindingFlags.Instance | BindingFlags.Public),
-                null,
-                new HarmonyLib.HarmonyMethod(typeof(PickupArmMovement).GetMethod(nameof(OnAvatarReinitialize_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
-            );
-            HarmonyInstance.Patch(
-                typeof(CVRPickupObject).GetMethod("OnGrab", BindingFlags.Instance | BindingFlags.NonPublic),
-                null,
-                new HarmonyLib.HarmonyMethod(typeof(PickupArmMovement).GetMethod(nameof(OnCVRPickupObjectGrab_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
-            );
-            HarmonyInstance.Patch(
-                typeof(CVRPickupObject).GetMethod("OnDrop", BindingFlags.Instance | BindingFlags.NonPublic),
-                null,
-                new HarmonyLib.HarmonyMethod(typeof(PickupArmMovement).GetMethod(nameof(OnCVRPickupObjectDrop_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
-            );
-            HarmonyInstance.Patch(
-                typeof(PlayerSetup).GetMethod("SetPlaySpaceScale", BindingFlags.NonPublic | BindingFlags.Instance),
-                null,
-                new HarmonyLib.HarmonyMethod(typeof(PickupArmMovement).GetMethod(nameof(OnPlayspaceScale_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
-            );
+            GameEvents.Init(HarmonyInstance);
 
             MelonLoader.MelonCoroutines.Start(WaitForLocalPlayer());
         }
@@ -65,96 +24,9 @@ namespace ml_pam
 
         public override void OnDeinitializeMelon()
         {
-            if(ms_instance == this)
-                ms_instance = null;
-
             if(m_localMover != null)
                 UnityEngine.Object.Destroy(m_localMover);
             m_localMover = null;
-        }
-
-        static void OnAvatarClear_Postfix() => ms_instance?.OnAvatarClear();
-        void OnAvatarClear()
-        {
-            try
-            {
-                if(m_localMover != null)
-                    m_localMover.OnAvatarClear();
-            }
-            catch(Exception e)
-            {
-                MelonLoader.MelonLogger.Error(e);
-            }
-        }
-
-        static void OnSetupAvatar_Postfix() => ms_instance?.OnSetupAvatar();
-        void OnSetupAvatar()
-        {
-            try
-            {
-                if(m_localMover != null)
-                    m_localMover.OnAvatarSetup();
-            }
-            catch(Exception e)
-            {
-                MelonLoader.MelonLogger.Error(e);
-            }
-        }
-
-        static void OnAvatarReinitialize_Postfix() => ms_instance?.OnAvatarReinitialize();
-        void OnAvatarReinitialize()
-        {
-            try
-            {
-                if(m_localMover != null)
-                    m_localMover.OnAvatarReinitialize();
-            }
-            catch(System.Exception e)
-            {
-                MelonLoader.MelonLogger.Error(e);
-            }
-        }
-
-        static void OnCVRPickupObjectGrab_Postfix(ref CVRPickupObject __instance, Vector3 __0) => ms_instance?.OnCVRPickupObjectGrab(__instance, __0);
-        void OnCVRPickupObjectGrab(CVRPickupObject p_pickup, Vector3 p_hit)
-        {
-            try
-            {
-                if(p_pickup.IsGrabbedByMe && (m_localMover != null))
-                    m_localMover.OnPickupGrab(p_pickup, p_hit);
-            }
-            catch(Exception e)
-            {
-                MelonLoader.MelonLogger.Error(e);
-            }
-        }
-
-        static void OnCVRPickupObjectDrop_Postfix(ref CVRPickupObject __instance) => ms_instance?.OnCVRPickupObjectDrop(__instance);
-        void OnCVRPickupObjectDrop(CVRPickupObject p_pickup)
-        {
-            try
-            {
-                if(m_localMover != null)
-                    m_localMover.OnPickupDrop(p_pickup);
-            }
-            catch(Exception e)
-            {
-                MelonLoader.MelonLogger.Error(e);
-            }
-        }
-
-        static void OnPlayspaceScale_Postfix(float ____avatarScaleRelation) => ms_instance?.OnPlayspaceScale(____avatarScaleRelation);
-        void OnPlayspaceScale(float p_relation)
-        {
-            try
-            {
-                if(m_localMover != null)
-                    m_localMover.OnPlayspaceScale(p_relation);
-            }
-            catch(Exception e)
-            {
-                MelonLoader.MelonLogger.Error(e);
-            }
         }
     }
 }

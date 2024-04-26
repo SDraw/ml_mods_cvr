@@ -1,6 +1,8 @@
 ﻿using ABI.CCK.Components;
 using ABI_RC.Core.Savior;
 using ABI_RC.Systems.InputManagement;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace ml_pmc
@@ -71,6 +73,27 @@ namespace ml_pmc
             p_pose.bodyRotation.x *= -1f;
             p_pose.bodyRotation.w *= -1f;
             p_pose.bodyPosition.x *= -1f;
+        }
+
+        public static bool IsInSight(CapsuleCollider p_source, CapsuleCollider p_target, float p_limit)
+        {
+            bool l_result = false;
+            if((p_source != null) && (p_target != null))
+            {
+                Ray l_ray = new Ray();
+                l_ray.origin = p_source.bounds.center;
+                l_ray.direction = p_target.bounds.center - l_ray.origin;
+                List<RaycastHit> l_hits = Physics.RaycastAll(l_ray, p_limit).ToList();
+                if(l_hits.Count > 0)
+                {
+                    l_hits.RemoveAll(hit => hit.collider.gameObject.layer == LayerMask.NameToLayer("UI Internal")); // Somehow layer mask in RaycastAll just ignores players entirely
+                    l_hits.RemoveAll(hit => hit.collider.gameObject.layer == LayerMask.NameToLayer("PlayerLocal"));
+                    l_hits.RemoveAll(hit => hit.collider.gameObject.layer == LayerMask.NameToLayer("PlayerClone"));
+                    l_hits.Sort((a, b) => ((a.distance < b.distance) ? -1 : 1));
+                    l_result = (l_hits.First().collider.gameObject.transform.root == p_target.transform.root);
+                }
+            }
+            return l_result;
         }
     }
 }

@@ -65,7 +65,7 @@ namespace ml_bft
                     m_localRotations[i] = m_bones[i].localRotation;
             }
 
-            base.OnShowHandsChange(Settings.ShowHands);
+            base.OnShowHandsChanged(Settings.ShowHands);
         }
 
         public override Transform GetSourceForBone(HumanBodyBones p_bone)
