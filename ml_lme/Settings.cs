@@ -170,75 +170,75 @@ namespace ml_lme
         {
             try
             {
-                if(Enum.TryParse(p_name, out ModSetting l_setting))
+                if(Enum.TryParse(p_name, out ModSetting l_setting) && bool.TryParse(p_value, out bool l_value))
                 {
                     switch(l_setting)
                     {
                         case ModSetting.Enabled:
                         {
-                            Enabled = bool.Parse(p_value);
+                            Enabled = l_value;
                             OnEnabledChanged.Invoke(Enabled);
                         }
                         break;
 
                         case ModSetting.FingersOnly:
                         {
-                            FingersOnly = bool.Parse(p_value);
+                            FingersOnly = l_value;
                             OnFingersOnlyChanged.Invoke(FingersOnly);
                         }
                         break;
 
                         case ModSetting.Model:
                         {
-                            ModelVisibility = bool.Parse(p_value);
+                            ModelVisibility = l_value;
                             OnModelVisibilityChanged.Invoke(ModelVisibility);
                         }
                         break;
 
                         case ModSetting.Head:
                         {
-                            HeadAttach = bool.Parse(p_value);
+                            HeadAttach = l_value;
                             OnHeadAttachChanged.Invoke(HeadAttach);
                         }
                         break;
 
                         case ModSetting.TrackElbows:
                         {
-                            TrackElbows = bool.Parse(p_value);
+                            TrackElbows = l_value;
                             OnTrackElbowsChanged.Invoke(TrackElbows);
                         }
                         break;
 
                         case ModSetting.Interaction:
                         {
-                            Interaction = bool.Parse(p_value);
+                            Interaction = l_value;
                             OnInteractionChanged.Invoke(Interaction);
                         }
                         break;
 
                         case ModSetting.Gestures:
                         {
-                            Gestures = bool.Parse(p_value);
+                            Gestures = l_value;
                             OnGesturesChanged.Invoke(Gestures);
                         }
                         break;
 
                         case ModSetting.VisualHands:
                         {
-                            VisualHands = bool.Parse(p_value);
+                            VisualHands = l_value;
                             OnVisualHandsChanged.Invoke(VisualHands);
                         }
                         break;
 
                         case ModSetting.MechanimFilter:
                         {
-                            MechanimFilter = bool.Parse(p_value);
+                            MechanimFilter = l_value;
                             OnMechanimFilterChanged.Invoke(MechanimFilter);
                         }
                         break;
                     }
 
-                    ms_entries[(int)l_setting].BoxedValue = bool.Parse(p_value);
+                    ms_entries[(int)l_setting].BoxedValue = l_value;
                 }
             }
             catch(Exception e)
@@ -251,14 +251,14 @@ namespace ml_lme
         {
             try
             {
-                if(Enum.TryParse(p_name, out ModSetting l_setting))
+                if(Enum.TryParse(p_name, out ModSetting l_setting) && int.TryParse(p_value, out int l_value))
                 {
                     switch(l_setting)
                     {
                         case ModSetting.DesktopX:
                         {
                             Vector3 l_current = DesktopOffset;
-                            l_current.x = int.Parse(p_value) * 0.01f;
+                            l_current.x = l_value * 0.01f;
                             DesktopOffset = l_current;
                             OnDesktopOffsetChanged.Invoke(l_current);
                         }
@@ -266,7 +266,7 @@ namespace ml_lme
                         case ModSetting.DesktopY:
                         {
                             Vector3 l_current = DesktopOffset;
-                            l_current.y = int.Parse(p_value) * 0.01f;
+                            l_current.y = l_value * 0.01f;
                             DesktopOffset = l_current;
                             OnDesktopOffsetChanged.Invoke(l_current);
                         }
@@ -274,7 +274,7 @@ namespace ml_lme
                         case ModSetting.DesktopZ:
                         {
                             Vector3 l_current = DesktopOffset;
-                            l_current.z = int.Parse(p_value) * 0.01f;
+                            l_current.z = l_value * 0.01f;
                             DesktopOffset = l_current;
                             OnDesktopOffsetChanged.Invoke(l_current);
                         }
@@ -283,7 +283,7 @@ namespace ml_lme
                         case ModSetting.AngleX:
                         {
                             Vector3 l_current = RootAngle;
-                            l_current.x = int.Parse(p_value);
+                            l_current.x = l_value;
                             RootAngle = l_current;
                             OnRootAngleChanged.Invoke(l_current);
                         }
@@ -292,7 +292,7 @@ namespace ml_lme
                         case ModSetting.AngleY:
                         {
                             Vector3 l_current = RootAngle;
-                            l_current.y = int.Parse(p_value);
+                            l_current.y = l_value;
                             RootAngle = l_current;
                             OnRootAngleChanged.Invoke(l_current);
                         }
@@ -301,7 +301,7 @@ namespace ml_lme
                         case ModSetting.AngleZ:
                         {
                             Vector3 l_current = RootAngle;
-                            l_current.z = int.Parse(p_value);
+                            l_current.z = l_value;
                             RootAngle = l_current;
                             OnRootAngleChanged.Invoke(l_current);
                         }
@@ -310,7 +310,7 @@ namespace ml_lme
                         case ModSetting.HeadX:
                         {
                             Vector3 l_current = HeadOffset;
-                            l_current.x = int.Parse(p_value) * 0.01f;
+                            l_current.x = l_value * 0.01f;
                             HeadOffset = l_current;
                             OnHeadOffsetChanged.Invoke(l_current);
                         }
@@ -318,7 +318,7 @@ namespace ml_lme
                         case ModSetting.HeadY:
                         {
                             Vector3 l_current = HeadOffset;
-                            l_current.y = int.Parse(p_value) * 0.01f;
+                            l_current.y = l_value * 0.01f;
                             HeadOffset = l_current;
                             OnHeadOffsetChanged.Invoke(l_current);
                         }
@@ -326,26 +326,26 @@ namespace ml_lme
                         case ModSetting.HeadZ:
                         {
                             Vector3 l_current = HeadOffset;
-                            l_current.z = int.Parse(p_value) * 0.01f;
+                            l_current.z = l_value * 0.01f;
                             HeadOffset = l_current;
                             OnHeadOffsetChanged.Invoke(l_current);
                         }
                         break;
                         case ModSetting.InteractThreadhold:
                         {
-                            InteractThreadhold = int.Parse(p_value) * 0.01f;
+                            InteractThreadhold = l_value * 0.01f;
                             OnInteractThreadholdChanged.Invoke(InteractThreadhold);
                         }
                         break;
                         case ModSetting.GripThreadhold:
                         {
-                            GripThreadhold = int.Parse(p_value) * 0.01f;
+                            GripThreadhold = l_value * 0.01f;
                             OnGripThreadholdChanged.Invoke(GripThreadhold);
                         }
                         break;
                     }
 
-                    ms_entries[(int)l_setting].BoxedValue = int.Parse(p_value);
+                    ms_entries[(int)l_setting].BoxedValue = l_value;
                 }
             }
             catch(Exception e)
@@ -358,19 +358,19 @@ namespace ml_lme
         {
             try
             {
-                if(Enum.TryParse(p_name, out ModSetting l_setting))
+                if(Enum.TryParse(p_name, out ModSetting l_setting) && int.TryParse(p_value, out int l_value))
                 {
                     switch(l_setting)
                     {
                         case ModSetting.Mode:
                         {
-                            TrackingMode = (LeapTrackingMode)int.Parse(p_value);
+                            TrackingMode = (LeapTrackingMode)l_value;
                             OnTrackingModeChanged.Invoke(TrackingMode);
                         }
                         break;
                     }
 
-                    ms_entries[(int)l_setting].BoxedValue = int.Parse(p_value);
+                    ms_entries[(int)l_setting].BoxedValue = l_value;
                 }
             }
             catch(Exception e)

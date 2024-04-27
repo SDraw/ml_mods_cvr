@@ -97,19 +97,19 @@ namespace ml_dht
         {
             try
             {
-                if(Enum.TryParse(p_name, out ModSetting l_setting))
+                if(Enum.TryParse(p_name, out ModSetting l_setting) && int.TryParse(p_value, out int l_value))
                 {
                     switch(l_setting)
                     {
                         case ModSetting.Smoothing:
                         {
-                            Smoothing = int.Parse(p_value) * 0.01f;
+                            Smoothing = l_value * 0.01f;
                             OnSmoothingChanged.Invoke(Smoothing);
                         }
                         break;
                     }
 
-                    ms_entries[(int)l_setting].BoxedValue = int.Parse(p_value);
+                    ms_entries[(int)l_setting].BoxedValue = l_value;
                 }
             }
             catch(Exception e)
@@ -122,54 +122,54 @@ namespace ml_dht
         {
             try
             {
-                if(Enum.TryParse(p_name, out ModSetting l_setting))
+                if(Enum.TryParse(p_name, out ModSetting l_setting) && bool.TryParse(p_value, out bool l_value))
                 {
                     switch(l_setting)
                     {
                         case ModSetting.Enabled:
                         {
-                            Enabled = bool.Parse(p_value);
+                            Enabled = l_value;
                             OnEnabledChanged.Invoke(Enabled);
                         }
                         break;
 
                         case ModSetting.HeadTracking:
                         {
-                            HeadTracking = bool.Parse(p_value);
+                            HeadTracking = l_value;
                             OnHeadTrackingChanged.Invoke(HeadTracking);
                         }
                         break;
 
                         case ModSetting.EyeTracking:
                         {
-                            EyeTracking = bool.Parse(p_value);
+                            EyeTracking = l_value;
                             OnEyeTrackingChanged.Invoke(EyeTracking);
                         }
                         break;
 
                         case ModSetting.FaceTracking:
                         {
-                            FaceTracking = bool.Parse(p_value);
+                            FaceTracking = l_value;
                             OnFaceTrackingChanged.Invoke(FaceTracking);
                         }
                         break;
 
                         case ModSetting.Blinking:
                         {
-                            Blinking = bool.Parse(p_value);
+                            Blinking = l_value;
                             OnBlinkingChanged.Invoke(Blinking);
                         }
                         break;
 
                         case ModSetting.Mirrored:
                         {
-                            Mirrored = bool.Parse(p_value);
+                            Mirrored = l_value;
                             OnMirroredChanged.Invoke(Mirrored);
                         }
                         break;
                     }
 
-                    ms_entries[(int)l_setting].BoxedValue = bool.Parse(p_value);
+                    ms_entries[(int)l_setting].BoxedValue = l_value;
                 }
             }
             catch(Exception e)

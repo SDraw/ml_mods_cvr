@@ -89,26 +89,26 @@ namespace ml_pam
         {
             try
             {
-                if(Enum.TryParse(p_name, out ModSetting l_setting))
+                if(Enum.TryParse(p_name, out ModSetting l_setting) && bool.TryParse(p_value, out bool l_value))
                 {
                     switch(l_setting)
                     {
                         case ModSetting.Enabled:
                         {
-                            Enabled = bool.Parse(p_value);
+                            Enabled = l_value;
                             OnEnabledChanged.Invoke(Enabled);
                         }
                         break;
 
                         case ModSetting.HandsExtension:
                         {
-                            HandsExtension = bool.Parse(p_value);
+                            HandsExtension = l_value;
                             OnHandsExtensionChanged.Invoke(HandsExtension);
                         }
                         break;
                     }
 
-                    ms_entries[(int)l_setting].BoxedValue = bool.Parse(p_value);
+                    ms_entries[(int)l_setting].BoxedValue = l_value;
                 }
             }
             catch(Exception e)
@@ -121,19 +121,19 @@ namespace ml_pam
         {
             try
             {
-                if(Enum.TryParse(p_name, out ModSetting l_setting))
+                if(Enum.TryParse(p_name, out ModSetting l_setting) && int.TryParse(p_value, out int l_value))
                 {
                     switch(l_setting)
                     {
                         case ModSetting.GrabOffset:
                         {
-                            GrabOffset = int.Parse(p_value) * 0.01f;
+                            GrabOffset = l_value * 0.01f;
                             OnGrabOffsetChanged.Invoke(GrabOffset);
                         }
                         break;
                     }
 
-                    ms_entries[(int)l_setting].BoxedValue = int.Parse(p_value);
+                    ms_entries[(int)l_setting].BoxedValue = l_value;
                 }
             }
             catch(Exception e)
@@ -146,19 +146,19 @@ namespace ml_pam
         {
             try
             {
-                if(Enum.TryParse(p_name, out ModSetting l_setting))
+                if(Enum.TryParse(p_name, out ModSetting l_setting) && int.TryParse(p_value, out int l_value))
                 {
                     switch(l_setting)
                     {
                         case ModSetting.LeadHand:
                         {
-                            LeadingHand = (LeadHand)int.Parse(p_value);
+                            LeadingHand = (LeadHand)l_value;
                             OnLeadingHandChanged.Invoke(LeadingHand);
                         }
                         break;
                     }
 
-                    ms_entries[(int)l_setting].BoxedValue = int.Parse(p_value);
+                    ms_entries[(int)l_setting].BoxedValue = l_value;
                 }
             }
             catch(Exception e)

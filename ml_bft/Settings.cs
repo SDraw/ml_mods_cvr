@@ -86,33 +86,33 @@ namespace ml_bft
         {
             try
             {
-                if(Enum.TryParse(p_name, out ModSetting l_setting))
+                if(Enum.TryParse(p_name, out ModSetting l_setting) && bool.TryParse(p_value, out bool l_value))
                 {
                     switch(l_setting)
                     {
                         case ModSetting.SkeletalInput:
                         {
-                            SkeletalInput = bool.Parse(p_value);
+                            SkeletalInput = l_value;
                             OnSkeletalInputChanged.Invoke(SkeletalInput);
                         }
                         break;
 
                         case ModSetting.ShowHands:
                         {
-                            ShowHands = bool.Parse(p_value);
+                            ShowHands = l_value;
                             OnShowHandsChanged.Invoke(ShowHands);
                         }
                         break;
 
                         case ModSetting.MechanimFilter:
                         {
-                            MechanimFilter = bool.Parse(p_value);
+                            MechanimFilter = l_value;
                             OnMechanimFilterChanged.Invoke(MechanimFilter);
                         }
                         break;
                     }
 
-                    ms_entries[(int)l_setting].BoxedValue = bool.Parse(p_value);
+                    ms_entries[(int)l_setting].BoxedValue = l_value;
                 }
             }
             catch(Exception e)
@@ -125,19 +125,19 @@ namespace ml_bft
         {
             try
             {
-                if(Enum.TryParse(p_name, out ModSetting l_setting))
+                if(Enum.TryParse(p_name, out ModSetting l_setting) && int.TryParse(p_value, out int l_value))
                 {
                     switch(l_setting)
                     {
                         case ModSetting.MotionRange:
                         {
-                            MotionRange = (MotionRangeType)int.Parse(p_value);
+                            MotionRange = (MotionRangeType)l_value;
                             OnMotionRangeChanged.Invoke(MotionRange);
                         }
                         break;
                     }
 
-                    ms_entries[(int)l_setting].BoxedValue = int.Parse(p_value);
+                    ms_entries[(int)l_setting].BoxedValue = l_value;
                 }
             }
             catch(Exception e)

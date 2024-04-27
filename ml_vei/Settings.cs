@@ -34,9 +34,9 @@ namespace ml_vei
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
 
-        public static readonly SettingEvent<bool> OnGesturesChanged;
-        public static readonly SettingEvent<bool> OnGripTriggerChanged;
-        public static readonly SettingEvent<PriorityAxis> OnAxisPriorityChanged;
+        public static readonly SettingEvent<bool> OnGesturesChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<bool> OnGripTriggerChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<PriorityAxis> OnAxisPriorityChanged = new SettingEvent<PriorityAxis>();
 
         internal static void Init()
         {
@@ -83,26 +83,26 @@ namespace ml_vei
         {
             try
             {
-                if(Enum.TryParse(p_name, out ModSetting l_setting))
+                if(Enum.TryParse(p_name, out ModSetting l_setting) && bool.TryParse(p_value,out bool l_value))
                 {
                     switch(l_setting)
                     {
                         case ModSetting.Gestures:
                         {
-                            Gestures = bool.Parse(p_value);
+                            Gestures = l_value;
                             OnGesturesChanged.Invoke(Gestures);
                         }
                         break;
 
                         case ModSetting.GripTrigger:
                         {
-                            GripTrigger = bool.Parse(p_value);
+                            GripTrigger = l_value;
                             OnGripTriggerChanged.Invoke(GripTrigger);
                         }
                         break;
                     }
 
-                    ms_entries[(int)l_setting].BoxedValue = bool.Parse(p_value);
+                    ms_entries[(int)l_setting].BoxedValue = l_value;
                 }
             }
             catch(Exception e)
@@ -115,19 +115,19 @@ namespace ml_vei
         {
             try
             {
-                if(Enum.TryParse(p_name, out ModSetting l_setting))
+                if(Enum.TryParse(p_name, out ModSetting l_setting) && int.TryParse(p_value, out int l_value))
                 {
                     switch(l_setting)
                     {
                         case ModSetting.AxisPriority:
                         {
-                            AxisPriority = (PriorityAxis)int.Parse(p_value);
+                            AxisPriority = (PriorityAxis)l_value;
                             OnAxisPriorityChanged.Invoke(AxisPriority);
                         }
                         break;
                     }
 
-                    ms_entries[(int)l_setting].BoxedValue = int.Parse(p_value);
+                    ms_entries[(int)l_setting].BoxedValue = l_value;
                 }
             }
             catch(Exception e)

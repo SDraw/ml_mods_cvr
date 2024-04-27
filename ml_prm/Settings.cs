@@ -129,9 +129,9 @@ namespace ml_prm
         {
             try
             {
-                if(p_newValue is KeyCode)
+                if(p_newValue is KeyCode code)
                 {
-                    HotkeyKey = (KeyCode)p_newValue;
+                    HotkeyKey = code;
                     OnHotkeyKeyChanged.Invoke(HotkeyKey);
                 }
             }

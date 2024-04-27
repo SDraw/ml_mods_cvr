@@ -92,26 +92,26 @@ namespace ml_amt
         {
             try
             {
-                if(Enum.TryParse(p_name, out ModSetting l_setting))
+                if(Enum.TryParse(p_name, out ModSetting l_setting) && int.TryParse(p_value, out int l_value))
                 {
                     switch(l_setting)
                     {
                         case ModSetting.CrouchLimit:
                         {
-                            CrouchLimit = int.Parse(p_value) * 0.01f;
+                            CrouchLimit = l_value * 0.01f;
                             OnCrouchLimitChanged.Invoke(CrouchLimit);
                         }
                         break;
 
                         case ModSetting.ProneLimit:
                         {
-                            ProneLimit = int.Parse(p_value) * 0.01f;
+                            ProneLimit = l_value * 0.01f;
                             OnProneLimitChanged.Invoke(ProneLimit);
                         }
                         break;
                     }
 
-                    ms_entries[(int)l_setting].BoxedValue = int.Parse(p_value);
+                    ms_entries[(int)l_setting].BoxedValue = l_value;
                 }
             }
             catch(Exception e)
@@ -124,40 +124,40 @@ namespace ml_amt
         {
             try
             {
-                if(Enum.TryParse(p_name, out ModSetting l_setting))
+                if(Enum.TryParse(p_name, out ModSetting l_setting) && bool.TryParse(p_value, out bool l_value))
                 {
                     switch(l_setting)
                     {
                         case ModSetting.IKOverrideFly:
                         {
-                            IKOverrideFly = bool.Parse(p_value);
-                            OnIKOverrideFlyChanged.Invoke(IKOverrideFly);
+                            IKOverrideFly = l_value;
+                            OnIKOverrideFlyChanged.Invoke(l_value);
                         }
                         break;
 
                         case ModSetting.IKOverrideJump:
                         {
-                            IKOverrideJump = bool.Parse(p_value);
+                            IKOverrideJump = l_value;
                             OnIKOverrideJumpChanged.Invoke(IKOverrideJump);
                         }
                         break;
 
                         case ModSetting.DetectEmotes:
                         {
-                            DetectEmotes = bool.Parse(p_value);
+                            DetectEmotes = l_value;
                             OnDetectEmotesChanged.Invoke(DetectEmotes);
                         }
                         break;
 
                         case ModSetting.MassCenter:
                         {
-                            MassCenter = bool.Parse(p_value);
+                            MassCenter = l_value;
                             OnMassCenterChanged.Invoke(MassCenter);
                         }
                         break;
                     }
 
-                    ms_entries[(int)l_setting].BoxedValue = bool.Parse(p_value);
+                    ms_entries[(int)l_setting].BoxedValue = l_value;
                 }
             }
             catch(Exception e)

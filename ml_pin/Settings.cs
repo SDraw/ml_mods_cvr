@@ -100,40 +100,40 @@ namespace ml_pin
         {
             try
             {
-                if(Enum.TryParse(p_name, out ModSetting l_setting))
+                if(Enum.TryParse(p_name, out ModSetting l_setting) && bool.TryParse(p_value, out bool l_value))
                 {
                     switch(l_setting)
                     {
                         case ModSetting.NotifyInPublic:
                         {
-                            NotifyInPublic = bool.Parse(p_value);
+                            NotifyInPublic = l_value;
                             OnNotifyInPublicChanged.Invoke(NotifyInPublic);
                         }
                         break;
 
                         case ModSetting.NotifyInFriends:
                         {
-                            NotifyInFriends = bool.Parse(p_value);
+                            NotifyInFriends = l_value;
                             OnNotifyInFriendsChanged.Invoke(NotifyInFriends);
                         }
                         break;
 
                         case ModSetting.NotifyInPrivate:
                         {
-                            NotifyInPrivate = bool.Parse(p_value);
+                            NotifyInPrivate = l_value;
                             OnNotifyInPrivateChanged.Invoke(NotifyInPrivate);
                         }
                         break;
 
                         case ModSetting.FriendsAlways:
                         {
-                            FriendsAlways = bool.Parse(p_value);
+                            FriendsAlways = l_value;
                             OnFriendsAlwaysChanged.Invoke(FriendsAlways);
                         }
                         break;
                     }
 
-                    ms_entries[(int)l_setting].BoxedValue = bool.Parse(p_value);
+                    ms_entries[(int)l_setting].BoxedValue = l_value;
                 }
             }
             catch(Exception e)
@@ -146,19 +146,19 @@ namespace ml_pin
         {
             try
             {
-                if(Enum.TryParse(p_name, out ModSetting l_setting))
+                if(Enum.TryParse(p_name, out ModSetting l_setting) && int.TryParse(p_value, out int l_value))
                 {
                     switch(l_setting)
                     {
                         case ModSetting.Volume:
                         {
-                            Volume = int.Parse(p_value) * 0.01f;
+                            Volume = l_value * 0.01f;
                             OnVolumeChanged.Invoke(Volume);
                         }
                         break;
                     }
 
-                    ms_entries[(int)l_setting].BoxedValue = int.Parse(p_value);
+                    ms_entries[(int)l_setting].BoxedValue = l_value;
                 }
             }
             catch(Exception e)
@@ -171,19 +171,19 @@ namespace ml_pin
         {
             try
             {
-                if(Enum.TryParse(p_name, out ModSetting l_setting))
+                if(Enum.TryParse(p_name, out ModSetting l_setting) && int.TryParse(p_value, out int l_value))
                 {
                     switch(l_setting)
                     {
                         case ModSetting.NotifyType:
                         {
-                            NotifyType = (NotificationType)int.Parse(p_value);
+                            NotifyType = (NotificationType)l_value;
                             OnNotifyTypeChanged.Invoke(NotifyType);
                         }
                         break;
                     }
 
-                    ms_entries[(int)l_setting].BoxedValue = int.Parse(p_value);
+                    ms_entries[(int)l_setting].BoxedValue = l_value;
                 }
             }
             catch(Exception e)

@@ -100,7 +100,6 @@ namespace ml_pmc
                     }
                     break;
 
-                    //
                     case ModSetting.MirrorPose:
                     {
                         MirrorPose = (bool)p_value;
