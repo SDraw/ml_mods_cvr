@@ -7,7 +7,7 @@
     <Authors>SDraw</Authors>
     <Company>None</Company>
     <Product>PlayerMovementCopycat</Product>
-    <Version>1.0.7</Version>
+    <Version>1.0.8</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
