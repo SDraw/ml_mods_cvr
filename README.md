@@ -2,7 +2,7 @@ Merged set of MelonLoader mods for ChilloutVR.
 
 **Table for game build 2023r175:**
 | Full name | Short name | Latest version |
-|:---------:|:----------:|:--------------:| :----------------------------------------------------------------|
+|:---------:|:----------:|:--------------:|
 | [Avatar Motion Tweaker](/ml_amt/README.md) | ml_amt | 1.4.0 [:arrow_down:](../../releases/latest/download/ml_amt.dll)|
 | [Avatar Synced Look](/ml_asl/README.md) | ml_asl | 1.0.4 [:arrow_down:](../../releases/latest/download/ml_asl.dll)|
 | [Better Fingers Tracking](/ml_bft/README.md) | ml_bft | 1.0.4 [:arrow_down:](../../releases/latest/download/ml_bft.dll)|
