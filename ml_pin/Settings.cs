@@ -25,6 +25,7 @@ namespace ml_pin
         {
             NotifyType,
             Volume,
+            Delay,
             NotifyInPublic,
             NotifyInFriends,
             NotifyInPrivate,
@@ -33,6 +34,7 @@ namespace ml_pin
 
         public static NotificationType NotifyType { get; private set; } = NotificationType.All;
         public static float Volume { get; private set; } = 1.0f;
+        public static bool Delay { get; private set; } = true;
         public static bool NotifyInPublic { get; private set; } = true;
         public static bool NotifyInFriends { get; private set; } = true;
         public static bool NotifyInPrivate { get; private set; } = true;
@@ -43,6 +45,7 @@ namespace ml_pin
 
         public static readonly SettingEvent<NotificationType> OnNotifyTypeChanged = new SettingEvent<NotificationType>();
         public static readonly SettingEvent<float> OnVolumeChanged = new SettingEvent<float>();
+        public static readonly SettingEvent<bool> OnDelayChange = new SettingEvent<bool>();
         public static readonly SettingEvent<bool> OnNotifyInPublicChanged = new SettingEvent<bool>();
         public static readonly SettingEvent<bool> OnNotifyInFriendsChanged = new SettingEvent<bool>();
         public static readonly SettingEvent<bool> OnNotifyInPrivateChanged = new SettingEvent<bool>();
@@ -56,6 +59,7 @@ namespace ml_pin
             {
                 ms_category.CreateEntry(ModSetting.NotifyType.ToString(), (int)NotifyType),
                 ms_category.CreateEntry(ModSetting.Volume.ToString(), (int)(Volume * 100f)),
+                ms_category.CreateEntry(ModSetting.Delay.ToString(), Delay),
                 ms_category.CreateEntry(ModSetting.NotifyInPublic.ToString(), NotifyInPublic),
                 ms_category.CreateEntry(ModSetting.NotifyInFriends.ToString(), NotifyInFriends),
                 ms_category.CreateEntry(ModSetting.NotifyInPrivate.ToString(), NotifyInPrivate),
@@ -64,6 +68,7 @@ namespace ml_pin
 
             NotifyType = (NotificationType)(int)ms_entries[(int)ModSetting.NotifyType].BoxedValue;
             Volume = (int)ms_entries[(int)ModSetting.Volume].BoxedValue * 0.01f;
+            Delay = (bool)ms_entries[(int)ModSetting.Delay].BoxedValue;
             NotifyInPublic = (bool)ms_entries[(int)ModSetting.NotifyInPublic].BoxedValue;
             NotifyInFriends = (bool)ms_entries[(int)ModSetting.NotifyInFriends].BoxedValue;
             NotifyInPrivate = (bool)ms_entries[(int)ModSetting.NotifyInPrivate].BoxedValue;
@@ -104,6 +109,13 @@ namespace ml_pin
                 {
                     switch(l_setting)
                     {
+                        case ModSetting.Delay:
+                        {
+                            Delay = l_value;
+                            OnDelayChange.Invoke(Delay);
+                        }
+                        break;
+
                         case ModSetting.NotifyInPublic:
                         {
                             NotifyInPublic = l_value;

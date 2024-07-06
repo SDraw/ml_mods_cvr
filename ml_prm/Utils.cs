@@ -16,21 +16,6 @@ namespace ml_prm
         static readonly FieldInfo ms_influencerTouchingVolumes = typeof(PhysicsInfluencer).GetField("_touchingVolumes", BindingFlags.NonPublic | BindingFlags.Instance);
         static readonly FieldInfo ms_influencerSubmergedColliders = typeof(PhysicsInfluencer).GetField("_submergedColliders", BindingFlags.NonPublic | BindingFlags.Instance);
 
-        public static bool IsInVR() => ((MetaPort.Instance != null) && MetaPort.Instance.isUsingVr);
-        public static bool IsWorldSafe() => ((CVRWorld.Instance != null) && CVRWorld.Instance.allowFlying);
-        public static float GetWorldMovementLimit()
-        {
-            float l_result = 1f;
-            if(CVRWorld.Instance != null)
-            {
-                l_result = CVRWorld.Instance.baseMovementSpeed;
-                l_result *= CVRWorld.Instance.sprintMultiplier;
-                l_result *= CVRWorld.Instance.inAirMovementMultiplier;
-                l_result *= CVRWorld.Instance.flyMultiplier;
-            }
-            return l_result;
-        }
-
         public static void ClearFluidVolumes(this BetterBetterCharacterController p_instance) => (ms_touchingVolumes.GetValue(p_instance) as List<FluidVolume>)?.Clear();
 
         public static void CopyGlobal(this Transform p_source, Transform p_target)

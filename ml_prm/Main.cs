@@ -15,6 +15,7 @@ namespace ml_prm
             Settings.Init();
             ModUi.Init();
             GameEvents.Init(HarmonyInstance);
+            WorldHandler.Init();
 
             // Whitelist the toggle script
             (typeof(SharedFilter).GetField("_localComponentWhitelist", BindingFlags.NonPublic | BindingFlags.Static)?.GetValue(null) as HashSet<Type>)?.Add(typeof(RagdollToggle));
@@ -24,6 +25,8 @@ namespace ml_prm
 
         public override void OnDeinitializeMelon()
         {
+            WorldHandler.DeInit();
+
             if(m_localController != null)
                 UnityEngine.Object.Destroy(m_localController);
             m_localController = null;

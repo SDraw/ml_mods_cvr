@@ -12,6 +12,7 @@ Available mod's settings in `Settings - Audio - Players Instance Notifier`:
 * **Notify of:** players notification filter type, available filters: `None`, `Friends`, `All`; `All` by default.
 * **Mixed volume:** volume of notifications; `100` by default.
   * Note: Respects game's interface volume setting and mixes with it accordingly.
+* **Delay between notifications:** prevents notification until previous one is finished; `true` by default.
 * **Notify in public instances:** notifies in `Public` instances; `true` by default.
 * **Notify in friends instances:** notifies in `Friends of friends` and `Friends` instances; `true` by default.
 * **Notify in private instances:** notifies in `Everyone can invite` and `Owner must invite` instances; `true` by default.

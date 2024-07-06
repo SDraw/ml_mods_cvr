@@ -21,6 +21,13 @@
         </div>
 
         <div class ="row-wrapper">
+            <div class ="option-caption">Delay between notifications: </div>
+            <div class ="option-input">
+                <div id="Delay" class ="inp_toggle no-scroll" data-current="true"></div>
+            </div>
+        </div>
+
+        <div class ="row-wrapper">
             <div class ="option-caption">Notify in public instances: </div>
             <div class ="option-input">
                 <div id="NotifyInPublic" class ="inp_toggle no-scroll" data-current="true"></div>

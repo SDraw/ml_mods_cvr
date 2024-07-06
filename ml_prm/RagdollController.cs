@@ -213,7 +213,7 @@ namespace ml_prm
                 if(m_downTime >= Settings.RecoverDelay)
                 {
                     SwitchRagdoll();
-                    m_downTime = float.MinValue; // One attepmt to recover
+                    m_downTime = float.MinValue; // One attempt to recover
                 }
             }
 
@@ -363,13 +363,13 @@ namespace ml_prm
                             m_rigidBodies.Add(l_body);
                             l_body.isKinematic = true;
                             l_body.angularDrag = Settings.AngularDrag;
-                            l_body.drag = (Utils.IsWorldSafe() ? Settings.MovementDrag : 1f);
+                            l_body.drag = (WorldHandler.IsSafeWorld() ? Settings.MovementDrag : 1f);
                             l_body.useGravity = false;
                             l_body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
                             l_body.gameObject.layer = LayerMask.NameToLayer("PlayerLocal");
 
                             GravityInfluencer l_gravInfluencer = l_body.gameObject.AddComponent<GravityInfluencer>();
-                            l_gravInfluencer.SetActiveGravity((!Utils.IsWorldSafe() || Settings.Gravity));
+                            l_gravInfluencer.SetActiveGravity((!WorldHandler.IsSafeWorld() || Settings.Gravity));
                             m_gravityInfluencers.Add(l_gravInfluencer);
                         }
 
@@ -398,7 +398,7 @@ namespace ml_prm
                         if((l_body != null) && (l_collider != null) && (l_puppetTransforms[i] == m_puppetReferences.hips || l_puppetTransforms[i] == m_puppetReferences.spine || l_puppetTransforms[i] == m_puppetReferences.chest))
                         {
                             PhysicsInfluencer l_physicsInfluencer = l_puppetTransforms[i].gameObject.AddComponent<PhysicsInfluencer>();
-                            l_physicsInfluencer.airDrag = (Utils.IsWorldSafe() ? Settings.MovementDrag : 1f);
+                            l_physicsInfluencer.airDrag = (WorldHandler.IsSafeWorld() ? Settings.MovementDrag : 1f);
                             l_physicsInfluencer.airAngularDrag = Settings.AngularDrag;
                             l_physicsInfluencer.fluidDrag = 3f;
                             l_physicsInfluencer.fluidAngularDrag = 1f;
@@ -572,7 +572,7 @@ namespace ml_prm
         {
             if(m_avatarReady)
             {
-                float l_drag = (Utils.IsWorldSafe() ? p_value : 1f);
+                float l_drag = (WorldHandler.IsSafeWorld() ? p_value : 1f);
                 foreach(Rigidbody l_body in m_rigidBodies)
                 {
                     l_body.drag = l_drag;
@@ -601,7 +601,7 @@ namespace ml_prm
         {
             if(m_avatarReady)
             {
-                bool l_gravity = (!Utils.IsWorldSafe() || p_state);
+                bool l_gravity = (!WorldHandler.IsSafeWorld() || p_state);
                 foreach(PhysicsInfluencer l_influencer in m_physicsInfluencers)
                     l_influencer.enabled = l_gravity;
                 foreach(GravityInfluencer l_influencer in m_gravityInfluencers)
@@ -618,8 +618,8 @@ namespace ml_prm
         {
             if(m_physicsMaterial != null)
             {
-                bool l_slipperiness = (Settings.Slipperiness && Utils.IsWorldSafe());
-                bool l_bounciness = (Settings.Bounciness && Utils.IsWorldSafe());
+                bool l_slipperiness = (Settings.Slipperiness && WorldHandler.IsSafeWorld());
+                bool l_bounciness = (Settings.Bounciness && WorldHandler.IsSafeWorld());
                 m_physicsMaterial.dynamicFriction = (l_slipperiness ? 0f : c_defaultFriction);
                 m_physicsMaterial.staticFriction = (l_slipperiness ? 0f : c_defaultFriction);
                 m_physicsMaterial.frictionCombine = (l_slipperiness ? PhysicMaterialCombine.Minimum : PhysicMaterialCombine.Average);
@@ -631,7 +631,7 @@ namespace ml_prm
         {
             if(m_avatarReady)
             {
-                bool l_buoyancy = (!Utils.IsWorldSafe() || p_state);
+                bool l_buoyancy = (!WorldHandler.IsSafeWorld() || p_state);
                 foreach(PhysicsInfluencer l_influencer in m_physicsInfluencers)
                     l_influencer.enableInfluence = l_buoyancy;
 
@@ -672,7 +672,7 @@ namespace ml_prm
                         PlayerSetup.Instance.animatorManager.CancelEmote = true;
                         m_ragdolledParameter.SetValue(true);
 
-                        if(!Utils.IsWorldSafe())
+                        if(!WorldHandler.IsSafeWorld())
                         {
                             m_reachedGround = false; // Force player to unragdoll and reach ground first
                             m_groundedTime = 0f;
@@ -683,8 +683,8 @@ namespace ml_prm
                         foreach(Rigidbody l_body in m_rigidBodies)
                             l_body.isKinematic = false;
 
-                        Vector3 l_velocity = Vector3.ClampMagnitude(m_velocity * (Utils.IsWorldSafe() ? Settings.VelocityMultiplier : 1f), Utils.GetWorldMovementLimit());
-                        if(Settings.ViewVelocity && Utils.IsWorldSafe())
+                        Vector3 l_velocity = Vector3.ClampMagnitude(m_velocity * (WorldHandler.IsSafeWorld() ? Settings.VelocityMultiplier : 1f), WorldHandler.GetMovementLimit());
+                        if(Settings.ViewVelocity && WorldHandler.IsSafeWorld())
                         {
                             float l_mag = l_velocity.magnitude;
                             l_velocity = PlayerSetup.Instance.GetActiveCamera().transform.forward * l_mag;
@@ -708,7 +708,7 @@ namespace ml_prm
                     {
                         BetterBetterCharacterController.Instance.TeleportPlayerTo(m_puppetReferences.hips.position, PlayerSetup.Instance.GetPlayerRotation().eulerAngles, false, false);
                         TryRestoreMovement();
-                        if(!Utils.IsWorldSafe())
+                        if(!WorldHandler.IsSafeWorld())
                         {
                             Vector3 l_vec = BetterBetterCharacterController.Instance.GetVelocity();
                             l_vec.y = Mathf.Clamp(l_vec.y, float.MinValue, 0f);
@@ -775,6 +775,9 @@ namespace ml_prm
 
         bool CanRagdoll()
         {
+            if(WorldHandler.IsRestrictedWorld())
+                return false;
+
             bool l_result = m_reachedGround;
             l_result &= !BodySystem.isCalibrating;
             l_result &= !BetterBetterCharacterController.Instance.IsSitting();

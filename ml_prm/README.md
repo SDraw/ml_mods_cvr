@@ -45,6 +45,9 @@ Optional mod's settings in [UIExpansionKit](https://github.com/ddakebono/Chillou
 Available additional parameters for AAS animator:
 * **`Ragdolled`:** defines current ragdoll state; boolean.
   * Note: Can be set as local-only (not synced) if starts with `#` character.
+  
+# World restriction
+World creators can restrict ragdolling by creating empty game object with name `[RagdollRestriction]` anywhere in scene.
 
 # Unity Editor Script
 You can also trigger the ragdoll via animations on your avatar. To do this you need:
