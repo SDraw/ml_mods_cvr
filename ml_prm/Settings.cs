@@ -53,7 +53,7 @@ namespace ml_prm
         public static bool JumpRecover { get; private set; } = false;
         public static bool Buoyancy { get; private set; } = true;
         public static bool FallDamage { get; private set; } = true;
-        public static float FallLimit { get; private set; } = 5f;
+        public static float FallLimit { get; private set; } = 9.899494f;
 
         public static readonly SettingEvent<bool> OnHotkeyChanged = new SettingEvent<bool>();
         public static readonly SettingEvent<KeyCode> OnHotkeyKeyChanged = new SettingEvent<KeyCode>();
@@ -122,7 +122,7 @@ namespace ml_prm
             JumpRecover = (bool)ms_entries[(int)ModSetting.JumpRecover].BoxedValue;
             Buoyancy = (bool)ms_entries[(int)ModSetting.Buoyancy].BoxedValue;
             FallDamage = (bool)ms_entries[(int)ModSetting.FallDamage].BoxedValue;
-            FallLimit = Mathf.Clamp((float)ms_entries[(int)ModSetting.FallLimit].BoxedValue, 0f, 100f);
+            FallLimit = Mathf.Clamp((float)ms_entries[(int)ModSetting.FallLimit].BoxedValue, 4.5f, 44.5f);
         }
 
         static void OnMelonSettingSave_HotkeyKey(object p_oldValue, object p_newValue)

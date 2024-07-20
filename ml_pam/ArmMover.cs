@@ -48,6 +48,9 @@ namespace ml_pam
         HandState m_leftHandState = HandState.Empty;
         HandState m_rightHandState = HandState.Empty;
 
+        AvatarBoolParameter m_leftHandParameter = null;
+        AvatarBoolParameter m_rightHandParameter = null;
+
         // Unity events
         void Start()
         {
@@ -239,7 +242,7 @@ namespace ml_pam
         {
             m_enabled = p_state;
 
-            if(m_enabled)
+            if(p_state)
             {
                 if(m_leftHandState != HandState.Empty)
                     SetArmActive(Settings.LeadHand.Left, true);
@@ -335,6 +338,8 @@ namespace ml_pam
             m_armIKLeft = null;
             m_armIKRight = null;
             m_armLength = 0f;
+            m_leftHandParameter = null;
+            m_rightHandParameter = null;
         }
 
         void OnAvatarSetup()
@@ -364,6 +369,9 @@ namespace ml_pam
                 else if(!m_inVR)
                     SetupArmIK();
             }
+
+            m_leftHandParameter = new AvatarBoolParameter("LeftHandExtended", PlayerSetup.Instance.animatorManager);
+            m_rightHandParameter = new AvatarBoolParameter("RightHandExtended", PlayerSetup.Instance.animatorManager);
 
             OnEnabledChanged(m_enabled);
         }
@@ -533,6 +541,11 @@ namespace ml_pam
                     m_armIKRight.solver.IKPositionWeight = (p_state ? 1f : 0f);
                     m_armIKRight.solver.IKRotationWeight = (p_state ? 1f : 0f);
                 }
+
+                if((p_hand == Settings.LeadHand.Left) || (p_hand == Settings.LeadHand.Both))
+                    m_leftHandParameter?.SetValue(p_state);
+                if((p_hand == Settings.LeadHand.Right) || (p_hand == Settings.LeadHand.Both))
+                    m_rightHandParameter?.SetValue(p_state);
             }
         }
 

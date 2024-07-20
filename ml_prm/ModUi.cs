@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
+using BTKUILib.UIObjects;
+using BTKUILib.UIObjects.Components;
 
 namespace ml_prm
 {
@@ -37,83 +37,103 @@ namespace ml_prm
             FallLimit
         }
 
+        const string c_ragdollKeyTooltip = "Switch ragdoll mode with '{0}' key";
+        const string c_fallLimitTooltip = "Fall limit based on impact velocity<p>Current value corresponds to drop from {0} units with default gravity</p>";
+
         internal static readonly UiEvent OnSwitchChanged = new UiEvent();
 
-        static List<object> ms_uiElements = null;
+        static Page ms_page = null;
+        static Category ms_category = null;
+
+        static Button ms_ragdollButton = null;
+        static ToggleButton ms_hotkeyToggle = null;
+        static ToggleButton ms_gravityToggle = null;
+        static ToggleButton ms_pointersToggle = null;
+        static ToggleButton ms_ignoreLocalToggle = null;
+        static ToggleButton ms_combatToggle = null;
+        static ToggleButton ms_recoveryToggle = null;
+        static ToggleButton ms_slipperinessToggle = null;
+        static ToggleButton ms_bouncinessToggle = null;
+        static ToggleButton ms_viewDirectionToggle = null;
+        static ToggleButton ms_jumpRecoverToggle = null;
+        static ToggleButton ms_buoyancyToggle = null;
+        static ToggleButton ms_fallDamageToggle = null;
+        static SliderFloat ms_velocityMultiplierSlider = null;
+        static SliderFloat ms_movementDragSlider = null;
+        static SliderFloat ms_angularMovementDragSlider = null;
+        static SliderFloat ms_recoverDelaySlider = null;
+        static SliderFloat ms_fallLimitSlider = null;
+        static Button ms_resetButton = null;
 
         internal static void Init()
         {
-            ms_uiElements = new List<object>();
-
-            if(MelonLoader.MelonMod.RegisteredMelons.FirstOrDefault(m => m.Info.Name == "BTKUILib") != null)
-                CreateUi();
-        }
-
-        // Separated method, otherwise exception is thrown, funny CSharp and optional references, smh
-        static void CreateUi()
-        {
             BTKUILib.QuickMenuAPI.PrepareIcon("PlayerRagdollMod", "PRM-Person", GetIconStream("person.png"));
 
-            var l_modRoot = new BTKUILib.UIObjects.Page("PlayerRagdollMod", "MainPage", true, "PRM-Person");
-            l_modRoot.MenuTitle = "Player Ragdoll Mod";
-            l_modRoot.MenuSubtitle = "Become a ragdoll and change various settings for people amusement";
+            ms_page = new Page("PlayerRagdollMod", "MainPage", true, "PRM-Person");
+            ms_page.MenuTitle = "Player Ragdoll Mod";
+            ms_page.MenuSubtitle = "Become a ragdoll and change various settings for people amusement";
 
-            var l_modCategory = l_modRoot.AddCategory("Settings");
+            ms_category = ms_page.AddCategory("Settings");
 
-            l_modCategory.AddButton("Switch ragdoll", "PRM-Person", "Switch between normal and ragdoll state.").OnPress += OnSwitch;
+            ms_ragdollButton = ms_category.AddButton("Switch ragdoll", "PRM-Person", "Switch between normal and ragdoll state");
+            ms_ragdollButton.OnPress += OnSwitch;
+            
+            ms_hotkeyToggle = ms_category.AddToggle("Use hotkey", "Switch ragdoll mode with 'R' key", Settings.Hotkey);
+            ms_hotkeyToggle.ToggleTooltip = string.Format(c_ragdollKeyTooltip, Settings.HotkeyKey);
+            ms_hotkeyToggle.OnValueUpdated += (state) => OnToggleUpdate(UiIndex.Hotkey, state);
+            Settings.OnHotkeyKeyChanged.AddHandler(OnHotkeyKeyChanged);
 
-            ms_uiElements.Add(l_modCategory.AddToggle("Use hotkey", "Switch ragdoll mode with 'R' key", Settings.Hotkey));
-            (ms_uiElements[(int)UiIndex.Hotkey] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate(UiIndex.Hotkey, state);
+            ms_gravityToggle = ms_category.AddToggle("Use gravity", "Apply gravity to ragdoll", Settings.Gravity);
+            ms_gravityToggle.OnValueUpdated += (state) => OnToggleUpdate(UiIndex.Gravity, state);
 
-            ms_uiElements.Add(l_modCategory.AddToggle("Use gravity", "Apply gravity to ragdoll", Settings.Gravity));
-            (ms_uiElements[(int)UiIndex.Gravity] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate(UiIndex.Gravity, state);
+            ms_pointersToggle = ms_category.AddToggle("Pointers reaction", "React to trigger colliders with CVRPointer component of 'ragdoll' type", Settings.PointersReaction);
+            ms_pointersToggle.OnValueUpdated += (state) => OnToggleUpdate(UiIndex.PointersReaction, state);
 
-            ms_uiElements.Add(l_modCategory.AddToggle("Pointers reaction", "React to trigger colliders with CVRPointer component of 'ragdoll' type", Settings.PointersReaction));
-            (ms_uiElements[(int)UiIndex.PointersReaction] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate(UiIndex.PointersReaction, state);
+            ms_ignoreLocalToggle = ms_category.AddToggle("Ignore local pointers", "Ignore local avatar's CVRPointer components of 'ragdoll' type", Settings.IgnoreLocal);
+            ms_ignoreLocalToggle.OnValueUpdated += (state) => OnToggleUpdate(UiIndex.IgnoreLocal, state);
 
-            ms_uiElements.Add(l_modCategory.AddToggle("Ignore local pointers", "Ignore local avatar's CVRPointer components of 'ragdoll' type", Settings.IgnoreLocal));
-            (ms_uiElements[(int)UiIndex.IgnoreLocal] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate(UiIndex.IgnoreLocal, state);
+            ms_combatToggle = ms_category.AddToggle("Combat reaction", "Ragdoll upon combat system death", Settings.CombatReaction);
+            ms_combatToggle.OnValueUpdated += (state) => OnToggleUpdate(UiIndex.CombatReaction, state);
 
-            ms_uiElements.Add(l_modCategory.AddToggle("Combat reaction", "Ragdoll upon combat system death", Settings.CombatReaction));
-            (ms_uiElements[(int)UiIndex.CombatReaction] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate(UiIndex.CombatReaction, state);
+            ms_recoveryToggle = ms_category.AddToggle("Auto recover", "Automatically unragdoll after set recover delay", Settings.AutoRecover);
+            ms_recoveryToggle.OnValueUpdated += (state) => OnToggleUpdate(UiIndex.AutoRecover, state);
 
-            ms_uiElements.Add(l_modCategory.AddToggle("Auto recover", "Automatically unragdoll after set recover delay", Settings.AutoRecover));
-            (ms_uiElements[(int)UiIndex.AutoRecover] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate(UiIndex.AutoRecover, state);
+            ms_slipperinessToggle = ms_category.AddToggle("Slipperiness", "Enables/disables friction of ragdoll", Settings.Slipperiness);
+            ms_slipperinessToggle.OnValueUpdated += (state) => OnToggleUpdate(UiIndex.Slipperiness, state);
 
-            ms_uiElements.Add(l_modCategory.AddToggle("Slipperiness", "Enables/disables friction of ragdoll", Settings.Slipperiness));
-            (ms_uiElements[(int)UiIndex.Slipperiness] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate(UiIndex.Slipperiness, state);
+            ms_bouncinessToggle = ms_category.AddToggle("Bounciness", "Enables/disables bounciness of ragdoll", Settings.Bounciness);
+            ms_bouncinessToggle.OnValueUpdated += (state) => OnToggleUpdate(UiIndex.Bounciness, state);
 
-            ms_uiElements.Add(l_modCategory.AddToggle("Bounciness", "Enables/disables bounciness of ragdoll", Settings.Bounciness));
-            (ms_uiElements[(int)UiIndex.Bounciness] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate(UiIndex.Bounciness, state);
+            ms_viewDirectionToggle = ms_category.AddToggle("View direction velocity", "Apply velocity to camera view direction", Settings.ViewVelocity);
+            ms_viewDirectionToggle.OnValueUpdated += (state) => OnToggleUpdate(UiIndex.ViewVelocity, state);
 
-            ms_uiElements.Add(l_modCategory.AddToggle("View direction velocity", "Apply velocity to camera view direction", Settings.ViewVelocity));
-            (ms_uiElements[(int)UiIndex.ViewVelocity] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate(UiIndex.ViewVelocity, state);
+            ms_jumpRecoverToggle = ms_category.AddToggle("Jump recover", "Recover from ragdoll state by jumping", Settings.JumpRecover);
+            ms_jumpRecoverToggle.OnValueUpdated += (state) => OnToggleUpdate(UiIndex.JumpRecover, state);
 
-            ms_uiElements.Add(l_modCategory.AddToggle("Jump recover", "Recover from ragdoll state by jumping", Settings.JumpRecover));
-            (ms_uiElements[(int)UiIndex.JumpRecover] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate(UiIndex.JumpRecover, state);
+            ms_buoyancyToggle = ms_category.AddToggle("Buoyancy", "Enable buoyancy in fluid volumes<p>Warning: constantly changes movement and air drag of hips, spine and chest</p>", Settings.Buoyancy);
+            ms_buoyancyToggle.OnValueUpdated += (state) => OnToggleUpdate(UiIndex.Buoyancy, state);
 
-            ms_uiElements.Add(l_modCategory.AddToggle("Buoyancy", "Enable buoyancy in fluid volumes. Warning: constantly changes movement and air drag of hips, spine and chest.", Settings.Buoyancy));
-            (ms_uiElements[(int)UiIndex.Buoyancy] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate(UiIndex.Buoyancy, state);
+            ms_fallDamageToggle = ms_category.AddToggle("Fall damage", "Enable ragdoll when falling from height", Settings.FallDamage);
+            ms_fallDamageToggle.OnValueUpdated += (state) => OnToggleUpdate(UiIndex.FallDamage, state);
 
-            ms_uiElements.Add(l_modCategory.AddToggle("Fall damage", "Enable ragdoll when falling from height", Settings.FallDamage));
-            (ms_uiElements[(int)UiIndex.FallDamage] as BTKUILib.UIObjects.Components.ToggleButton).OnValueUpdated += (state) => OnToggleUpdate(UiIndex.FallDamage, state);
+            ms_velocityMultiplierSlider = ms_category.AddSlider("Velocity multiplier", "Velocity multiplier upon entering ragdoll state", Settings.VelocityMultiplier, 1f, 50f);
+            ms_velocityMultiplierSlider.OnValueUpdated += (value) => OnSliderUpdate(UiIndex.VelocityMultiplier, value);
 
-            ms_uiElements.Add(l_modCategory.AddSlider("Velocity multiplier", "Velocity multiplier upon entering ragdoll state", Settings.VelocityMultiplier, 1f, 50f));
-            (ms_uiElements[(int)UiIndex.VelocityMultiplier] as BTKUILib.UIObjects.Components.SliderFloat).OnValueUpdated += (value) => OnSliderUpdate(UiIndex.VelocityMultiplier, value);
+            ms_movementDragSlider = ms_category.AddSlider("Movement drag", "Movement resistance", Settings.MovementDrag, 0f, 50f);
+            ms_movementDragSlider.OnValueUpdated += (value) => OnSliderUpdate(UiIndex.MovementDrag, value);
 
-            ms_uiElements.Add(l_modCategory.AddSlider("Movement drag", "Movement resistance", Settings.MovementDrag, 0f, 50f));
-            (ms_uiElements[(int)UiIndex.MovementDrag] as BTKUILib.UIObjects.Components.SliderFloat).OnValueUpdated += (value) => OnSliderUpdate(UiIndex.MovementDrag, value);
+            ms_angularMovementDragSlider = ms_category.AddSlider("Angular movement drag", "Rotation movement resistance", Settings.AngularDrag, 0f, 50f);
+            ms_angularMovementDragSlider.OnValueUpdated += (value) => OnSliderUpdate(UiIndex.AngularDrag, value);
 
-            ms_uiElements.Add(l_modCategory.AddSlider("Angular movement drag", "Rotation movement resistance", Settings.AngularDrag, 0f, 50f));
-            (ms_uiElements[(int)UiIndex.AngularDrag] as BTKUILib.UIObjects.Components.SliderFloat).OnValueUpdated += (value) => OnSliderUpdate(UiIndex.AngularDrag, value);
+            ms_recoverDelaySlider = ms_category.AddSlider("Recover delay (seconds)", "Recover delay for automatic recover", Settings.RecoverDelay, 1f, 10f);
+            ms_recoverDelaySlider.OnValueUpdated += (value) => OnSliderUpdate(UiIndex.RecoverDelay, value);
 
-            ms_uiElements.Add(l_modCategory.AddSlider("Recover delay (seconds)", "Recover delay for automatic recover", Settings.RecoverDelay, 1f, 10f));
-            (ms_uiElements[(int)UiIndex.RecoverDelay] as BTKUILib.UIObjects.Components.SliderFloat).OnValueUpdated += (value) => OnSliderUpdate(UiIndex.RecoverDelay, value);
+            ms_fallLimitSlider = ms_category.AddSlider("Fall limit", "", Settings.FallLimit, 4.5f, 44.5f);
+            ms_fallLimitSlider.SliderTooltip = string.Format(c_fallLimitTooltip, GetDropHeight(Settings.FallLimit));
+            ms_fallLimitSlider.OnValueUpdated += (value) => OnSliderUpdate(UiIndex.FallLimit, value);
 
-            ms_uiElements.Add(l_modCategory.AddSlider("Fall limit", "Height limit for fall damage", Settings.FallLimit, 0f, 100f));
-            (ms_uiElements[(int)UiIndex.FallLimit] as BTKUILib.UIObjects.Components.SliderFloat).OnValueUpdated += (value) => OnSliderUpdate(UiIndex.FallLimit, value);
-
-            l_modCategory.AddButton("Reset settings", "", "Reset mod settings to default").OnPress += Reset;
+            ms_resetButton = ms_category.AddButton("Reset settings", "", "Reset mod settings to default");
+            ms_resetButton.OnPress += Reset;
         }
 
         static void OnSwitch()
@@ -128,7 +148,7 @@ namespace ml_prm
             }
         }
 
-        static void OnToggleUpdate(UiIndex p_index, bool p_state, bool p_force = false)
+        static void OnToggleUpdate(UiIndex p_index, bool p_state)
         {
             try
             {
@@ -182,9 +202,6 @@ namespace ml_prm
                         Settings.SetSetting(Settings.ModSetting.FallDamage, p_state);
                         break;
                 }
-
-                if(p_force)
-                    (ms_uiElements[(int)p_index] as BTKUILib.UIObjects.Components.ToggleButton).ToggleValue = p_state;
             }
             catch(Exception e)
             {
@@ -192,7 +209,7 @@ namespace ml_prm
             }
         }
 
-        static void OnSliderUpdate(UiIndex p_index, float p_value, bool p_force = false)
+        static void OnSliderUpdate(UiIndex p_index, float p_value)
         {
             try
             {
@@ -215,12 +232,12 @@ namespace ml_prm
                         break;
 
                     case UiIndex.FallLimit:
+                    {
                         Settings.SetSetting(Settings.ModSetting.FallLimit, p_value);
-                        break;
+                        ms_fallLimitSlider.SliderTooltip = string.Format(c_fallLimitTooltip, GetDropHeight(p_value));
+                    }
+                    break;
                 }
-
-                if(p_force)
-                    (ms_uiElements[(int)p_index] as BTKUILib.UIObjects.Components.SliderFloat).SetSliderValue(p_value);
             }
             catch(Exception e)
             {
@@ -230,23 +247,62 @@ namespace ml_prm
 
         static void Reset()
         {
-            OnToggleUpdate(UiIndex.Hotkey, true, true);
-            OnToggleUpdate(UiIndex.Gravity, true, true);
-            OnToggleUpdate(UiIndex.PointersReaction, true, true);
-            OnToggleUpdate(UiIndex.IgnoreLocal, true, true);
-            OnToggleUpdate(UiIndex.CombatReaction, true, true);
-            OnToggleUpdate(UiIndex.AutoRecover, false, true);
-            OnToggleUpdate(UiIndex.Slipperiness, false, true);
-            OnToggleUpdate(UiIndex.Bounciness, false, true);
-            OnToggleUpdate(UiIndex.ViewVelocity, false, true);
-            OnToggleUpdate(UiIndex.JumpRecover, false, true);
-            OnToggleUpdate(UiIndex.Buoyancy, true, true);
-            OnToggleUpdate(UiIndex.FallDamage, true, true);
-            OnSliderUpdate(UiIndex.VelocityMultiplier, 2f, true);
-            OnSliderUpdate(UiIndex.MovementDrag, 1f, true);
-            OnSliderUpdate(UiIndex.AngularDrag, 1f, true);
-            OnSliderUpdate(UiIndex.RecoverDelay, 3f, true);
-            OnSliderUpdate(UiIndex.FallLimit, 5f, true);
+            OnToggleUpdate(UiIndex.Hotkey, true);
+            ms_hotkeyToggle.ToggleValue = true;
+
+            OnToggleUpdate(UiIndex.Gravity, true);
+            ms_gravityToggle.ToggleValue = true;
+
+            OnToggleUpdate(UiIndex.PointersReaction, true);
+            ms_pointersToggle.ToggleValue = true;
+
+            OnToggleUpdate(UiIndex.IgnoreLocal, true);
+            ms_ignoreLocalToggle.ToggleValue = true;
+
+            OnToggleUpdate(UiIndex.CombatReaction, true);
+            ms_combatToggle.ToggleValue = true;
+
+            OnToggleUpdate(UiIndex.AutoRecover, false);
+            ms_recoveryToggle.ToggleValue = false;
+
+            OnToggleUpdate(UiIndex.Slipperiness, false);
+            ms_slipperinessToggle.ToggleValue = false;
+
+            OnToggleUpdate(UiIndex.Bounciness, false);
+            ms_bouncinessToggle.ToggleValue = false;
+
+            OnToggleUpdate(UiIndex.ViewVelocity, false);
+            ms_viewDirectionToggle.ToggleValue = false;
+
+            OnToggleUpdate(UiIndex.JumpRecover, false);
+            ms_jumpRecoverToggle.ToggleValue = false;
+
+            OnToggleUpdate(UiIndex.Buoyancy, true);
+            ms_buoyancyToggle.ToggleValue = true;
+
+            OnToggleUpdate(UiIndex.FallDamage, true);
+            ms_fallDamageToggle.ToggleValue = true;
+
+            OnSliderUpdate(UiIndex.VelocityMultiplier, 2f);
+            ms_velocityMultiplierSlider.SetSliderValue(2f);
+
+            OnSliderUpdate(UiIndex.MovementDrag, 1f);
+            ms_movementDragSlider.SetSliderValue(1f);
+
+            OnSliderUpdate(UiIndex.AngularDrag, 1f);
+            ms_angularMovementDragSlider.SetSliderValue(1f);
+
+            OnSliderUpdate(UiIndex.RecoverDelay, 3f);
+            ms_recoverDelaySlider.SetSliderValue(3f);
+
+            OnSliderUpdate(UiIndex.FallLimit, 9.899494f);
+            ms_fallLimitSlider.SetSliderValue(9.899494f);
+        }
+
+        static void OnHotkeyKeyChanged(UnityEngine.KeyCode p_keyCode)
+        {
+            if(ms_ragdollButton != null)
+                ms_hotkeyToggle.ToggleTooltip = string.Format(c_ragdollKeyTooltip, p_keyCode);
         }
 
         static Stream GetIconStream(string p_name)
@@ -254,6 +310,11 @@ namespace ml_prm
             Assembly l_assembly = Assembly.GetExecutingAssembly();
             string l_assemblyName = l_assembly.GetName().Name;
             return l_assembly.GetManifestResourceStream(l_assemblyName + ".resources." + p_name);
+        }
+
+        static float GetDropHeight(float p_speed, float p_gravity = 9.8f)
+        {
+            return MathF.Pow(p_speed, 2f) / (p_gravity * 2f);
         }
     }
 }

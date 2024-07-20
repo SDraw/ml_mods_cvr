@@ -27,15 +27,12 @@ namespace ml_prm
         bool m_enabled = false;
         bool m_forcedSwitch = false;
 
-        readonly List<Rigidbody> m_rigidBodies = null;
-        readonly List<Collider> m_colliders = null;
         Transform m_puppetRoot = null;
         Transform m_puppet = null;
         BipedRagdollReferences m_puppetReferences;
+        readonly List<RagdollBodypartHandler> m_ragdollBodyHandlers = null;
         readonly List<System.Tuple<Transform, Transform>> m_boneLinks = null;
         readonly List<System.Tuple<CharacterJoint, Vector3>> m_jointAnchors = null;
-        readonly List<PhysicsInfluencer> m_physicsInfluencers = null;
-        readonly List<GravityInfluencer> m_gravityInfluencers = null;
 
         bool m_avatarReady = false;
         Coroutine m_initCoroutine = null;
@@ -44,8 +41,7 @@ namespace ml_prm
         Vector3 m_ragdollLastPos = Vector3.zero;
         bool m_wasSwimming = false;
 
-        RagdollToggle m_avatarRagdollToggle = null;
-        RagdollTrigger m_ragdollTrigger = null;
+        RagdollToggle m_avatarRagdollToggle = null; // Custom component available for editor
         AvatarBoolParameter m_ragdolledParameter = null;
         PhysicMaterial m_physicsMaterial = null;
 
@@ -54,24 +50,25 @@ namespace ml_prm
         float m_downTime = float.MinValue;
 
         bool m_inAir = false;
-        float m_inAirDistance = 0f;
 
         internal RagdollController()
         {
-            m_rigidBodies = new List<Rigidbody>();
-            m_colliders = new List<Collider>();
+            m_ragdollBodyHandlers = new List<RagdollBodypartHandler>();
             m_boneLinks = new List<System.Tuple<Transform, Transform>>();
             m_jointAnchors = new List<System.Tuple<CharacterJoint, Vector3>>();
-            m_physicsInfluencers = new List<PhysicsInfluencer>();
-            m_gravityInfluencers = new List<GravityInfluencer>();
         }
 
         // Unity events
+        void Awake()
+        {
+            if((Instance != null) && (Instance != this))
+                Object.Destroy(this);
+            else
+                Instance = this;
+        }
+
         void Start()
         {
-            if(Instance == null)
-                Instance = this;
-
             m_physicsMaterial = new PhysicMaterial("Ragdoll");
             m_physicsMaterial.dynamicFriction = c_defaultFriction;
             m_physicsMaterial.staticFriction = c_defaultFriction;
@@ -83,9 +80,6 @@ namespace ml_prm
             m_puppetRoot.parent = PlayerSetup.Instance.transform;
             m_puppetRoot.localPosition = Vector3.zero;
             m_puppetRoot.localRotation = Quaternion.identity;
-
-            m_ragdollTrigger = BetterBetterCharacterController.Instance.NonKinematicProxy.gameObject.AddComponent<RagdollTrigger>();
-            m_ragdollTrigger.enabled = false;
 
             Settings.OnMovementDragChanged.AddHandler(this.OnMovementDragChanged);
             Settings.OnAngularDragChanged.AddHandler(this.OnAngularDragChanged);
@@ -125,16 +119,10 @@ namespace ml_prm
             m_puppetRoot = null;
 
             m_puppet = null;
-            m_rigidBodies.Clear();
-            m_colliders.Clear();
+            m_ragdollBodyHandlers.Clear();
             m_boneLinks.Clear();
             m_jointAnchors.Clear();
-            m_physicsInfluencers.Clear();
             m_avatarRagdollToggle = null;
-
-            if(m_ragdollTrigger != null)
-                Object.Destroy(m_ragdollTrigger);
-            m_ragdollTrigger = null;
 
             if(m_physicsMaterial != null)
                 Object.Destroy(m_physicsMaterial);
@@ -170,33 +158,23 @@ namespace ml_prm
             {
                 bool l_grounded = BetterBetterCharacterController.Instance.IsGrounded();
                 bool l_inWater = BetterBetterCharacterController.Instance.IsInWater();
-                if(m_inAir && l_grounded && !l_inWater && (m_inAirDistance > Settings.FallLimit))
-                {
-                    m_inAirDistance = 0f;
+                if(m_inAir && l_grounded && !l_inWater && (m_velocity.magnitude >= Settings.FallLimit))
                     SwitchRagdoll();
-                }
 
                 m_inAir = !(l_grounded || l_inWater);
-                if(!m_inAir)
-                    m_inAirDistance = 0f;
             }
 
             if(m_avatarReady && m_enabled)
             {
-                m_inAirDistance = 0f;
                 BodySystem.TrackingPositionWeight = 0f;
+                BetterBetterCharacterController.Instance.PauseGroundConstraint();
+                BetterBetterCharacterController.Instance.ResetAllForces();
             }
 
             if(m_avatarReady && !m_enabled)
             {
                 Vector3 l_pos = PlayerSetup.Instance.transform.position;
                 m_velocity = (m_velocity + (l_pos - m_lastPosition) / Time.deltaTime) * 0.5f;
-                if(m_inAir)
-                {
-                    m_inAirDistance += (Quaternion.Inverse(PlayerSetup.Instance.transform.rotation) * (m_lastPosition - l_pos)).y;
-                    m_inAirDistance = Mathf.Clamp(m_inAirDistance, 0f, float.MaxValue);
-                }
-
                 m_lastPosition = l_pos;
 
                 if(!m_reachedGround && BetterBetterCharacterController.Instance.IsOnGround())
@@ -218,9 +196,6 @@ namespace ml_prm
             }
 
             if((m_avatarRagdollToggle != null) && m_avatarRagdollToggle.isActiveAndEnabled && m_avatarRagdollToggle.shouldOverride && (m_enabled != m_avatarRagdollToggle.isOn))
-                SwitchRagdoll();
-
-            if((m_ragdollTrigger != null) && m_ragdollTrigger.GetStateWithReset() && m_avatarReady && !m_enabled && Settings.PointersReaction)
                 SwitchRagdoll();
 
             if(Settings.Hotkey && Input.GetKeyDown(Settings.HotkeyKey) && !ViewManager.Instance.IsAnyMenuOpen)
@@ -277,31 +252,21 @@ namespace ml_prm
                 Object.Destroy(m_puppet.gameObject);
             m_puppet = null;
 
-            if(m_ragdollTrigger != null)
-            {
-                m_ragdollTrigger.GetStateWithReset();
-                m_ragdollTrigger.enabled = false;
-            }
-
             m_vrIK = null;
             m_applyHipsPosition = false;
             m_enabled = false;
             m_avatarReady = false;
             m_avatarRagdollToggle = null;
             m_ragdolledParameter = null;
-            m_rigidBodies.Clear();
-            m_colliders.Clear();
             m_puppetReferences = new BipedRagdollReferences();
+            m_ragdollBodyHandlers.Clear();
             m_boneLinks.Clear();
             m_jointAnchors.Clear();
-            m_physicsInfluencers.Clear();
-            m_gravityInfluencers.Clear();
             m_reachedGround = true;
             m_groundedTime = 0f;
             m_downTime = float.MinValue;
             m_puppetRoot.localScale = Vector3.one;
             m_inAir = false;
-            m_inAirDistance = 0f;
             m_wasSwimming = false;
         }
 
@@ -353,26 +318,11 @@ namespace ml_prm
 
                 Transform[] l_puppetTransforms = m_puppetReferences.GetRagdollTransforms();
                 Transform[] l_avatarTransforms = l_avatarReferences.GetRagdollTransforms();
+                Transform[] l_influencedTransforms = new Transform[] { m_puppetReferences.hips, m_puppetReferences.spine, m_puppetReferences.chest };
                 for(int i = 0; i < l_puppetTransforms.Length; i++)
                 {
                     if(l_puppetTransforms[i] != null)
                     {
-                        Rigidbody l_body = l_puppetTransforms[i].GetComponent<Rigidbody>();
-                        if(l_body != null)
-                        {
-                            m_rigidBodies.Add(l_body);
-                            l_body.isKinematic = true;
-                            l_body.angularDrag = Settings.AngularDrag;
-                            l_body.drag = (WorldHandler.IsSafeWorld() ? Settings.MovementDrag : 1f);
-                            l_body.useGravity = false;
-                            l_body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
-                            l_body.gameObject.layer = LayerMask.NameToLayer("PlayerLocal");
-
-                            GravityInfluencer l_gravInfluencer = l_body.gameObject.AddComponent<GravityInfluencer>();
-                            l_gravInfluencer.SetActiveGravity((!WorldHandler.IsSafeWorld() || Settings.Gravity));
-                            m_gravityInfluencers.Add(l_gravInfluencer);
-                        }
-
                         CharacterJoint l_joint = l_puppetTransforms[i].GetComponent<CharacterJoint>();
                         if(l_joint != null)
                         {
@@ -381,37 +331,13 @@ namespace ml_prm
                             m_jointAnchors.Add(System.Tuple.Create(l_joint, l_joint.connectedAnchor));
                         }
 
+                        Rigidbody l_body = l_puppetTransforms[i].GetComponent<Rigidbody>();
                         Collider l_collider = l_puppetTransforms[i].GetComponent<Collider>();
-                        if(l_collider != null)
+                        if((l_body != null) && (l_collider != null))
                         {
-                            Physics.IgnoreCollision(l_collider, BetterBetterCharacterController.Instance.Collider, true);
-                            Physics.IgnoreCollision(l_collider, BetterBetterCharacterController.Instance.KinematicTriggerProxy.Collider, true);
-                            Physics.IgnoreCollision(l_collider, BetterBetterCharacterController.Instance.NonKinematicProxy.Collider, true);
-                            Physics.IgnoreCollision(l_collider, BetterBetterCharacterController.Instance.SphereProxy.Collider, true);
-                            BetterBetterCharacterController.Instance.IgnoreCollision(l_collider, true);
-
-                            l_collider.sharedMaterial = m_physicsMaterial;
-                            l_collider.material = m_physicsMaterial;
-                            m_colliders.Add(l_collider);
-                        }
-
-                        if((l_body != null) && (l_collider != null) && (l_puppetTransforms[i] == m_puppetReferences.hips || l_puppetTransforms[i] == m_puppetReferences.spine || l_puppetTransforms[i] == m_puppetReferences.chest))
-                        {
-                            PhysicsInfluencer l_physicsInfluencer = l_puppetTransforms[i].gameObject.AddComponent<PhysicsInfluencer>();
-                            l_physicsInfluencer.airDrag = (WorldHandler.IsSafeWorld() ? Settings.MovementDrag : 1f);
-                            l_physicsInfluencer.airAngularDrag = Settings.AngularDrag;
-                            l_physicsInfluencer.fluidDrag = 3f;
-                            l_physicsInfluencer.fluidAngularDrag = 1f;
-                            l_physicsInfluencer.enableBuoyancy = true;
-                            l_physicsInfluencer.enableInfluence = false;
-                            l_physicsInfluencer.forceAlignUpright = false;
-                            float mass = l_body.mass;
-                            l_physicsInfluencer.UpdateDensity();
-                            l_body.mass = mass;
-                            l_physicsInfluencer.volume = mass * 0.005f;
-                            l_physicsInfluencer.enableLocalGravity = true;
-
-                            m_physicsInfluencers.Add(l_physicsInfluencer);
+                            RagdollBodypartHandler l_handler = l_puppetTransforms[i].gameObject.AddComponent<RagdollBodypartHandler>();
+                            l_handler.SetInfuencerUsage(Utils.IsInEnumeration(l_puppetTransforms[i], l_influencedTransforms));
+                            m_ragdollBodyHandlers.Add(l_handler);
                         }
 
                         if(l_avatarTransforms[i] != null)
@@ -422,7 +348,6 @@ namespace ml_prm
                 // And return back
                 m_puppetRoot.localPosition = Vector3.zero;
                 m_puppetRoot.localRotation = Quaternion.identity;
-                m_puppetRoot.gameObject.SetActive(true);
 
                 m_vrIK = PlayerSetup.Instance._avatar.GetComponent<VRIK>();
                 if(m_vrIK != null)
@@ -431,25 +356,28 @@ namespace ml_prm
                 m_avatarRagdollToggle = PlayerSetup.Instance._avatar.GetComponentInChildren<RagdollToggle>(true);
                 m_ragdolledParameter = new AvatarBoolParameter("Ragdolled", PlayerSetup.Instance.animatorManager);
 
-                m_initCoroutine = StartCoroutine(WaitForPhysicsInfluencers());
+                m_initCoroutine = StartCoroutine(WaitForBodyHandlers());
             }
         }
 
-        IEnumerator WaitForPhysicsInfluencers()
+        IEnumerator WaitForBodyHandlers()
         {
-            while(!m_physicsInfluencers.TrueForAll(p => p.IsReady()))
+            while(!m_ragdollBodyHandlers.TrueForAll(p => p.IsReady()))
                 yield return null;
 
-            m_puppetRoot.gameObject.SetActive(false);
+            foreach(RagdollBodypartHandler l_handler in m_ragdollBodyHandlers)
+            {
+                l_handler.SetAsKinematic(true);
+                l_handler.SetColliderMaterial(m_physicsMaterial);
+            }
 
-            m_ragdollTrigger.enabled = true;
             m_avatarReady = true;
             m_initCoroutine = null;
 
-            OnGravityChanged(Settings.Gravity);
-            OnBuoyancyChanged(Settings.Buoyancy);
             OnMovementDragChanged(Settings.MovementDrag);
             OnAngularDragChanged(Settings.AngularDrag);
+            OnGravityChanged(Settings.Gravity);
+            OnBuoyancyChanged(Settings.Buoyancy);
         }
 
         void OnAvatarPreReuse()
@@ -573,28 +501,16 @@ namespace ml_prm
             if(m_avatarReady)
             {
                 float l_drag = (WorldHandler.IsSafeWorld() ? p_value : 1f);
-                foreach(Rigidbody l_body in m_rigidBodies)
-                {
-                    l_body.drag = l_drag;
-                    if(m_enabled)
-                        l_body.WakeUp();
-                }
-                foreach(PhysicsInfluencer l_influencer in m_physicsInfluencers)
-                    l_influencer.airDrag = l_drag;
+                foreach(RagdollBodypartHandler l_handler in m_ragdollBodyHandlers)
+                    l_handler.SetDrag(l_drag);
             }
         }
         void OnAngularDragChanged(float p_value)
         {
             if(m_avatarReady)
             {
-                foreach(Rigidbody l_body in m_rigidBodies)
-                {
-                    l_body.angularDrag = p_value;
-                    if(m_enabled)
-                        l_body.WakeUp();
-                }
-                foreach(PhysicsInfluencer l_influencer in m_physicsInfluencers)
-                    l_influencer.airAngularDrag = p_value;
+                foreach(RagdollBodypartHandler l_handler in m_ragdollBodyHandlers)
+                    l_handler.SetAngularDrag(p_value);
             }
         }
         void OnGravityChanged(bool p_state)
@@ -602,10 +518,8 @@ namespace ml_prm
             if(m_avatarReady)
             {
                 bool l_gravity = (!WorldHandler.IsSafeWorld() || p_state);
-                foreach(PhysicsInfluencer l_influencer in m_physicsInfluencers)
-                    l_influencer.enabled = l_gravity;
-                foreach(GravityInfluencer l_influencer in m_gravityInfluencers)
-                    l_influencer.SetActiveGravity(l_gravity);
+                foreach(RagdollBodypartHandler l_handler in m_ragdollBodyHandlers)
+                    l_handler.SetActiveGravity(l_gravity);
 
                 if(!l_gravity)
                 {
@@ -632,8 +546,8 @@ namespace ml_prm
             if(m_avatarReady)
             {
                 bool l_buoyancy = (!WorldHandler.IsSafeWorld() || p_state);
-                foreach(PhysicsInfluencer l_influencer in m_physicsInfluencers)
-                    l_influencer.enableInfluence = l_buoyancy;
+                foreach(RagdollBodypartHandler l_handler in m_ragdollBodyHandlers)
+                    l_handler.SetBuoyancy(l_buoyancy);
 
                 if(!l_buoyancy)
                 {
@@ -645,7 +559,6 @@ namespace ml_prm
         void OnFallDamageChanged(bool p_state)
         {
             m_inAir = false;
-            m_inAirDistance = 0f;
         }
 
         // Arbitrary
@@ -663,6 +576,8 @@ namespace ml_prm
                             BetterBetterCharacterController.Instance.ChangeFlight(false, true);
                         BetterBetterCharacterController.Instance.SetImmobilized(true);
                         BetterBetterCharacterController.Instance.ClearFluidVolumes();
+                        BetterBetterCharacterController.Instance.ResetAllForces();
+                        BetterBetterCharacterController.Instance.PauseGroundConstraint();
                         BodySystem.TrackingPositionWeight = 0f;
                         m_applyHipsPosition = IKSystem.Instance.applyOriginalHipPosition;
                         IKSystem.Instance.applyOriginalHipPosition = true;
@@ -678,10 +593,11 @@ namespace ml_prm
                             m_groundedTime = 0f;
                         }
 
-                        m_puppetRoot.gameObject.SetActive(true);
+                        foreach(RagdollBodypartHandler l_handler in m_ragdollBodyHandlers)
+                            l_handler.SetAsKinematic(false);
 
-                        foreach(Rigidbody l_body in m_rigidBodies)
-                            l_body.isKinematic = false;
+                        m_puppetRoot.gameObject.SetActive(false); //
+                        m_puppetRoot.gameObject.SetActive(true); // Resets rigidbodies and joints inner physics states
 
                         Vector3 l_velocity = Vector3.ClampMagnitude(m_velocity * (WorldHandler.IsSafeWorld() ? Settings.VelocityMultiplier : 1f), WorldHandler.GetMovementLimit());
                         if(Settings.ViewVelocity && WorldHandler.IsSafeWorld())
@@ -690,10 +606,10 @@ namespace ml_prm
                             l_velocity = PlayerSetup.Instance.GetActiveCamera().transform.forward * l_mag;
                         }
 
-                        foreach(Rigidbody l_body in m_rigidBodies)
+                        foreach(RagdollBodypartHandler l_handler in m_ragdollBodyHandlers)
                         {
-                            l_body.velocity = l_velocity;
-                            l_body.angularVelocity = Vector3.zero;
+                            l_handler.SetVelocity(l_velocity);
+                            l_handler.SetAngularVelocity(Vector3.zero);
                         }
 
                         m_ragdollLastPos = m_puppetReferences.hips.position;
@@ -723,15 +639,14 @@ namespace ml_prm
 
                         m_ragdolledParameter.SetValue(false);
 
-                        m_puppetRoot.gameObject.SetActive(false);
                         m_puppetRoot.localPosition = Vector3.zero;
                         m_puppetRoot.localRotation = Quaternion.identity;
 
-                        foreach(Rigidbody l_body in m_rigidBodies)
-                            l_body.isKinematic = true;
-
-                        foreach(PhysicsInfluencer l_physicsInfluencer in m_physicsInfluencers)
-                            l_physicsInfluencer.ClearFluidVolumes();
+                        foreach(RagdollBodypartHandler l_handler in m_ragdollBodyHandlers)
+                        {
+                            l_handler.SetAsKinematic(true);
+                            l_handler.ClearFluidVolumes();
+                        }
 
                         m_lastPosition = PlayerSetup.Instance.transform.position;
                         m_velocity = Vector3.zero;
@@ -762,7 +677,6 @@ namespace ml_prm
             }
 
             m_inAir = false;
-            m_inAirDistance = 0f;
         }
 
         static Transform CloneTransform(Transform p_source, Transform p_parent, string p_name)

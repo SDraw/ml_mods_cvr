@@ -26,9 +26,13 @@ namespace ml_lme
 
         void Start()
         {
-            if(Instance == null)
-                Instance = this;
+            if((Instance != null) && (Instance != this))
+            {
+                Object.DestroyImmediate(this);
+                return;
+            }
 
+            Instance = this;
             m_inVR = Utils.IsInVR();
 
             m_leapElbowLeft = new GameObject("LeapElbowLeft").transform;

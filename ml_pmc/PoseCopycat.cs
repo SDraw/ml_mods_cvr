@@ -41,11 +41,16 @@ namespace ml_pmc
         HumanPose m_pose;
         PuppetParser m_puppetParser = null;
 
+        void Awake()
+        {
+            if((Instance != null) && (Instance != this))
+                Object.Destroy(this);
+            else
+                Instance = this;
+        }
+
         void Start()
         {
-            if(Instance == null)
-                Instance = this;
-
             GameEvents.OnAvatarClear.AddHandler(this.OnAvatarClear);
             GameEvents.OnAvatarSetup.AddHandler(this.OnAvatarSetup);
             GameEvents.OnAvatarPreReuse.AddHandler(this.OnAvatarPreReuse);

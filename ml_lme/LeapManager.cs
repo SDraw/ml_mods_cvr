@@ -19,16 +19,22 @@ namespace ml_lme
 
         void Awake()
         {
-            if(Instance == null)
-                Instance = this;
+            if((Instance != null) && (Instance != this))
+            {
+                Object.DestroyImmediate(this);
+                return;
+            }
 
-            ScriptableObject.CreateInstance<Leap.Unity.UltraleapSettings>().ResetToDefaults();
-
-            m_leapController = new Leap.Controller();
-            m_leapData = new LeapParser.LeapData();
-
+            Instance = this;
             DontDestroyOnLoad(this);
 
+            ScriptableObject.CreateInstance<Leap.Unity.UltraleapSettings>().ResetToDefaults();
+            m_leapController = new Leap.Controller();
+            m_leapData = new LeapParser.LeapData();
+        }
+
+        void Start()
+        {
             m_leapController.Device += this.OnLeapDeviceInitialized;
             m_leapController.DeviceFailure += this.OnLeapDeviceFailure;
             m_leapController.DeviceLost += this.OnLeapDeviceLost;

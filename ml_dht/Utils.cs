@@ -19,9 +19,12 @@ namespace ml_dht
 
         public static void SetAvatarTPose()
         {
-            IKSystem.Instance.SetAvatarPose(IKSystem.AvatarPose.TPose);
-            PlayerSetup.Instance._avatar.transform.localPosition = Vector3.zero;
-            PlayerSetup.Instance._avatar.transform.localRotation = Quaternion.identity;
+            if(PlayerSetup.Instance._animator.isHuman)
+            {
+                IKSystem.Instance.SetAvatarPose(IKSystem.AvatarPose.TPose);
+                PlayerSetup.Instance._avatar.transform.localPosition = Vector3.zero;
+                PlayerSetup.Instance._avatar.transform.localRotation = Quaternion.identity;
+            }
         }
     }
 }

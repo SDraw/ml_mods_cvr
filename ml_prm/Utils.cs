@@ -6,6 +6,7 @@ using ABI_RC.Systems.Movement;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
+using System.Linq;
 
 namespace ml_prm
 {
@@ -40,5 +41,7 @@ namespace ml_prm
             PlayerSetup.Instance._avatar.transform.localPosition = Vector3.zero;
             PlayerSetup.Instance._avatar.transform.localRotation = Quaternion.identity;
         }
+
+        public static bool IsInEnumeration(object p_obj, object[] p_enumeration) => p_enumeration.Contains(p_obj);
     }
 }
