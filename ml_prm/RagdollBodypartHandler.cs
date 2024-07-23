@@ -90,7 +90,7 @@ namespace ml_prm
             if(Settings.PointersReaction && (RagdollController.Instance != null))
             {
                 CVRPointer l_pointer = p_col.GetComponent<CVRPointer>();
-                if((l_pointer != null) && (l_pointer.type == c_ragdollPointerType) && !IsIgnored(l_pointer.transform) && !RagdollController.Instance.IsRagdolled())
+                if((l_pointer != null) && (l_pointer.type == c_ragdollPointerType) && l_pointer.enabled && !IsIgnored(l_pointer.transform) && !RagdollController.Instance.IsRagdolled())
                     RagdollController.Instance.SwitchRagdoll();
             }
         }
@@ -183,7 +183,7 @@ namespace ml_prm
         {
             if(Settings.PointersReaction && (RagdollController.Instance != null))
             {
-                if((pointer != null) && (pointer.type == c_ragdollPointerType) && !IsIgnored(pointer.transform) && !RagdollController.Instance.IsRagdolled())
+                if((pointer != null) && (pointer.type == c_ragdollPointerType) && pointer.enabled && !IsIgnored(pointer.transform) && !RagdollController.Instance.IsRagdolled())
                     RagdollController.Instance.SwitchRagdoll();
             }
         }
