@@ -17,10 +17,8 @@ namespace ml_prm
             GameEvents.Init(HarmonyInstance);
             WorldHandler.Init();
 
-            // Whitelist the toggle script
-            (typeof(SharedFilter).GetField("_localComponentWhitelist", BindingFlags.NonPublic | BindingFlags.Static)?.GetValue(null) as HashSet<Type>)?.Add(typeof(RagdollToggle));
-
             MelonLoader.MelonCoroutines.Start(WaitForLocalPlayer());
+            MelonLoader.MelonCoroutines.Start(WaitForWhitelist());
         }
 
         public override void OnDeinitializeMelon()
@@ -38,6 +36,19 @@ namespace ml_prm
                 yield return null;
 
             m_localController = PlayerSetup.Instance.gameObject.AddComponent<RagdollController>();
+        }
+
+        System.Collections.IEnumerator WaitForWhitelist()
+        {
+            // Whitelist the toggle script
+            FieldInfo l_field = typeof(SharedFilter).GetField("_localComponentWhitelist", BindingFlags.NonPublic | BindingFlags.Static);
+            HashSet<Type> l_hashSet = l_field?.GetValue(null) as HashSet<Type>;
+            while(l_hashSet == null)
+            {
+                l_hashSet = l_field?.GetValue(null) as HashSet<Type>;
+                yield return null;
+            }
+            l_hashSet.Add(typeof(RagdollToggle));
         }
     }
 }
