@@ -88,6 +88,7 @@ namespace ml_prm
             Settings.OnBouncinessChanged.AddHandler(this.OnPhysicsMaterialChanged);
             Settings.OnBuoyancyChanged.AddHandler(this.OnBuoyancyChanged);
             Settings.OnFallDamageChanged.AddHandler(this.OnFallDamageChanged);
+            Settings.OnGestureGrabChanged.AddHandler(this.OnGestureGrabChanged);
 
             GameEvents.OnAvatarClear.AddHandler(this.OnAvatarClear);
             GameEvents.OnAvatarSetup.AddHandler(this.OnAvatarSetup);
@@ -103,6 +104,7 @@ namespace ml_prm
             BetterBetterCharacterController.OnTeleport.AddListener(this.OnPlayerTeleport);
 
             ModUi.OnSwitchChanged.AddHandler(this.SwitchRagdoll);
+            RemoteGestureHandler.OnGestureState.AddHandler(this.OnRemotePlayerGestureStateChanged);
         }
 
         void OnDestroy()
@@ -135,6 +137,7 @@ namespace ml_prm
             Settings.OnBouncinessChanged.RemoveHandler(this.OnPhysicsMaterialChanged);
             Settings.OnBuoyancyChanged.RemoveHandler(this.OnBuoyancyChanged);
             Settings.OnFallDamageChanged.RemoveHandler(this.OnFallDamageChanged);
+            Settings.OnGestureGrabChanged.RemoveHandler(this.OnGestureGrabChanged);
 
             GameEvents.OnAvatarClear.RemoveHandler(this.OnAvatarClear);
             GameEvents.OnAvatarSetup.RemoveHandler(this.OnAvatarSetup);
@@ -150,6 +153,7 @@ namespace ml_prm
             BetterBetterCharacterController.OnTeleport.RemoveListener(this.OnPlayerTeleport);
 
             ModUi.OnSwitchChanged.RemoveHandler(this.SwitchRagdoll);
+            RemoteGestureHandler.OnGestureState.RemoveHandler(this.OnRemotePlayerGestureStateChanged);
         }
 
         void Update()
@@ -485,6 +489,37 @@ namespace ml_prm
             p_result.m_result |= (m_enabled && (m_vrIK != null));
         }
 
+        // Custom game events
+        void OnRemotePlayerGestureStateChanged(ABI_RC.Core.Player.PuppetMaster p_master, bool p_left, bool p_state)
+        {
+            if(m_avatarReady && m_enabled && Settings.GestureGrab && (p_master.animatorManager.Animator != null))
+            {
+                Transform l_hand = p_master.animatorManager.Animator.GetBoneTransform(p_left ? HumanBodyBones.LeftHand : HumanBodyBones.RightHand);
+                Transform l_finger = p_master.animatorManager.Animator.GetBoneTransform(p_left ? HumanBodyBones.LeftMiddleProximal : HumanBodyBones.RightMiddleProximal);
+
+                if(l_hand != null)
+                {
+                    Vector3 l_pos = l_hand.position;
+                    if(l_finger != null)
+                    {
+                        l_pos += l_finger.position;
+                        l_pos *= 0.5f;
+                    }
+
+                    foreach(var l_bodyHandler in m_ragdollBodyHandlers)
+                    {
+                        if(p_state)
+                        {
+                            if(l_bodyHandler.Attach(l_hand, l_pos))
+                                break;
+                        }
+                        else
+                            l_bodyHandler.Detach(l_hand);
+                    }
+                }
+            }
+        }
+
         // VRIK updates
         void OnIKPostSolverUpdate()
         {
@@ -505,6 +540,7 @@ namespace ml_prm
                     l_handler.SetDrag(l_drag);
             }
         }
+
         void OnAngularDragChanged(float p_value)
         {
             if(m_avatarReady)
@@ -513,6 +549,7 @@ namespace ml_prm
                     l_handler.SetAngularDrag(p_value);
             }
         }
+
         void OnGravityChanged(bool p_state)
         {
             if(m_avatarReady)
@@ -528,6 +565,7 @@ namespace ml_prm
                 }
             }
         }
+
         void OnPhysicsMaterialChanged(bool p_state)
         {
             if(m_physicsMaterial != null)
@@ -541,6 +579,7 @@ namespace ml_prm
                 m_physicsMaterial.bounceCombine = (l_bounciness ? PhysicMaterialCombine.Maximum : PhysicMaterialCombine.Average);
             }
         }
+
         void OnBuoyancyChanged(bool p_state)
         {
             if(m_avatarReady)
@@ -556,9 +595,19 @@ namespace ml_prm
                 }
             }
         }
+
         void OnFallDamageChanged(bool p_state)
         {
             m_inAir = false;
+        }
+
+        void OnGestureGrabChanged(bool p_state)
+        {
+            if(m_avatarReady && m_enabled & !p_state)
+            {
+                foreach(var l_hanlder in m_ragdollBodyHandlers)
+                    l_hanlder.Detach();
+            }
         }
 
         // Arbitrary
@@ -644,8 +693,9 @@ namespace ml_prm
 
                         foreach(RagdollBodypartHandler l_handler in m_ragdollBodyHandlers)
                         {
-                            l_handler.SetAsKinematic(true);
+                            l_handler.Detach();
                             l_handler.ClearFluidVolumes();
+                            l_handler.SetAsKinematic(true);
                         }
 
                         m_lastPosition = PlayerSetup.Instance.transform.position;

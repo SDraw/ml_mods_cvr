@@ -33,7 +33,10 @@ namespace ml_prm
             JumpRecover,
             Buoyancy,
             FallDamage,
-            FallLimit
+            FallLimit,
+            GestureGrab,
+            FriendsGrab,
+            GrabDistance
         }
 
         public static bool Hotkey { get; private set; } = true;
@@ -54,6 +57,9 @@ namespace ml_prm
         public static bool Buoyancy { get; private set; } = true;
         public static bool FallDamage { get; private set; } = true;
         public static float FallLimit { get; private set; } = 9.899494f;
+        public static bool GestureGrab { get; private set; } = false;
+        public static bool FriendsGrab { get; private set; } = true;
+        public static float GrabDistance { get; private set; } = 0.1f;
 
         public static readonly SettingEvent<bool> OnHotkeyChanged = new SettingEvent<bool>();
         public static readonly SettingEvent<KeyCode> OnHotkeyKeyChanged = new SettingEvent<KeyCode>();
@@ -73,6 +79,9 @@ namespace ml_prm
         public static readonly SettingEvent<bool> OnBuoyancyChanged = new SettingEvent<bool>();
         public static readonly SettingEvent<bool> OnFallDamageChanged = new SettingEvent<bool>();
         public static readonly SettingEvent<float> OnFallLimitChanged = new SettingEvent<float>();
+        public static readonly SettingEvent<bool> OnGestureGrabChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<bool> OnFriendsGrabChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<float> OnGrabDistanceChanged = new SettingEvent<float>();
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
@@ -101,6 +110,9 @@ namespace ml_prm
                 ms_category.CreateEntry(ModSetting.Buoyancy.ToString(), Buoyancy, null, null, true),
                 ms_category.CreateEntry(ModSetting.FallDamage.ToString(), FallDamage, null, null, true),
                 ms_category.CreateEntry(ModSetting.FallLimit.ToString(), FallLimit, null, null, true),
+                ms_category.CreateEntry(ModSetting.GestureGrab.ToString(), GestureGrab, null, null, true),
+                ms_category.CreateEntry(ModSetting.FriendsGrab.ToString(), FriendsGrab, null, null, true),
+                ms_category.CreateEntry(ModSetting.GrabDistance.ToString(), GrabDistance, null, null, true),
             };
 
             ms_entries[(int)ModSetting.HotkeyKey].OnEntryValueChangedUntyped.Subscribe(OnMelonSettingSave_HotkeyKey);
@@ -123,6 +135,9 @@ namespace ml_prm
             Buoyancy = (bool)ms_entries[(int)ModSetting.Buoyancy].BoxedValue;
             FallDamage = (bool)ms_entries[(int)ModSetting.FallDamage].BoxedValue;
             FallLimit = Mathf.Clamp((float)ms_entries[(int)ModSetting.FallLimit].BoxedValue, 4.5f, 44.5f);
+            GestureGrab = (bool)ms_entries[(int)ModSetting.GestureGrab].BoxedValue;
+            FriendsGrab = (bool)ms_entries[(int)ModSetting.FriendsGrab].BoxedValue;
+            GrabDistance = Mathf.Clamp01((float)ms_entries[(int)ModSetting.GrabDistance].BoxedValue);
         }
 
         static void OnMelonSettingSave_HotkeyKey(object p_oldValue, object p_newValue)
@@ -232,6 +247,20 @@ namespace ml_prm
                     }
                     break;
 
+                    case ModSetting.GestureGrab:
+                    {
+                        GestureGrab = (bool)p_value;
+                        OnGestureGrabChanged.Invoke(GestureGrab);
+                    }
+                    break;
+
+                    case ModSetting.FriendsGrab:
+                    {
+                        FriendsGrab = (bool)p_value;
+                        OnFriendsGrabChanged.Invoke(FriendsGrab);
+                    }
+                    break;
+
                     // Floats
                     case ModSetting.VelocityMultiplier:
                     {
@@ -265,6 +294,13 @@ namespace ml_prm
                     {
                         FallLimit = (float)p_value;
                         OnFallLimitChanged.Invoke(FallLimit);
+                    }
+                    break;
+
+                    case ModSetting.GrabDistance:
+                    {
+                        GrabDistance = (float)p_value;
+                        OnGrabDistanceChanged.Invoke(GrabDistance);
                     }
                     break;
                 }

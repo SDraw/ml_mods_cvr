@@ -18,6 +18,11 @@ namespace ml_prm
         bool m_shouldHaveInfluencer = false;
         bool m_activeGravity = true;
 
+        bool m_attached = false;
+        Transform m_attachedHand = null;
+        Transform m_attachTransform = null;
+        FixedJoint m_attachJoint = null;
+
         // Unity events
         void Awake()
         {
@@ -72,6 +77,8 @@ namespace ml_prm
         {
             if(collider != null)
                 CVRParticlePointerManager.RemoveTrigger(collider);
+
+            Detach();
         }
 
         void FixedUpdate()
@@ -80,8 +87,23 @@ namespace ml_prm
             {
                 m_rigidBody.useGravity = false;
 
-                if(m_activeGravity && ((m_physicsInfluencer == null) || !m_physicsInfluencer.enableInfluence || !m_physicsInfluencer.GetSubmerged()))
+                if(!m_attached && m_activeGravity && ((m_physicsInfluencer == null) || !m_physicsInfluencer.enableInfluence || !m_physicsInfluencer.GetSubmerged()))
                     m_rigidBody.AddForce(BetterBetterCharacterController.Instance.GravityResult.AppliedGravity * m_rigidBody.mass);
+            }
+        }
+
+        void Update()
+        {
+            if(m_attached && !ReferenceEquals(m_attachTransform, null) && (m_attachTransform == null))
+            {
+                m_attachTransform = null;
+
+                if(m_attachJoint != null)
+                    Object.Destroy(m_attachJoint);
+                m_attachJoint = null;
+
+                m_attachedHand = null;
+                m_attached = false;
             }
         }
 
@@ -178,6 +200,54 @@ namespace ml_prm
             return (Settings.IgnoreLocal && (p_transform.root == PlayerSetup.Instance.transform));
         }
 
+        public bool Attach(Transform p_hand, Vector3 p_pos)
+        {
+            bool l_result = false;
+
+            if(!m_attached && (collider != null))
+            {
+                if(Vector3.Distance(p_pos, collider.ClosestPoint(p_pos)) <= Settings.GrabDistance)
+                {
+                    GameObject l_attachPoint = new GameObject("[AttachPoint]");
+                    m_attachTransform = l_attachPoint.transform;
+                    m_attachTransform.parent = p_hand;
+                    m_attachTransform.position = p_pos;
+
+                    Rigidbody l_body = l_attachPoint.AddComponent<Rigidbody>();
+                    l_body.isKinematic = true;
+                    l_body.detectCollisions = false;
+
+                    m_attachJoint = this.gameObject.AddComponent<FixedJoint>();
+                    m_attachJoint.connectedBody = l_body;
+                    m_attachJoint.breakForce = Mathf.Infinity;
+                    m_attachJoint.breakTorque = Mathf.Infinity;
+
+                    m_attached = true;
+                    m_attachedHand = p_hand;
+                    l_result = true;
+                }
+            }
+            return l_result;
+        }
+
+        public void Detach() => Detach(m_attachedHand);
+        public void Detach(Transform p_hand)
+        {
+            if(m_attached && ReferenceEquals(m_attachedHand, p_hand))
+            {
+                if(m_attachTransform != null)
+                    Object.Destroy(m_attachTransform.gameObject);
+                m_attachTransform = null;
+
+                if(m_attachJoint != null)
+                    Object.Destroy(m_attachJoint);
+                m_attachJoint = null;
+
+                m_attachedHand = null;
+                m_attached = false;
+            }
+        }
+
         // CVRTriggerVolume
         public void TriggerEnter(CVRPointer pointer)
         {
@@ -187,6 +257,8 @@ namespace ml_prm
                     RagdollController.Instance.SwitchRagdoll();
             }
         }
-        public void TriggerExit(CVRPointer pointer) { }
+        public void TriggerExit(CVRPointer pointer)
+        {
+        }
     }
 }

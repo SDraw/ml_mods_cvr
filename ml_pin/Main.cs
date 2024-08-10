@@ -24,8 +24,8 @@ namespace ml_pin
         {
             m_soundManager = null;
 
-            CVRGameEventSystem.Player.OnJoin.RemoveListener(OnPlayerJoin);
-            CVRGameEventSystem.Player.OnLeave.RemoveListener(OnPlayerLeave);
+            CVRGameEventSystem.Player.OnJoinEntity.RemoveListener(OnPlayerJoin);
+            CVRGameEventSystem.Player.OnLeaveEntity.RemoveListener(OnPlayerLeave);
         }
 
         IEnumerator WaitForInstances()
@@ -36,17 +36,17 @@ namespace ml_pin
             m_soundManager = new SoundManager();
             m_soundManager.LoadSounds();
 
-            CVRGameEventSystem.Player.OnJoin.AddListener(OnPlayerJoin);
-            CVRGameEventSystem.Player.OnLeave.AddListener(OnPlayerLeave);
+            CVRGameEventSystem.Player.OnJoinEntity.AddListener(OnPlayerJoin);
+            CVRGameEventSystem.Player.OnLeaveEntity.AddListener(OnPlayerLeave);
         }
 
-        void OnPlayerJoin(PlayerDescriptor p_player)
+        void OnPlayerJoin(CVRPlayerEntity p_player)
         {
             try
             {
-                if(p_player != null) // This happens sometimes, no idea why
+                if((p_player != null) && (p_player.PlayerDescriptor != null)) // This happens sometimes, no idea why
                 {
-                    bool l_isFriend = Friends.FriendsWith(p_player.ownerId);
+                    bool l_isFriend = Friends.FriendsWith(p_player.PlayerDescriptor.ownerId);
                     bool l_notify = false;
 
                     switch(Settings.NotifyType)
@@ -72,13 +72,13 @@ namespace ml_pin
                 MelonLoader.MelonLogger.Warning(e);
             }
         }
-        void OnPlayerLeave(PlayerDescriptor p_player)
+        void OnPlayerLeave(CVRPlayerEntity p_player)
         {
             try
             {
-                if(p_player != null) // This happens sometimes, no idea why
+                if((p_player != null) && (p_player.PlayerDescriptor != null)) // This happens sometimes, no idea why
                 {
-                    bool l_isFriend = Friends.FriendsWith(p_player.ownerId);
+                    bool l_isFriend = Friends.FriendsWith(p_player.PlayerDescriptor.ownerId);
                     bool l_notify = false;
 
                     switch(Settings.NotifyType)

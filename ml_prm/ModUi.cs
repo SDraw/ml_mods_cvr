@@ -34,7 +34,10 @@ namespace ml_prm
             MovementDrag,
             AngularDrag,
             RecoverDelay,
-            FallLimit
+            FallLimit,
+            GestureGrab,
+            FriendsGrab,
+            GrabDistance
         }
 
         const string c_ragdollKeyTooltip = "Switch ragdoll mode with '{0}' key";
@@ -58,11 +61,14 @@ namespace ml_prm
         static ToggleButton ms_jumpRecoverToggle = null;
         static ToggleButton ms_buoyancyToggle = null;
         static ToggleButton ms_fallDamageToggle = null;
+        static ToggleButton ms_gestureGrabToggle = null;
+        static ToggleButton ms_friendsGrabToggle = null;
         static SliderFloat ms_velocityMultiplierSlider = null;
         static SliderFloat ms_movementDragSlider = null;
         static SliderFloat ms_angularMovementDragSlider = null;
         static SliderFloat ms_recoverDelaySlider = null;
         static SliderFloat ms_fallLimitSlider = null;
+        static SliderFloat ms_grabDistanceSlider = null;
         static Button ms_resetButton = null;
 
         internal static void Init()
@@ -77,7 +83,7 @@ namespace ml_prm
 
             ms_ragdollButton = ms_category.AddButton("Switch ragdoll", "PRM-Person", "Switch between normal and ragdoll state");
             ms_ragdollButton.OnPress += OnSwitch;
-            
+
             ms_hotkeyToggle = ms_category.AddToggle("Use hotkey", "Switch ragdoll mode with 'R' key", Settings.Hotkey);
             ms_hotkeyToggle.ToggleTooltip = string.Format(c_ragdollKeyTooltip, Settings.HotkeyKey);
             ms_hotkeyToggle.OnValueUpdated += (state) => OnToggleUpdate(UiIndex.Hotkey, state);
@@ -116,6 +122,12 @@ namespace ml_prm
             ms_fallDamageToggle = ms_category.AddToggle("Fall damage", "Enable ragdoll when falling from height", Settings.FallDamage);
             ms_fallDamageToggle.OnValueUpdated += (state) => OnToggleUpdate(UiIndex.FallDamage, state);
 
+            ms_gestureGrabToggle = ms_category.AddToggle("Gesture grab", "Enable grabbing of ragdolled body parts by remote players with trigger gesture<p>Warning: can lead to unpredictable physics behaviour in some cases", Settings.GestureGrab);
+            ms_gestureGrabToggle.OnValueUpdated += (state) => OnToggleUpdate(UiIndex.GestureGrab, state);
+
+            ms_friendsGrabToggle = ms_category.AddToggle("Friends grab only", " ", Settings.FriendsGrab);
+            ms_friendsGrabToggle.OnValueUpdated += (state) => OnToggleUpdate(UiIndex.FriendsGrab, state);
+
             ms_velocityMultiplierSlider = ms_category.AddSlider("Velocity multiplier", "Velocity multiplier upon entering ragdoll state", Settings.VelocityMultiplier, 1f, 50f);
             ms_velocityMultiplierSlider.OnValueUpdated += (value) => OnSliderUpdate(UiIndex.VelocityMultiplier, value);
 
@@ -131,6 +143,9 @@ namespace ml_prm
             ms_fallLimitSlider = ms_category.AddSlider("Fall limit", "", Settings.FallLimit, 4.5f, 44.5f);
             ms_fallLimitSlider.SliderTooltip = string.Format(c_fallLimitTooltip, GetDropHeight(Settings.FallLimit));
             ms_fallLimitSlider.OnValueUpdated += (value) => OnSliderUpdate(UiIndex.FallLimit, value);
+
+            ms_grabDistanceSlider = ms_category.AddSlider("Grab distance", "Minimal distance for successful grab", Settings.GrabDistance, 0f, 1f);
+            ms_grabDistanceSlider.OnValueUpdated += (value) => OnSliderUpdate(UiIndex.GrabDistance, value);
 
             ms_resetButton = ms_category.AddButton("Reset settings", "", "Reset mod settings to default");
             ms_resetButton.OnPress += Reset;
@@ -201,6 +216,14 @@ namespace ml_prm
                     case UiIndex.FallDamage:
                         Settings.SetSetting(Settings.ModSetting.FallDamage, p_state);
                         break;
+
+                    case UiIndex.GestureGrab:
+                        Settings.SetSetting(Settings.ModSetting.GestureGrab, p_state);
+                        break;
+
+                    case UiIndex.FriendsGrab:
+                        Settings.SetSetting(Settings.ModSetting.FriendsGrab, p_state);
+                        break;
                 }
             }
             catch(Exception e)
@@ -237,6 +260,10 @@ namespace ml_prm
                         ms_fallLimitSlider.SliderTooltip = string.Format(c_fallLimitTooltip, GetDropHeight(p_value));
                     }
                     break;
+
+                    case UiIndex.GrabDistance:
+                        Settings.SetSetting(Settings.ModSetting.GrabDistance, p_value);
+                        break;
                 }
             }
             catch(Exception e)
@@ -283,6 +310,12 @@ namespace ml_prm
             OnToggleUpdate(UiIndex.FallDamage, true);
             ms_fallDamageToggle.ToggleValue = true;
 
+            OnToggleUpdate(UiIndex.GestureGrab, false);
+            ms_gestureGrabToggle.ToggleValue = false;
+
+            OnToggleUpdate(UiIndex.FriendsGrab, true);
+            ms_friendsGrabToggle.ToggleValue = true;
+
             OnSliderUpdate(UiIndex.VelocityMultiplier, 2f);
             ms_velocityMultiplierSlider.SetSliderValue(2f);
 
@@ -297,6 +330,9 @@ namespace ml_prm
 
             OnSliderUpdate(UiIndex.FallLimit, 9.899494f);
             ms_fallLimitSlider.SetSliderValue(9.899494f);
+
+            OnSliderUpdate(UiIndex.GrabDistance, 0.1f);
+            ms_grabDistanceSlider.SetSliderValue(0.1f);
         }
 
         static void OnHotkeyKeyChanged(UnityEngine.KeyCode p_keyCode)

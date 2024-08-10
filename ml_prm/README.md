@@ -29,6 +29,9 @@ Optional mod's settings page with [BTKUILib](https://github.com/BTK-Development/
 * **Buoyancy:** enables floating in fluid volumes; `true` by default.
   * Note: Forcibly enabled in worlds that don't allow flight.
 * **Fall damage:** enables ragdoll when falling from specific height; `true` by default.
+* **Gesture grab:** enables grabbing of ragdolled body parts by remote players with trigger gesture; `false` by default.
+  * Note: Can lead to unpredictable physics behaviour in some cases.
+* **Friends grab only:** Allow only friends to be able to grab your radgolled body parts; `true` by default.
 * **Velocity multiplier:** velocity force multiplier based on player's movement direction; `2.0` by default.
   * Note: Limited according to world's fly multiplier.
   * Note: Forcibly set to `1.0` in worlds that don't allow flight.
@@ -37,6 +40,7 @@ Optional mod's settings page with [BTKUILib](https://github.com/BTK-Development/
 * **Angular movement drag:** angular movement resistance; `2.0` by default.
 * **Recover delay:** time delay for enabled `Auto recover` in seconds; `3.0` by default.
 * **Fall limit:** height limit for fall damage; `5.0` by default.
+* **Grab distance:** minimal distance for successful grab; `0.1` by default.
 * **Reset settings:** resets mod settings to default.
 
 Optional mod's settings in [UIExpansionKit](https://github.com/ddakebono/ChilloutMods):
