@@ -10,8 +10,8 @@ Merged set of MelonLoader mods for ChilloutVR.
 | [Leap Motion Extension](/ml_lme/README.md)| ml_lme | 1.5.2 [:arrow_down:](../../releases/latest/download/ml_lme.dll)|
 | [Pickup Arm Movement](/ml_pam/README.md)| ml_pam | 1.1.4 [:arrow_down:](../../releases/latest/download/ml_pam.dll)|
 | [Player Movement Copycat](/ml_pmc/README.md)| ml_pmc | 1.0.8 [:arrow_down:](../../releases/latest/download/ml_pmc.dll)|
-| [Player Ragdoll Mod](/ml_prm/README.md) | ml_prm | 1.1.8 [:arrow_down:](../../releases/latest/download/ml_prm.dll)|
-| [Players Instance Notifier](/ml_pin/README.md) | ml_pin | 1.0.7 [:arrow_down:](../../releases/latest/download/ml_ml_pin.dll)|
+| [Player Ragdoll Mod](/ml_prm/README.md) | ml_prm | 1.1.9 [:arrow_down:](../../releases/latest/download/ml_prm.dll)|
+| [Players Instance Notifier](/ml_pin/README.md) | ml_pin | 1.0.8 [:arrow_down:](../../releases/latest/download/ml_ml_pin.dll)|
 | [Vive Extended Input](/ml_vei/README.md) | ml_vei | 1.0.4 [:arrow_down:](../../releases/latest/download/ml_vei.dll)|
 
 **Archived mods:**
