@@ -30,7 +30,7 @@ namespace ml_prm
 
         void Update()
         {
-            bool l_state = Mathf.Approximately(m_puppetMaster.PlayerAvatarMovementDataInput.AnimatorGestureLeft, 1f);
+            bool l_state = m_puppetMaster.IsLeftGrabPointerActive();
             if(m_stateLeft != l_state)
             {
                 m_stateLeft = l_state;
@@ -38,7 +38,7 @@ namespace ml_prm
                     OnGestureState.Invoke(m_puppetMaster, true, m_stateLeft);
             }
 
-            l_state = Mathf.Approximately(m_puppetMaster.PlayerAvatarMovementDataInput.AnimatorGestureRight, 1f);
+            l_state = m_puppetMaster.IsRightGrabPointerActive();
             if(m_stateRight != l_state)
             {
                 m_stateRight = l_state;

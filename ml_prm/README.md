@@ -29,7 +29,7 @@ Optional mod's settings page with [BTKUILib](https://github.com/BTK-Development/
 * **Buoyancy:** enables floating in fluid volumes; `true` by default.
   * Note: Forcibly enabled in worlds that don't allow flight.
 * **Fall damage:** enables ragdoll when falling from specific height; `true` by default.
-* **Gesture grab:** enables grabbing of ragdolled body parts by remote players with trigger gesture; `false` by default.
+* **Gesture grab:** enables grabbing of ragdolled body parts by remote players with trigger/grab gesture; `false` by default.
   * Note: Can lead to unpredictable physics behaviour in some cases.
 * **Friends grab only:** Allow only friends to be able to grab your radgolled body parts; `true` by default.
 * **Velocity multiplier:** velocity force multiplier based on player's movement direction; `2.0` by default.

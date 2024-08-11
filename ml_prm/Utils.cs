@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using System.Linq;
+using ABI_RC.Systems.IK.SubSystems;
 
 namespace ml_prm
 {
@@ -43,5 +44,19 @@ namespace ml_prm
         }
 
         public static bool IsInEnumeration(object p_obj, object[] p_enumeration) => p_enumeration.Contains(p_obj);
+
+        public static bool IsLeftGrabPointerActive(this PuppetMaster p_source)
+        {
+            bool l_result = ((p_source._playerAvatarMovementDataCurrent.AnimatorGestureLeft >= 0.5f) && (p_source._playerAvatarMovementDataCurrent.AnimatorGestureLeft <= 1f));
+            l_result |= ((FingerSystem.GetCurlNormalized(p_source._playerAvatarMovementDataCurrent.LeftMiddle1Stretched) >= 0.5f) && (FingerSystem.GetCurlNormalized(p_source._playerAvatarMovementDataCurrent.LeftMiddle2Stretched) >= 0.5f) && (FingerSystem.GetCurlNormalized(p_source._playerAvatarMovementDataCurrent.LeftMiddle3Stretched) >= 0.5f));
+            return l_result;
+        }
+
+        public static bool IsRightGrabPointerActive(this PuppetMaster p_source)
+        {
+            bool l_result = ((p_source._playerAvatarMovementDataCurrent.AnimatorGestureRight >= 0.5f) && (p_source._playerAvatarMovementDataCurrent.AnimatorGestureRight <= 1f));
+            l_result |= ((FingerSystem.GetCurlNormalized(p_source._playerAvatarMovementDataCurrent.RightMiddle1Stretched) >= 0.5f) && (FingerSystem.GetCurlNormalized(p_source._playerAvatarMovementDataCurrent.RightMiddle2Stretched) >= 0.5f) && (FingerSystem.GetCurlNormalized(p_source._playerAvatarMovementDataCurrent.RightMiddle3Stretched) >= 0.5f));
+            return l_result;
+        }
     }
 }

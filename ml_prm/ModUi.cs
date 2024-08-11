@@ -122,7 +122,7 @@ namespace ml_prm
             ms_fallDamageToggle = ms_category.AddToggle("Fall damage", "Enable ragdoll when falling from height", Settings.FallDamage);
             ms_fallDamageToggle.OnValueUpdated += (state) => OnToggleUpdate(UiIndex.FallDamage, state);
 
-            ms_gestureGrabToggle = ms_category.AddToggle("Gesture grab", "Enable grabbing of ragdolled body parts by remote players with trigger gesture<p>Warning: can lead to unpredictable physics behaviour in some cases", Settings.GestureGrab);
+            ms_gestureGrabToggle = ms_category.AddToggle("Gesture grab", "Enable grabbing of ragdolled body parts by remote players with trigger/grab gesture<p>Warning: can lead to unpredictable physics behaviour in some cases", Settings.GestureGrab);
             ms_gestureGrabToggle.OnValueUpdated += (state) => OnToggleUpdate(UiIndex.GestureGrab, state);
 
             ms_friendsGrabToggle = ms_category.AddToggle("Friends grab only", " ", Settings.FriendsGrab);
