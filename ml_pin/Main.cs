@@ -107,9 +107,9 @@ namespace ml_pin
 
         bool ShouldNotifyInCurrentInstance()
         {
-            bool l_isInPublic = ((MetaPort.Instance.CurrentInstancePrivacyType == MetaPort.InstancePrivacy.Public) && Settings.NotifyInPublic);
-            bool l_isInFriends = (((MetaPort.Instance.CurrentInstancePrivacyType == MetaPort.InstancePrivacy.Friends) || (MetaPort.Instance.CurrentInstancePrivacyType == MetaPort.InstancePrivacy.FriendsOfFriends)) && Settings.NotifyInFriends);
-            bool l_isInPrivate = (((MetaPort.Instance.CurrentInstancePrivacyType == MetaPort.InstancePrivacy.EveryoneCanInvite) || (MetaPort.Instance.CurrentInstancePrivacyType == MetaPort.InstancePrivacy.OwnerMustInvite)) && Settings.NotifyInPrivate);
+            bool l_isInPublic = (MetaPort.Instance.CurrentInstancePrivacy.Contains("Public") && Settings.NotifyInPublic);
+            bool l_isInFriends = (MetaPort.Instance.CurrentInstancePrivacy.Contains("Friends") && Settings.NotifyInFriends);
+            bool l_isInPrivate = (MetaPort.Instance.CurrentInstancePrivacy.Contains("invite") && Settings.NotifyInPrivate);
             return (l_isInPublic || l_isInFriends || l_isInPrivate);
         }
     }
