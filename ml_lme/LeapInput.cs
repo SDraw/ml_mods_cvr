@@ -92,13 +92,13 @@ namespace ml_lme
             VRModeSwitchEvents.OnInitializeXR.AddListener(OnModeSwitch);
             VRModeSwitchEvents.OnDeinitializeXR.AddListener(OnModeSwitch);
 
-            Settings.OnEnabledChanged.AddHandler(this.OnEnableChanged);
-            Settings.OnInteractionChanged.AddHandler(this.OnInteractionChanged);
-            Settings.OnGesturesChanged.AddHandler(this.OnGesturesChanged);
-            Settings.OnFingersOnlyChanged.AddHandler(this.OnFingersOnlyChanged);
+            Settings.OnEnabledChanged.AddListener(this.OnEnableChanged);
+            Settings.OnInteractionChanged.AddListener(this.OnInteractionChanged);
+            Settings.OnGesturesChanged.AddListener(this.OnGesturesChanged);
+            Settings.OnFingersOnlyChanged.AddListener(this.OnFingersOnlyChanged);
 
-            GameEvents.OnRayScale.AddHandler(this.OnRayScale);
-            GameEvents.OnPickupGrab.AddHandler(this.OnPickupGrab);
+            GameEvents.OnRayScale.AddListener(this.OnRayScale);
+            GameEvents.OnPickupGrab.AddListener(this.OnPickupGrab);
         }
 
         IEnumerator WaitForSettings()
@@ -156,13 +156,13 @@ namespace ml_lme
             VRModeSwitchEvents.OnInitializeXR.RemoveListener(OnModeSwitch);
             VRModeSwitchEvents.OnDeinitializeXR.RemoveListener(OnModeSwitch);
 
-            Settings.OnEnabledChanged.RemoveHandler(this.OnEnableChanged);
-            Settings.OnInteractionChanged.RemoveHandler(this.OnInteractionChanged);
-            Settings.OnGesturesChanged.RemoveHandler(this.OnGesturesChanged);
-            Settings.OnFingersOnlyChanged.RemoveHandler(this.OnFingersOnlyChanged);
+            Settings.OnEnabledChanged.RemoveListener(this.OnEnableChanged);
+            Settings.OnInteractionChanged.RemoveListener(this.OnInteractionChanged);
+            Settings.OnGesturesChanged.RemoveListener(this.OnGesturesChanged);
+            Settings.OnFingersOnlyChanged.RemoveListener(this.OnFingersOnlyChanged);
 
-            GameEvents.OnRayScale.RemoveHandler(this.OnRayScale);
-            GameEvents.OnPickupGrab.RemoveHandler(this.OnPickupGrab);
+            GameEvents.OnRayScale.RemoveListener(this.OnRayScale);
+            GameEvents.OnPickupGrab.RemoveListener(this.OnPickupGrab);
         }
 
         public override void UpdateInput()

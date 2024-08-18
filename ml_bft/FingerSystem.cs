@@ -82,10 +82,10 @@ namespace ml_bft
             m_pose = new HumanPose();
             m_lastValues = new float[40];
 
-            GameEvents.OnAvatarSetup.AddHandler(this.OnAvatarSetup);
-            GameEvents.OnAvatarClear.AddHandler(this.OnAvatarClear);
-            GameEvents.OnAvatarReuse.AddHandler(this.OnAvatarReuse);
-            GameEvents.OnIKSystemLateUpdate.AddHandler(this.OnIKSystemLateUpdate);
+            GameEvents.OnAvatarSetup.AddListener(this.OnAvatarSetup);
+            GameEvents.OnAvatarClear.AddListener(this.OnAvatarClear);
+            GameEvents.OnAvatarReuse.AddListener(this.OnAvatarReuse);
+            GameEvents.OnIKSystemLateUpdate.AddListener(this.OnIKSystemLateUpdate);
         }
         internal void Cleanup()
         {
@@ -96,10 +96,10 @@ namespace ml_bft
             m_rightFingerOffsets.Clear();
             m_ready = false;
 
-            GameEvents.OnAvatarSetup.RemoveHandler(this.OnAvatarSetup);
-            GameEvents.OnAvatarClear.RemoveHandler(this.OnAvatarClear);
-            GameEvents.OnAvatarReuse.RemoveHandler(this.OnAvatarReuse);
-            GameEvents.OnIKSystemLateUpdate.RemoveHandler(this.OnIKSystemLateUpdate);
+            GameEvents.OnAvatarSetup.RemoveListener(this.OnAvatarSetup);
+            GameEvents.OnAvatarClear.RemoveListener(this.OnAvatarClear);
+            GameEvents.OnAvatarReuse.RemoveListener(this.OnAvatarReuse);
+            GameEvents.OnIKSystemLateUpdate.RemoveListener(this.OnIKSystemLateUpdate);
         }
 
         internal void OnAvatarSetup()

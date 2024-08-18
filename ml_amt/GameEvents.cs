@@ -10,8 +10,8 @@ namespace ml_amt
         internal class GameEvent
         {
             event Action m_action;
-            public void AddHandler(Action p_listener) => m_action += p_listener;
-            public void RemoveHandler(Action p_listener) => m_action -= p_listener;
+            public void AddListener(Action p_listener) => m_action += p_listener;
+            public void RemoveListener(Action p_listener) => m_action -= p_listener;
             public void Invoke() => m_action?.Invoke();
         }
 

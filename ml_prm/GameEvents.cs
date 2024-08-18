@@ -20,15 +20,15 @@ namespace ml_prm
         internal class GameEvent
         {
             event Action m_action;
-            public void AddHandler(Action p_listener) => m_action += p_listener;
-            public void RemoveHandler(Action p_listener) => m_action -= p_listener;
+            public void AddListener(Action p_listener) => m_action += p_listener;
+            public void RemoveListener(Action p_listener) => m_action -= p_listener;
             public void Invoke() => m_action?.Invoke();
         }
         internal class GameEvent<T1>
         {
             event Action<T1> m_action;
-            public void AddHandler(Action<T1> p_listener) => m_action += p_listener;
-            public void RemoveHandler(Action<T1> p_listener) => m_action -= p_listener;
+            public void AddListener(Action<T1> p_listener) => m_action += p_listener;
+            public void RemoveListener(Action<T1> p_listener) => m_action -= p_listener;
             public void Invoke(T1 p_obj) => m_action?.Invoke(p_obj);
         }
 

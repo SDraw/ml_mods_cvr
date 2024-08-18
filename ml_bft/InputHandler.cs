@@ -28,9 +28,9 @@ namespace ml_bft
             VRModeSwitchEvents.OnInitializeXR.AddListener(this.OnSwitchToVR);
             VRModeSwitchEvents.OnDeinitializeXR.AddListener(this.OnSwitchToDesktop);
 
-            Settings.OnSkeletalInputChanged.AddHandler(this.OnSkeletalInputChanged);
+            Settings.OnSkeletalInputChanged.AddListener(this.OnSkeletalInputChanged);
 
-            GameEvents.OnInputUpdate.AddHandler(this.OnInputUpdate);
+            GameEvents.OnInputUpdate.AddListener(this.OnInputUpdate);
         }
         internal void Cleanup()
         {
@@ -39,9 +39,9 @@ namespace ml_bft
 
             RemoveHandlers();
 
-            Settings.OnSkeletalInputChanged.RemoveHandler(this.OnSkeletalInputChanged);
+            Settings.OnSkeletalInputChanged.RemoveListener(this.OnSkeletalInputChanged);
 
-            GameEvents.OnInputUpdate.RemoveHandler(this.OnInputUpdate);
+            GameEvents.OnInputUpdate.RemoveListener(this.OnInputUpdate);
         }
 
         void SetupHandlers()

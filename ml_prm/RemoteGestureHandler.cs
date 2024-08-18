@@ -1,8 +1,6 @@
 ﻿using ABI_RC.Core.Networking.IO.Social;
 using ABI_RC.Core.Player;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using UnityEngine;
 
 namespace ml_prm
@@ -12,8 +10,8 @@ namespace ml_prm
         internal class GestureEvent<T1, T2, T3>
         {
             event Action<T1, T2, T3> m_action;
-            public void AddHandler(Action<T1, T2, T3> p_listener) => m_action += p_listener;
-            public void RemoveHandler(Action<T1, T2, T3> p_listener) => m_action -= p_listener;
+            public void AddListener(Action<T1, T2, T3> p_listener) => m_action += p_listener;
+            public void RemoveListener(Action<T1, T2, T3> p_listener) => m_action -= p_listener;
             public void Invoke(T1 p_objA, T2 p_objB, T3 p_objC) => m_action?.Invoke(p_objA, p_objB, p_objC);
         }
 

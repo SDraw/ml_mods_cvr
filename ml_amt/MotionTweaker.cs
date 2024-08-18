@@ -52,14 +52,14 @@ namespace ml_amt
             OnCrouchLimitChanged(Settings.CrouchLimit);
             OnProneLimitChanged(Settings.ProneLimit);
 
-            Settings.OnCrouchLimitChanged.AddHandler(this.OnCrouchLimitChanged);
-            Settings.OnProneLimitChanged.AddHandler(this.OnProneLimitChanged);
-            Settings.OnMassCenterChanged.AddHandler(this.OnMassCenterChanged);
+            Settings.OnCrouchLimitChanged.AddListener(this.OnCrouchLimitChanged);
+            Settings.OnProneLimitChanged.AddListener(this.OnProneLimitChanged);
+            Settings.OnMassCenterChanged.AddListener(this.OnMassCenterChanged);
 
-            GameEvents.OnAvatarSetup.AddHandler(this.OnAvatarSetup);
-            GameEvents.OnAvatarClear.AddHandler(this.OnAvatarClear);
-            GameEvents.OnAvatarReuse.AddHandler(this.OnAvatarReuse);
-            GameEvents.OnPlayspaceScale.AddHandler(this.OnPlayspaceScale);
+            GameEvents.OnAvatarSetup.AddListener(this.OnAvatarSetup);
+            GameEvents.OnAvatarClear.AddListener(this.OnAvatarClear);
+            GameEvents.OnAvatarReuse.AddListener(this.OnAvatarReuse);
+            GameEvents.OnPlayspaceScale.AddListener(this.OnPlayspaceScale);
         }
 
         void OnDestroy()
@@ -68,14 +68,14 @@ namespace ml_amt
             m_ikLimits = null;
             m_parameters.Clear();
 
-            Settings.OnCrouchLimitChanged.RemoveHandler(this.OnCrouchLimitChanged);
-            Settings.OnProneLimitChanged.RemoveHandler(this.OnProneLimitChanged);
-            Settings.OnMassCenterChanged.RemoveHandler(this.OnMassCenterChanged);
+            Settings.OnCrouchLimitChanged.RemoveListener(this.OnCrouchLimitChanged);
+            Settings.OnProneLimitChanged.RemoveListener(this.OnProneLimitChanged);
+            Settings.OnMassCenterChanged.RemoveListener(this.OnMassCenterChanged);
 
-            GameEvents.OnAvatarSetup.RemoveHandler(this.OnAvatarSetup);
-            GameEvents.OnAvatarClear.RemoveHandler(this.OnAvatarClear);
-            GameEvents.OnAvatarReuse.RemoveHandler(this.OnAvatarReuse);
-            GameEvents.OnPlayspaceScale.RemoveHandler(this.OnPlayspaceScale);
+            GameEvents.OnAvatarSetup.RemoveListener(this.OnAvatarSetup);
+            GameEvents.OnAvatarClear.RemoveListener(this.OnAvatarClear);
+            GameEvents.OnAvatarReuse.RemoveListener(this.OnAvatarReuse);
+            GameEvents.OnPlayspaceScale.RemoveListener(this.OnPlayspaceScale);
         }
 
         void Update()

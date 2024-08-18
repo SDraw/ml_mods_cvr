@@ -78,7 +78,7 @@ namespace ml_bft
             base.OnShowHandsChanged(Settings.ShowHands);
             OnMotionRangeChanged(Settings.MotionRange);
 
-            Settings.OnMotionRangeChanged.AddHandler(this.OnMotionRangeChanged);
+            Settings.OnMotionRangeChanged.AddListener(this.OnMotionRangeChanged);
         }
 
         public override void Cleanup()
@@ -87,7 +87,7 @@ namespace ml_bft
 
             m_skeletonAction = null;
 
-            Settings.OnMotionRangeChanged.RemoveHandler(this.OnMotionRangeChanged);
+            Settings.OnMotionRangeChanged.RemoveListener(this.OnMotionRangeChanged);
         }
 
         public override void Update()

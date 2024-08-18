@@ -15,8 +15,8 @@ namespace ml_pmc
         public class CopycatEvent<T1>
         {
             event System.Action<T1> m_action;
-            public void AddHandler(System.Action<T1> p_listener) => m_action += p_listener;
-            public void RemoveHandler(System.Action<T1> p_listener) => m_action -= p_listener;
+            public void AddListener(System.Action<T1> p_listener) => m_action += p_listener;
+            public void RemoveListener(System.Action<T1> p_listener) => m_action -= p_listener;
             public void Invoke(T1 p_value) => m_action?.Invoke(p_value);
         }
 
@@ -51,12 +51,12 @@ namespace ml_pmc
 
         void Start()
         {
-            GameEvents.OnAvatarClear.AddHandler(this.OnAvatarClear);
-            GameEvents.OnAvatarSetup.AddHandler(this.OnAvatarSetup);
-            GameEvents.OnAvatarPreReuse.AddHandler(this.OnAvatarPreReuse);
-            GameEvents.OnAvatarPostReuse.AddHandler(this.OnAvatarPostReuse);
+            GameEvents.OnAvatarClear.AddListener(this.OnAvatarClear);
+            GameEvents.OnAvatarSetup.AddListener(this.OnAvatarSetup);
+            GameEvents.OnAvatarPreReuse.AddListener(this.OnAvatarPreReuse);
+            GameEvents.OnAvatarPostReuse.AddListener(this.OnAvatarPostReuse);
 
-            ModUi.OnTargetSelect.AddHandler(this.OnTargetSelect);
+            ModUi.OnTargetSelect.AddListener(this.OnTargetSelect);
         }
         void OnDestroy()
         {
@@ -74,12 +74,12 @@ namespace ml_pmc
             m_vrIk = null;
             m_lookAtIk = null;
 
-            GameEvents.OnAvatarClear.RemoveHandler(this.OnAvatarClear);
-            GameEvents.OnAvatarSetup.RemoveHandler(this.OnAvatarSetup);
-            GameEvents.OnAvatarPreReuse.RemoveHandler(this.OnAvatarPreReuse);
-            GameEvents.OnAvatarPostReuse.RemoveHandler(this.OnAvatarPostReuse);
+            GameEvents.OnAvatarClear.RemoveListener(this.OnAvatarClear);
+            GameEvents.OnAvatarSetup.RemoveListener(this.OnAvatarSetup);
+            GameEvents.OnAvatarPreReuse.RemoveListener(this.OnAvatarPreReuse);
+            GameEvents.OnAvatarPostReuse.RemoveListener(this.OnAvatarPostReuse);
 
-            ModUi.OnTargetSelect.RemoveHandler(this.OnTargetSelect);
+            ModUi.OnTargetSelect.RemoveListener(this.OnTargetSelect);
         }
 
         // Unity events

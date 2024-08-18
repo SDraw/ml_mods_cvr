@@ -1,6 +1,5 @@
 ﻿using ABI_RC.Core.Player;
 using ABI_RC.Core.Util.AssetFiltering;
-using ABI_RC.Systems.GameEventSystem;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -17,8 +16,7 @@ namespace ml_prm
             ModUi.Init();
             GameEvents.Init(HarmonyInstance);
             WorldHandler.Init();
-
-            CVRGameEventSystem.Player.OnJoinEntity.AddListener(this.OnRemotePlayerCreated);
+            RemoteGestureManager.Init();
 
             MelonLoader.MelonCoroutines.Start(WaitForLocalPlayer());
             MelonLoader.MelonCoroutines.Start(WaitForWhitelist());
@@ -27,12 +25,11 @@ namespace ml_prm
         public override void OnDeinitializeMelon()
         {
             WorldHandler.DeInit();
+            RemoteGestureManager.DeInit();
 
             if(m_localController != null)
                 UnityEngine.Object.Destroy(m_localController);
             m_localController = null;
-
-            CVRGameEventSystem.Player.OnJoinEntity.RemoveListener(this.OnRemotePlayerCreated);
         }
 
         System.Collections.IEnumerator WaitForLocalPlayer()
@@ -54,12 +51,6 @@ namespace ml_prm
                 yield return null;
             }
             l_hashSet.Add(typeof(RagdollToggle));
-        }
-
-        void OnRemotePlayerCreated(CVRPlayerEntity p_player)
-        {
-            if((p_player != null) && (p_player.PuppetMaster != null))
-                p_player.PuppetMaster.gameObject.AddComponent<RemoteGestureHandler>();
         }
     }
 }

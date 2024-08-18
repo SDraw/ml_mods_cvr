@@ -81,30 +81,30 @@ namespace ml_prm
             m_puppetRoot.localPosition = Vector3.zero;
             m_puppetRoot.localRotation = Quaternion.identity;
 
-            Settings.OnMovementDragChanged.AddHandler(this.OnMovementDragChanged);
-            Settings.OnAngularDragChanged.AddHandler(this.OnAngularDragChanged);
-            Settings.OnGravityChanged.AddHandler(this.OnGravityChanged);
-            Settings.OnSlipperinessChanged.AddHandler(this.OnPhysicsMaterialChanged);
-            Settings.OnBouncinessChanged.AddHandler(this.OnPhysicsMaterialChanged);
-            Settings.OnBuoyancyChanged.AddHandler(this.OnBuoyancyChanged);
-            Settings.OnFallDamageChanged.AddHandler(this.OnFallDamageChanged);
-            Settings.OnGestureGrabChanged.AddHandler(this.OnGestureGrabChanged);
+            Settings.OnMovementDragChanged.AddListener(this.OnMovementDragChanged);
+            Settings.OnAngularDragChanged.AddListener(this.OnAngularDragChanged);
+            Settings.OnGravityChanged.AddListener(this.OnGravityChanged);
+            Settings.OnSlipperinessChanged.AddListener(this.OnPhysicsMaterialChanged);
+            Settings.OnBouncinessChanged.AddListener(this.OnPhysicsMaterialChanged);
+            Settings.OnBuoyancyChanged.AddListener(this.OnBuoyancyChanged);
+            Settings.OnFallDamageChanged.AddListener(this.OnFallDamageChanged);
+            Settings.OnGestureGrabChanged.AddListener(this.OnGestureGrabChanged);
 
-            GameEvents.OnAvatarClear.AddHandler(this.OnAvatarClear);
-            GameEvents.OnAvatarSetup.AddHandler(this.OnAvatarSetup);
-            GameEvents.OnAvatarPreReuse.AddHandler(this.OnAvatarPreReuse);
-            GameEvents.OnAvatarPostReuse.AddHandler(this.OnAvatarPostReuse);
-            GameEvents.OnIKScaling.AddHandler(this.OnAvatarScaling);
-            GameEvents.OnSeatPreSit.AddHandler(this.OnSeatPreSit);
-            GameEvents.OnCalibrationStart.AddHandler(this.OnCalibrationStart);
-            GameEvents.OnWorldPreSpawn.AddHandler(this.OnWorldPreSpawn);
-            GameEvents.OnCombatPreDown.AddHandler(this.OnCombatPreDown);
-            GameEvents.OnFlightChange.AddHandler(this.OnFlightChange);
-            GameEvents.OnIKOffsetUpdate.AddHandler(this.OnIKOffsetUpdate);
+            GameEvents.OnAvatarClear.AddListener(this.OnAvatarClear);
+            GameEvents.OnAvatarSetup.AddListener(this.OnAvatarSetup);
+            GameEvents.OnAvatarPreReuse.AddListener(this.OnAvatarPreReuse);
+            GameEvents.OnAvatarPostReuse.AddListener(this.OnAvatarPostReuse);
+            GameEvents.OnIKScaling.AddListener(this.OnAvatarScaling);
+            GameEvents.OnSeatPreSit.AddListener(this.OnSeatPreSit);
+            GameEvents.OnCalibrationStart.AddListener(this.OnCalibrationStart);
+            GameEvents.OnWorldPreSpawn.AddListener(this.OnWorldPreSpawn);
+            GameEvents.OnCombatPreDown.AddListener(this.OnCombatPreDown);
+            GameEvents.OnFlightChange.AddListener(this.OnFlightChange);
+            GameEvents.OnIKOffsetUpdate.AddListener(this.OnIKOffsetUpdate);
             BetterBetterCharacterController.OnTeleport.AddListener(this.OnPlayerTeleport);
 
-            ModUi.OnSwitchChanged.AddHandler(this.SwitchRagdoll);
-            RemoteGestureHandler.OnGestureState.AddHandler(this.OnRemotePlayerGestureStateChanged);
+            ModUi.OnSwitchChanged.AddListener(this.SwitchRagdoll);
+            RemoteGestureHandler.OnGestureState.AddListener(this.OnRemotePlayerGestureStateChanged);
         }
 
         void OnDestroy()
@@ -130,30 +130,30 @@ namespace ml_prm
                 Object.Destroy(m_physicsMaterial);
             m_physicsMaterial = null;
 
-            Settings.OnMovementDragChanged.RemoveHandler(this.OnMovementDragChanged);
-            Settings.OnAngularDragChanged.RemoveHandler(this.OnAngularDragChanged);
-            Settings.OnGravityChanged.RemoveHandler(this.OnGravityChanged);
-            Settings.OnSlipperinessChanged.RemoveHandler(this.OnPhysicsMaterialChanged);
-            Settings.OnBouncinessChanged.RemoveHandler(this.OnPhysicsMaterialChanged);
-            Settings.OnBuoyancyChanged.RemoveHandler(this.OnBuoyancyChanged);
-            Settings.OnFallDamageChanged.RemoveHandler(this.OnFallDamageChanged);
-            Settings.OnGestureGrabChanged.RemoveHandler(this.OnGestureGrabChanged);
+            Settings.OnMovementDragChanged.RemoveListener(this.OnMovementDragChanged);
+            Settings.OnAngularDragChanged.RemoveListener(this.OnAngularDragChanged);
+            Settings.OnGravityChanged.RemoveListener(this.OnGravityChanged);
+            Settings.OnSlipperinessChanged.RemoveListener(this.OnPhysicsMaterialChanged);
+            Settings.OnBouncinessChanged.RemoveListener(this.OnPhysicsMaterialChanged);
+            Settings.OnBuoyancyChanged.RemoveListener(this.OnBuoyancyChanged);
+            Settings.OnFallDamageChanged.RemoveListener(this.OnFallDamageChanged);
+            Settings.OnGestureGrabChanged.RemoveListener(this.OnGestureGrabChanged);
 
-            GameEvents.OnAvatarClear.RemoveHandler(this.OnAvatarClear);
-            GameEvents.OnAvatarSetup.RemoveHandler(this.OnAvatarSetup);
-            GameEvents.OnAvatarPreReuse.RemoveHandler(this.OnAvatarPreReuse);
-            GameEvents.OnAvatarPostReuse.RemoveHandler(this.OnAvatarPostReuse);
-            GameEvents.OnIKScaling.RemoveHandler(this.OnAvatarScaling);
-            GameEvents.OnSeatPreSit.RemoveHandler(this.OnSeatPreSit);
-            GameEvents.OnCalibrationStart.RemoveHandler(this.OnCalibrationStart);
-            GameEvents.OnWorldPreSpawn.RemoveHandler(this.OnWorldPreSpawn);
-            GameEvents.OnCombatPreDown.RemoveHandler(this.OnCombatPreDown);
-            GameEvents.OnFlightChange.RemoveHandler(this.OnFlightChange);
-            GameEvents.OnIKOffsetUpdate.RemoveHandler(this.OnIKOffsetUpdate);
+            GameEvents.OnAvatarClear.RemoveListener(this.OnAvatarClear);
+            GameEvents.OnAvatarSetup.RemoveListener(this.OnAvatarSetup);
+            GameEvents.OnAvatarPreReuse.RemoveListener(this.OnAvatarPreReuse);
+            GameEvents.OnAvatarPostReuse.RemoveListener(this.OnAvatarPostReuse);
+            GameEvents.OnIKScaling.RemoveListener(this.OnAvatarScaling);
+            GameEvents.OnSeatPreSit.RemoveListener(this.OnSeatPreSit);
+            GameEvents.OnCalibrationStart.RemoveListener(this.OnCalibrationStart);
+            GameEvents.OnWorldPreSpawn.RemoveListener(this.OnWorldPreSpawn);
+            GameEvents.OnCombatPreDown.RemoveListener(this.OnCombatPreDown);
+            GameEvents.OnFlightChange.RemoveListener(this.OnFlightChange);
+            GameEvents.OnIKOffsetUpdate.RemoveListener(this.OnIKOffsetUpdate);
             BetterBetterCharacterController.OnTeleport.RemoveListener(this.OnPlayerTeleport);
 
-            ModUi.OnSwitchChanged.RemoveHandler(this.SwitchRagdoll);
-            RemoteGestureHandler.OnGestureState.RemoveHandler(this.OnRemotePlayerGestureStateChanged);
+            ModUi.OnSwitchChanged.RemoveListener(this.SwitchRagdoll);
+            RemoteGestureHandler.OnGestureState.RemoveListener(this.OnRemotePlayerGestureStateChanged);
         }
 
         void Update()

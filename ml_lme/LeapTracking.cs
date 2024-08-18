@@ -76,17 +76,17 @@ namespace ml_lme
             VRModeSwitchEvents.OnInitializeXR.AddListener(this.OnAvatarSetup);
             VRModeSwitchEvents.OnDeinitializeXR.AddListener(this.OnAvatarSetup);
 
-            Settings.OnDesktopOffsetChanged.AddHandler(this.OnDesktopOffsetChanged);
-            Settings.OnModelVisibilityChanged.AddHandler(this.OnModelVisibilityChanged);
-            Settings.OnVisualHandsChanged.AddHandler(this.OnVisualHandsChanged);
-            Settings.OnTrackingModeChanged.AddHandler(this.OnTrackingModeChanged);
-            Settings.OnRootAngleChanged.AddHandler(this.OnRootAngleChanged);
-            Settings.OnHeadAttachChanged.AddHandler(this.OnHeadAttachChanged);
-            Settings.OnHeadOffsetChanged.AddHandler(this.OnHeadOffsetChanged);
+            Settings.OnDesktopOffsetChanged.AddListener(this.OnDesktopOffsetChanged);
+            Settings.OnModelVisibilityChanged.AddListener(this.OnModelVisibilityChanged);
+            Settings.OnVisualHandsChanged.AddListener(this.OnVisualHandsChanged);
+            Settings.OnTrackingModeChanged.AddListener(this.OnTrackingModeChanged);
+            Settings.OnRootAngleChanged.AddListener(this.OnRootAngleChanged);
+            Settings.OnHeadAttachChanged.AddListener(this.OnHeadAttachChanged);
+            Settings.OnHeadOffsetChanged.AddListener(this.OnHeadOffsetChanged);
 
-            GameEvents.OnAvatarClear.AddHandler(this.OnAvatarClear);
-            GameEvents.OnAvatarSetup.AddHandler(this.OnAvatarSetup);
-            GameEvents.OnPlayspaceScale.AddHandler(this.OnPlayspaceScale);
+            GameEvents.OnAvatarClear.AddListener(this.OnAvatarClear);
+            GameEvents.OnAvatarSetup.AddListener(this.OnAvatarSetup);
+            GameEvents.OnPlayspaceScale.AddListener(this.OnPlayspaceScale);
         }
 
         IEnumerator WaitForLocalPlayer()
@@ -123,17 +123,17 @@ namespace ml_lme
             VRModeSwitchEvents.OnInitializeXR.RemoveListener(this.OnAvatarSetup);
             VRModeSwitchEvents.OnDeinitializeXR.RemoveListener(this.OnAvatarSetup);
 
-            Settings.OnDesktopOffsetChanged.RemoveHandler(this.OnDesktopOffsetChanged);
-            Settings.OnModelVisibilityChanged.RemoveHandler(this.OnModelVisibilityChanged);
-            Settings.OnVisualHandsChanged.RemoveHandler(this.OnVisualHandsChanged);
-            Settings.OnTrackingModeChanged.RemoveHandler(this.OnTrackingModeChanged);
-            Settings.OnRootAngleChanged.RemoveHandler(this.OnRootAngleChanged);
-            Settings.OnHeadAttachChanged.RemoveHandler(this.OnHeadAttachChanged);
-            Settings.OnHeadOffsetChanged.RemoveHandler(this.OnHeadOffsetChanged);
+            Settings.OnDesktopOffsetChanged.RemoveListener(this.OnDesktopOffsetChanged);
+            Settings.OnModelVisibilityChanged.RemoveListener(this.OnModelVisibilityChanged);
+            Settings.OnVisualHandsChanged.RemoveListener(this.OnVisualHandsChanged);
+            Settings.OnTrackingModeChanged.RemoveListener(this.OnTrackingModeChanged);
+            Settings.OnRootAngleChanged.RemoveListener(this.OnRootAngleChanged);
+            Settings.OnHeadAttachChanged.RemoveListener(this.OnHeadAttachChanged);
+            Settings.OnHeadOffsetChanged.RemoveListener(this.OnHeadOffsetChanged);
 
-            GameEvents.OnAvatarClear.RemoveHandler(this.OnAvatarClear);
-            GameEvents.OnAvatarSetup.RemoveHandler(this.OnAvatarSetup);
-            GameEvents.OnPlayspaceScale.RemoveHandler(this.OnPlayspaceScale);
+            GameEvents.OnAvatarClear.RemoveListener(this.OnAvatarClear);
+            GameEvents.OnAvatarSetup.RemoveListener(this.OnAvatarSetup);
+            GameEvents.OnPlayspaceScale.RemoveListener(this.OnPlayspaceScale);
         }
 
         void Update()

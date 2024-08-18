@@ -41,8 +41,8 @@ namespace ml_lme
             m_leapController.Connect += this.OnLeapServiceConnect;
             m_leapController.Disconnect += this.OnLeapServiceDisconnect;
 
-            Settings.OnEnabledChanged.AddHandler(this.OnEnableChanged);
-            Settings.OnTrackingModeChanged.AddHandler(this.OnTrackingModeChanged);
+            Settings.OnEnabledChanged.AddListener(this.OnEnableChanged);
+            Settings.OnTrackingModeChanged.AddListener(this.OnTrackingModeChanged);
 
             m_leapTracking = new GameObject("[LeapTrackingRoot]").AddComponent<LeapTracking>();
             m_leapTracking.transform.parent = this.transform;
@@ -84,8 +84,8 @@ namespace ml_lme
             }
             m_leapInput = null;
 
-            Settings.OnEnabledChanged.RemoveHandler(this.OnEnableChanged);
-            Settings.OnTrackingModeChanged.RemoveHandler(this.OnTrackingModeChanged);
+            Settings.OnEnabledChanged.RemoveListener(this.OnEnableChanged);
+            Settings.OnTrackingModeChanged.RemoveListener(this.OnTrackingModeChanged);
         }
 
         IEnumerator WaitForObjects()

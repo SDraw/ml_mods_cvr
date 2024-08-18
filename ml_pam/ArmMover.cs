@@ -78,17 +78,17 @@ namespace ml_pam
 
             m_enabled = Settings.Enabled;
 
-            Settings.OnEnabledChanged.AddHandler(this.OnEnabledChanged);
-            Settings.OnGrabOffsetChanged.AddHandler(this.OnGrabOffsetChanged);
-            Settings.OnLeadingHandChanged.AddHandler(this.OnLeadingHandChanged);
-            Settings.OnHandsExtensionChanged.AddHandler(this.OnHandsExtensionChanged);
+            Settings.OnEnabledChanged.AddListener(this.OnEnabledChanged);
+            Settings.OnGrabOffsetChanged.AddListener(this.OnGrabOffsetChanged);
+            Settings.OnLeadingHandChanged.AddListener(this.OnLeadingHandChanged);
+            Settings.OnHandsExtensionChanged.AddListener(this.OnHandsExtensionChanged);
 
-            GameEvents.OnAvatarClear.AddHandler(this.OnAvatarClear);
-            GameEvents.OnAvatarSetup.AddHandler(this.OnAvatarSetup);
-            GameEvents.OnAvatarReuse.AddHandler(this.OnAvatarReuse);
-            GameEvents.OnPlayspaceScale.AddHandler(this.OnPlayspaceScale);
-            GameEvents.OnPickupGrab.AddHandler(this.OnPickupGrab);
-            GameEvents.OnPickupDrop.AddHandler(this.OnPickupDrop);
+            GameEvents.OnAvatarClear.AddListener(this.OnAvatarClear);
+            GameEvents.OnAvatarSetup.AddListener(this.OnAvatarSetup);
+            GameEvents.OnAvatarReuse.AddListener(this.OnAvatarReuse);
+            GameEvents.OnPlayspaceScale.AddListener(this.OnPlayspaceScale);
+            GameEvents.OnPickupGrab.AddListener(this.OnPickupGrab);
+            GameEvents.OnPickupDrop.AddListener(this.OnPickupDrop);
         }
 
         void OnDestroy()
@@ -108,17 +108,17 @@ namespace ml_pam
             m_pickup = null;
             m_vrIK = null;
 
-            Settings.OnEnabledChanged.RemoveHandler(this.OnEnabledChanged);
-            Settings.OnGrabOffsetChanged.RemoveHandler(this.OnGrabOffsetChanged);
-            Settings.OnLeadingHandChanged.RemoveHandler(this.OnLeadingHandChanged);
-            Settings.OnHandsExtensionChanged.RemoveHandler(this.OnHandsExtensionChanged);
+            Settings.OnEnabledChanged.RemoveListener(this.OnEnabledChanged);
+            Settings.OnGrabOffsetChanged.RemoveListener(this.OnGrabOffsetChanged);
+            Settings.OnLeadingHandChanged.RemoveListener(this.OnLeadingHandChanged);
+            Settings.OnHandsExtensionChanged.RemoveListener(this.OnHandsExtensionChanged);
 
-            GameEvents.OnAvatarClear.RemoveHandler(this.OnAvatarClear);
-            GameEvents.OnAvatarSetup.RemoveHandler(this.OnAvatarSetup);
-            GameEvents.OnAvatarReuse.RemoveHandler(this.OnAvatarReuse);
-            GameEvents.OnPlayspaceScale.RemoveHandler(this.OnPlayspaceScale);
-            GameEvents.OnPickupGrab.RemoveHandler(this.OnPickupGrab);
-            GameEvents.OnPickupDrop.RemoveHandler(this.OnPickupDrop);
+            GameEvents.OnAvatarClear.RemoveListener(this.OnAvatarClear);
+            GameEvents.OnAvatarSetup.RemoveListener(this.OnAvatarSetup);
+            GameEvents.OnAvatarReuse.RemoveListener(this.OnAvatarReuse);
+            GameEvents.OnPlayspaceScale.RemoveListener(this.OnPlayspaceScale);
+            GameEvents.OnPickupGrab.RemoveListener(this.OnPickupGrab);
+            GameEvents.OnPickupDrop.RemoveListener(this.OnPickupDrop);
         }
 
         void Update()

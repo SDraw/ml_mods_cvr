@@ -11,8 +11,8 @@ namespace ml_prm
         internal class UiEvent
         {
             event Action m_action;
-            public void AddHandler(Action p_listener) => m_action += p_listener;
-            public void RemoveHandler(Action p_listener) => m_action -= p_listener;
+            public void AddListener(Action p_listener) => m_action += p_listener;
+            public void RemoveListener(Action p_listener) => m_action -= p_listener;
             public void Invoke() => m_action?.Invoke();
         }
 
@@ -87,7 +87,7 @@ namespace ml_prm
             ms_hotkeyToggle = ms_category.AddToggle("Use hotkey", "Switch ragdoll mode with 'R' key", Settings.Hotkey);
             ms_hotkeyToggle.ToggleTooltip = string.Format(c_ragdollKeyTooltip, Settings.HotkeyKey);
             ms_hotkeyToggle.OnValueUpdated += (state) => OnToggleUpdate(UiIndex.Hotkey, state);
-            Settings.OnHotkeyKeyChanged.AddHandler(OnHotkeyKeyChanged);
+            Settings.OnHotkeyKeyChanged.AddListener(OnHotkeyKeyChanged);
 
             ms_gravityToggle = ms_category.AddToggle("Use gravity", "Apply gravity to ragdoll", Settings.Gravity);
             ms_gravityToggle.OnValueUpdated += (state) => OnToggleUpdate(UiIndex.Gravity, state);

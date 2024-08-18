@@ -9,8 +9,8 @@ namespace ml_bft
         internal class SettingEvent<T>
         {
             event Action<T> m_action;
-            public void AddHandler(Action<T> p_listener) => m_action += p_listener;
-            public void RemoveHandler(Action<T> p_listener) => m_action -= p_listener;
+            public void AddListener(Action<T> p_listener) => m_action += p_listener;
+            public void RemoveListener(Action<T> p_listener) => m_action -= p_listener;
             public void Invoke(T p_value) => m_action?.Invoke(p_value);
         }
 

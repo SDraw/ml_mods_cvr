@@ -51,28 +51,28 @@ namespace ml_dht
             OnHeadTrackingChanged(Settings.HeadTracking);
             OnSmoothingChanged(Settings.Smoothing);
 
-            Settings.OnEnabledChanged.AddHandler(this.OnEnabledChanged);
-            Settings.OnHeadTrackingChanged.AddHandler(this.OnHeadTrackingChanged);
-            Settings.OnSmoothingChanged.AddHandler(this.OnSmoothingChanged);
+            Settings.OnEnabledChanged.AddListener(this.OnEnabledChanged);
+            Settings.OnHeadTrackingChanged.AddListener(this.OnHeadTrackingChanged);
+            Settings.OnSmoothingChanged.AddListener(this.OnSmoothingChanged);
 
-            GameEvents.OnAvatarClear.AddHandler(this.OnAvatarClear);
-            GameEvents.OnAvatarSetup.AddHandler(this.OnAvatarSetup);
-            GameEvents.OnAvatarReuse.AddHandler(this.OnAvatarReuse);
-            GameEvents.OnEyeControllerUpdate.AddHandler(this.OnEyeControllerUpdate);
-            GameEvents.OnFaceTrackingUpdate.AddHandler(this.UpdateFaceTracking);
+            GameEvents.OnAvatarClear.AddListener(this.OnAvatarClear);
+            GameEvents.OnAvatarSetup.AddListener(this.OnAvatarSetup);
+            GameEvents.OnAvatarReuse.AddListener(this.OnAvatarReuse);
+            GameEvents.OnEyeControllerUpdate.AddListener(this.OnEyeControllerUpdate);
+            GameEvents.OnFaceTrackingUpdate.AddListener(this.UpdateFaceTracking);
         }
 
         void OnDestroy()
         {
-            Settings.OnEnabledChanged.RemoveHandler(this.OnEnabledChanged);
-            Settings.OnHeadTrackingChanged.RemoveHandler(this.OnHeadTrackingChanged);
-            Settings.OnSmoothingChanged.RemoveHandler(this.OnSmoothingChanged);
+            Settings.OnEnabledChanged.RemoveListener(this.OnEnabledChanged);
+            Settings.OnHeadTrackingChanged.RemoveListener(this.OnHeadTrackingChanged);
+            Settings.OnSmoothingChanged.RemoveListener(this.OnSmoothingChanged);
 
-            GameEvents.OnAvatarClear.RemoveHandler(this.OnAvatarClear);
-            GameEvents.OnAvatarSetup.RemoveHandler(this.OnAvatarSetup);
-            GameEvents.OnAvatarReuse.RemoveHandler(this.OnAvatarReuse);
-            GameEvents.OnEyeControllerUpdate.RemoveHandler(this.OnEyeControllerUpdate);
-            GameEvents.OnFaceTrackingUpdate.RemoveHandler(this.UpdateFaceTracking);
+            GameEvents.OnAvatarClear.RemoveListener(this.OnAvatarClear);
+            GameEvents.OnAvatarSetup.RemoveListener(this.OnAvatarSetup);
+            GameEvents.OnAvatarReuse.RemoveListener(this.OnAvatarReuse);
+            GameEvents.OnEyeControllerUpdate.RemoveListener(this.OnEyeControllerUpdate);
+            GameEvents.OnFaceTrackingUpdate.RemoveListener(this.UpdateFaceTracking);
         }
 
         void Update()

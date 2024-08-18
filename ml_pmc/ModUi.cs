@@ -12,8 +12,8 @@ namespace ml_pmc
         internal class UiEvent<T>
         {
             event Action<T> m_action;
-            public void AddHandler(Action<T> p_listener) => m_action += p_listener;
-            public void RemoveHandler(Action<T> p_listener) => m_action -= p_listener;
+            public void AddListener(Action<T> p_listener) => m_action += p_listener;
+            public void RemoveListener(Action<T> p_listener) => m_action -= p_listener;
             public void Invoke(T p_value) => m_action?.Invoke(p_value);
         }
 
@@ -72,7 +72,7 @@ namespace ml_pmc
             (ms_uiElements[(int)UiIndex.Reset] as Button).OnPress += Reset;
 
             BTKUILib.QuickMenuAPI.OnPlayerSelected += (_, id) => ms_selectedPlayer = id;
-            PoseCopycat.OnCopycatChanged.AddHandler(OnCopycatChanged);
+            PoseCopycat.OnCopycatChanged.AddListener(OnCopycatChanged);
         }
 
         static void OnCopySwitch() => OnTargetSelect.Invoke(ms_selectedPlayer);

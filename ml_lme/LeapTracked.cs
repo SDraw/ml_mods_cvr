@@ -139,13 +139,13 @@ namespace ml_lme
             OnFingersOnlyChanged(Settings.FingersOnly);
             OnTrackElbowsChanged(Settings.TrackElbows);
 
-            Settings.OnEnabledChanged.AddHandler(this.OnEnabledChanged);
-            Settings.OnFingersOnlyChanged.AddHandler(this.OnFingersOnlyChanged);
-            Settings.OnTrackElbowsChanged.AddHandler(this.OnTrackElbowsChanged);
+            Settings.OnEnabledChanged.AddListener(this.OnEnabledChanged);
+            Settings.OnFingersOnlyChanged.AddListener(this.OnFingersOnlyChanged);
+            Settings.OnTrackElbowsChanged.AddListener(this.OnTrackElbowsChanged);
 
-            GameEvents.OnAvatarClear.AddHandler(this.OnAvatarClear);
-            GameEvents.OnAvatarSetup.AddHandler(this.OnAvatarSetup);
-            GameEvents.OnAvatarReuse.AddHandler(this.OnAvatarReuse);
+            GameEvents.OnAvatarClear.AddListener(this.OnAvatarClear);
+            GameEvents.OnAvatarSetup.AddListener(this.OnAvatarSetup);
+            GameEvents.OnAvatarReuse.AddListener(this.OnAvatarReuse);
         }
 
         void OnDestroy()
@@ -165,13 +165,13 @@ namespace ml_lme
 
             m_vrIK = null;
 
-            Settings.OnEnabledChanged.RemoveHandler(this.OnEnabledChanged);
-            Settings.OnFingersOnlyChanged.RemoveHandler(this.OnFingersOnlyChanged);
-            Settings.OnTrackElbowsChanged.RemoveHandler(this.OnTrackElbowsChanged);
+            Settings.OnEnabledChanged.RemoveListener(this.OnEnabledChanged);
+            Settings.OnFingersOnlyChanged.RemoveListener(this.OnFingersOnlyChanged);
+            Settings.OnTrackElbowsChanged.RemoveListener(this.OnTrackElbowsChanged);
 
-            GameEvents.OnAvatarClear.RemoveHandler(this.OnAvatarClear);
-            GameEvents.OnAvatarSetup.RemoveHandler(this.OnAvatarSetup);
-            GameEvents.OnAvatarReuse.RemoveHandler(this.OnAvatarReuse);
+            GameEvents.OnAvatarClear.RemoveListener(this.OnAvatarClear);
+            GameEvents.OnAvatarSetup.RemoveListener(this.OnAvatarSetup);
+            GameEvents.OnAvatarReuse.RemoveListener(this.OnAvatarReuse);
         }
 
         void Update()
