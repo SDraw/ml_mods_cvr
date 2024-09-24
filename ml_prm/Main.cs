@@ -8,36 +8,35 @@ namespace ml_prm
 {
     public class PlayerRagdollMod : MelonLoader.MelonMod
     {
-        RagdollController m_localController = null;
+        RagdollController m_controller = null;
 
         public override void OnInitializeMelon()
         {
             Settings.Init();
             ModUi.Init();
             GameEvents.Init(HarmonyInstance);
-            WorldHandler.Init();
-            RemoteGestureManager.Init();
+            WorldManager.Init();
 
-            MelonLoader.MelonCoroutines.Start(WaitForLocalPlayer());
+            MelonLoader.MelonCoroutines.Start(WaitForRootLogic());
             MelonLoader.MelonCoroutines.Start(WaitForWhitelist());
         }
 
         public override void OnDeinitializeMelon()
         {
-            WorldHandler.DeInit();
-            RemoteGestureManager.DeInit();
+            WorldManager.DeInit();
 
-            if(m_localController != null)
-                UnityEngine.Object.Destroy(m_localController);
-            m_localController = null;
+            if(m_controller != null)
+                UnityEngine.Object.Destroy(m_controller.gameObject);
+            m_controller = null;
         }
 
-        System.Collections.IEnumerator WaitForLocalPlayer()
+        System.Collections.IEnumerator WaitForRootLogic()
         {
-            while(PlayerSetup.Instance == null)
+            while(ABI_RC.Core.RootLogic.Instance == null)
                 yield return null;
 
-            m_localController = PlayerSetup.Instance.gameObject.AddComponent<RagdollController>();
+            m_controller = new UnityEngine.GameObject("[PlayerRagdollMod]").AddComponent<RagdollController>();
+            m_controller.gameObject.AddComponent<RemoteGesturesManager>();
         }
 
         System.Collections.IEnumerator WaitForWhitelist()

@@ -3,12 +3,12 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <Authors>SDraw</Authors>
-    <Company>None</Company>
+    <Company>SDraw</Company>
     <Product>AvatarMotionTweaker</Product>
     <PackageId>AvatarMotionTweaker</PackageId>
-    <Version>1.4.1</Version>
+    <Version>1.4.2</Version>
     <Platforms>x64</Platforms>
-    <AssemblyName>ml_amt</AssemblyName>
+    <AssemblyName>AvatarMotionTweaker</AssemblyName>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

@@ -8,7 +8,9 @@ namespace ml_amt
     {
         public enum ParameterType
         {
-            Moving
+            Moving,
+            MovementSpeed,
+            Velocity
         }
 
         readonly ParameterType m_type;
@@ -43,6 +45,14 @@ namespace ml_amt
             {
                 case ParameterType.Moving:
                     SetBoolean(p_tweaker.IsMoving());
+                    break;
+
+                case ParameterType.MovementSpeed:
+                    SetFloat(p_tweaker.GetMovementSpeed());
+                    break;
+
+                case ParameterType.Velocity:
+                    SetFloat(p_tweaker.GetVelocity());
                     break;
             }
         }

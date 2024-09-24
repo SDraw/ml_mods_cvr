@@ -64,6 +64,8 @@ namespace ml_prm
                 m_rigidBody.mass = mass;
                 m_physicsInfluencer.volume = mass * 0.005f;
                 m_physicsInfluencer.enableLocalGravity = true;
+
+                this.gameObject.name = string.Format("{0} [NoGizmo]", this.gameObject.name);
             }
 
             if(collider != null)
@@ -109,11 +111,11 @@ namespace ml_prm
 
         void OnTriggerEnter(Collider p_col)
         {
-            if(Settings.PointersReaction && (RagdollController.Instance != null))
+            if(Settings.PointersReaction && (RagdollController.Instance != null) && !RagdollController.Instance.IsRagdolled())
             {
                 CVRPointer l_pointer = p_col.GetComponent<CVRPointer>();
-                if((l_pointer != null) && (l_pointer.type == c_ragdollPointerType) && l_pointer.enabled && !IsIgnored(l_pointer.transform) && !RagdollController.Instance.IsRagdolled())
-                    RagdollController.Instance.SwitchRagdoll();
+                if((l_pointer != null) && (l_pointer.type == c_ragdollPointerType) && l_pointer.enabled && !IsIgnored(l_pointer.transform))
+                    RagdollController.Instance.Ragdoll();
             }
         }
 

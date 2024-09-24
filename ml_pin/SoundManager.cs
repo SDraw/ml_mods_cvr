@@ -59,7 +59,7 @@ namespace ml_pin
             ((DownloadHandlerAudioClip)l_uwr.downloadHandler).streamAudio = true;
             yield return l_uwr.SendWebRequest();
 
-            if(l_uwr.isNetworkError || l_uwr.isHttpError)
+            if((l_uwr.result == UnityWebRequest.Result.ConnectionError) || (l_uwr.result == UnityWebRequest.Result.ProtocolError))
             {
                 MelonLoader.MelonLogger.Warning(l_uwr.error);
                 yield break;

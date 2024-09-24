@@ -1,17 +1,29 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using Valve.VR;
 
 namespace ml_bft
 {
-    class HandHandlerVR : HandHandler
+    class HandHandlerVR
     {
         // 31 bones in each hand, get index at Valve.VR.SteamVR_Skeleton_JointIndexes or SteamVR_Skeleton_JointIndexEnum
         const int c_fingerBonesCount = (int)SteamVR_Skeleton_JointIndexEnum.pinkyAux + 1;
 
+        bool m_left = false;
+        readonly List<Transform> m_bones = null;
+        readonly List<Quaternion> m_localRotations = null;
+        Transform m_prefabRoot = null;
+        readonly List<Renderer> m_renderers = null;
+
         SteamVR_Action_Skeleton m_skeletonAction;
 
-        public HandHandlerVR(Transform p_root, bool p_left) : base(p_left)
+        public HandHandlerVR(Transform p_root, bool p_left)
         {
+            m_left = p_left;
+            m_bones = new List<Transform>();
+            m_localRotations = new List<Quaternion>();
+            m_renderers = new List<Renderer>();
+
             for(int i = 0; i < c_fingerBonesCount; i++)
             {
                 m_bones.Add(null);
@@ -75,22 +87,30 @@ namespace ml_bft
 
             m_skeletonAction = SteamVR_Input.GetAction<SteamVR_Action_Skeleton>(p_left ? "SkeletonLeftHand" : "SkeletonRightHand");
 
-            base.OnShowHandsChanged(Settings.ShowHands);
+            OnShowHandsChanged(Settings.ShowHands);
             OnMotionRangeChanged(Settings.MotionRange);
 
+            Settings.OnShowHandsChanged.AddListener(this.OnShowHandsChanged);
             Settings.OnMotionRangeChanged.AddListener(this.OnMotionRangeChanged);
         }
 
-        public override void Cleanup()
+        public void Cleanup()
         {
-            base.Cleanup();
+            if(m_prefabRoot != null)
+                Object.Destroy(m_prefabRoot.gameObject);
+            m_prefabRoot = null;
+
+            m_bones.Clear();
+            m_localRotations.Clear();
+            m_renderers.Clear();
 
             m_skeletonAction = null;
 
+            Settings.OnShowHandsChanged.RemoveListener(this.OnShowHandsChanged);
             Settings.OnMotionRangeChanged.RemoveListener(this.OnMotionRangeChanged);
         }
 
-        public override void Update()
+        public void Update()
         {
             if(m_skeletonAction != null)
             {
@@ -107,7 +127,7 @@ namespace ml_bft
             }
         }
 
-        public override Transform GetSourceForBone(HumanBodyBones p_bone)
+        public Transform GetSourceForBone(HumanBodyBones p_bone)
         {
             Transform l_result = null;
             switch(p_bone)
@@ -221,7 +241,7 @@ namespace ml_bft
             return l_result;
         }
 
-        public override void Rebind(Quaternion p_base)
+        public void Rebind(Quaternion p_base)
         {
             for(int i = 0; i < c_fingerBonesCount; i++)
             {
@@ -231,6 +251,16 @@ namespace ml_bft
 
             if(m_bones[(int)SteamVR_Skeleton_JointIndexEnum.root] != null)
                 m_bones[(int)SteamVR_Skeleton_JointIndexEnum.root].rotation = p_base * (m_left ? Quaternion.Euler(0f, -90f, -90f) : Quaternion.Euler(0f, 90f, 90f));
+        }
+
+        // Settings
+        void OnShowHandsChanged(bool p_state)
+        {
+            foreach(var l_render in m_renderers)
+            {
+                if(l_render != null)
+                    l_render.enabled = p_state;
+            }
         }
 
         void OnMotionRangeChanged(Settings.MotionRangeType p_mode)

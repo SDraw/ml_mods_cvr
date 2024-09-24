@@ -109,23 +109,25 @@ namespace ml_bft
                 Utils.SetAvatarTPose();
                 InputHandler.Instance.Rebind(PlayerSetup.Instance.transform.rotation);
 
-                // Try to "fix" rotations of fingers
-                foreach(var l_tuple in ms_rotationFixChains)
+                if(Settings.FixFingers)
                 {
-                    ReorientateTowards(
-                        PlayerSetup.Instance._animator.GetBoneTransform(l_tuple.Item1),
-                        PlayerSetup.Instance._animator.GetBoneTransform(l_tuple.Item2),
-                        InputHandler.Instance.GetSourceForBone(l_tuple.Item1, l_tuple.Item3),
-                        InputHandler.Instance.GetSourceForBone(l_tuple.Item2, l_tuple.Item3),
-                        PlaneType.OXZ
-                    );
-                    ReorientateTowards(
-                        PlayerSetup.Instance._animator.GetBoneTransform(l_tuple.Item1),
-                        PlayerSetup.Instance._animator.GetBoneTransform(l_tuple.Item2),
-                        InputHandler.Instance.GetSourceForBone(l_tuple.Item1, l_tuple.Item3),
-                        InputHandler.Instance.GetSourceForBone(l_tuple.Item2, l_tuple.Item3),
-                        PlaneType.OYX
-                    );
+                    foreach(var l_tuple in ms_rotationFixChains)
+                    {
+                        ReorientateTowards(
+                            PlayerSetup.Instance._animator.GetBoneTransform(l_tuple.Item1),
+                            PlayerSetup.Instance._animator.GetBoneTransform(l_tuple.Item2),
+                            InputHandler.Instance.GetSourceForBone(l_tuple.Item1, l_tuple.Item3),
+                            InputHandler.Instance.GetSourceForBone(l_tuple.Item2, l_tuple.Item3),
+                            PlaneType.OXZ
+                        );
+                        ReorientateTowards(
+                            PlayerSetup.Instance._animator.GetBoneTransform(l_tuple.Item1),
+                            PlayerSetup.Instance._animator.GetBoneTransform(l_tuple.Item2),
+                            InputHandler.Instance.GetSourceForBone(l_tuple.Item1, l_tuple.Item3),
+                            InputHandler.Instance.GetSourceForBone(l_tuple.Item2, l_tuple.Item3),
+                            PlaneType.OYX
+                        );
+                    }
                 }
 
                 // Bind hands

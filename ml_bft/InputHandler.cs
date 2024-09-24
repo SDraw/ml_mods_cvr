@@ -12,8 +12,8 @@ namespace ml_bft
 
         bool m_active = false;
 
-        HandHandler m_leftHandHandler = null;
-        HandHandler m_rightHandHandler = null;
+        HandHandlerVR m_leftHandHandler = null;
+        HandHandlerVR m_rightHandHandler = null;
 
         internal InputHandler()
         {

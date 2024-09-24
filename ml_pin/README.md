@@ -5,7 +5,7 @@ This can be considered as attempt of [JoinNotifier](https://github.com/knah/VRCM
 # Installation
 * Install [latest MelonLoader](https://github.com/LavaGang/MelonLoader)
 * Get [latest release DLL](../../../releases/latest):
-  * Put `ml_pin.dll` in `Mods` folder of game
+  * Put `PlayersInstanceNotifier.dll` in `Mods` folder of game
   
 # Usage
 Available mod's settings in `Settings - Audio - Players Instance Notifier`:

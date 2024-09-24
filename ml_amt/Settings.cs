@@ -20,7 +20,6 @@ namespace ml_amt
             ProneLimit,
             IKOverrideFly,
             IKOverrideJump,
-            DetectEmotes,
             MassCenter
         };
 
@@ -28,7 +27,6 @@ namespace ml_amt
         public static float ProneLimit { get; private set; } = 0.4f;
         public static bool IKOverrideFly { get; private set; } = true;
         public static bool IKOverrideJump { get; private set; } = true;
-        public static bool DetectEmotes { get; private set; } = true;
         public static bool MassCenter { get; private set; } = true;
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
@@ -51,7 +49,6 @@ namespace ml_amt
                 ms_category.CreateEntry(ModSetting.ProneLimit.ToString(), (int)(ProneLimit * 100f)),
                 ms_category.CreateEntry(ModSetting.IKOverrideFly.ToString(), IKOverrideFly),
                 ms_category.CreateEntry(ModSetting.IKOverrideJump.ToString(), IKOverrideJump),
-                ms_category.CreateEntry(ModSetting.DetectEmotes.ToString(), DetectEmotes),
                 ms_category.CreateEntry(ModSetting.MassCenter.ToString(), MassCenter)
             };
 
@@ -59,7 +56,6 @@ namespace ml_amt
             ProneLimit = ((int)ms_entries[(int)ModSetting.ProneLimit].BoxedValue) * 0.01f;
             IKOverrideFly = (bool)ms_entries[(int)ModSetting.IKOverrideFly].BoxedValue;
             IKOverrideJump = (bool)ms_entries[(int)ModSetting.IKOverrideJump].BoxedValue;
-            DetectEmotes = (bool)ms_entries[(int)ModSetting.DetectEmotes].BoxedValue;
             MassCenter = (bool)ms_entries[(int)ModSetting.MassCenter].BoxedValue;
 
             MelonLoader.MelonCoroutines.Start(WaitMainMenuUi());
@@ -139,13 +135,6 @@ namespace ml_amt
                         {
                             IKOverrideJump = l_value;
                             OnIKOverrideJumpChanged.Invoke(IKOverrideJump);
-                        }
-                        break;
-
-                        case ModSetting.DetectEmotes:
-                        {
-                            DetectEmotes = l_value;
-                            OnDetectEmotesChanged.Invoke(DetectEmotes);
                         }
                         break;
 

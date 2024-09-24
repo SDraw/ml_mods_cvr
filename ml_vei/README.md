@@ -4,7 +4,7 @@ This mod changes input behaviour for Vive controllers.
 # Installation
 * Install [latest MelonLoader](https://github.com/LavaGang/MelonLoader)
 * Get [latest release DLL](../../../releases/latest):
-  * Put `ml_vei.dll` in `Mods` folder of game
+  * Put `ViveExtendedInput.dll` in `Mods` folder of game
   
 # Usage
 Available mod's settings in `Settings - Input & Key-Bindings - Vive Extended Input`:

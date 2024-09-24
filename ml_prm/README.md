@@ -4,7 +4,7 @@ This mod turns player's avatar into ragdoll puppet.
 # Installation
 * Install [latest MelonLoader](https://github.com/LavaGang/MelonLoader)
 * Get [latest release DLL](../../../releases/latest):
-  * Put `ml_prm.dll` in `Mods` folder of game
+  * Put `PlayerRagdollMod.dll` in `Mods` folder of game
   
 # Usage
 * Press `R` to turn into ragdoll and back.
@@ -73,6 +73,8 @@ You can use this mod's functions within your mod. To do this you need:
 Available methods:
 * ```bool IsRagdolled()```
 * ```void SwitchRagdoll()```
+* ```void Ragdoll()```
+* ```void Unragdoll()```
 
 # Notes
 * If ragdoll state is enabled during emote, remote players see whole emote playing while local player sees ragdolling. It's tied to how game handles remote players, currently can be prevented with (choose one):

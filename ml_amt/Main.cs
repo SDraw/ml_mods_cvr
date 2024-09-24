@@ -1,33 +1,33 @@
-﻿using ABI_RC.Core.Player;
-using System.Collections;
+﻿using System.Collections;
+using UnityEngine;
 
 namespace ml_amt
 {
     public class AvatarMotionTweaker : MelonLoader.MelonMod
     {
-        MotionTweaker m_localTweaker = null;
+        MotionTweaker m_tweaker = null;
 
         public override void OnInitializeMelon()
         {
             Settings.Init();
             GameEvents.Init(HarmonyInstance);
 
-            MelonLoader.MelonCoroutines.Start(WaitForLocalPlayer());
+            MelonLoader.MelonCoroutines.Start(WaitForRootLogic());
         }
 
-        IEnumerator WaitForLocalPlayer()
+        IEnumerator WaitForRootLogic()
         {
-            while(PlayerSetup.Instance == null)
+            while(ABI_RC.Core.RootLogic.Instance == null)
                 yield return null;
 
-            m_localTweaker = PlayerSetup.Instance.gameObject.AddComponent<MotionTweaker>();
+            m_tweaker = new GameObject("[AvatarMotionTweaker]").AddComponent<MotionTweaker>();
         }
 
         public override void OnDeinitializeMelon()
         {
-            if(m_localTweaker != null)
-                UnityEngine.Object.Destroy(m_localTweaker);
-            m_localTweaker = null;
+            if(m_tweaker != null)
+                Object.Destroy(m_tweaker.gameObject);
+            m_tweaker = null;
         }
     }
 }

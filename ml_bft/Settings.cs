@@ -24,13 +24,15 @@ namespace ml_bft
             SkeletalInput = 0,
             MotionRange,
             ShowHands,
-            MechanimFilter
+            MechanimFilter,
+            FixFingers
         }
 
         public static bool SkeletalInput { get; private set; } = false;
         public static MotionRangeType MotionRange { get; private set; } = MotionRangeType.WithController;
         public static bool ShowHands { get; private set; } = false;
         public static bool MechanimFilter { get; private set; } = true;
+        public static bool FixFingers { get; private set; } = true;
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
@@ -39,6 +41,7 @@ namespace ml_bft
         public static readonly SettingEvent<MotionRangeType> OnMotionRangeChanged = new SettingEvent<MotionRangeType>();
         public static readonly SettingEvent<bool> OnShowHandsChanged = new SettingEvent<bool>();
         public static readonly SettingEvent<bool> OnMechanimFilterChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<bool> OnFixFingersChanged = new SettingEvent<bool>();
 
         internal static void Init()
         {
@@ -49,12 +52,14 @@ namespace ml_bft
                 ms_category.CreateEntry(ModSetting.SkeletalInput.ToString(), SkeletalInput),
                 ms_category.CreateEntry(ModSetting.MotionRange.ToString(), (int)MotionRange),
                 ms_category.CreateEntry(ModSetting.ShowHands.ToString(), ShowHands),
-                ms_category.CreateEntry(ModSetting.MechanimFilter.ToString(), MechanimFilter)
+                ms_category.CreateEntry(ModSetting.MechanimFilter.ToString(), MechanimFilter),
+                ms_category.CreateEntry(ModSetting.FixFingers.ToString(), FixFingers)
             };
 
             SkeletalInput = (bool)ms_entries[(int)ModSetting.SkeletalInput].BoxedValue;
             MotionRange = (MotionRangeType)(int)ms_entries[(int)ModSetting.MotionRange].BoxedValue;
             ShowHands = (bool)ms_entries[(int)ModSetting.ShowHands].BoxedValue;
+            FixFingers = (bool)ms_entries[(int)ModSetting.FixFingers].BoxedValue;
 
             MelonLoader.MelonCoroutines.Start(WaitMainMenuUi());
         }
@@ -108,6 +113,13 @@ namespace ml_bft
                         {
                             MechanimFilter = l_value;
                             OnMechanimFilterChanged.Invoke(MechanimFilter);
+                        }
+                        break;
+                        
+                        case ModSetting.FixFingers:
+                        {
+                            FixFingers = l_value;
+                            OnFixFingersChanged.Invoke(FixFingers);
                         }
                         break;
                     }
