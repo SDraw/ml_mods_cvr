@@ -5,9 +5,10 @@
     <Platforms>x64</Platforms>
     <PackageId>PlayerMovementCopycat</PackageId>
     <Authors>SDraw</Authors>
-    <Company>None</Company>
+    <Company>SDraw</Company>
     <Product>PlayerMovementCopycat</Product>
-    <Version>1.0.8</Version>
+    <Version>1.1.0</Version>
+    <AssemblyName>PlayerMovementCopycat</AssemblyName>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

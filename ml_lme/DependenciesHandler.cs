@@ -8,6 +8,8 @@ namespace ml_lme
 {
     static class DependenciesHandler
     {
+        readonly static string ms_namespace = typeof(DependenciesHandler).Namespace;
+
         static readonly List<string> ms_libraries = new List<string>()
         {
             "LeapC.dll"
@@ -16,11 +18,10 @@ namespace ml_lme
         public static void ExtractDependencies()
         {
             Assembly l_assembly = Assembly.GetExecutingAssembly();
-            string l_assemblyName = l_assembly.GetName().Name;
 
             foreach(string l_library in ms_libraries)
             {
-                Stream l_libraryStream = l_assembly.GetManifestResourceStream(l_assemblyName + ".resources." + l_library);
+                Stream l_libraryStream = l_assembly.GetManifestResourceStream(ms_namespace + ".resources." + l_library);
 
                 if(!File.Exists(l_library))
                 {

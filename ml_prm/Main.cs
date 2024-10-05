@@ -42,14 +42,9 @@ namespace ml_prm
         System.Collections.IEnumerator WaitForWhitelist()
         {
             // Whitelist the toggle script
-            FieldInfo l_field = typeof(SharedFilter).GetField("_localComponentWhitelist", BindingFlags.NonPublic | BindingFlags.Static);
-            HashSet<Type> l_hashSet = l_field?.GetValue(null) as HashSet<Type>;
-            while(l_hashSet == null)
-            {
-                l_hashSet = l_field?.GetValue(null) as HashSet<Type>;
+            while(SharedFilter.LocalComponentWhitelist == null)
                 yield return null;
-            }
-            l_hashSet.Add(typeof(RagdollToggle));
+            SharedFilter.LocalComponentWhitelist.Add(typeof(RagdollToggle));
         }
     }
 }

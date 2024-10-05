@@ -1,5 +1,5 @@
 # Vive Extended Input
-This mod changes input behaviour for Vive controllers.
+This mod adds few changes of input behaviour for Vive controllers.
 
 # Installation
 * Install [latest MelonLoader](https://github.com/LavaGang/MelonLoader)

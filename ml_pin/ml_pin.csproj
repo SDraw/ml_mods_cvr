@@ -5,9 +5,9 @@
     <Platforms>x64</Platforms>
     <PackageId>PlayersInstanceNotifier</PackageId>
     <Authors>SDraw</Authors>
-    <Company>None</Company>
+    <Company>SDraw</Company>
     <Product>PlayersInstanceNotifier</Product>
-    <Version>1.0.9</Version>
+    <Version>1.1.0</Version>
     <AssemblyName>PlayersInstanceNotifier</AssemblyName>
   </PropertyGroup>
 

@@ -2,9 +2,9 @@
 using ABI_RC.Core.Player;
 using ABI_RC.Core.Player.EyeMovement;
 using ABI_RC.Systems.FaceTracking;
+using ABI_RC.Systems.VRModeSwitch;
 using RootMotion.FinalIK;
 using System;
-using System.Reflection;
 using UnityEngine;
 using ViveSR.anipal.Lip;
 
@@ -13,11 +13,7 @@ namespace ml_dht
     [DisallowMultipleComponent]
     class HeadTracked : MonoBehaviour
     {
-        static FieldInfo ms_emotePlaying = typeof(PlayerSetup).GetField("_emotePlaying", BindingFlags.NonPublic | BindingFlags.Instance);
-
-        bool m_enabled = false;
-        bool m_headTracking = true;
-        float m_smoothing = 0.5f;
+        static HeadTracked ms_instance = null;
 
         CVRAvatar m_avatarDescriptor = null;
         Transform m_camera = null;
@@ -34,6 +30,9 @@ namespace ml_dht
         Quaternion m_bindRotation;
         Quaternion m_lastHeadRotation;
 
+        DataParser m_dataParser = null;
+        float m_smoothing = 0.5f;
+
         internal HeadTracked()
         {
             m_lipData = new LipData_v2();
@@ -45,14 +44,28 @@ namespace ml_dht
         }
 
         // Unity events
+        void Awake()
+        {
+            if(ms_instance != null)
+            {
+                DestroyImmediate(this);
+                return;
+            }
+
+            DontDestroyOnLoad(this);
+
+            ms_instance = this;
+            m_dataParser = new DataParser();
+        }
+
         void Start()
         {
-            OnEnabledChanged(Settings.Enabled);
-            OnHeadTrackingChanged(Settings.HeadTracking);
             OnSmoothingChanged(Settings.Smoothing);
 
-            Settings.OnEnabledChanged.AddListener(this.OnEnabledChanged);
-            Settings.OnHeadTrackingChanged.AddListener(this.OnHeadTrackingChanged);
+            OnVRModeSwitch(true);
+
+            Settings.OnEnabledChanged.AddListener(this.OnEnabledOrHeadTrackingChanged);
+            Settings.OnHeadTrackingChanged.AddListener(this.OnEnabledOrHeadTrackingChanged);
             Settings.OnSmoothingChanged.AddListener(this.OnSmoothingChanged);
 
             GameEvents.OnAvatarClear.AddListener(this.OnAvatarClear);
@@ -60,12 +73,19 @@ namespace ml_dht
             GameEvents.OnAvatarReuse.AddListener(this.OnAvatarReuse);
             GameEvents.OnEyeControllerUpdate.AddListener(this.OnEyeControllerUpdate);
             GameEvents.OnFaceTrackingUpdate.AddListener(this.UpdateFaceTracking);
+
+            VRModeSwitchEvents.OnCompletedVRModeSwitch.AddListener(this.OnVRModeSwitch);
         }
 
         void OnDestroy()
         {
-            Settings.OnEnabledChanged.RemoveListener(this.OnEnabledChanged);
-            Settings.OnHeadTrackingChanged.RemoveListener(this.OnHeadTrackingChanged);
+            if(ms_instance == this)
+                ms_instance = null;
+
+            m_dataParser = null;
+
+            Settings.OnEnabledChanged.RemoveListener(this.OnEnabledOrHeadTrackingChanged);
+            Settings.OnHeadTrackingChanged.RemoveListener(this.OnEnabledOrHeadTrackingChanged);
             Settings.OnSmoothingChanged.RemoveListener(this.OnSmoothingChanged);
 
             GameEvents.OnAvatarClear.RemoveListener(this.OnAvatarClear);
@@ -73,12 +93,20 @@ namespace ml_dht
             GameEvents.OnAvatarReuse.RemoveListener(this.OnAvatarReuse);
             GameEvents.OnEyeControllerUpdate.RemoveListener(this.OnEyeControllerUpdate);
             GameEvents.OnFaceTrackingUpdate.RemoveListener(this.UpdateFaceTracking);
+
+            VRModeSwitchEvents.OnCompletedVRModeSwitch.RemoveListener(this.OnVRModeSwitch);
         }
 
         void Update()
         {
             if(m_lipDataSent)
                 m_lipDataSent = false;
+
+            if(Settings.Enabled && (m_dataParser != null))
+            {
+                m_dataParser.Update();
+                UpdateTrackingData(ref m_dataParser.GetLatestTrackingData());
+            }
         }
 
         // Tracking updates
@@ -98,11 +126,11 @@ namespace ml_dht
 
         void OnLookIKPostUpdate()
         {
-            if(m_enabled && m_headTracking && (m_headBone != null))
+            if(Settings.Enabled && Settings.HeadTracking && (m_headBone != null))
             {
                 m_lastHeadRotation = Quaternion.Slerp(m_lastHeadRotation, m_avatarDescriptor.transform.rotation * (m_headRotation * m_bindRotation), m_smoothing);
 
-                if(!(bool)ms_emotePlaying.GetValue(PlayerSetup.Instance))
+                if(!PlayerSetup.Instance.IsEmotePlaying())
                     m_headBone.rotation = m_lastHeadRotation;
             }
         }
@@ -142,7 +170,7 @@ namespace ml_dht
 
         void OnEyeControllerUpdate(EyeMovementController p_component)
         {
-            if(m_enabled)
+            if(this.enabled && Settings.Enabled)
             {
                 // Gaze
                 if(Settings.EyeTracking && (m_camera != null))
@@ -162,7 +190,7 @@ namespace ml_dht
 
         void UpdateFaceTracking(CVRFaceTracking p_component, GameEvents.EventResult p_result)
         {
-            if(p_component.isLocal && p_component.UseFacialTracking && m_enabled && Settings.FaceTracking)
+            if(this.enabled && Settings.Enabled && Settings.FaceTracking && p_component.isLocal && p_component.UseFacialTracking )
             {
                 if(!m_lipDataSent)
                 {
@@ -176,33 +204,27 @@ namespace ml_dht
             }
         }
 
-        // Settings
-        void OnEnabledChanged(bool p_state)
+        void OnVRModeSwitch(bool p_state)
         {
-            if(m_enabled != p_state)
+            try
             {
-                m_enabled = p_state;
-                TryRestoreHeadRotation();
+                this.enabled = !Utils.IsInVR();
+            }
+            catch(Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
             }
         }
-        void OnHeadTrackingChanged(bool p_state)
+
+        // Settings
+        void OnEnabledOrHeadTrackingChanged(bool p_state)
         {
-            if(m_headTracking != p_state)
-            {
-                m_headTracking = p_state;
-                TryRestoreHeadRotation();
-            }
+            if(Settings.Enabled && Settings.HeadTracking)
+                m_lastHeadRotation = ((m_headBone != null) ? m_headBone.rotation : m_bindRotation);
         }
         void OnSmoothingChanged(float p_value)
         {
             m_smoothing = 1f - Mathf.Clamp(p_value, 0f, 0.99f);
-        }
-
-        // Arbitrary
-        void TryRestoreHeadRotation()
-        {
-            if(m_enabled && m_headTracking)
-                m_lastHeadRotation = ((m_headBone != null) ? m_headBone.rotation : m_bindRotation);
         }
     }
 }

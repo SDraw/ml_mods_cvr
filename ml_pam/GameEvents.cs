@@ -34,7 +34,7 @@ namespace ml_pam
         public static readonly GameEvent OnAvatarSetup = new GameEvent();
         public static readonly GameEvent OnAvatarClear = new GameEvent();
         public static readonly GameEvent OnAvatarReuse = new GameEvent();
-        public static readonly GameEvent<float> OnPlayspaceScale = new GameEvent<float>();
+        public static readonly GameEvent<float> OnIKScaling = new GameEvent<float>();
         public static readonly GameEvent<CVRPickupObject, Vector3> OnPickupGrab = new GameEvent<CVRPickupObject, Vector3>();
         public static readonly GameEvent<CVRPickupObject> OnPickupDrop = new GameEvent<CVRPickupObject>();
 
@@ -61,9 +61,9 @@ namespace ml_pam
                 );
 
                 p_instance.Patch(
-                    typeof(PlayerSetup).GetMethod("SetPlaySpaceScale", BindingFlags.NonPublic | BindingFlags.Instance),
+                    typeof(PlayerSetup).GetMethod("SetupIKScaling", BindingFlags.NonPublic | BindingFlags.Instance),
                     null,
-                    new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnPlayspaceScale_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
+                    new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnSetupIKScaling_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
                 );
 
                 p_instance.Patch(
@@ -120,11 +120,11 @@ namespace ml_pam
             }
         }
 
-        static void OnPlayspaceScale_Postfix(float ____avatarScaleRelation)
+        static void OnSetupIKScaling_Postfix(ref UnityEngine.Vector3 ___scaleDifference)
         {
             try
             {
-                OnPlayspaceScale.Invoke(____avatarScaleRelation);
+                OnIKScaling.Invoke(1f + ___scaleDifference.y);
             }
             catch(Exception e)
             {

@@ -19,7 +19,8 @@ namespace ml_pam
             Enabled = 0,
             GrabOffset,
             LeadHand,
-            HandsExtension
+            HandsExtension,
+            ExtensionSpeed
         }
         public enum LeadHand
         {
@@ -29,9 +30,10 @@ namespace ml_pam
         }
 
         public static bool Enabled { get; private set; } = true;
-        public static float GrabOffset { get; private set; } = 0.25f;
+        public static float GrabOffset { get; private set; } = 0.5f;
         public static LeadHand LeadingHand { get; private set; } = LeadHand.Right;
         public static bool HandsExtension { get; private set; } = true;
+        public static float ExtensionSpeed { get; private set; } = 10f;
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
@@ -40,6 +42,7 @@ namespace ml_pam
         public static readonly SettingEvent<float> OnGrabOffsetChanged = new SettingEvent<float>();
         public static readonly SettingEvent<LeadHand> OnLeadingHandChanged = new SettingEvent<LeadHand>();
         public static readonly SettingEvent<bool> OnHandsExtensionChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<float> OnExtensionSpeedChanged = new SettingEvent<float>();
 
         internal static void Init()
         {
@@ -51,12 +54,14 @@ namespace ml_pam
                 ms_category.CreateEntry(ModSetting.GrabOffset.ToString(), (int)(GrabOffset * 100f)),
                 ms_category.CreateEntry(ModSetting.LeadHand.ToString(), (int)LeadHand.Right),
                 ms_category.CreateEntry(ModSetting.HandsExtension.ToString(), HandsExtension),
+                ms_category.CreateEntry(ModSetting.ExtensionSpeed.ToString(), (int)ExtensionSpeed),
             };
 
             Enabled = (bool)ms_entries[(int)ModSetting.Enabled].BoxedValue;
             GrabOffset = (int)ms_entries[(int)ModSetting.GrabOffset].BoxedValue * 0.01f;
             LeadingHand = (LeadHand)(int)ms_entries[(int)ModSetting.LeadHand].BoxedValue;
             HandsExtension = (bool)ms_entries[(int)ModSetting.HandsExtension].BoxedValue;
+            ExtensionSpeed = Math.Clamp((int)ms_entries[(int)ModSetting.ExtensionSpeed].BoxedValue, 1f, 50f);
 
             MelonLoader.MelonCoroutines.Start(WaitMainMenuUi());
         }
@@ -72,6 +77,7 @@ namespace ml_pam
 
             ViewManager.Instance.gameMenuView.Listener.ReadyForBindings += () =>
             {
+
                 ViewManager.Instance.gameMenuView.View.BindCall("OnToggleUpdate_" + ms_category.Identifier, new Action<string, string>(OnToggleUpdate));
                 ViewManager.Instance.gameMenuView.View.BindCall("OnSliderUpdate_" + ms_category.Identifier, new Action<string, string>(OnSliderUpdate));
                 ViewManager.Instance.gameMenuView.View.BindCall("OnDropdownUpdate_" + ms_category.Identifier, new Action<string, string>(OnDropdownUpdate));
@@ -129,6 +135,13 @@ namespace ml_pam
                         {
                             GrabOffset = l_value * 0.01f;
                             OnGrabOffsetChanged.Invoke(GrabOffset);
+                        }
+                        break;
+
+                        case ModSetting.ExtensionSpeed:
+                        {
+                            ExtensionSpeed = l_value;
+                            OnExtensionSpeedChanged.Invoke(ExtensionSpeed);
                         }
                         break;
                     }

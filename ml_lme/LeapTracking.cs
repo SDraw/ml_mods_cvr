@@ -1,6 +1,4 @@
 ﻿using ABI_RC.Core.Player;
-using ABI_RC.Systems.VRModeSwitch;
-using System.Collections;
 using UnityEngine;
 
 namespace ml_lme
@@ -13,8 +11,8 @@ namespace ml_lme
         static readonly Quaternion ms_hmdRotation = new Quaternion(0f, 0.7071068f, 0.7071068f, 0f);
         static readonly Quaternion ms_screentopRotation = new Quaternion(0f, 0f, -1f, 0f);
 
-        bool m_inVR = false;
-
+        Transform m_root = null;
+        Transform m_offsetPoint = null;
         GameObject m_leapHands = null;
         LeapHand m_leapHandLeft = null;
         LeapHand m_leapHandRight = null;
@@ -22,26 +20,33 @@ namespace ml_lme
         Transform m_leapElbowRight = null;
         GameObject m_leapControllerModel = null;
 
-        float m_scaleRelation = 1f;
-
         void Start()
         {
-            if((Instance != null) && (Instance != this))
+            if(Instance != null)
             {
                 Object.DestroyImmediate(this);
                 return;
             }
 
             Instance = this;
-            m_inVR = Utils.IsInVR();
+
+            m_root = new GameObject("Root").transform;
+            m_root.parent = this.transform;
+            m_root.localPosition = Vector3.zero;
+            m_root.localRotation = Quaternion.identity;
+
+            m_offsetPoint = new GameObject("OffsetPoint").transform;
+            m_offsetPoint.parent = m_root;
+            m_offsetPoint.localPosition = Vector3.zero;
+            m_offsetPoint.localRotation = Quaternion.identity;
 
             m_leapElbowLeft = new GameObject("LeapElbowLeft").transform;
-            m_leapElbowLeft.parent = this.transform;
+            m_leapElbowLeft.parent = m_offsetPoint;
             m_leapElbowLeft.localPosition = Vector3.zero;
             m_leapElbowLeft.localRotation = Quaternion.identity;
 
             m_leapElbowRight = new GameObject("LeapElbowRight").transform;
-            m_leapElbowRight.parent = this.transform;
+            m_leapElbowRight.parent = m_offsetPoint;
             m_leapElbowRight.localPosition = Vector3.zero;
             m_leapElbowRight.localRotation = Quaternion.identity;
 
@@ -49,7 +54,7 @@ namespace ml_lme
             if(m_leapControllerModel != null)
             {
                 m_leapControllerModel.name = "LeapModel";
-                m_leapControllerModel.transform.parent = this.transform;
+                m_leapControllerModel.transform.parent = m_offsetPoint;
                 m_leapControllerModel.transform.localPosition = Vector3.zero;
                 m_leapControllerModel.transform.localRotation = Quaternion.identity;
             }
@@ -58,7 +63,7 @@ namespace ml_lme
             if(m_leapHands != null)
             {
                 m_leapHands.name = "LeapHands";
-                m_leapHands.transform.parent = this.transform;
+                m_leapHands.transform.parent = m_offsetPoint;
                 m_leapHands.transform.localPosition = Vector3.zero;
                 m_leapHands.transform.localRotation = Quaternion.identity;
 
@@ -69,32 +74,19 @@ namespace ml_lme
             OnModelVisibilityChanged(Settings.ModelVisibility);
             OnVisualHandsChanged(Settings.VisualHands);
             OnTrackingModeChanged(Settings.TrackingMode);
+            OnHeadAttachChanged(Settings.HeadAttach);
             OnRootAngleChanged(Settings.RootAngle);
 
-            MelonLoader.MelonCoroutines.Start(WaitForLocalPlayer());
-
-            VRModeSwitchEvents.OnInitializeXR.AddListener(this.OnAvatarSetup);
-            VRModeSwitchEvents.OnDeinitializeXR.AddListener(this.OnAvatarSetup);
-
-            Settings.OnDesktopOffsetChanged.AddListener(this.OnDesktopOffsetChanged);
+            Settings.OnEnabledChanged.AddListener(this.OnEnabledChanged);
             Settings.OnModelVisibilityChanged.AddListener(this.OnModelVisibilityChanged);
             Settings.OnVisualHandsChanged.AddListener(this.OnVisualHandsChanged);
             Settings.OnTrackingModeChanged.AddListener(this.OnTrackingModeChanged);
-            Settings.OnRootAngleChanged.AddListener(this.OnRootAngleChanged);
             Settings.OnHeadAttachChanged.AddListener(this.OnHeadAttachChanged);
             Settings.OnHeadOffsetChanged.AddListener(this.OnHeadOffsetChanged);
+            Settings.OnDesktopOffsetChanged.AddListener(this.OnDesktopOffsetChanged);
+            Settings.OnRootAngleChanged.AddListener(this.OnRootAngleChanged);
 
-            GameEvents.OnAvatarClear.AddListener(this.OnAvatarClear);
-            GameEvents.OnAvatarSetup.AddListener(this.OnAvatarSetup);
             GameEvents.OnPlayspaceScale.AddListener(this.OnPlayspaceScale);
-        }
-
-        IEnumerator WaitForLocalPlayer()
-        {
-            while(PlayerSetup.Instance == null)
-                yield return null;
-
-            OnHeadAttachChanged(Settings.HeadAttach);
         }
 
         void OnDestroy()
@@ -120,19 +112,23 @@ namespace ml_lme
                 Object.Destroy(m_leapControllerModel);
             m_leapControllerModel = null;
 
-            VRModeSwitchEvents.OnInitializeXR.RemoveListener(this.OnAvatarSetup);
-            VRModeSwitchEvents.OnDeinitializeXR.RemoveListener(this.OnAvatarSetup);
+            if(m_offsetPoint != null)
+                Destroy(m_offsetPoint.gameObject);
+            m_offsetPoint = null;
 
-            Settings.OnDesktopOffsetChanged.RemoveListener(this.OnDesktopOffsetChanged);
+            if(m_root != null)
+                Destroy(m_root.gameObject);
+            m_root = null;
+
+            Settings.OnEnabledChanged.RemoveListener(this.OnEnabledChanged);
             Settings.OnModelVisibilityChanged.RemoveListener(this.OnModelVisibilityChanged);
             Settings.OnVisualHandsChanged.RemoveListener(this.OnVisualHandsChanged);
             Settings.OnTrackingModeChanged.RemoveListener(this.OnTrackingModeChanged);
-            Settings.OnRootAngleChanged.RemoveListener(this.OnRootAngleChanged);
             Settings.OnHeadAttachChanged.RemoveListener(this.OnHeadAttachChanged);
             Settings.OnHeadOffsetChanged.RemoveListener(this.OnHeadOffsetChanged);
+            Settings.OnDesktopOffsetChanged.RemoveListener(this.OnDesktopOffsetChanged);
+            Settings.OnRootAngleChanged.RemoveListener(this.OnRootAngleChanged);
 
-            GameEvents.OnAvatarClear.RemoveListener(this.OnAvatarClear);
-            GameEvents.OnAvatarSetup.RemoveListener(this.OnAvatarSetup);
             GameEvents.OnPlayspaceScale.RemoveListener(this.OnPlayspaceScale);
         }
 
@@ -140,6 +136,10 @@ namespace ml_lme
         {
             if(Settings.Enabled)
             {
+                Transform l_camera = PlayerSetup.Instance.GetActiveCamera().transform;
+                m_root.position = l_camera.position;
+                m_root.rotation = (Settings.HeadAttach ? l_camera.rotation : PlayerSetup.Instance.GetPlayerRotation());
+
                 LeapParser.LeapData l_data = LeapManager.Instance.GetLatestData();
 
                 if(l_data.m_leftHand.m_present)
@@ -185,21 +185,22 @@ namespace ml_lme
         }
 
         // Settings
-        void OnDesktopOffsetChanged(Vector3 p_offset)
+        void OnEnabledChanged(bool p_state)
         {
-            if(!Settings.HeadAttach)
-                this.transform.localPosition = p_offset * (!m_inVR ? m_scaleRelation : 1f);
+            OnModelVisibilityChanged(Settings.ModelVisibility);
+            OnVisualHandsChanged(Settings.VisualHands);
         }
 
         void OnModelVisibilityChanged(bool p_state)
         {
-            m_leapControllerModel.SetActive(p_state);
+            if(m_leapControllerModel != null)
+                m_leapControllerModel.SetActive(Settings.Enabled && p_state);
         }
 
         void OnVisualHandsChanged(bool p_state)
         {
-            m_leapHandLeft?.SetMeshActive(p_state);
-            m_leapHandRight?.SetMeshActive(p_state);
+            m_leapHandLeft?.SetMeshActive(Settings.Enabled && p_state);
+            m_leapHandRight?.SetMeshActive(Settings.Enabled && p_state);
         }
 
         void OnTrackingModeChanged(Settings.LeapTrackingMode p_mode)
@@ -218,51 +219,42 @@ namespace ml_lme
             }
         }
 
-        void OnRootAngleChanged(Vector3 p_angle)
-        {
-            this.transform.localRotation = Quaternion.Euler(p_angle);
-        }
-
         void OnHeadAttachChanged(bool p_state)
         {
-            if(!m_inVR)
-            {
-                this.transform.parent = (p_state ? PlayerSetup.Instance.desktopCamera.transform : PlayerSetup.Instance.desktopCameraRig.transform);
-                this.transform.localPosition = (p_state ? Settings.HeadOffset : Settings.DesktopOffset) * m_scaleRelation;
-            }
-            else
-            {
-                this.transform.parent = (p_state ? PlayerSetup.Instance.vrCamera.transform : PlayerSetup.Instance.vrCameraRig.transform);
-                this.transform.localPosition = (p_state ? Settings.HeadOffset : Settings.DesktopOffset);
-            }
-
-            this.transform.localScale = Vector3.one * (!m_inVR ? m_scaleRelation : 1f);
-            this.transform.localRotation = Quaternion.Euler(Settings.RootAngle);
+            if(m_offsetPoint != null)
+                m_offsetPoint.localPosition = (p_state ? Settings.HeadOffset : Settings.DesktopOffset);
         }
 
         void OnHeadOffsetChanged(Vector3 p_offset)
         {
-            if(Settings.HeadAttach)
-                this.transform.localPosition = p_offset * (!m_inVR ? m_scaleRelation : 1f);
+            if(Settings.HeadAttach && (m_offsetPoint != null))
+                m_offsetPoint.localPosition = p_offset;
+        }
+
+        void OnDesktopOffsetChanged(Vector3 p_offset)
+        {
+            if(!Settings.HeadAttach && (m_offsetPoint != null))
+                m_offsetPoint.localPosition = p_offset;
+        }
+
+        void OnRootAngleChanged(Vector3 p_angle)
+        {
+            if(m_offsetPoint != null)
+                m_offsetPoint.localRotation = Quaternion.Euler(p_angle);
         }
 
         // Game events
-        void OnAvatarClear()
-        {
-            m_scaleRelation = 1f;
-            OnHeadAttachChanged(Settings.HeadAttach);
-        }
-
-        void OnAvatarSetup()
-        {
-            m_inVR = Utils.IsInVR();
-            OnHeadAttachChanged(Settings.HeadAttach);
-        }
-
         void OnPlayspaceScale(float p_relation)
         {
-            m_scaleRelation = p_relation;
-            OnHeadAttachChanged(Settings.HeadAttach);
+            try
+            {
+                if(m_root != null)
+                    m_root.localScale = Vector3.one * p_relation;
+            }
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
         }
 
         // Utils

@@ -8,6 +8,7 @@ namespace ml_pin
     static class ResourcesHandler
     {
         const string c_modName = "PlayersInstanceNotifier";
+        readonly static string ms_namespace = typeof(ResourcesHandler).Namespace;
 
         static readonly List<string> ms_audioResources = new List<string>()
         {
@@ -45,11 +46,10 @@ namespace ml_pin
         static void ExtractAudioFile(string p_name, string p_path)
         {
             Assembly l_assembly = Assembly.GetExecutingAssembly();
-            string l_assemblyName = l_assembly.GetName().Name;
 
             try
             {
-                Stream l_resourceStream = l_assembly.GetManifestResourceStream(l_assemblyName + ".resources." + p_name);
+                Stream l_resourceStream = l_assembly.GetManifestResourceStream(ms_namespace + ".resources." + p_name);
                 Stream l_fileStream = File.Create(p_path);
                 l_resourceStream.CopyTo(l_fileStream);
                 l_fileStream.Flush();
@@ -66,11 +66,10 @@ namespace ml_pin
         {
             string l_result = "";
             Assembly l_assembly = Assembly.GetExecutingAssembly();
-            string l_assemblyName = l_assembly.GetName().Name;
 
             try
             {
-                Stream l_libraryStream = l_assembly.GetManifestResourceStream(l_assemblyName + ".resources." + p_name);
+                Stream l_libraryStream = l_assembly.GetManifestResourceStream(ms_namespace + ".resources." + p_name);
                 StreamReader l_streadReader = new StreamReader(l_libraryStream);
                 l_result = l_streadReader.ReadToEnd();
             }

@@ -7,6 +7,8 @@ namespace ml_lme
 {
     static class AssetsHandler
     {
+        readonly static string ms_namespace = typeof(AssetsHandler).Namespace;
+
         static readonly List<string> ms_assets = new List<string>()
         {
             "leapmotion_controller.asset",
@@ -19,13 +21,12 @@ namespace ml_lme
         public static void Load()
         {
             Assembly l_assembly = Assembly.GetExecutingAssembly();
-            string l_assemblyName = l_assembly.GetName().Name;
 
             foreach(string l_assetName in ms_assets)
             {
                 try
                 {
-                    Stream l_assetStream = l_assembly.GetManifestResourceStream(l_assemblyName + ".resources." + l_assetName);
+                    Stream l_assetStream = l_assembly.GetManifestResourceStream(ms_namespace + ".resources." + l_assetName);
                     if(l_assetStream != null)
                     {
                         MemoryStream l_memorySteam = new MemoryStream((int)l_assetStream.Length);

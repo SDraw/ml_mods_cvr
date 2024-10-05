@@ -45,18 +45,28 @@ namespace ml_bft
             HumanBodyBones.RightRingProximal, HumanBodyBones.RightRingIntermediate, HumanBodyBones.RightRingDistal,
             HumanBodyBones.RightLittleProximal, HumanBodyBones.RightLittleIntermediate, HumanBodyBones.RightLittleDistal
         };
-        static readonly (HumanBodyBones, HumanBodyBones, bool)[] ms_rotationFixChains =
+        static readonly (HumanBodyBones, HumanBodyBones, bool)[] ms_fingersChains =
         {
-            (HumanBodyBones.LeftThumbProximal,HumanBodyBones.LeftThumbIntermediate,true), (HumanBodyBones.LeftThumbIntermediate, HumanBodyBones.LeftThumbDistal,true),
-            (HumanBodyBones.LeftIndexProximal,HumanBodyBones.LeftIndexIntermediate,true), (HumanBodyBones.LeftIndexIntermediate, HumanBodyBones.LeftIndexDistal,true),
-            (HumanBodyBones.LeftMiddleProximal,HumanBodyBones.LeftMiddleIntermediate,true), (HumanBodyBones.LeftMiddleIntermediate, HumanBodyBones.LeftMiddleDistal,true),
-            (HumanBodyBones.LeftRingProximal,HumanBodyBones.LeftRingIntermediate,true), (HumanBodyBones.LeftRingIntermediate, HumanBodyBones.LeftRingDistal,true),
-            (HumanBodyBones.LeftLittleProximal,HumanBodyBones.LeftLittleIntermediate,true), (HumanBodyBones.LeftLittleIntermediate, HumanBodyBones.LeftLittleDistal,true),
-            (HumanBodyBones.RightThumbProximal,HumanBodyBones.RightThumbIntermediate,false), (HumanBodyBones.RightThumbIntermediate, HumanBodyBones.RightThumbDistal,false),
-            (HumanBodyBones.RightIndexProximal,HumanBodyBones.RightIndexIntermediate,false), (HumanBodyBones.RightIndexIntermediate, HumanBodyBones.RightIndexDistal,false),
-            (HumanBodyBones.RightMiddleProximal,HumanBodyBones.RightMiddleIntermediate,false), (HumanBodyBones.RightMiddleIntermediate, HumanBodyBones.RightMiddleDistal,false),
-            (HumanBodyBones.RightRingProximal,HumanBodyBones.RightRingIntermediate,false), (HumanBodyBones.RightRingIntermediate, HumanBodyBones.RightRingDistal,false),
-            (HumanBodyBones.RightLittleProximal,HumanBodyBones.RightLittleIntermediate,false), (HumanBodyBones.RightLittleIntermediate, HumanBodyBones.RightLittleDistal,false)
+            (HumanBodyBones.LeftThumbProximal,HumanBodyBones.LeftThumbIntermediate,true), (HumanBodyBones.LeftThumbIntermediate, HumanBodyBones.LeftThumbDistal,true), (HumanBodyBones.LeftThumbDistal,HumanBodyBones.LastBone,true),
+            (HumanBodyBones.LeftIndexProximal,HumanBodyBones.LeftIndexIntermediate,true), (HumanBodyBones.LeftIndexIntermediate, HumanBodyBones.LeftIndexDistal,true), (HumanBodyBones.LeftIndexDistal,HumanBodyBones.LastBone,true),
+            (HumanBodyBones.LeftMiddleProximal,HumanBodyBones.LeftMiddleIntermediate,true), (HumanBodyBones.LeftMiddleIntermediate, HumanBodyBones.LeftMiddleDistal,true), (HumanBodyBones.LeftMiddleDistal,HumanBodyBones.LastBone,true),
+            (HumanBodyBones.LeftRingProximal,HumanBodyBones.LeftRingIntermediate,true), (HumanBodyBones.LeftRingIntermediate, HumanBodyBones.LeftRingDistal,true), (HumanBodyBones.LeftRingDistal,HumanBodyBones.LastBone,true),
+            (HumanBodyBones.LeftLittleProximal,HumanBodyBones.LeftLittleIntermediate,true), (HumanBodyBones.LeftLittleIntermediate, HumanBodyBones.LeftLittleDistal,true), (HumanBodyBones.LeftLittleDistal,HumanBodyBones.LastBone,true),
+            (HumanBodyBones.RightThumbProximal,HumanBodyBones.RightThumbIntermediate,false), (HumanBodyBones.RightThumbIntermediate, HumanBodyBones.RightThumbDistal,false), (HumanBodyBones.RightThumbDistal,HumanBodyBones.LastBone,false),
+            (HumanBodyBones.RightIndexProximal,HumanBodyBones.RightIndexIntermediate,false), (HumanBodyBones.RightIndexIntermediate, HumanBodyBones.RightIndexDistal,false), (HumanBodyBones.RightIndexDistal,HumanBodyBones.LastBone,false),
+            (HumanBodyBones.RightMiddleProximal,HumanBodyBones.RightMiddleIntermediate,false), (HumanBodyBones.RightMiddleIntermediate, HumanBodyBones.RightMiddleDistal,false), (HumanBodyBones.RightMiddleDistal,HumanBodyBones.LastBone,false),
+            (HumanBodyBones.RightRingProximal,HumanBodyBones.RightRingIntermediate,false), (HumanBodyBones.RightRingIntermediate, HumanBodyBones.RightRingDistal,false), (HumanBodyBones.RightRingDistal,HumanBodyBones.LastBone,false),
+            (HumanBodyBones.RightLittleProximal,HumanBodyBones.RightLittleIntermediate,false), (HumanBodyBones.RightLittleIntermediate, HumanBodyBones.RightLittleDistal,false),(HumanBodyBones.RightLittleDistal,HumanBodyBones.LastBone,false),
+        };
+
+        static readonly Vector3[] ms_directions =
+        {
+            Vector3.forward,
+            Vector3.back,
+            Vector3.left,
+            Vector3.right,
+            Vector3.up,
+            Vector3.down,
         };
 
         public static FingerSystem Instance { get; private set; } = null;
@@ -104,39 +114,39 @@ namespace ml_bft
 
         internal void OnAvatarSetup()
         {
-            if(PlayerSetup.Instance._animator.isHuman)
+            Animator l_animator = PlayerSetup.Instance._animator;
+            if(l_animator.isHuman)
             {
                 Utils.SetAvatarTPose();
                 InputHandler.Instance.Rebind(PlayerSetup.Instance.transform.rotation);
 
-                if(Settings.FixFingers)
+                foreach(var l_tuple in ms_fingersChains)
                 {
-                    foreach(var l_tuple in ms_rotationFixChains)
-                    {
-                        ReorientateTowards(
-                            PlayerSetup.Instance._animator.GetBoneTransform(l_tuple.Item1),
-                            PlayerSetup.Instance._animator.GetBoneTransform(l_tuple.Item2),
-                            InputHandler.Instance.GetSourceForBone(l_tuple.Item1, l_tuple.Item3),
-                            InputHandler.Instance.GetSourceForBone(l_tuple.Item2, l_tuple.Item3),
-                            PlaneType.OXZ
-                        );
-                        ReorientateTowards(
-                            PlayerSetup.Instance._animator.GetBoneTransform(l_tuple.Item1),
-                            PlayerSetup.Instance._animator.GetBoneTransform(l_tuple.Item2),
-                            InputHandler.Instance.GetSourceForBone(l_tuple.Item1, l_tuple.Item3),
-                            InputHandler.Instance.GetSourceForBone(l_tuple.Item2, l_tuple.Item3),
-                            PlaneType.OYX
-                        );
-                    }
+                    ReorientateTowards(
+                        PlayerSetup.Instance.transform,
+                        l_animator.GetBoneTransform(l_tuple.Item1),
+                        (l_tuple.Item2 != HumanBodyBones.LastBone) ? l_animator.GetBoneTransform(l_tuple.Item2) : null,
+                        InputHandler.Instance.GetSourceForBone(l_tuple.Item1, l_tuple.Item3),
+                        InputHandler.Instance.GetSourceForBone(l_tuple.Item2, l_tuple.Item3),
+                        PlaneType.OXZ
+                    );
+                    ReorientateTowards(
+                        PlayerSetup.Instance.transform,
+                        l_animator.GetBoneTransform(l_tuple.Item1),
+                        (l_tuple.Item2 != HumanBodyBones.LastBone) ? l_animator.GetBoneTransform(l_tuple.Item2) : null,
+                        InputHandler.Instance.GetSourceForBone(l_tuple.Item1, l_tuple.Item3),
+                        InputHandler.Instance.GetSourceForBone(l_tuple.Item2, l_tuple.Item3),
+                        PlaneType.OYX
+                    );
                 }
 
                 // Bind hands
-                m_leftHandOffset.m_source = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftHand);
+                m_leftHandOffset.m_source = l_animator.GetBoneTransform(HumanBodyBones.LeftHand);
                 m_leftHandOffset.m_target = InputHandler.Instance.GetSourceForBone(HumanBodyBones.LeftHand, true);
                 if((m_leftHandOffset.m_source != null) && (m_leftHandOffset.m_target != null))
                     m_leftHandOffset.m_offset = Quaternion.Inverse(m_leftHandOffset.m_source.rotation) * m_leftHandOffset.m_target.rotation;
 
-                m_rightHandOffset.m_source = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightHand);
+                m_rightHandOffset.m_source = l_animator.GetBoneTransform(HumanBodyBones.RightHand);
                 m_rightHandOffset.m_target = InputHandler.Instance.GetSourceForBone(HumanBodyBones.RightHand, false);
                 if((m_rightHandOffset.m_source != null) && (m_rightHandOffset.m_target != null))
                     m_rightHandOffset.m_offset = Quaternion.Inverse(m_rightHandOffset.m_source.rotation) * m_rightHandOffset.m_target.rotation;
@@ -144,7 +154,7 @@ namespace ml_bft
                 // Bind fingers
                 foreach(HumanBodyBones p_bone in ms_leftFingerBones)
                 {
-                    Transform l_avatarBone = PlayerSetup.Instance._animator.GetBoneTransform(p_bone);
+                    Transform l_avatarBone = l_animator.GetBoneTransform(p_bone);
                     Transform l_controllerBone = InputHandler.Instance.GetSourceForBone(p_bone, true);
                     if((l_avatarBone != null) && (l_controllerBone != null))
                     {
@@ -157,7 +167,7 @@ namespace ml_bft
                 }
                 foreach(HumanBodyBones p_bone in ms_rightFingerBones)
                 {
-                    Transform l_avatarBone = PlayerSetup.Instance._animator.GetBoneTransform(p_bone);
+                    Transform l_avatarBone = l_animator.GetBoneTransform(p_bone);
                     Transform l_controllerBone = InputHandler.Instance.GetSourceForBone(p_bone, false);
                     if((l_avatarBone != null) && (l_controllerBone != null))
                     {
@@ -262,13 +272,13 @@ namespace ml_bft
             }
         }
 
-        void ReorientateTowards(Transform p_target, Transform p_targetEnd, Transform p_source, Transform p_sourceEnd, PlaneType p_plane)
+        static void ReorientateTowards(Transform root, Transform p_source, Transform p_sourceEnd, Transform p_target, Transform p_targetEnd, PlaneType p_plane)
         {
-            if((p_target != null) && (p_targetEnd != null) && (p_source != null) && (p_sourceEnd != null))
+            if((root != null) && (p_target != null) && (p_source != null))
             {
-                Quaternion l_playerInv = Quaternion.Inverse(PlayerSetup.Instance.transform.rotation);
-                Vector3 l_targetDir = l_playerInv * (p_targetEnd.position - p_target.position);
-                Vector3 l_sourceDir = l_playerInv * (p_sourceEnd.position - p_source.position);
+                Quaternion l_rootInv = Quaternion.Inverse(root.rotation);
+                Vector3 l_targetDir = l_rootInv * (((p_targetEnd != null) ? p_targetEnd.position : GuessEnd(p_target)) - p_target.position);
+                Vector3 l_sourceDir = l_rootInv * (((p_sourceEnd != null) ? p_sourceEnd.position : GuessEnd(p_source)) - p_source.position);
                 switch(p_plane)
                 {
                     case PlaneType.OXZ:
@@ -301,9 +311,30 @@ namespace ml_bft
                 if(p_plane == PlaneType.OYX)
                     l_diff = Quaternion.Euler(0f, 0f, l_diff.eulerAngles.y);
 
-                Quaternion l_adjusted = l_diff * (l_playerInv * p_target.rotation);
-                p_target.rotation = PlayerSetup.Instance.transform.rotation * l_adjusted;
+                Quaternion l_adjusted = l_diff * (l_rootInv * p_target.rotation);
+                p_target.rotation = root.rotation * l_adjusted;
             }
+        }
+
+        static Vector3 GuessEnd(Transform p_target)
+        {
+            Vector3 l_result = p_target.position;
+            if(p_target.parent != null)
+            {
+                float l_dot = -1f;
+                Vector3 l_axisDir = p_target.position - p_target.parent.position;
+                foreach(Vector3 l_dir in ms_directions)
+                {
+                    Vector3 l_rotDir = p_target.rotation * l_dir;
+                    float l_stepDot = Vector3.Dot(l_rotDir, l_axisDir);
+                    if(l_stepDot >= l_dot)
+                    {
+                        l_dot = l_stepDot;
+                        l_result = p_target.position + l_rotDir;
+                    }
+                }
+            }
+            return l_result;
         }
     }
 }

@@ -123,107 +123,89 @@ namespace ml_lme
         }
 
         public Transform GetRoot() => m_root;
-        public Transform GetBone(HumanBodyBones p_bone)
+        public Transform GetLinkedBone(HumanBodyBones p_bone)
         {
             Transform l_result = null;
             switch(p_bone)
             {
                 case HumanBodyBones.LeftHand:
-                    l_result = (m_left ? m_wrist : null);
-                    break;
-                case HumanBodyBones.LeftThumbProximal:
-                    l_result = (m_left ? m_fingersBones[(int)FingerBone.ThumbProximal] : null);
-                    break;
-                case HumanBodyBones.LeftThumbIntermediate:
-                    l_result = (m_left ? m_fingersBones[(int)FingerBone.ThumbIntermediate] : null);
-                    break;
-                case HumanBodyBones.LeftThumbDistal:
-                    l_result = (m_left ? m_fingersBones[(int)FingerBone.ThumbDistal] : null);
-                    break;
-                case HumanBodyBones.LeftIndexProximal:
-                    l_result = (m_left ? m_fingersBones[(int)FingerBone.IndexProximal] : null);
-                    break;
-                case HumanBodyBones.LeftIndexIntermediate:
-                    l_result = (m_left ? m_fingersBones[(int)FingerBone.IndexIntermediate] : null);
-                    break;
-                case HumanBodyBones.LeftIndexDistal:
-                    l_result = (m_left ? m_fingersBones[(int)FingerBone.IndexDistal] : null);
-                    break;
-                case HumanBodyBones.LeftMiddleProximal:
-                    l_result = (m_left ? m_fingersBones[(int)FingerBone.MiddleProximal] : null);
-                    break;
-                case HumanBodyBones.LeftMiddleIntermediate:
-                    l_result = (m_left ? m_fingersBones[(int)FingerBone.MiddleIntermediate] : null);
-                    break;
-                case HumanBodyBones.LeftMiddleDistal:
-                    l_result = (m_left ? m_fingersBones[(int)FingerBone.MiddleDistal] : null);
-                    break;
-                case HumanBodyBones.LeftRingProximal:
-                    l_result = (m_left ? m_fingersBones[(int)FingerBone.RingProximal] : null);
-                    break;
-                case HumanBodyBones.LeftRingIntermediate:
-                    l_result = (m_left ? m_fingersBones[(int)FingerBone.RingIntermediate] : null);
-                    break;
-                case HumanBodyBones.LeftRingDistal:
-                    l_result = (m_left ? m_fingersBones[(int)FingerBone.RingDistal] : null);
-                    break;
-                case HumanBodyBones.LeftLittleProximal:
-                    l_result = (m_left ? m_fingersBones[(int)FingerBone.PinkyProximal] : null);
-                    break;
-                case HumanBodyBones.LeftLittleIntermediate:
-                    l_result = (m_left ? m_fingersBones[(int)FingerBone.PinkyIntermediate] : null);
-                    break;
-                case HumanBodyBones.LeftLittleDistal:
-                    l_result = (m_left ? m_fingersBones[(int)FingerBone.PinkyDistal] : null);
+                case HumanBodyBones.RightHand:
+                    l_result = m_wrist;
                     break;
 
-                case HumanBodyBones.RightHand:
-                    l_result = (!m_left ? m_wrist : null);
-                    break;
+                case HumanBodyBones.LeftThumbProximal:
                 case HumanBodyBones.RightThumbProximal:
-                    l_result = (!m_left ? m_fingersBones[(int)FingerBone.ThumbProximal] : null);
+                    l_result = m_fingersBones[(int)FingerBone.ThumbProximal];
                     break;
+
+                case HumanBodyBones.LeftThumbIntermediate:
                 case HumanBodyBones.RightThumbIntermediate:
-                    l_result = (!m_left ? m_fingersBones[(int)FingerBone.ThumbIntermediate] : null);
+                    l_result = m_fingersBones[(int)FingerBone.ThumbIntermediate];
                     break;
+
+                case HumanBodyBones.LeftThumbDistal:
                 case HumanBodyBones.RightThumbDistal:
-                    l_result = (!m_left ? m_fingersBones[(int)FingerBone.ThumbDistal] : null);
+                    l_result = m_fingersBones[(int)FingerBone.ThumbDistal];
                     break;
+
+                case HumanBodyBones.LeftIndexProximal:
                 case HumanBodyBones.RightIndexProximal:
-                    l_result = (!m_left ? m_fingersBones[(int)FingerBone.IndexProximal] : null);
+                    l_result = m_fingersBones[(int)FingerBone.IndexProximal];
                     break;
+
+                case HumanBodyBones.LeftIndexIntermediate:
                 case HumanBodyBones.RightIndexIntermediate:
-                    l_result = (!m_left ? m_fingersBones[(int)FingerBone.IndexIntermediate] : null);
+                    l_result = m_fingersBones[(int)FingerBone.IndexIntermediate];
                     break;
+
+                case HumanBodyBones.LeftIndexDistal:
                 case HumanBodyBones.RightIndexDistal:
-                    l_result = (!m_left ? m_fingersBones[(int)FingerBone.IndexDistal] : null);
+                    l_result = m_fingersBones[(int)FingerBone.IndexDistal];
                     break;
+
+                case HumanBodyBones.LeftMiddleProximal:
                 case HumanBodyBones.RightMiddleProximal:
-                    l_result = (!m_left ? m_fingersBones[(int)FingerBone.MiddleProximal] : null);
+                    l_result = m_fingersBones[(int)FingerBone.MiddleProximal];
                     break;
+
+                case HumanBodyBones.LeftMiddleIntermediate:
                 case HumanBodyBones.RightMiddleIntermediate:
-                    l_result = (!m_left ? m_fingersBones[(int)FingerBone.MiddleIntermediate] : null);
+                    l_result = m_fingersBones[(int)FingerBone.MiddleIntermediate];
                     break;
+
+                case HumanBodyBones.LeftMiddleDistal:
                 case HumanBodyBones.RightMiddleDistal:
-                    l_result = (!m_left ? m_fingersBones[(int)FingerBone.MiddleDistal] : null);
+                    l_result = m_fingersBones[(int)FingerBone.MiddleDistal];
                     break;
+
+                case HumanBodyBones.LeftRingProximal:
                 case HumanBodyBones.RightRingProximal:
-                    l_result = (!m_left ? m_fingersBones[(int)FingerBone.RingProximal] : null);
+                    l_result = m_fingersBones[(int)FingerBone.RingProximal];
                     break;
+
+                case HumanBodyBones.LeftRingIntermediate:
                 case HumanBodyBones.RightRingIntermediate:
-                    l_result = (!m_left ? m_fingersBones[(int)FingerBone.RingIntermediate] : null);
+                    l_result = m_fingersBones[(int)FingerBone.RingIntermediate];
                     break;
+
+                case HumanBodyBones.LeftRingDistal:
                 case HumanBodyBones.RightRingDistal:
-                    l_result = (!m_left ? m_fingersBones[(int)FingerBone.RingDistal] : null);
+                    l_result = m_fingersBones[(int)FingerBone.RingDistal];
                     break;
+
+                case HumanBodyBones.LeftLittleProximal:
                 case HumanBodyBones.RightLittleProximal:
-                    l_result = (!m_left ? m_fingersBones[(int)FingerBone.PinkyProximal] : null);
+                    l_result = m_fingersBones[(int)FingerBone.PinkyProximal];
                     break;
+
+                case HumanBodyBones.LeftLittleIntermediate:
                 case HumanBodyBones.RightLittleIntermediate:
-                    l_result = (!m_left ? m_fingersBones[(int)FingerBone.PinkyIntermediate] : null);
+                    l_result = m_fingersBones[(int)FingerBone.PinkyIntermediate];
                     break;
+
+                case HumanBodyBones.LeftLittleDistal:
                 case HumanBodyBones.RightLittleDistal:
-                    l_result = (!m_left ? m_fingersBones[(int)FingerBone.PinkyDistal] : null);
+                    l_result = m_fingersBones[(int)FingerBone.PinkyDistal];
                     break;
             }
             return l_result;
@@ -234,5 +216,7 @@ namespace ml_lme
             if(m_mesh != null)
                 m_mesh.SetActive(p_state);
         }
+
+        public bool IsLeft() => m_left;
     }
 }

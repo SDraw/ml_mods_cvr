@@ -1,12 +1,13 @@
 using ABI_RC.Core.Player;
 using ABI_RC.Core.Savior;
+using UnityEngine;
 
 namespace ml_dht
 {
     public class DesktopHeadTracking : MelonLoader.MelonMod
     {
-        DataParser m_dataParser = null;
-        HeadTracked m_localTracked = null;
+        
+        HeadTracked m_tracked = null;
 
         public override void OnInitializeMelon()
         {
@@ -26,24 +27,14 @@ namespace ml_dht
 
             GameEvents.InitB(HarmonyInstance);
 
-            m_dataParser = new DataParser();
-            m_localTracked = PlayerSetup.Instance.gameObject.AddComponent<HeadTracked>();
+            m_tracked = new GameObject("[DesktopHeadTracking]").AddComponent<HeadTracked>();
         }
 
         public override void OnDeinitializeMelon()
         {
-            m_dataParser = null;
-            m_localTracked = null;
-        }
-
-        public override void OnUpdate()
-        {
-            if(Settings.Enabled && (m_dataParser != null))
-            {
-                m_dataParser.Update();
-                if(m_localTracked != null)
-                    m_localTracked.UpdateTrackingData(ref m_dataParser.GetLatestTrackingData());
-            }
+            if(m_tracked != null)
+                Object.Destroy(m_tracked.gameObject);
+            m_tracked = null;
         }
     }
 }

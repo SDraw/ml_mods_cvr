@@ -1,10 +1,11 @@
 ﻿using ABI_RC.Core.Player;
+using UnityEngine;
 
 namespace ml_pmc
 {
     public class PlayerMovementCopycat : MelonLoader.MelonMod
     {
-        PoseCopycat m_localCopycat = null;
+        PoseCopycat m_poseCopycat = null;
 
         public override void OnInitializeMelon()
         {
@@ -17,9 +18,9 @@ namespace ml_pmc
 
         public override void OnDeinitializeMelon()
         {
-            if(m_localCopycat != null)
-                UnityEngine.Object.Destroy(m_localCopycat);
-            m_localCopycat = null;
+            if(m_poseCopycat != null)
+                Object.Destroy(m_poseCopycat.gameObject);
+            m_poseCopycat = null;
         }
 
         System.Collections.IEnumerator WaitForLocalPlayer()
@@ -27,7 +28,7 @@ namespace ml_pmc
             while(PlayerSetup.Instance == null)
                 yield return null;
 
-            m_localCopycat = PlayerSetup.Instance.gameObject.AddComponent<PoseCopycat>();
+            m_poseCopycat = new GameObject("[PlayerMovementCopycat]").AddComponent<PoseCopycat>();
         }
     }
 }

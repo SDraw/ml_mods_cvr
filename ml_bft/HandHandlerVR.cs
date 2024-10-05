@@ -90,6 +90,7 @@ namespace ml_bft
             OnShowHandsChanged(Settings.ShowHands);
             OnMotionRangeChanged(Settings.MotionRange);
 
+            Settings.OnSkeletalInputChanged.AddListener(this.OnSkeletalInputChanged);
             Settings.OnShowHandsChanged.AddListener(this.OnShowHandsChanged);
             Settings.OnMotionRangeChanged.AddListener(this.OnMotionRangeChanged);
         }
@@ -106,6 +107,7 @@ namespace ml_bft
 
             m_skeletonAction = null;
 
+            Settings.OnSkeletalInputChanged.RemoveListener(this.OnSkeletalInputChanged);
             Settings.OnShowHandsChanged.RemoveListener(this.OnShowHandsChanged);
             Settings.OnMotionRangeChanged.RemoveListener(this.OnMotionRangeChanged);
         }
@@ -254,12 +256,17 @@ namespace ml_bft
         }
 
         // Settings
+        void OnSkeletalInputChanged(bool p_state)
+        {
+            OnShowHandsChanged(Settings.ShowHands);
+        }
+
         void OnShowHandsChanged(bool p_state)
         {
             foreach(var l_render in m_renderers)
             {
                 if(l_render != null)
-                    l_render.enabled = p_state;
+                    l_render.enabled = (Settings.SkeletalInput && p_state);
             }
         }
 

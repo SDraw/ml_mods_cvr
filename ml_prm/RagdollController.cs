@@ -26,8 +26,10 @@ namespace ml_prm
         bool m_applyHipsPosition = false;
         bool m_applyHipsRotation = false;
 
+        bool m_avatarReady = false;
         bool m_ragdolled = false;
         bool m_forcedSwitch = false;
+        Coroutine m_initTask = null;
 
         Transform m_puppet = null;
         Transform m_puppetRoot = null;
@@ -35,10 +37,6 @@ namespace ml_prm
         readonly List<RagdollBodypartHandler> m_ragdollBodyHandlers = null;
         readonly List<System.Tuple<Transform, Transform>> m_boneLinks = null;
         readonly List<System.Tuple<CharacterJoint, Vector3>> m_jointAnchors = null;
-
-        bool m_avatarReady = false;
-        Coroutine m_initCoroutine = null;
-        Vector3 m_ragdollLastPos = Vector3.zero;
 
         RagdollToggle m_avatarRagdollToggle = null; // Custom component available for editor
         AvatarBoolParameter m_ragdolledParameter = null;
@@ -48,6 +46,11 @@ namespace ml_prm
         bool m_reachedGround = true;
         float m_groundedTime = 0f;
         float m_downTime = float.MinValue;
+
+        Vector3 m_lastRagdollPosition;
+        Vector3 m_lastSeatPositon;
+        Vector3 m_seatVelocity;
+        Plane m_playerPlane;
 
         internal RagdollController()
         {
@@ -59,10 +62,14 @@ namespace ml_prm
         // Unity events
         void Awake()
         {
-            if((Instance != null) && (Instance != this))
-                Object.Destroy(this);
-            else
-                Instance = this;
+            if(Instance != null)
+            {
+                DestroyImmediate(this);
+                return;
+            }
+
+            Instance = this;
+            DontDestroyOnLoad(this);
         }
 
         void Start()
@@ -112,9 +119,9 @@ namespace ml_prm
             if(Instance == this)
                 Instance = null;
 
-            if(m_initCoroutine != null)
-                StopCoroutine(m_initCoroutine);
-            m_initCoroutine = null;
+            if(m_initTask != null)
+                StopCoroutine(m_initTask);
+            m_initTask = null;
 
             if(m_puppet != null)
                 Object.Destroy(m_puppet);
@@ -160,7 +167,7 @@ namespace ml_prm
         {
             if(m_avatarReady)
             {
-                if(!m_ragdolled && Settings.FallDamage && !BetterBetterCharacterController.Instance.IsFlying())
+                if(!m_ragdolled && Settings.FallDamage && !BetterBetterCharacterController.Instance.IsFlying() && !BetterBetterCharacterController.Instance.IsSitting())
                 {
                     bool l_grounded = BetterBetterCharacterController.Instance.IsGrounded();
                     bool l_inWater = BetterBetterCharacterController.Instance.IsInWater();
@@ -168,6 +175,17 @@ namespace ml_prm
                         Ragdoll();
 
                     m_inAir = !(l_grounded || l_inWater);
+                }
+
+                if(!m_ragdolled && BetterBetterCharacterController.Instance.IsSitting()) // Those seats without velocity, smh
+                {
+                    CVRSeat l_seat = BetterBetterCharacterController.Instance.GetCurrentSeat();
+                    if(l_seat != null)
+                    {
+                        Vector3 l_pos = l_seat.transform.position;
+                        m_seatVelocity = (l_pos - m_lastSeatPositon) / Time.deltaTime;
+                        m_lastSeatPositon = l_pos;
+                    }
                 }
 
                 if(m_ragdolled)
@@ -178,7 +196,7 @@ namespace ml_prm
                     PlayerSetup.Instance.animatorManager.CancelEmote = true;
                 }
 
-                if(!m_ragdolled && !m_reachedGround && (BetterBetterCharacterController.Instance.IsOnGround() || BetterBetterCharacterController.Instance.IsInWater()))
+                if(!m_ragdolled && !m_reachedGround && (BetterBetterCharacterController.Instance.IsOnGround() || BetterBetterCharacterController.Instance.IsInWater() || BetterBetterCharacterController.Instance.IsSitting()))
                 {
                     m_groundedTime += Time.unscaledDeltaTime;
                     if(m_groundedTime >= 0.25f)
@@ -210,9 +228,18 @@ namespace ml_prm
         {
             if(m_avatarReady && m_ragdolled)
             {
-                Vector3 l_currentPos = m_puppetReferences.hips.position;
-                PlayerSetup.Instance.transform.position += (l_currentPos - m_ragdollLastPos);
-                m_ragdollLastPos = l_currentPos;
+                Vector3 l_diff = m_puppetReferences.hips.position - m_lastRagdollPosition;
+                m_playerPlane.SetNormalAndPosition(PlayerSetup.Instance.transform.rotation * Vector3.up, PlayerSetup.Instance.transform.position);
+
+                PlayerSetup.Instance.transform.position += l_diff;
+                m_lastRagdollPosition = m_puppetReferences.hips.position;
+
+                // Project on plane and fix our position if we under previous plane
+                if(m_playerPlane.GetDistanceToPoint(m_lastRagdollPosition) < 0f)
+                    m_playerPlane.Flip();
+                float l_distance = m_playerPlane.GetDistanceToPoint(PlayerSetup.Instance.transform.position);
+                if(l_distance < 0f)
+                    PlayerSetup.Instance.transform.position = m_playerPlane.ClosestPointOnPlane(PlayerSetup.Instance.transform.position);
             }
         }
 
@@ -242,10 +269,10 @@ namespace ml_prm
         // Game events
         void OnAvatarClear()
         {
-            if(m_initCoroutine != null)
+            if(m_initTask != null)
             {
-                StopCoroutine(m_initCoroutine);
-                m_initCoroutine = null;
+                StopCoroutine(m_initTask);
+                m_initTask = null;
             }
 
             if(m_ragdolled)
@@ -365,7 +392,7 @@ namespace ml_prm
                 m_avatarRagdollToggle = PlayerSetup.Instance._avatar.GetComponentInChildren<RagdollToggle>(true);
                 m_ragdolledParameter = new AvatarBoolParameter("Ragdolled", PlayerSetup.Instance.animatorManager);
 
-                m_initCoroutine = StartCoroutine(WaitForBodyHandlers());
+                m_initTask = StartCoroutine(WaitForBodyHandlers());
             }
         }
 
@@ -381,7 +408,7 @@ namespace ml_prm
             }
 
             m_avatarReady = true;
-            m_initCoroutine = null;
+            m_initTask = null;
 
             OnMovementDragChanged(Settings.MovementDrag);
             OnAngularDragChanged(Settings.AngularDrag);
@@ -414,6 +441,8 @@ namespace ml_prm
 
         void OnSeatPreSit(CVRSeat p_seat)
         {
+            m_lastSeatPositon = p_seat.transform.position;
+
             if(!p_seat.occupied)
             {
                 m_forcedSwitch = true;
@@ -473,9 +502,8 @@ namespace ml_prm
 
                 if(m_avatarReady && m_ragdolled)
                 {
-                    Vector3 l_pos = m_hips.position;
-                    m_puppetReferences.hips.position = l_pos;
-                    m_ragdollLastPos = l_pos;
+                    m_puppetReferences.hips.position = m_hips.position;
+                    m_lastRagdollPosition = m_puppetReferences.hips.position;
                 }
             }
             catch(System.Exception e)
@@ -600,7 +628,7 @@ namespace ml_prm
 
         void OnGestureGrabChanged(bool p_state)
         {
-            if(m_avatarReady && m_ragdolled & !p_state)
+            if(m_avatarReady && m_ragdolled && !p_state)
             {
                 foreach(var l_hanlder in m_ragdollBodyHandlers)
                     l_hanlder.Detach();
@@ -622,11 +650,22 @@ namespace ml_prm
         {
             if(m_avatarReady && !m_ragdolled && CanRagdoll())
             {
-                Vector3 l_velocity = Vector3.ClampMagnitude(BetterBetterCharacterController.Instance.velocity * (WorldManager.IsSafeWorld() ? Settings.VelocityMultiplier : 1f), WorldManager.GetMovementLimit());
+                Vector3 l_velocity = (BetterBetterCharacterController.Instance.IsSitting() ? m_seatVelocity : BetterBetterCharacterController.Instance.velocity);
+                l_velocity *= (WorldManager.IsSafeWorld() ? Settings.VelocityMultiplier : 1f);
+                l_velocity = Vector3.ClampMagnitude(l_velocity, WorldManager.GetMovementLimit());
                 if(Settings.ViewVelocity && WorldManager.IsSafeWorld())
                 {
                     float l_mag = l_velocity.magnitude;
                     l_velocity = PlayerSetup.Instance.GetActiveCamera().transform.forward * l_mag;
+                }
+
+                Vector3 l_playerPos = PlayerSetup.Instance.transform.position;
+                Quaternion l_playerRot = PlayerSetup.Instance.transform.rotation;
+                bool l_wasSitting = BetterBetterCharacterController.Instance.IsSitting();
+                if(BetterBetterCharacterController.Instance.IsSitting())
+                {
+                    BetterBetterCharacterController.Instance.SetSitting(false);
+                    l_wasSitting = true;
                 }
 
                 if(BetterBetterCharacterController.Instance.IsFlying())
@@ -662,7 +701,12 @@ namespace ml_prm
                     l_handler.SetAngularVelocity(Vector3.zero);
                 }
 
-                m_ragdollLastPos = m_puppetReferences.hips.position;
+                if(l_wasSitting)
+                {
+                    PlayerSetup.Instance.transform.position = l_playerPos;
+                    PlayerSetup.Instance.transform.rotation = l_playerRot;
+                }
+                m_lastRagdollPosition = m_puppetReferences.hips.position;
                 m_downTime = 0f;
 
                 m_ragdolled = true;
@@ -675,12 +719,6 @@ namespace ml_prm
             {
                 BetterBetterCharacterController.Instance.TeleportPlayerTo(m_puppetReferences.hips.position, PlayerSetup.Instance.GetPlayerRotation().eulerAngles, false, false);
                 TryRestoreMovement();
-                if(!WorldManager.IsSafeWorld())
-                {
-                    Vector3 l_vec = BetterBetterCharacterController.Instance.GetVelocity();
-                    l_vec.y = Mathf.Clamp(l_vec.y, float.MinValue, 0f);
-                    BetterBetterCharacterController.Instance.SetVelocity(l_vec);
-                }
                 BodySystem.TrackingPositionWeight = 1f;
                 IKSystem.Instance.applyOriginalHipPosition = m_applyHipsPosition;
                 IKSystem.Instance.applyOriginalHipRotation = m_applyHipsRotation;
@@ -725,7 +763,6 @@ namespace ml_prm
 
             bool l_result = m_reachedGround;
             l_result &= !BodySystem.isCalibrating;
-            l_result &= !BetterBetterCharacterController.Instance.IsSitting();
             l_result &= ((CombatSystem.Instance == null) || !CombatSystem.Instance.isDown);
             return (l_result || m_forcedSwitch);
         }

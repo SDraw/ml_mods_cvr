@@ -1,13 +1,13 @@
 # Leap Motion Extension
 This mod allows you to use your Leap Motion controller for hands and fingers tracking.
 
-[![](.github/img_01.png)](https://youtu.be/nak1C8uibgc)
+![](.github/img_01.png)
 
 # Installation
 * Install [latest Ultraleap Gemini tracking software](https://developer.leapmotion.com/tracking-software-download)
 * Install [latest MelonLoader](https://github.com/LavaGang/MelonLoader)
 * Get [latest release DLL](../../../releases/latest):
-  * Put `ml_lme.dll` in `Mods` folder of game
+  * Put `LeapMotionExtension.dll` in `Mods` folder of game
 
 # Usage
 ## Settings
@@ -26,4 +26,4 @@ Available mod's settings in `Settings - Implementation - Leap Motion Tracking`:
 * **Interact gesture threadhold:** activation limit for interaction based on hand gesture; 80 by default.
 * **Grip gesture threadhold:** activation limit for grip based on hand gesture; 40 by default.
 * **Filter humanoid limits:** Limits fingers rotations to be valid for Unity's Mechanim; `true` by default
-  * Note: Enabling this option ensures that visual representation of your fingers will be same for you and remote players, but it cancels out additional finger segments rotations that can be better visually in most cases.
+  * Note: Enabling this option ensures that visual representation of your fingers will be same for you and remote players, but it cancels out additional finger segments rotations that can be better visually in some cases.

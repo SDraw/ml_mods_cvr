@@ -248,6 +248,5 @@ namespace ml_prm
             }
             return !ms_result.m_result;
         }
-
     }
 }

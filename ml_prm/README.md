@@ -65,7 +65,7 @@ Now you can animate both parameters available:
 ![](.github/img_01.png)  
 Note: In order to work the game object needs to be active and the component enabled.
 
-# Mods Integration
+# Mods integration
 You can use this mod's functions within your mod. To do this you need:
 * Add mod's dll as reference in your project
 * Access ragdoll controller with `ml_prm.RagdollController.Instance`
@@ -75,9 +75,3 @@ Available methods:
 * ```void SwitchRagdoll()```
 * ```void Ragdoll()```
 * ```void Unragdoll()```
-
-# Notes
-* If ragdoll state is enabled during emote, remote players see whole emote playing while local player sees ragdolling. It's tied to how game handles remote players, currently can be prevented with (choose one):
-  * Renaming avatar emote animations to not have default name or containing `Emote` substring.
-  * Holding any movement key right after activating ragdoll state.
-  * Add transition from `Any state` to state with A-pose/T-pose animation and condition with `Ragdolled` parameter on main avatar's animator layer.

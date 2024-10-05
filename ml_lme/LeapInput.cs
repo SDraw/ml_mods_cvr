@@ -89,8 +89,7 @@ namespace ml_lme
             MelonLoader.MelonCoroutines.Start(WaitForSettings());
             MelonLoader.MelonCoroutines.Start(WaitForMaterial());
 
-            VRModeSwitchEvents.OnInitializeXR.AddListener(OnModeSwitch);
-            VRModeSwitchEvents.OnDeinitializeXR.AddListener(OnModeSwitch);
+            VRModeSwitchEvents.OnCompletedVRModeSwitch.AddListener(OnVRModeSwitch);
 
             Settings.OnEnabledChanged.AddListener(this.OnEnableChanged);
             Settings.OnInteractionChanged.AddListener(this.OnInteractionChanged);
@@ -153,8 +152,7 @@ namespace ml_lme
             m_lineRight = null;
 
             MetaPort.Instance.settings.settingBoolChanged.RemoveListener(this.OnGameSettingBoolChange);
-            VRModeSwitchEvents.OnInitializeXR.RemoveListener(OnModeSwitch);
-            VRModeSwitchEvents.OnDeinitializeXR.RemoveListener(OnModeSwitch);
+            VRModeSwitchEvents.OnCompletedVRModeSwitch.RemoveListener(OnVRModeSwitch);
 
             Settings.OnEnabledChanged.RemoveListener(this.OnEnableChanged);
             Settings.OnInteractionChanged.RemoveListener(this.OnInteractionChanged);
@@ -291,7 +289,7 @@ namespace ml_lme
                     m_handVisibleRight = false;
                 }
 
-                if(!ModSupporter.SkipFingersOverride() && (!m_inVR || !Utils.AreKnucklesInUse()))
+                if(!m_inVR || !Utils.AreKnucklesInUse())
                     SetGameFingersTracking(m_handVisibleRight || m_handVisibleLeft);
 
                 base.UpdateInput();
@@ -384,7 +382,7 @@ namespace ml_lme
                     ResetGestures(false);
                 }
 
-                // Reset to default, FreedomFingers can go brrr, player should press funny controller button two times
+                // Reset to default
                 SetGameFingersTracking(m_inVR && Utils.AreKnucklesInUse() && !CVRInputManager._moduleXR.GestureToggleValue);
             }
 
@@ -450,23 +448,30 @@ namespace ml_lme
             }
         }
 
-        void OnModeSwitch()
+        void OnVRModeSwitch(bool p_state)
         {
-            m_inVR = Utils.IsInVR();
-            base._inputManager.SetModuleAsLast(this);
-
-            if(m_handRayLeft != null)
+            try
             {
-                m_handRayLeft.isDesktopRay = !m_inVR;
-                m_handRayLeft.SetVRActive(m_inVR);
-            }
-            if(m_handRayRight != null)
-            {
-                m_handRayRight.isDesktopRay = !m_inVR;
-                m_handRayRight.SetVRActive(m_inVR);
-            }
+                m_inVR = Utils.IsInVR();
+                base._inputManager.SetModuleAsLast(this);
 
-            OnEnableChanged(Settings.Enabled);
+                if(m_handRayLeft != null)
+                {
+                    m_handRayLeft.isDesktopRay = !m_inVR;
+                    m_handRayLeft.SetVRActive(m_inVR);
+                }
+                if(m_handRayRight != null)
+                {
+                    m_handRayRight.isDesktopRay = !m_inVR;
+                    m_handRayRight.SetVRActive(m_inVR);
+                }
+
+                OnEnableChanged(Settings.Enabled);
+            }
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
         }
 
         // Arbitrary

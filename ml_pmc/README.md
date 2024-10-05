@@ -5,7 +5,7 @@ Allows to copy pose, gestures and movement of your friends.
 * Install [BTKUILib](https://github.com/BTK-Development/BTKUILib)
 * Install [latest MelonLoader](https://github.com/LavaGang/MelonLoader)
 * Get [latest release DLL](../../../releases/latest):
-  * Put `ml_pmc.dll` in `Mods` folder of game
+  * Put `PlayerMovementCopycat.dll` in `Mods` folder of game
   
 # Usage
 Available options in BTKUILib players list upon player selection:

@@ -19,9 +19,9 @@ namespace ml_lme
 
         void Awake()
         {
-            if((Instance != null) && (Instance != this))
+            if(Instance != null)
             {
-                Object.DestroyImmediate(this);
+                DestroyImmediate(this);
                 return;
             }
 
@@ -44,8 +44,7 @@ namespace ml_lme
             Settings.OnEnabledChanged.AddListener(this.OnEnableChanged);
             Settings.OnTrackingModeChanged.AddListener(this.OnTrackingModeChanged);
 
-            m_leapTracking = new GameObject("[LeapTrackingRoot]").AddComponent<LeapTracking>();
-            m_leapTracking.transform.parent = this.transform;
+            m_leapTracking = this.gameObject.AddComponent<LeapTracking>();
 
             OnEnableChanged(Settings.Enabled);
             OnTrackingModeChanged(Settings.TrackingMode);
@@ -102,7 +101,7 @@ namespace ml_lme
             m_leapInput = new LeapInput();
             CVRInputManager.Instance.AddInputModule(m_leapInput);
 
-            m_leapTracked = PlayerSetup.Instance.gameObject.AddComponent<LeapTracked>();
+            m_leapTracked = this.gameObject.AddComponent<LeapTracked>();
         }
 
         void Update()

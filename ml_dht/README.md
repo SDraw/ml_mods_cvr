@@ -13,7 +13,7 @@ Refer to `TrackingData.cs` for reference in case of implementing own software.
 # Installation
 * Install [latest MelonLoader](https://github.com/LavaGang/MelonLoader)
 * Get [latest release DLL](../../../releases/latest):
-  * Put `ml_dht.dll` in `Mods` folder of game
+  * Put `DesktopHeadTracking.dll` in `Mods` folder of game
 
 # Usage
 Available mod's settings in `Settings - Implementation - Desktop Head Tracking`:

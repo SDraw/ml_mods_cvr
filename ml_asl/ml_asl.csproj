@@ -5,9 +5,10 @@
     <Platforms>x64</Platforms>
     <PackageId>AvatarSyncedLook</PackageId>
     <Authors>SDraw</Authors>
-    <Company>None</Company>
+    <Company>SDraw</Company>
     <Product>AvatarSyncedLook</Product>
-    <Version>1.0.4</Version>
+    <Version>1.1.0</Version>
+    <AssemblyName>AvatarSyncedLook</AssemblyName>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -49,6 +50,11 @@
       <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\MelonLoader\net35\MelonLoader.dll</HintPath>
       <Private>false</Private>
       <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\UnityEngine.dll</HintPath>
+      <SpecificVersion>false</SpecificVersion>
+      <Private>false</Private>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\UnityEngine.CoreModule.dll</HintPath>

@@ -31,9 +31,9 @@ namespace ml_lme
             if(CohtmlHud.Instance != null)
             {
                 if(p_immediate)
-                    CohtmlHud.Instance.ViewDropTextImmediate(p_title, p_message, p_small);
+                    CohtmlHud.Instance.ViewDropTextImmediate(p_title, p_message, p_small, "", false);
                 else
-                    CohtmlHud.Instance.ViewDropText(p_title, p_message, p_small);
+                    CohtmlHud.Instance.ViewDropText(p_title, p_message, p_small, "", false);
             }
         }
 

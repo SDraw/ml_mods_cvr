@@ -8,6 +8,7 @@ using System.Reflection;
 using UnityEngine;
 using System.Linq;
 using ABI_RC.Systems.IK.SubSystems;
+using ABI_RC.Core.InteractionSystem;
 
 namespace ml_prm
 {
@@ -17,6 +18,7 @@ namespace ml_prm
         static readonly FieldInfo ms_referencePoints = typeof(PhysicsInfluencer).GetField("_referencePoints", BindingFlags.NonPublic | BindingFlags.Instance);
         static readonly FieldInfo ms_influencerTouchingVolumes = typeof(PhysicsInfluencer).GetField("_touchingVolumes", BindingFlags.NonPublic | BindingFlags.Instance);
         static readonly FieldInfo ms_influencerSubmergedColliders = typeof(PhysicsInfluencer).GetField("_submergedColliders", BindingFlags.NonPublic | BindingFlags.Instance);
+        static readonly FieldInfo ms_lastCVRSeat = typeof(BetterBetterCharacterController).GetField("_lastCvrSeat", BindingFlags.NonPublic | BindingFlags.Instance);
 
         public static void ClearFluidVolumes(this BetterBetterCharacterController p_instance) => (ms_touchingVolumes.GetValue(p_instance) as List<FluidVolume>)?.Clear();
 
@@ -58,5 +60,9 @@ namespace ml_prm
             l_result |= ((FingerSystem.GetCurlNormalized(p_source._playerAvatarMovementDataCurrent.RightMiddle1Stretched) >= 0.5f) && (FingerSystem.GetCurlNormalized(p_source._playerAvatarMovementDataCurrent.RightMiddle2Stretched) >= 0.5f) && (FingerSystem.GetCurlNormalized(p_source._playerAvatarMovementDataCurrent.RightMiddle3Stretched) >= 0.5f));
             return l_result;
         }
+
+        public static CVRSeat GetCurrentSeat(this BetterBetterCharacterController p_instance) => (ms_lastCVRSeat?.GetValue(p_instance) as CVRSeat);
+
+        public static bool IsInRange(float p_value, float p_min, float p_max) => ((p_min <= p_value) && (p_value <= p_max));
     }
 }

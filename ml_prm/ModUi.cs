@@ -43,6 +43,7 @@ namespace ml_prm
         const string c_ragdollKeyTooltip = "Switch ragdoll mode with '{0}' key";
         const string c_fallLimitTooltip = "Fall limit based on impact velocity<p>Current value corresponds to drop from {0} units with default gravity</p>";
 
+        readonly static string ms_namespace = typeof(ModUi).Namespace;
         internal static readonly UiEvent OnSwitchChanged = new UiEvent();
 
         static Page ms_page = null;
@@ -345,7 +346,7 @@ namespace ml_prm
         {
             Assembly l_assembly = Assembly.GetExecutingAssembly();
             string l_assemblyName = l_assembly.GetName().Name;
-            return l_assembly.GetManifestResourceStream(l_assemblyName + ".resources." + p_name);
+            return l_assembly.GetManifestResourceStream(ms_namespace + ".resources." + p_name);
         }
 
         static float GetDropHeight(float p_speed, float p_gravity = 9.8f)

@@ -25,8 +25,7 @@ namespace ml_bft
             if(MetaPort.Instance.isUsingVr)
                 SetupHandlers();
 
-            VRModeSwitchEvents.OnInitializeXR.AddListener(this.OnSwitchToVR);
-            VRModeSwitchEvents.OnDeinitializeXR.AddListener(this.OnSwitchToDesktop);
+            VRModeSwitchEvents.OnCompletedVRModeSwitch.AddListener(this.OnVRModeSwitch);
 
             Settings.OnSkeletalInputChanged.AddListener(this.OnSkeletalInputChanged);
 
@@ -38,6 +37,8 @@ namespace ml_bft
                 Instance = null;
 
             RemoveHandlers();
+
+            VRModeSwitchEvents.OnCompletedVRModeSwitch.RemoveListener(this.OnVRModeSwitch);
 
             Settings.OnSkeletalInputChanged.RemoveListener(this.OnSkeletalInputChanged);
 
@@ -133,23 +134,14 @@ namespace ml_bft
             }
         }
 
-        void OnSwitchToVR()
+        void OnVRModeSwitch(bool p_state)
         {
             try
             {
-                SetupHandlers();
-            }
-            catch(System.Exception e)
-            {
-                MelonLoader.MelonLogger.Error(e);
-            }
-        }
-
-        void OnSwitchToDesktop()
-        {
-            try
-            {
-                RemoveHandlers();
+                if(Utils.IsInVR())
+                    SetupHandlers();
+                else
+                    RemoveHandlers();
             }
             catch(System.Exception e)
             {

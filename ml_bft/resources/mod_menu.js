@@ -19,13 +19,6 @@
                 <div id="MotionRange" class ="inp_dropdown no-scroll" data-options="0:With controller,1:Without controller" data-current="0"></div>
             </div>
         </div>
-
-        <div class ="row-wrapper">
-            <div class ="option-caption">Change fingers direction at bind: </div>
-            <div class ="option-input">
-                <div id="FixFingers" class ="inp_toggle no-scroll" data-current="true"></div>
-            </div>
-        </div>
         
         <div class ="row-wrapper">
             <div class ="option-caption">Filter humanoid limits: </div>

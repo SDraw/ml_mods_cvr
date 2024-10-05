@@ -10,7 +10,7 @@ using UnityEngine;
 namespace ml_pmc
 {
     [DisallowMultipleComponent]
-    public class PoseCopycat : MonoBehaviour
+    class PoseCopycat : MonoBehaviour
     {
         public class CopycatEvent<T1>
         {
@@ -22,7 +22,7 @@ namespace ml_pmc
 
         static readonly Vector4 ms_pointVector = new Vector4(0f, 0f, 0f, 1f);
 
-        public static PoseCopycat Instance { get; private set; } = null;
+        static PoseCopycat ms_instance = null;
         internal static readonly CopycatEvent<bool> OnCopycatChanged = new CopycatEvent<bool>();
 
         Animator m_animator = null;
@@ -43,10 +43,14 @@ namespace ml_pmc
 
         void Awake()
         {
-            if((Instance != null) && (Instance != this))
-                Object.Destroy(this);
-            else
-                Instance = this;
+            if(ms_instance != null)
+            {
+                DestroyImmediate(this);
+                return;
+            }
+
+            ms_instance = this;
+            DontDestroyOnLoad(this);
         }
 
         void Start()
@@ -60,8 +64,8 @@ namespace ml_pmc
         }
         void OnDestroy()
         {
-            if(Instance == this)
-                Instance = null;
+            if(ms_instance == this)
+                ms_instance = null;
 
             m_poseHandler?.Dispose();
             m_poseHandler = null;
@@ -201,7 +205,7 @@ namespace ml_pmc
                             PlayerSetup.Instance.transform.rotation = l_result.rotation;
                     }
 
-                    if(Vector3.Distance(this.transform.position, m_puppetParser.transform.position) > m_distanceLimit)
+                    if(Vector3.Distance(PlayerSetup.Instance.GetPlayerPosition(), m_puppetParser.transform.position) > m_distanceLimit)
                         SetTarget(null);
                 }
                 else
@@ -364,7 +368,7 @@ namespace ml_pmc
         }
 
         // Arbitrary
-        public void SetTarget(PuppetMaster p_target)
+        void SetTarget(PuppetMaster p_target)
         {
             if(m_animator != null)
             {
@@ -404,9 +408,6 @@ namespace ml_pmc
                 }
             }
         }
-
-        public bool IsActive() => m_active;
-        public bool IsFingerTrackingActive() => m_fingerTracking;
 
         void OverrideIK()
         {

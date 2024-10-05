@@ -22,6 +22,7 @@ namespace ml_prm
             public void RemoveListener(Action<T1, T2, T3> p_listener) => m_action -= p_listener;
             public void Invoke(T1 p_objA, T2 p_objB, T3 p_objC) => m_action?.Invoke(p_objA, p_objB, p_objC);
         }
+
         public static readonly GestureEvent<PuppetMaster, GestureHand, bool> OnGestureState = new GestureEvent<PuppetMaster, GestureHand, bool>();
 
         class PlayerEntry
@@ -32,6 +33,8 @@ namespace ml_prm
             public bool m_stateRight = false;
         }
 
+        static RemoteGesturesManager ms_instance = null;
+
         readonly List<PlayerEntry> m_entries = null;
 
         internal RemoteGesturesManager()
@@ -39,10 +42,20 @@ namespace ml_prm
             m_entries = new List<PlayerEntry>();
         }
 
+        void Awake()
+        {
+            if(ms_instance != null)
+            {
+                DestroyImmediate(this);
+                return;
+            }
+
+            ms_instance = this;
+            DontDestroyOnLoad(this);
+        }
+
         void Start()
         {
-            DontDestroyOnLoad(this);
-
             CVRGameEventSystem.Player.OnJoinEntity.AddListener(OnRemotePlayerCreated);
             CVRGameEventSystem.Player.OnLeaveEntity.AddListener(OnRemotePlayerDestroyed);
             Settings.OnGestureGrabChanged.AddListener(OnGestureGrabChanged);
@@ -50,6 +63,9 @@ namespace ml_prm
 
         void OnDestroy()
         {
+            if(ms_instance == this)
+                ms_instance = null;
+
             m_entries.Clear();
 
             CVRGameEventSystem.Player.OnJoinEntity.RemoveListener(OnRemotePlayerCreated);

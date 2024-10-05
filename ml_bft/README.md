@@ -13,7 +13,7 @@ Available mod's settings in `Settings - Input & Key-Bindings - Better Fingers Tr
 * **Filter humanoid limits:** Limits fingers rotations to be valid for Unity's Mechanim; `true` by default
   * Note: Enabling this option ensures that visual representation of your fingers will be same for you and remote players, but it cancels out additional finger segments rotations that can be better visually in most cases.
 * **Show hands model:** shows transparent hands model (mostly as debug option); `false` by default
-* **Change fingers direction at bind:** tries to allign avatar's fingers for more accurate poses
+* **Change fingers direction at bind:** tries to allign avatar's fingers for more accurate poses; `true` by default
 
 # Notes
 * Currently supports only SteamVR environment, OpenXR support is planned.

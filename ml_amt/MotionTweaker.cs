@@ -11,7 +11,7 @@ namespace ml_amt
     [DisallowMultipleComponent]
     class MotionTweaker : MonoBehaviour
     {
-        struct IKState
+        struct IKInfo
         {
             public float m_weight;
             public float m_locomotionWeight;
@@ -20,7 +20,9 @@ namespace ml_amt
             public bool m_bendNormalRight;
         }
 
-        IKState m_ikState;
+        static MotionTweaker ms_instance = null;
+
+        IKInfo m_ikInfo;
         VRIK m_vrIk = null;
         float m_avatarScale = 1f;
         Vector3 m_locomotionOffset = Vector3.zero; // Original locomotion offset
@@ -37,10 +39,19 @@ namespace ml_amt
         }
 
         // Unity events
+        void Awake()
+        {
+            if(ms_instance != null)
+            {
+                DestroyImmediate(this);
+                return;
+            }
+
+            ms_instance = this;
+            DontDestroyOnLoad(this);
+        }
         void Start()
         {
-            DontDestroyOnLoad(this);
-
             OnCrouchLimitChanged(Settings.CrouchLimit);
             OnProneLimitChanged(Settings.ProneLimit);
 
@@ -56,6 +67,9 @@ namespace ml_amt
 
         void OnDestroy()
         {
+            if(ms_instance == this)
+                ms_instance = null;
+
             m_vrIk = null;
             m_ikLimits = null;
             m_parameters.Clear();
@@ -170,11 +184,11 @@ namespace ml_amt
         // IK events
         void OnIKPreSolverUpdate()
         {
-            m_ikState.m_weight = m_vrIk.solver.IKPositionWeight;
-            m_ikState.m_locomotionWeight = m_vrIk.solver.locomotion.weight;
-            m_ikState.m_plantFeet = m_vrIk.solver.plantFeet;
-            m_ikState.m_bendNormalLeft = m_vrIk.solver.leftLeg.useAnimatedBendNormal;
-            m_ikState.m_bendNormalRight = m_vrIk.solver.rightLeg.useAnimatedBendNormal;
+            m_ikInfo.m_weight = m_vrIk.solver.IKPositionWeight;
+            m_ikInfo.m_locomotionWeight = m_vrIk.solver.locomotion.weight;
+            m_ikInfo.m_plantFeet = m_vrIk.solver.plantFeet;
+            m_ikInfo.m_bendNormalLeft = m_vrIk.solver.leftLeg.useAnimatedBendNormal;
+            m_ikInfo.m_bendNormalRight = m_vrIk.solver.rightLeg.useAnimatedBendNormal;
 
             if(!BodySystem.isCalibratedAsFullBody)
             {
@@ -200,11 +214,11 @@ namespace ml_amt
 
         void OnIKPostSolverUpdate()
         {
-            m_vrIk.solver.IKPositionWeight = m_ikState.m_weight;
-            m_vrIk.solver.locomotion.weight = m_ikState.m_locomotionWeight;
-            m_vrIk.solver.plantFeet = m_ikState.m_plantFeet;
-            m_vrIk.solver.leftLeg.useAnimatedBendNormal = m_ikState.m_bendNormalLeft;
-            m_vrIk.solver.rightLeg.useAnimatedBendNormal = m_ikState.m_bendNormalRight;
+            m_vrIk.solver.IKPositionWeight = m_ikInfo.m_weight;
+            m_vrIk.solver.locomotion.weight = m_ikInfo.m_locomotionWeight;
+            m_vrIk.solver.plantFeet = m_ikInfo.m_plantFeet;
+            m_vrIk.solver.leftLeg.useAnimatedBendNormal = m_ikInfo.m_bendNormalLeft;
+            m_vrIk.solver.rightLeg.useAnimatedBendNormal = m_ikInfo.m_bendNormalRight;
         }
 
         // Settings

@@ -18,20 +18,6 @@ namespace ml_amt
 
         public static bool HasToes(this IKSolverVR p_instance) => (bool)ms_hasToes.GetValue(p_instance);
 
-        public static bool IsWorldSafe() => ((CVRWorld.Instance != null) && CVRWorld.Instance.allowFlying);
-        public static float GetWorldMovementLimit()
-        {
-            float l_result = 1f;
-            if(CVRWorld.Instance != null)
-            {
-                l_result = CVRWorld.Instance.baseMovementSpeed;
-                l_result *= CVRWorld.Instance.sprintMultiplier;
-                l_result *= CVRWorld.Instance.inAirMovementMultiplier;
-                l_result *= CVRWorld.Instance.flyMultiplier;
-            }
-            return l_result;
-        }
-
         public static void ExecuteScript(this CohtmlControlledViewWrapper p_instance, string p_script) => ((cohtml.Net.View)ms_view.GetValue(p_instance)).ExecuteScript(p_script);
 
         public static void SetAvatarTPose()

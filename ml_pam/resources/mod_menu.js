@@ -16,7 +16,7 @@
         <div class ="row-wrapper">
             <div class ="option-caption">Grab offset: </div>
             <div class ="option-input">
-                <div id="GrabOffset" class ="inp_slider no-scroll" data-min="0" data-max="100" data-current="25"></div>
+                <div id="GrabOffset" class ="inp_slider no-scroll" data-min="0" data-max="100" data-current="50"></div>
             </div>
         </div>
 
@@ -33,8 +33,15 @@
                 <div id="HandsExtension" class ="inp_toggle no-scroll" data-current="true"></div>
             </div>
         </div>
+
+        <div class ="row-wrapper">
+            <div class ="option-caption">Hand extension speed: </div>
+            <div class ="option-input">
+                <div id="ExtensionSpeed" class ="inp_slider no-scroll" data-min="1" data-max="50" data-current="10"></div>
+            </div>
+        </div>
     `;
-    document.getElementById('settings-interaction').appendChild(l_block);
+    document.getElementById('settings-input').appendChild(l_block);
 
     // Toggles
     for (let l_toggle of l_block.querySelectorAll('.inp_toggle'))

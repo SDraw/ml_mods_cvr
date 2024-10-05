@@ -77,18 +77,28 @@ namespace ml_lme
             (HumanBodyBones.RightLittleIntermediate, false),
             (HumanBodyBones.RightLittleDistal, false),
         };
-        static readonly (HumanBodyBones, HumanBodyBones, bool)[] ms_rotationFixChains =
+        static readonly (HumanBodyBones, HumanBodyBones, bool)[] ms_fingersChains =
         {
-            (HumanBodyBones.LeftThumbProximal,HumanBodyBones.LeftThumbIntermediate,true), (HumanBodyBones.LeftThumbIntermediate, HumanBodyBones.LeftThumbDistal,true),
-            (HumanBodyBones.LeftIndexProximal,HumanBodyBones.LeftIndexIntermediate,true), (HumanBodyBones.LeftIndexIntermediate, HumanBodyBones.LeftIndexDistal,true),
-            (HumanBodyBones.LeftMiddleProximal,HumanBodyBones.LeftMiddleIntermediate,true), (HumanBodyBones.LeftMiddleIntermediate, HumanBodyBones.LeftMiddleDistal,true),
-            (HumanBodyBones.LeftRingProximal,HumanBodyBones.LeftRingIntermediate,true), (HumanBodyBones.LeftRingIntermediate, HumanBodyBones.LeftRingDistal,true),
-            (HumanBodyBones.LeftLittleProximal,HumanBodyBones.LeftLittleIntermediate,true), (HumanBodyBones.LeftLittleIntermediate, HumanBodyBones.LeftLittleDistal,true),
-            (HumanBodyBones.RightThumbProximal,HumanBodyBones.RightThumbIntermediate,false), (HumanBodyBones.RightThumbIntermediate, HumanBodyBones.RightThumbDistal,false),
-            (HumanBodyBones.RightIndexProximal,HumanBodyBones.RightIndexIntermediate,false), (HumanBodyBones.RightIndexIntermediate, HumanBodyBones.RightIndexDistal,false),
-            (HumanBodyBones.RightMiddleProximal,HumanBodyBones.RightMiddleIntermediate,false), (HumanBodyBones.RightMiddleIntermediate, HumanBodyBones.RightMiddleDistal,false),
-            (HumanBodyBones.RightRingProximal,HumanBodyBones.RightRingIntermediate,false), (HumanBodyBones.RightRingIntermediate, HumanBodyBones.RightRingDistal,false),
-            (HumanBodyBones.RightLittleProximal,HumanBodyBones.RightLittleIntermediate,false), (HumanBodyBones.RightLittleIntermediate, HumanBodyBones.RightLittleDistal,false)
+            (HumanBodyBones.LeftThumbProximal,HumanBodyBones.LeftThumbIntermediate,true), (HumanBodyBones.LeftThumbIntermediate, HumanBodyBones.LeftThumbDistal,true), (HumanBodyBones.LeftThumbDistal,HumanBodyBones.LastBone,true),
+            (HumanBodyBones.LeftIndexProximal,HumanBodyBones.LeftIndexIntermediate,true), (HumanBodyBones.LeftIndexIntermediate, HumanBodyBones.LeftIndexDistal,true), (HumanBodyBones.LeftIndexDistal,HumanBodyBones.LastBone,true),
+            (HumanBodyBones.LeftMiddleProximal,HumanBodyBones.LeftMiddleIntermediate,true), (HumanBodyBones.LeftMiddleIntermediate, HumanBodyBones.LeftMiddleDistal,true), (HumanBodyBones.LeftMiddleDistal,HumanBodyBones.LastBone,true),
+            (HumanBodyBones.LeftRingProximal,HumanBodyBones.LeftRingIntermediate,true), (HumanBodyBones.LeftRingIntermediate, HumanBodyBones.LeftRingDistal,true), (HumanBodyBones.LeftRingDistal,HumanBodyBones.LastBone,true),
+            (HumanBodyBones.LeftLittleProximal,HumanBodyBones.LeftLittleIntermediate,true), (HumanBodyBones.LeftLittleIntermediate, HumanBodyBones.LeftLittleDistal,true), (HumanBodyBones.LeftLittleDistal,HumanBodyBones.LastBone,true),
+            (HumanBodyBones.RightThumbProximal,HumanBodyBones.RightThumbIntermediate,false), (HumanBodyBones.RightThumbIntermediate, HumanBodyBones.RightThumbDistal,false), (HumanBodyBones.RightThumbDistal,HumanBodyBones.LastBone,false),
+            (HumanBodyBones.RightIndexProximal,HumanBodyBones.RightIndexIntermediate,false), (HumanBodyBones.RightIndexIntermediate, HumanBodyBones.RightIndexDistal,false), (HumanBodyBones.RightIndexDistal,HumanBodyBones.LastBone,false),
+            (HumanBodyBones.RightMiddleProximal,HumanBodyBones.RightMiddleIntermediate,false), (HumanBodyBones.RightMiddleIntermediate, HumanBodyBones.RightMiddleDistal,false), (HumanBodyBones.RightMiddleDistal,HumanBodyBones.LastBone,false),
+            (HumanBodyBones.RightRingProximal,HumanBodyBones.RightRingIntermediate,false), (HumanBodyBones.RightRingIntermediate, HumanBodyBones.RightRingDistal,false), (HumanBodyBones.RightRingDistal,HumanBodyBones.LastBone,false),
+            (HumanBodyBones.RightLittleProximal,HumanBodyBones.RightLittleIntermediate,false), (HumanBodyBones.RightLittleIntermediate, HumanBodyBones.RightLittleDistal,false),(HumanBodyBones.RightLittleDistal,HumanBodyBones.LastBone,false),
+        };
+
+        static readonly Vector3[] ms_directions =
+        {
+            Vector3.forward,
+            Vector3.back,
+            Vector3.left,
+            Vector3.right,
+            Vector3.up,
+            Vector3.down,
         };
 
         public static readonly float[] ms_lastLeftFingerBones = new float[20];
@@ -96,10 +106,6 @@ namespace ml_lme
 
         VRIK m_vrIK = null;
         Transform m_hips = null;
-
-        bool m_enabled = true;
-        bool m_fingersOnly = false;
-        bool m_trackElbows = true;
 
         IKInfo m_vrIKInfo;
         ArmIK m_leftArmIK = null;
@@ -135,12 +141,11 @@ namespace ml_lme
             m_rightHandTarget.localPosition = Vector3.zero;
             m_rightHandTarget.localRotation = Quaternion.identity;
 
-            OnEnabledChanged(Settings.Enabled);
-            OnFingersOnlyChanged(Settings.FingersOnly);
+            OnEnabledOrFingersOnlyChanged(Settings.Enabled || Settings.FingersOnly);
             OnTrackElbowsChanged(Settings.TrackElbows);
 
-            Settings.OnEnabledChanged.AddListener(this.OnEnabledChanged);
-            Settings.OnFingersOnlyChanged.AddListener(this.OnFingersOnlyChanged);
+            Settings.OnEnabledChanged.AddListener(this.OnEnabledOrFingersOnlyChanged);
+            Settings.OnFingersOnlyChanged.AddListener(this.OnEnabledOrFingersOnlyChanged);
             Settings.OnTrackElbowsChanged.AddListener(this.OnTrackElbowsChanged);
 
             GameEvents.OnAvatarClear.AddListener(this.OnAvatarClear);
@@ -165,8 +170,8 @@ namespace ml_lme
 
             m_vrIK = null;
 
-            Settings.OnEnabledChanged.RemoveListener(this.OnEnabledChanged);
-            Settings.OnFingersOnlyChanged.RemoveListener(this.OnFingersOnlyChanged);
+            Settings.OnEnabledChanged.RemoveListener(this.OnEnabledOrFingersOnlyChanged);
+            Settings.OnFingersOnlyChanged.RemoveListener(this.OnEnabledOrFingersOnlyChanged);
             Settings.OnTrackElbowsChanged.RemoveListener(this.OnTrackElbowsChanged);
 
             GameEvents.OnAvatarClear.RemoveListener(this.OnAvatarClear);
@@ -176,24 +181,24 @@ namespace ml_lme
 
         void Update()
         {
-            if(m_enabled)
+            if(Settings.Enabled)
             {
                 LeapParser.LeapData l_data = LeapManager.Instance.GetLatestData();
 
                 if((m_leftArmIK != null) && (m_rightArmIK != null))
                 {
-                    m_leftArmIK.solver.IKPositionWeight = Mathf.Lerp(m_leftArmIK.solver.IKPositionWeight, (l_data.m_leftHand.m_present && !m_fingersOnly) ? 1f : 0f, 0.25f);
-                    m_leftArmIK.solver.IKRotationWeight = Mathf.Lerp(m_leftArmIK.solver.IKRotationWeight, (l_data.m_leftHand.m_present && !m_fingersOnly) ? 1f : 0f, 0.25f);
-                    if(m_trackElbows)
-                        m_leftArmIK.solver.arm.bendGoalWeight = Mathf.Lerp(m_leftArmIK.solver.arm.bendGoalWeight, (l_data.m_leftHand.m_present && !m_fingersOnly) ? 1f : 0f, 0.25f);
+                    m_leftArmIK.solver.IKPositionWeight = Mathf.Lerp(m_leftArmIK.solver.IKPositionWeight, (l_data.m_leftHand.m_present && !Settings.FingersOnly) ? 1f : 0f, 0.25f);
+                    m_leftArmIK.solver.IKRotationWeight = Mathf.Lerp(m_leftArmIK.solver.IKRotationWeight, (l_data.m_leftHand.m_present && !Settings.FingersOnly) ? 1f : 0f, 0.25f);
+                    if(Settings.TrackElbows)
+                        m_leftArmIK.solver.arm.bendGoalWeight = Mathf.Lerp(m_leftArmIK.solver.arm.bendGoalWeight, (l_data.m_leftHand.m_present && !Settings.FingersOnly) ? 1f : 0f, 0.25f);
 
-                    m_rightArmIK.solver.IKPositionWeight = Mathf.Lerp(m_rightArmIK.solver.IKPositionWeight, (l_data.m_rightHand.m_present && !m_fingersOnly) ? 1f : 0f, 0.25f);
-                    m_rightArmIK.solver.IKRotationWeight = Mathf.Lerp(m_rightArmIK.solver.IKRotationWeight, (l_data.m_rightHand.m_present && !m_fingersOnly) ? 1f : 0f, 0.25f);
-                    if(m_trackElbows)
-                        m_rightArmIK.solver.arm.bendGoalWeight = Mathf.Lerp(m_rightArmIK.solver.arm.bendGoalWeight, (l_data.m_rightHand.m_present && !m_fingersOnly) ? 1f : 0f, 0.25f);
+                    m_rightArmIK.solver.IKPositionWeight = Mathf.Lerp(m_rightArmIK.solver.IKPositionWeight, (l_data.m_rightHand.m_present && !Settings.FingersOnly) ? 1f : 0f, 0.25f);
+                    m_rightArmIK.solver.IKRotationWeight = Mathf.Lerp(m_rightArmIK.solver.IKRotationWeight, (l_data.m_rightHand.m_present && !Settings.FingersOnly) ? 1f : 0f, 0.25f);
+                    if(Settings.TrackElbows)
+                        m_rightArmIK.solver.arm.bendGoalWeight = Mathf.Lerp(m_rightArmIK.solver.arm.bendGoalWeight, (l_data.m_rightHand.m_present && !Settings.FingersOnly) ? 1f : 0f, 0.25f);
                 }
 
-                if((m_vrIK != null) && !m_fingersOnly)
+                if((m_vrIK != null) && !Settings.FingersOnly)
                 {
                     m_leftTargetActive = l_data.m_leftHand.m_present;
                     m_rightTargetActive = l_data.m_rightHand.m_present;
@@ -203,7 +208,7 @@ namespace ml_lme
 
         void LateUpdate()
         {
-            if(m_enabled && (m_poseHandler != null))
+            if(Settings.Enabled && (m_poseHandler != null))
             {
                 LeapParser.LeapData l_data = LeapManager.Instance.GetLatestData();
                 if(l_data.m_leftHand.m_present)
@@ -276,24 +281,25 @@ namespace ml_lme
 
         void OnAvatarSetup()
         {
-            if(PlayerSetup.Instance._animator.isHuman)
+            Animator l_animator = PlayerSetup.Instance._animator;
+            if(l_animator.isHuman)
             {
                 Utils.SetAvatarTPose();
 
-                m_poseHandler = new HumanPoseHandler(PlayerSetup.Instance._animator.avatar, PlayerSetup.Instance._animator.transform);
+                m_poseHandler = new HumanPoseHandler(l_animator.avatar, l_animator.transform);
                 m_poseHandler.GetHumanPose(ref m_pose);
 
-                m_hips = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.Hips);
+                m_hips = l_animator.GetBoneTransform(HumanBodyBones.Hips);
 
-                m_leftHandOffset.m_source = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftHand);
-                m_leftHandTarget.localRotation = ms_offsetLeft * (Quaternion.Inverse(PlayerSetup.Instance._avatar.transform.rotation) * m_leftHandOffset.m_source.rotation);
+                m_leftHandOffset.m_source = l_animator.GetBoneTransform(HumanBodyBones.LeftHand);
+                m_leftHandTarget.localRotation = ms_offsetLeft * (Quaternion.Inverse(l_animator.transform.rotation) * m_leftHandOffset.m_source.rotation);
 
-                m_rightHandOffset.m_source = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightHand);
-                m_rightHandTarget.localRotation = ms_offsetRight * (Quaternion.Inverse(PlayerSetup.Instance._avatar.transform.rotation) * m_rightHandOffset.m_source.rotation);
+                m_rightHandOffset.m_source = l_animator.GetBoneTransform(HumanBodyBones.RightHand);
+                m_rightHandTarget.localRotation = ms_offsetRight * (Quaternion.Inverse(l_animator.transform.rotation) * m_rightHandOffset.m_source.rotation);
 
                 ParseFingersBones();
 
-                m_vrIK = PlayerSetup.Instance._animator.GetComponent<VRIK>();
+                m_vrIK = l_animator.GetComponent<VRIK>();
                 if(m_vrIK != null)
                 {
                     m_vrIK.onPreSolverUpdate.AddListener(this.OnIKPreSolverUpdate);
@@ -339,7 +345,7 @@ namespace ml_lme
                 m_vrIK.solver.leftArm.positionWeight = 1f;
                 m_vrIK.solver.leftArm.rotationWeight = 1f;
                 m_vrIK.solver.leftArm.bendGoal = LeapTracking.Instance.GetLeftElbow();
-                m_vrIK.solver.leftArm.bendGoalWeight = (m_trackElbows ? 1f : 0f);
+                m_vrIK.solver.leftArm.bendGoalWeight = (Settings.TrackElbows ? 1f : 0f);
             }
             if(m_rightTargetActive)
             {
@@ -353,7 +359,7 @@ namespace ml_lme
                 m_vrIK.solver.rightArm.positionWeight = 1f;
                 m_vrIK.solver.rightArm.rotationWeight = 1f;
                 m_vrIK.solver.rightArm.bendGoal = LeapTracking.Instance.GetRightElbow();
-                m_vrIK.solver.rightArm.bendGoalWeight = (m_trackElbows ? 1f : 0f);
+                m_vrIK.solver.rightArm.bendGoalWeight = (Settings.TrackElbows ? 1f : 0f);
             }
         }
         void OnIKPostSolverUpdate()
@@ -377,30 +383,18 @@ namespace ml_lme
         }
 
         // Settings
-        void OnEnabledChanged(bool p_state)
+        void OnEnabledOrFingersOnlyChanged(bool p_state)
         {
-            m_enabled = p_state;
-
-            RefreshArmIK();
-            ResetTargetsStates();
-        }
-
-        void OnFingersOnlyChanged(bool p_state)
-        {
-            m_fingersOnly = p_state;
-
             RefreshArmIK();
             ResetTargetsStates();
         }
 
         void OnTrackElbowsChanged(bool p_state)
         {
-            m_trackElbows = p_state;
-
             if((m_leftArmIK != null) && (m_rightArmIK != null))
             {
-                m_leftArmIK.solver.arm.bendGoalWeight = (m_trackElbows ? 1f : 0f);
-                m_rightArmIK.solver.arm.bendGoalWeight = (m_trackElbows ? 1f : 0f);
+                m_leftArmIK.solver.arm.bendGoalWeight = (p_state ? 1f : 0f);
+                m_rightArmIK.solver.arm.bendGoalWeight = (p_state ? 1f : 0f);
             }
 
             ResetTargetsStates();
@@ -415,41 +409,42 @@ namespace ml_lme
 
         void SetupArmIK()
         {
-            Transform l_chest = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.UpperChest);
+            Animator l_animator = PlayerSetup.Instance._animator;
+            Transform l_chest = l_animator.GetBoneTransform(HumanBodyBones.UpperChest);
             if(l_chest == null)
-                l_chest = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.Chest);
+                l_chest = l_animator.GetBoneTransform(HumanBodyBones.Chest);
             if(l_chest == null)
-                l_chest = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.Spine);
+                l_chest = l_animator.GetBoneTransform(HumanBodyBones.Spine);
 
-            m_leftArmIK = PlayerSetup.Instance._avatar.AddComponent<ArmIK>();
+            m_leftArmIK = l_animator.gameObject.AddComponent<ArmIK>();
             m_leftArmIK.solver.isLeft = true;
             m_leftArmIK.solver.SetChain(
                 l_chest,
-                PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftShoulder),
-                PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftUpperArm),
-                PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftLowerArm),
-                PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftHand),
-                PlayerSetup.Instance._animator.transform
+                l_animator.GetBoneTransform(HumanBodyBones.LeftShoulder),
+                l_animator.GetBoneTransform(HumanBodyBones.LeftUpperArm),
+                l_animator.GetBoneTransform(HumanBodyBones.LeftLowerArm),
+                l_animator.GetBoneTransform(HumanBodyBones.LeftHand),
+                l_animator.transform
             );
             m_leftArmIK.solver.arm.target = m_leftHandTarget;
             m_leftArmIK.solver.arm.bendGoal = LeapTracking.Instance.GetLeftElbow();
-            m_leftArmIK.solver.arm.bendGoalWeight = (m_trackElbows ? 1f : 0f);
-            m_leftArmIK.enabled = (m_enabled && !m_fingersOnly);
+            m_leftArmIK.solver.arm.bendGoalWeight = (Settings.TrackElbows ? 1f : 0f);
+            m_leftArmIK.enabled = (Settings.Enabled && !Settings.FingersOnly);
 
-            m_rightArmIK = PlayerSetup.Instance._avatar.AddComponent<ArmIK>();
+            m_rightArmIK = l_animator.gameObject.AddComponent<ArmIK>();
             m_rightArmIK.solver.isLeft = false;
             m_rightArmIK.solver.SetChain(
                 l_chest,
-                PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightShoulder),
-                PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightUpperArm),
-                PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightLowerArm),
-                PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightHand),
-                PlayerSetup.Instance._animator.transform
+                l_animator.GetBoneTransform(HumanBodyBones.RightShoulder),
+                l_animator.GetBoneTransform(HumanBodyBones.RightUpperArm),
+                l_animator.GetBoneTransform(HumanBodyBones.RightLowerArm),
+                l_animator.GetBoneTransform(HumanBodyBones.RightHand),
+                l_animator.transform
             );
             m_rightArmIK.solver.arm.target = m_rightHandTarget;
             m_rightArmIK.solver.arm.bendGoal = LeapTracking.Instance.GetRightElbow();
-            m_rightArmIK.solver.arm.bendGoalWeight = (m_trackElbows ? 1f : 0f);
-            m_rightArmIK.enabled = (m_enabled && !m_fingersOnly);
+            m_rightArmIK.solver.arm.bendGoalWeight = (Settings.TrackElbows ? 1f : 0f);
+            m_rightArmIK.enabled = (Settings.Enabled && !Settings.FingersOnly);
         }
 
         void RemoveArmIK()
@@ -467,8 +462,8 @@ namespace ml_lme
         {
             if((m_leftArmIK != null) && (m_rightArmIK != null))
             {
-                m_leftArmIK.enabled = (m_enabled && !m_fingersOnly);
-                m_rightArmIK.enabled = (m_enabled && !m_fingersOnly);
+                m_leftArmIK.enabled = (Settings.Enabled && !Settings.FingersOnly);
+                m_rightArmIK.enabled = (Settings.Enabled && !Settings.FingersOnly);
             }
         }
 
@@ -476,42 +471,48 @@ namespace ml_lme
         {
             LeapTracking.Instance.Rebind(PlayerSetup.Instance.transform.rotation);
 
+            // Align rotations of leap fingers to avatar fingers
+            Animator l_animator = PlayerSetup.Instance._animator;
+            LeapHand l_leapLeft = LeapTracking.Instance.GetLeftHand();
+            LeapHand l_leapRight = LeapTracking.Instance.GetRightHand();
             // Try to "fix" rotations, slightly inaccurate after 0YX plane rotation
-            foreach(var l_tuple in ms_rotationFixChains)
+            foreach(var l_tuple in ms_fingersChains)
             {
                 ReorientateTowards(
-                    PlayerSetup.Instance._animator.GetBoneTransform(l_tuple.Item1),
-                    PlayerSetup.Instance._animator.GetBoneTransform(l_tuple.Item2),
-                    l_tuple.Item3 ? LeapTracking.Instance.GetLeftHand().GetBone(l_tuple.Item1) : LeapTracking.Instance.GetRightHand().GetBone(l_tuple.Item1),
-                    l_tuple.Item3 ? LeapTracking.Instance.GetLeftHand().GetBone(l_tuple.Item2) : LeapTracking.Instance.GetRightHand().GetBone(l_tuple.Item2),
+                    PlayerSetup.Instance.transform,
+                    l_animator.GetBoneTransform(l_tuple.Item1),
+                    (l_tuple.Item2 != HumanBodyBones.LastBone) ? l_animator.GetBoneTransform(l_tuple.Item2) : null,
+                    l_tuple.Item3 ? l_leapLeft.GetLinkedBone(l_tuple.Item1) : l_leapRight.GetLinkedBone(l_tuple.Item1),
+                    l_tuple.Item3 ? l_leapLeft.GetLinkedBone(l_tuple.Item2) : l_leapRight.GetLinkedBone(l_tuple.Item2),
                     PlaneType.OXZ
                 );
                 ReorientateTowards(
-                    PlayerSetup.Instance._animator.GetBoneTransform(l_tuple.Item1),
-                    PlayerSetup.Instance._animator.GetBoneTransform(l_tuple.Item2),
-                    l_tuple.Item3 ? LeapTracking.Instance.GetLeftHand().GetBone(l_tuple.Item1) : LeapTracking.Instance.GetRightHand().GetBone(l_tuple.Item1),
-                    l_tuple.Item3 ? LeapTracking.Instance.GetLeftHand().GetBone(l_tuple.Item2) : LeapTracking.Instance.GetRightHand().GetBone(l_tuple.Item2),
+                    PlayerSetup.Instance.transform,
+                    l_animator.GetBoneTransform(l_tuple.Item1),
+                    (l_tuple.Item2 != HumanBodyBones.LastBone) ? l_animator.GetBoneTransform(l_tuple.Item2) : null,
+                    l_tuple.Item3 ? l_leapLeft.GetLinkedBone(l_tuple.Item1) : l_leapRight.GetLinkedBone(l_tuple.Item1),
+                    l_tuple.Item3 ? l_leapLeft.GetLinkedBone(l_tuple.Item2) : l_leapRight.GetLinkedBone(l_tuple.Item2),
                     PlaneType.OYX
                 );
             }
 
             // Bind
-            m_leftHandOffset.m_target = LeapTracking.Instance.GetLeftHand().GetBone(HumanBodyBones.LeftHand);
+            m_leftHandOffset.m_target = l_leapLeft.GetLinkedBone(HumanBodyBones.LeftHand);
             if((m_leftHandOffset.m_source != null) && (m_leftHandOffset.m_target != null))
                 m_leftHandOffset.m_offset = Quaternion.Inverse(m_leftHandOffset.m_source.rotation) * m_leftHandOffset.m_target.rotation;
 
-            m_rightHandOffset.m_target = LeapTracking.Instance.GetRightHand().GetBone(HumanBodyBones.RightHand);
+            m_rightHandOffset.m_target = l_leapRight.GetLinkedBone(HumanBodyBones.RightHand);
             if((m_rightHandOffset.m_source != null) && (m_rightHandOffset.m_target != null))
                 m_rightHandOffset.m_offset = Quaternion.Inverse(m_rightHandOffset.m_source.rotation) * m_rightHandOffset.m_target.rotation;
 
             foreach(var l_link in ms_fingers)
             {
-                Transform l_transform = PlayerSetup.Instance._animator.GetBoneTransform(l_link.Item1);
+                Transform l_transform = l_animator.GetBoneTransform(l_link.Item1);
                 if(l_transform != null)
                 {
                     RotationOffset l_offset = new RotationOffset();
                     l_offset.m_target = l_transform;
-                    l_offset.m_source = (l_link.Item2 ? LeapTracking.Instance.GetLeftHand().GetBone(l_link.Item1) : LeapTracking.Instance.GetRightHand().GetBone(l_link.Item1));
+                    l_offset.m_source = (l_link.Item2 ? l_leapLeft.GetLinkedBone(l_link.Item1) : l_leapRight.GetLinkedBone(l_link.Item1));
                     l_offset.m_offset = Quaternion.Inverse(l_offset.m_source.rotation) * l_offset.m_target.rotation;
 
                     if(l_link.Item2)
@@ -522,13 +523,13 @@ namespace ml_lme
             }
         }
 
-        void ReorientateTowards(Transform p_target, Transform p_targetEnd, Transform p_source, Transform p_sourceEnd, PlaneType p_plane)
+        static void ReorientateTowards(Transform root, Transform p_source, Transform p_sourceEnd, Transform p_target, Transform p_targetEnd, PlaneType p_plane)
         {
-            if((p_target != null) && (p_targetEnd != null) && (p_source != null) && (p_sourceEnd != null))
+            if((root != null) && (p_target != null) && (p_source != null))
             {
-                Quaternion l_playerInv = Quaternion.Inverse(PlayerSetup.Instance.transform.rotation);
-                Vector3 l_targetDir = l_playerInv * (p_targetEnd.position - p_target.position);
-                Vector3 l_sourceDir = l_playerInv * (p_sourceEnd.position - p_source.position);
+                Quaternion l_rootInv = Quaternion.Inverse(root.rotation);
+                Vector3 l_targetDir = l_rootInv * (((p_targetEnd != null) ? p_targetEnd.position : GuessEnd(p_target)) - p_target.position);
+                Vector3 l_sourceDir = l_rootInv * (((p_sourceEnd != null) ? p_sourceEnd.position : GuessEnd(p_source)) - p_source.position);
                 switch(p_plane)
                 {
                     case PlaneType.OXZ:
@@ -561,9 +562,30 @@ namespace ml_lme
                 if(p_plane == PlaneType.OYX)
                     l_diff = Quaternion.Euler(0f, 0f, l_diff.eulerAngles.y);
 
-                Quaternion l_adjusted = l_diff * (l_playerInv * p_target.rotation);
-                p_target.rotation = PlayerSetup.Instance.transform.rotation * l_adjusted;
+                Quaternion l_adjusted = l_diff * (l_rootInv * p_target.rotation);
+                p_target.rotation = root.rotation * l_adjusted;
             }
+        }
+
+        static Vector3 GuessEnd(Transform p_target)
+        {
+            Vector3 l_result = p_target.position;
+            if(p_target.parent != null)
+            {
+                float l_dot = -1f;
+                Vector3 l_axisDir = p_target.position - p_target.parent.position;
+                foreach(Vector3 l_dir in ms_directions)
+                {
+                    Vector3 l_rotDir = p_target.rotation * l_dir;
+                    float l_stepDot = Vector3.Dot(l_rotDir, l_axisDir);
+                    if(l_stepDot >= l_dot)
+                    {
+                        l_dot = l_stepDot;
+                        l_result = p_target.position + l_rotDir;
+                    }
+                }
+            }
+            return l_result;
         }
     }
 }

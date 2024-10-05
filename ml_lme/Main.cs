@@ -14,7 +14,6 @@ namespace ml_lme
             Settings.Init();
             AssetsHandler.Load();
             GameEvents.Init(HarmonyInstance);
-            ModSupporter.Init();
 
             MelonLoader.MelonCoroutines.Start(WaitForRootLogic());
         }
@@ -31,7 +30,7 @@ namespace ml_lme
             while(ABI_RC.Core.RootLogic.Instance == null)
                 yield return null;
 
-            m_leapManager = new GameObject("LeapMotionManager").AddComponent<LeapManager>();
+            m_leapManager = new GameObject("[LeapMotionExtension]").AddComponent<LeapManager>();
         }
     }
 }
