@@ -30,6 +30,8 @@ namespace ml_pmc
             Reset
         }
 
+        readonly static string ms_namespace = typeof(ModUi).Namespace;
+
         public static readonly UiEvent<string> OnTargetSelect = new UiEvent<string>();
 
         static List<QMUIElement> ms_uiElements = null;
@@ -132,11 +134,6 @@ namespace ml_pmc
             (ms_uiElements[(int)UiIndex.Toggle] as Button).ButtonIcon = (p_state ? "PMC-Dancing-On" : "PMC-Dancing");
         }
 
-        static Stream GetIconStream(string p_name)
-        {
-            Assembly l_assembly = Assembly.GetExecutingAssembly();
-            string l_assemblyName = l_assembly.GetName().Name;
-            return l_assembly.GetManifestResourceStream(l_assemblyName + ".resources." + p_name);
-        }
+        static Stream GetIconStream(string p_name) => Assembly.GetExecutingAssembly().GetManifestResourceStream(ms_namespace + ".resources." + p_name);
     }
 }
