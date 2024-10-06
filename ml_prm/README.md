@@ -55,14 +55,13 @@ World creators can restrict ragdolling by creating empty game object with name `
 
 # Unity Editor Script
 You can also trigger the ragdoll via animations on your avatar. To do this you need:
-* Download and import the `ml_prm_editor_script.unitypackage` into your unity project
+* Download and import the [`PlayerRagdollMod.unitypackage`](./PlayerRagdollMod.unitypackage) into your unity project
 * Add the component `Ragdoll Toggle` anywhere inside of your avatar's hierarchy.
 
 Now you can animate both parameters available:
 - **Should Override:** whether the animation should override the toggled state of the ragdoll.
 - **Is On:** whether the ragdoll state is On or Off (only works if `Should Override` is also On).
 
-![](.github/img_01.png)  
 Note: In order to work the game object needs to be active and the component enabled.
 
 # Mods integration
