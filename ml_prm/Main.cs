@@ -21,15 +21,6 @@ namespace ml_prm
             MelonLoader.MelonCoroutines.Start(WaitForWhitelist());
         }
 
-        public override void OnDeinitializeMelon()
-        {
-            WorldManager.DeInit();
-
-            if(m_controller != null)
-                UnityEngine.Object.Destroy(m_controller.gameObject);
-            m_controller = null;
-        }
-
         System.Collections.IEnumerator WaitForRootLogic()
         {
             while(ABI_RC.Core.RootLogic.Instance == null)
@@ -45,6 +36,15 @@ namespace ml_prm
             while(SharedFilter.LocalComponentWhitelist == null)
                 yield return null;
             SharedFilter.LocalComponentWhitelist.Add(typeof(RagdollToggle));
+        }
+
+        public override void OnDeinitializeMelon()
+        {
+            WorldManager.DeInit();
+
+            if(m_controller != null)
+                UnityEngine.Object.Destroy(m_controller.gameObject);
+            m_controller = null;
         }
     }
 }

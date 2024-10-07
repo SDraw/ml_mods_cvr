@@ -12,7 +12,7 @@ namespace ml_vei
             Settings.Init();
 
             HarmonyInstance.Patch(
-                typeof(CVRXRModule).GetMethod("Update_Gestures_Vive", BindingFlags.NonPublic | BindingFlags.Instance),
+                typeof(CVRXRModule).GetMethod("Update_Gestures_Vive", BindingFlags.Instance | BindingFlags.NonPublic),
                 null,
                 new HarmonyLib.HarmonyMethod(typeof(ViveExtendedInput).GetMethod(nameof(OnViveGesturesUpdate_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );

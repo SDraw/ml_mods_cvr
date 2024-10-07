@@ -48,13 +48,13 @@ namespace ml_dht
             try
             {
                 p_instance.Patch(
-                    typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.ClearAvatar)),
+                    typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.ClearAvatar), BindingFlags.Instance | BindingFlags.Public),
                     null,
                     new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnAvatarClear_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
                 );
 
                 p_instance.Patch(
-                    typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.SetupAvatar)),
+                    typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.SetupAvatar), BindingFlags.Instance | BindingFlags.Public),
                     null,
                     new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnSetupAvatar_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
                 );

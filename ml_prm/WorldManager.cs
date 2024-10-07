@@ -29,7 +29,7 @@ namespace ml_prm
                 ms_movementLimit = 1f;
 
                 GameObject l_restrictObj = GameObject.Find("[RagdollRestriction]");
-                ms_restrictedWorld = ((l_restrictObj == null) ? false : (l_restrictObj.scene.name != "DontDestroyOnLoad"));
+                ms_restrictedWorld = ((l_restrictObj != null) && (l_restrictObj.scene.name != "DontDestroyOnLoad"));
 
                 if(CVRWorld.Instance != null)
                 {

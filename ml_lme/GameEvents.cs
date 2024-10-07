@@ -35,13 +35,13 @@ namespace ml_lme
             try
             {
                 p_instance.Patch(
-                    typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.ClearAvatar)),
+                    typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.ClearAvatar), BindingFlags.Instance | BindingFlags.Public),
                     null,
                     new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnAvatarClear_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
                 );
 
                 p_instance.Patch(
-                    typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.SetupAvatar)),
+                    typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.SetupAvatar), BindingFlags.Instance | BindingFlags.Public),
                     null,
                     new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnSetupAvatar_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
                 );
@@ -53,19 +53,19 @@ namespace ml_lme
                 );
 
                 p_instance.Patch(
-                    typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.SetControllerRayScale)),
+                    typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.SetControllerRayScale), BindingFlags.Instance | BindingFlags.Public),
                     null,
                     new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnRayScale_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
                 );
 
                 p_instance.Patch(
-                    typeof(PlayerSetup).GetMethod("SetPlaySpaceScale", BindingFlags.NonPublic | BindingFlags.Instance),
+                    typeof(PlayerSetup).GetMethod("SetPlaySpaceScale", BindingFlags.Instance | BindingFlags.NonPublic),
                     null,
                     new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnPlayspaceScale_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
                 );
 
                 p_instance.Patch(
-                    typeof(CVRPickupObject).GetMethod(nameof(CVRPickupObject.Grab), BindingFlags.Public | BindingFlags.Instance),
+                    typeof(CVRPickupObject).GetMethod(nameof(CVRPickupObject.Grab), BindingFlags.Instance | BindingFlags.Public),
                     null,
                     new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnPickupGrab_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
                 );

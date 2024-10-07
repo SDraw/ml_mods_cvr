@@ -52,9 +52,9 @@ namespace ml_dht
                 return;
             }
 
-            DontDestroyOnLoad(this);
-
             ms_instance = this;
+            DontDestroyOnLoad(this);
+            
             m_dataParser = new DataParser();
         }
 

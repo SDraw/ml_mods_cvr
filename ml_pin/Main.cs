@@ -20,14 +20,6 @@ namespace ml_pin
             MelonLoader.MelonCoroutines.Start(WaitForInstances());
         }
 
-        public override void OnDeinitializeMelon()
-        {
-            m_soundManager = null;
-
-            CVRGameEventSystem.Player.OnJoinEntity.RemoveListener(OnPlayerJoin);
-            CVRGameEventSystem.Player.OnLeaveEntity.RemoveListener(OnPlayerLeave);
-        }
-
         IEnumerator WaitForInstances()
         {
             if(InterfaceAudio.Instance == null)
@@ -38,6 +30,14 @@ namespace ml_pin
 
             CVRGameEventSystem.Player.OnJoinEntity.AddListener(OnPlayerJoin);
             CVRGameEventSystem.Player.OnLeaveEntity.AddListener(OnPlayerLeave);
+        }
+
+        public override void OnDeinitializeMelon()
+        {
+            m_soundManager = null;
+
+            CVRGameEventSystem.Player.OnJoinEntity.RemoveListener(OnPlayerJoin);
+            CVRGameEventSystem.Player.OnLeaveEntity.RemoveListener(OnPlayerLeave);
         }
 
         void OnPlayerJoin(CVRPlayerEntity p_player)

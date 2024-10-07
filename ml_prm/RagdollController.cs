@@ -57,6 +57,7 @@ namespace ml_prm
             m_ragdollBodyHandlers = new List<RagdollBodypartHandler>();
             m_boneLinks = new List<System.Tuple<Transform, Transform>>();
             m_jointAnchors = new List<System.Tuple<CharacterJoint, Vector3>>();
+            m_playerPlane = new Plane();
         }
 
         // Unity events
@@ -237,8 +238,7 @@ namespace ml_prm
                 // Project on plane and fix our position if we under previous plane
                 if(m_playerPlane.GetDistanceToPoint(m_lastRagdollPosition) < 0f)
                     m_playerPlane.Flip();
-                float l_distance = m_playerPlane.GetDistanceToPoint(PlayerSetup.Instance.transform.position);
-                if(l_distance < 0f)
+                if(m_playerPlane.GetDistanceToPoint(PlayerSetup.Instance.transform.position) < 0f)
                     PlayerSetup.Instance.transform.position = m_playerPlane.ClosestPointOnPlane(PlayerSetup.Instance.transform.position);
             }
         }
@@ -692,8 +692,8 @@ namespace ml_prm
                 foreach(RagdollBodypartHandler l_handler in m_ragdollBodyHandlers)
                     l_handler.SetAsKinematic(false);
 
-                m_puppet.gameObject.SetActive(false); //
-                m_puppet.gameObject.SetActive(true); // Resets rigidbodies and joints inner physics states
+                m_puppet.gameObject.SetActive(false); // Resets rigidbodies and joints inner physics states
+                m_puppet.gameObject.SetActive(true);
 
                 foreach(RagdollBodypartHandler l_handler in m_ragdollBodyHandlers)
                 {

@@ -18,19 +18,19 @@ namespace ml_lme
             MelonLoader.MelonCoroutines.Start(WaitForRootLogic());
         }
 
-        public override void OnDeinitializeMelon()
-        {
-            if(m_leapManager != null)
-                Object.Destroy(m_leapManager);
-            m_leapManager = null;
-        }
-
         IEnumerator WaitForRootLogic()
         {
             while(ABI_RC.Core.RootLogic.Instance == null)
                 yield return null;
 
             m_leapManager = new GameObject("[LeapMotionExtension]").AddComponent<LeapManager>();
+        }
+
+        public override void OnDeinitializeMelon()
+        {
+            if(m_leapManager != null)
+                Object.Destroy(m_leapManager);
+            m_leapManager = null;
         }
     }
 }

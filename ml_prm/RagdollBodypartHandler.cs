@@ -206,28 +206,25 @@ namespace ml_prm
         {
             bool l_result = false;
 
-            if(!m_attached && (collider != null))
+            if(!m_attached && (collider != null) && (Vector3.Distance(p_pos, collider.ClosestPoint(p_pos)) <= Settings.GrabDistance))
             {
-                if(Vector3.Distance(p_pos, collider.ClosestPoint(p_pos)) <= Settings.GrabDistance)
-                {
-                    GameObject l_attachPoint = new GameObject("[AttachPoint]");
-                    m_attachTransform = l_attachPoint.transform;
-                    m_attachTransform.parent = p_hand;
-                    m_attachTransform.position = p_pos;
+                GameObject l_attachPoint = new GameObject("[AttachPoint]");
+                m_attachTransform = l_attachPoint.transform;
+                m_attachTransform.parent = p_hand;
+                m_attachTransform.position = p_pos;
 
-                    Rigidbody l_body = l_attachPoint.AddComponent<Rigidbody>();
-                    l_body.isKinematic = true;
-                    l_body.detectCollisions = false;
+                Rigidbody l_body = l_attachPoint.AddComponent<Rigidbody>();
+                l_body.isKinematic = true;
+                l_body.detectCollisions = false;
 
-                    m_attachJoint = this.gameObject.AddComponent<FixedJoint>();
-                    m_attachJoint.connectedBody = l_body;
-                    m_attachJoint.breakForce = Mathf.Infinity;
-                    m_attachJoint.breakTorque = Mathf.Infinity;
+                m_attachJoint = this.gameObject.AddComponent<FixedJoint>();
+                m_attachJoint.connectedBody = l_body;
+                m_attachJoint.breakForce = Mathf.Infinity;
+                m_attachJoint.breakTorque = Mathf.Infinity;
 
-                    m_attached = true;
-                    m_attachedHand = p_hand;
-                    l_result = true;
-                }
+                m_attached = true;
+                m_attachedHand = p_hand;
+                l_result = true;
             }
             return l_result;
         }
@@ -253,11 +250,8 @@ namespace ml_prm
         // CVRTriggerVolume
         public void TriggerEnter(CVRPointer pointer)
         {
-            if(Settings.PointersReaction && (RagdollController.Instance != null))
-            {
-                if((pointer != null) && (pointer.type == c_ragdollPointerType) && pointer.enabled && !IsIgnored(pointer.transform) && !RagdollController.Instance.IsRagdolled())
-                    RagdollController.Instance.SwitchRagdoll();
-            }
+            if(Settings.PointersReaction && (pointer != null) && pointer.enabled && (pointer.type == c_ragdollPointerType) && !IsIgnored(pointer.transform) && (RagdollController.Instance != null) && !RagdollController.Instance.IsRagdolled())
+                RagdollController.Instance.Ragdoll();
         }
         public void TriggerExit(CVRPointer pointer)
         {

@@ -9,7 +9,7 @@ namespace ml_bft
         // 31 bones in each hand, get index at Valve.VR.SteamVR_Skeleton_JointIndexes or SteamVR_Skeleton_JointIndexEnum
         const int c_fingerBonesCount = (int)SteamVR_Skeleton_JointIndexEnum.pinkyAux + 1;
 
-        bool m_left = false;
+        readonly bool m_left = false;
         readonly List<Transform> m_bones = null;
         readonly List<Quaternion> m_localRotations = null;
         Transform m_prefabRoot = null;

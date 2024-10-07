@@ -19,7 +19,10 @@ namespace ml_asl
                 StreamReader l_streadReader = new StreamReader(l_libraryStream);
                 l_result = l_streadReader.ReadToEnd();
             }
-            catch(Exception) { }
+            catch(Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
 
             return l_result;
         }

@@ -25,13 +25,13 @@ namespace ml_amt
             try
             {
                 p_instance.Patch(
-                    typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.ClearAvatar)),
+                    typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.ClearAvatar), BindingFlags.Instance | BindingFlags.Public),
                     null,
-                    new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnAvatarClear_Postfix), BindingFlags.NonPublic | BindingFlags.Static))
+                    new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnAvatarClear_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
                 );
 
                 p_instance.Patch(
-                    typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.SetupAvatar)),
+                    typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.SetupAvatar), BindingFlags.Instance | BindingFlags.Public),
                     null,
                     new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnSetupAvatar_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
                 );
@@ -43,7 +43,7 @@ namespace ml_amt
                 );
 
                 p_instance.Patch(
-                    typeof(PlayerSetup).GetMethod("SetPlaySpaceScale", BindingFlags.NonPublic | BindingFlags.Instance),
+                    typeof(PlayerSetup).GetMethod("SetPlaySpaceScale", BindingFlags.Instance | BindingFlags.NonPublic),
                     null,
                     new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnPlayspaceScale_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
                 );

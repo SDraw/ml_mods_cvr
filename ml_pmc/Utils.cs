@@ -90,7 +90,7 @@ namespace ml_pmc
                     l_hits.RemoveAll(hit => hit.collider.gameObject.layer == LayerMask.NameToLayer("PlayerLocal"));
                     l_hits.RemoveAll(hit => hit.collider.gameObject.layer == LayerMask.NameToLayer("PlayerClone"));
                     l_hits.Sort((a, b) => ((a.distance < b.distance) ? -1 : 1));
-                    l_result = (l_hits.First().collider.gameObject.transform.root == p_target.transform.root);
+                    l_result = (l_hits[0].collider.gameObject.transform.root == p_target.transform.root);
                 }
             }
             return l_result;

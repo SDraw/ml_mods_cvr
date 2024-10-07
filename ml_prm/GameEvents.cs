@@ -51,13 +51,13 @@ namespace ml_prm
             try
             {
                 p_instance.Patch(
-                    typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.ClearAvatar)),
+                    typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.ClearAvatar), BindingFlags.Instance | BindingFlags.Public),
                     null,
-                    new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnAvatarClear_Postfix), BindingFlags.NonPublic | BindingFlags.Static))
+                    new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnAvatarClear_Postfix), BindingFlags.Static |BindingFlags.NonPublic))
                 );
 
                 p_instance.Patch(
-                    typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.SetupAvatar)),
+                    typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.SetupAvatar), BindingFlags.Instance | BindingFlags.Public),
                     null,
                     new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnSetupAvatar_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
                 );
@@ -69,25 +69,25 @@ namespace ml_prm
                 );
 
                 p_instance.Patch(
-                    typeof(PlayerSetup).GetMethod("SetupIKScaling", BindingFlags.NonPublic | BindingFlags.Instance),
+                    typeof(PlayerSetup).GetMethod("SetupIKScaling", BindingFlags.Instance |BindingFlags.NonPublic),
                     null,
                     new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnSetupIKScaling_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
                 );
 
                 p_instance.Patch(
-                    typeof(CVRSeat).GetMethod(nameof(CVRSeat.SitDown)),
+                    typeof(CVRSeat).GetMethod(nameof(CVRSeat.SitDown), BindingFlags.Instance | BindingFlags.Public),
                     new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnCVRSeatSitDown_Prefix), BindingFlags.Static | BindingFlags.NonPublic)),
                     null
                 );
 
                 p_instance.Patch(
-                    typeof(BodySystem).GetMethod(nameof(BodySystem.StartCalibration)),
+                    typeof(BodySystem).GetMethod(nameof(BodySystem.StartCalibration), BindingFlags.Instance | BindingFlags.Public),
                     new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnStartCalibration_Prefix), BindingFlags.Static | BindingFlags.NonPublic)),
                     null
                 );
 
                 p_instance.Patch(
-                    typeof(RootLogic).GetMethod(nameof(RootLogic.SpawnOnWorldInstance)),
+                    typeof(RootLogic).GetMethod(nameof(RootLogic.SpawnOnWorldInstance),BindingFlags.Instance | BindingFlags.Public),
                     new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnWorldSpawn_Prefix), BindingFlags.Static | BindingFlags.NonPublic)),
                     null
                 );
@@ -99,7 +99,7 @@ namespace ml_prm
                 );
 
                 p_instance.Patch(
-                    typeof(BetterBetterCharacterController).GetMethod(nameof(BetterBetterCharacterController.ChangeFlight)),
+                    typeof(BetterBetterCharacterController).GetMethod(nameof(BetterBetterCharacterController.ChangeFlight), BindingFlags.Instance | BindingFlags.Public),
                     null,
                     new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnChangeFlight_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
                 );

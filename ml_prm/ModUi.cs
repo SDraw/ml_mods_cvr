@@ -342,12 +342,7 @@ namespace ml_prm
                 ms_hotkeyToggle.ToggleTooltip = string.Format(c_ragdollKeyTooltip, p_keyCode);
         }
 
-        static Stream GetIconStream(string p_name)
-        {
-            Assembly l_assembly = Assembly.GetExecutingAssembly();
-            string l_assemblyName = l_assembly.GetName().Name;
-            return l_assembly.GetManifestResourceStream(ms_namespace + ".resources." + p_name);
-        }
+        static Stream GetIconStream(string p_name) => Assembly.GetExecutingAssembly().GetManifestResourceStream(ms_namespace + ".resources." + p_name);
 
         static float GetDropHeight(float p_speed, float p_gravity = 9.8f)
         {

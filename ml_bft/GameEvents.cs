@@ -35,13 +35,13 @@ namespace ml_bft
             try
             {
                 p_instance.Patch(
-                    typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.SetupAvatar)),
+                    typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.SetupAvatar), BindingFlags.Instance | BindingFlags.Public),
                     null,
                     new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnSetupAvatar_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
                 );
 
                 p_instance.Patch(
-                    typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.ClearAvatar)),
+                    typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.ClearAvatar), BindingFlags.Instance | BindingFlags.Public),
                     null,
                     new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnAvatarClear_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
                 );
@@ -53,15 +53,15 @@ namespace ml_bft
                 );
 
                 p_instance.Patch(
-                    typeof(CVRInputManager).GetMethod("UpdateInput", BindingFlags.NonPublic | BindingFlags.Instance),
+                    typeof(CVRInputManager).GetMethod("UpdateInput", BindingFlags.Instance | BindingFlags.NonPublic),
                     null,
-                    new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnInputUpdate_Postfix), BindingFlags.NonPublic | BindingFlags.Static))
+                    new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnInputUpdate_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
                 );
 
                 p_instance.Patch(
-                    typeof(IKSystem).GetMethod("LateUpdate", BindingFlags.NonPublic | BindingFlags.Instance),
+                    typeof(IKSystem).GetMethod("LateUpdate", BindingFlags.Instance | BindingFlags.NonPublic),
                     null,
-                    new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnIKSystemLateUpdate_Postfix), BindingFlags.NonPublic | BindingFlags.Static))
+                    new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnIKSystemLateUpdate_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
                 );
             }
             catch(Exception e)

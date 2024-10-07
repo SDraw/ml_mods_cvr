@@ -32,7 +32,10 @@ namespace ml_dht
                     m_stream.Read(p_data, 0, (p_data.Length > m_dataSize) ? m_dataSize : p_data.Length);
                     l_result = true;
                 }
-                catch(System.Exception) { }
+                catch(System.Exception e)
+                {
+                    MelonLoader.MelonLogger.Error(e);
+                }
             }
             return l_result;
         }

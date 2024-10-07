@@ -16,19 +16,19 @@ namespace ml_pmc
             MelonLoader.MelonCoroutines.Start(WaitForLocalPlayer());
         }
 
-        public override void OnDeinitializeMelon()
-        {
-            if(m_poseCopycat != null)
-                Object.Destroy(m_poseCopycat.gameObject);
-            m_poseCopycat = null;
-        }
-
         System.Collections.IEnumerator WaitForLocalPlayer()
         {
             while(PlayerSetup.Instance == null)
                 yield return null;
 
             m_poseCopycat = new GameObject("[PlayerMovementCopycat]").AddComponent<PoseCopycat>();
+        }
+
+        public override void OnDeinitializeMelon()
+        {
+            if(m_poseCopycat != null)
+                Object.Destroy(m_poseCopycat.gameObject);
+            m_poseCopycat = null;
         }
     }
 }
