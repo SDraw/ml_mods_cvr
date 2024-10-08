@@ -112,11 +112,11 @@ namespace ml_lme
             }
         }
 
-        static void OnRayScale_Postfix(float __0)
+        static void OnRayScale_Postfix(float scale)
         {
             try
             {
-                OnRayScale.Invoke(__0);
+                OnRayScale.Invoke(scale);
             }
             catch(Exception e)
             {

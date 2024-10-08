@@ -132,11 +132,11 @@ namespace ml_pam
             }
         }
 
-        static void OnCVRPickupObjectGrab_Postfix(ref CVRPickupObject __instance, Vector3 __0)
+        static void OnCVRPickupObjectGrab_Postfix(ref CVRPickupObject __instance, Vector3 hitPoint)
         {
             try
             {
-                OnPickupGrab.Invoke(__instance, __0);
+                OnPickupGrab.Invoke(__instance, hitPoint);
             }
             catch(Exception e)
             {
