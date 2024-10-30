@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <Platforms>x64</Platforms>
     <PackageId>PlayerRagdollMod</PackageId>
-    <Version>1.2.0</Version>
+    <Version>1.2.1</Version>
     <Authors>SDraw</Authors>
     <Company>SDraw</Company>
     <Product>PlayerRagdollMod</Product>

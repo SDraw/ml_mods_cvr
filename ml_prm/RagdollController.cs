@@ -225,30 +225,14 @@ namespace ml_prm
             }
         }
 
-        void FixedUpdate()
-        {
-            if(m_avatarReady && m_ragdolled)
-            {
-                Vector3 l_diff = m_puppetReferences.hips.position - m_lastRagdollPosition;
-                m_playerPlane.SetNormalAndPosition(PlayerSetup.Instance.transform.rotation * Vector3.up, PlayerSetup.Instance.transform.position);
-
-                PlayerSetup.Instance.transform.position += l_diff;
-                m_lastRagdollPosition = m_puppetReferences.hips.position;
-
-                // Project on plane and fix our position if we under previous plane
-                if(m_playerPlane.GetDistanceToPoint(m_lastRagdollPosition) < 0f)
-                    m_playerPlane.Flip();
-                if(m_playerPlane.GetDistanceToPoint(PlayerSetup.Instance.transform.position) < 0f)
-                    PlayerSetup.Instance.transform.position = m_playerPlane.ClosestPointOnPlane(PlayerSetup.Instance.transform.position);
-            }
-        }
-
         void LateUpdate()
         {
             if(m_avatarReady)
             {
                 if(m_ragdolled)
                 {
+                    MovePlayer();
+
                     foreach(var l_link in m_boneLinks)
                         l_link.Item1.CopyGlobal(l_link.Item2);
                 }
@@ -748,14 +732,6 @@ namespace ml_prm
             }
         }
 
-        static Transform CloneTransform(Transform p_source, Transform p_parent, string p_name)
-        {
-            Transform l_target = new GameObject(p_name).transform;
-            l_target.parent = p_parent;
-            p_source.CopyGlobal(l_target);
-            return l_target;
-        }
-
         bool CanRagdoll()
         {
             if(WorldManager.IsRestrictedWorld())
@@ -774,6 +750,23 @@ namespace ml_prm
             return (l_result || m_forcedSwitch);
         }
 
+        void MovePlayer()
+        {
+            // Pain
+            Vector3 l_up = PlayerSetup.Instance.transform.rotation * Vector3.up;
+            Vector3 l_diff = m_puppetReferences.hips.position - m_lastRagdollPosition;
+            m_playerPlane.SetNormalAndPosition(l_up, PlayerSetup.Instance.transform.position);
+
+            PlayerSetup.Instance.transform.position += l_diff;
+            m_lastRagdollPosition = m_puppetReferences.hips.position;
+
+            // Try to tether player position closer to hips rigid body position
+            if(m_playerPlane.GetDistanceToPoint(m_lastRagdollPosition) < 0f)
+                m_playerPlane.SetNormalAndPosition(l_up, m_lastRagdollPosition);
+            if(m_playerPlane.GetDistanceToPoint(PlayerSetup.Instance.transform.position) < 0f)
+                PlayerSetup.Instance.transform.position = m_playerPlane.ClosestPointOnPlane(PlayerSetup.Instance.transform.position);
+        }
+
         static void TryRestoreMovement()
         {
             bool l_state = true;
@@ -782,6 +775,15 @@ namespace ml_prm
 
             if(l_state)
                 BetterBetterCharacterController.Instance.SetImmobilized(false);
+        }
+
+
+        static Transform CloneTransform(Transform p_source, Transform p_parent, string p_name)
+        {
+            Transform l_target = new GameObject(p_name).transform;
+            l_target.parent = p_parent;
+            p_source.CopyGlobal(l_target);
+            return l_target;
         }
     }
 }
