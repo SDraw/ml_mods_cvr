@@ -403,6 +403,7 @@ namespace ml_pam
 
             OnEnabledChanged(Settings.Enabled);
             OnGrabOffsetChanged(Settings.GrabOffset);
+            OnIKScaling(1f); // Reset scaling, game doesn't do this anymore on avatar switch
         }
 
         void OnAvatarReuse()
