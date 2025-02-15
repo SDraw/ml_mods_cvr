@@ -365,10 +365,6 @@ namespace ml_prm
                     }
                 }
 
-                // And return back
-                m_puppetRoot.position = m_avatarTransform.position;
-                m_puppetRoot.rotation = m_avatarTransform.rotation;
-
                 m_vrIK = PlayerSetup.Instance._avatar.GetComponent<VRIK>();
                 if(m_vrIK != null)
                     m_vrIK.onPostSolverUpdate.AddListener(this.OnIKPostSolverUpdate);
@@ -393,6 +389,10 @@ namespace ml_prm
 
             m_avatarReady = true;
             m_initTask = null;
+
+            // And return back
+            m_puppetRoot.position = m_avatarTransform.position;
+            m_puppetRoot.rotation = m_avatarTransform.rotation;
 
             OnMovementDragChanged(Settings.MovementDrag);
             OnAngularDragChanged(Settings.AngularDrag);
