@@ -24,8 +24,7 @@ namespace ml_bft
             SkeletalInput = 0,
             MotionRange,
             ShowHands,
-            MechanimFilter,
-            FixFingers
+            MechanimFilter
         }
 
         public static bool SkeletalInput { get; private set; } = false;
@@ -56,6 +55,7 @@ namespace ml_bft
             SkeletalInput = (bool)ms_entries[(int)ModSetting.SkeletalInput].BoxedValue;
             MotionRange = (MotionRangeType)(int)ms_entries[(int)ModSetting.MotionRange].BoxedValue;
             ShowHands = (bool)ms_entries[(int)ModSetting.ShowHands].BoxedValue;
+            MechanimFilter = (bool)ms_entries[(int)ModSetting.MechanimFilter].BoxedValue;
 
             MelonLoader.MelonCoroutines.Start(WaitMainMenuUi());
         }
