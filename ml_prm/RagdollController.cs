@@ -40,7 +40,7 @@ namespace ml_prm
 
         RagdollToggle m_avatarRagdollToggle = null; // Custom component available for editor
         AvatarBoolParameter m_ragdolledParameter = null;
-        PhysicMaterial m_physicsMaterial = null;
+        PhysicsMaterial m_physicsMaterial = null;
 
         bool m_inAir = false;
         bool m_reachedGround = true;
@@ -77,12 +77,12 @@ namespace ml_prm
         {
             this.gameObject.layer = LayerMask.NameToLayer("PlayerLocal");
 
-            m_physicsMaterial = new PhysicMaterial("Ragdoll");
+            m_physicsMaterial = new PhysicsMaterial("Ragdoll");
             m_physicsMaterial.dynamicFriction = c_defaultFriction;
             m_physicsMaterial.staticFriction = c_defaultFriction;
-            m_physicsMaterial.frictionCombine = PhysicMaterialCombine.Average;
+            m_physicsMaterial.frictionCombine = PhysicsMaterialCombine.Average;
             m_physicsMaterial.bounciness = 0f;
-            m_physicsMaterial.bounceCombine = PhysicMaterialCombine.Average;
+            m_physicsMaterial.bounceCombine = PhysicsMaterialCombine.Average;
 
             m_puppet = new GameObject("[Puppet]").transform;
             m_puppet.parent = this.transform;
@@ -583,9 +583,9 @@ namespace ml_prm
                 bool l_bounciness = (Settings.Bounciness && WorldManager.IsSafeWorld());
                 m_physicsMaterial.dynamicFriction = (l_slipperiness ? 0f : c_defaultFriction);
                 m_physicsMaterial.staticFriction = (l_slipperiness ? 0f : c_defaultFriction);
-                m_physicsMaterial.frictionCombine = (l_slipperiness ? PhysicMaterialCombine.Minimum : PhysicMaterialCombine.Average);
+                m_physicsMaterial.frictionCombine = (l_slipperiness ? PhysicsMaterialCombine.Minimum : PhysicsMaterialCombine.Average);
                 m_physicsMaterial.bounciness = (l_bounciness ? 1f : 0f);
-                m_physicsMaterial.bounceCombine = (l_bounciness ? PhysicMaterialCombine.Maximum : PhysicMaterialCombine.Average);
+                m_physicsMaterial.bounceCombine = (l_bounciness ? PhysicsMaterialCombine.Maximum : PhysicsMaterialCombine.Average);
             }
         }
 
@@ -701,7 +701,7 @@ namespace ml_prm
         {
             if(m_avatarReady && m_ragdolled && CanUnragdoll())
             {
-                BetterBetterCharacterController.Instance.TeleportPlayerTo(m_puppetReferences.hips.position, PlayerSetup.Instance.GetPlayerRotation().eulerAngles, false, false);
+                BetterBetterCharacterController.Instance.TeleportPlayerTo(m_puppetReferences.hips.position, PlayerSetup.Instance.GetPlayerRotation().eulerAngles, false, true);
                 TryRestoreMovement();
                 BodySystem.TrackingPositionWeight = 1f;
                 IKSystem.Instance.applyOriginalHipPosition = m_applyHipsPosition;

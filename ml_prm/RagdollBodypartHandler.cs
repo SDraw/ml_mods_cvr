@@ -123,7 +123,7 @@ namespace ml_prm
         public bool IsReady() => ((m_rigidBody != null) && (collider != null) && (!m_shouldHaveInfluencer || ((m_physicsInfluencer != null) && m_physicsInfluencer.IsReady())));
         public void SetInfuencerUsage(bool p_state) => m_shouldHaveInfluencer = p_state;
 
-        public void SetColliderMaterial(PhysicMaterial p_material)
+        public void SetColliderMaterial(PhysicsMaterial p_material)
         {
             if(collider != null)
             {
@@ -146,7 +146,7 @@ namespace ml_prm
         public void SetVelocity(Vector3 p_vec)
         {
             if(m_rigidBody != null)
-                m_rigidBody.velocity = p_vec;
+                m_rigidBody.linearVelocity = p_vec;
         }
 
         public void SetAngularVelocity(Vector3 p_vec)
@@ -167,7 +167,7 @@ namespace ml_prm
         {
             if(m_rigidBody != null)
             {
-                m_rigidBody.drag = p_value;
+                m_rigidBody.linearDamping = p_value;
                 m_rigidBody.WakeUp();
             }
             if(m_physicsInfluencer != null)
@@ -178,7 +178,7 @@ namespace ml_prm
         {
             if(m_rigidBody != null)
             {
-                m_rigidBody.angularDrag = p_value;
+                m_rigidBody.angularDamping = p_value;
                 m_rigidBody.WakeUp();
             }
             if(m_physicsInfluencer != null)
