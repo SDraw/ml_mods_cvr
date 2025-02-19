@@ -1,4 +1,4 @@
-﻿[assembly: MelonLoader.MelonInfo(typeof(ml_pam.PickupArmMovement), "PickupArmMovement", "1.2.1-u6", "SDraw", "https://github.com/SDraw/ml_mods_cvr")]
+﻿[assembly: MelonLoader.MelonInfo(typeof(ml_pam.PickupArmMovement), "PickupArmMovement", "1.2.2-u6", "SDraw", "https://github.com/SDraw/ml_mods_cvr")]
 [assembly: MelonLoader.MelonGame(null, "ChilloutVR")]
 [assembly: MelonLoader.MelonPriority(1)]
 [assembly: MelonLoader.MelonPlatform(MelonLoader.MelonPlatformAttribute.CompatiblePlatforms.WINDOWS_X64)]
