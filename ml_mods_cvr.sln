@@ -26,6 +26,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_dht", "ml_dht\ml_dht.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_bft", "ml_bft\ml_bft.csproj", "{331C995D-9648-44AD-8B02-D5F3A89FDC1F}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_vpc", "ml_vpc\ml_vpc.csproj", "{7CF37B93-9341-422D-845C-9AB96DB4D0A1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -65,6 +67,10 @@ Global
 		{331C995D-9648-44AD-8B02-D5F3A89FDC1F}.Debug|x64.ActiveCfg = Debug|x64
 		{331C995D-9648-44AD-8B02-D5F3A89FDC1F}.Release|x64.ActiveCfg = Release|x64
 		{331C995D-9648-44AD-8B02-D5F3A89FDC1F}.Release|x64.Build.0 = Release|x64
+		{7CF37B93-9341-422D-845C-9AB96DB4D0A1}.Debug|x64.ActiveCfg = Debug|x64
+		{7CF37B93-9341-422D-845C-9AB96DB4D0A1}.Debug|x64.Build.0 = Debug|x64
+		{7CF37B93-9341-422D-845C-9AB96DB4D0A1}.Release|x64.ActiveCfg = Release|x64
+		{7CF37B93-9341-422D-845C-9AB96DB4D0A1}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
