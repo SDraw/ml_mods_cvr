@@ -1,6 +1,6 @@
 Merged set of MelonLoader mods for ChilloutVR.
 
-**Table for game build 2024r177:**
+**Table for game build 2025r178:**
 | Full name | Latest version |
 |:---------:|:--------------:|
 |[Avatar Motion Tweaker](/ml_amt/README.md)|1.5.0 [:arrow_down:](../../releases/latest/download/AvatarMotionTweaker.dll)|
