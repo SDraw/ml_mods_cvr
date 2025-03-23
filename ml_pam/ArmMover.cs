@@ -426,7 +426,7 @@ namespace ml_pam
 
         void OnPickupGrab(CVRPickupObject p_pickup, Vector3 p_hit)
         {
-            if(p_pickup.IsGrabbedByMe && (p_pickup.ControllerRay == ViewManager.Instance.desktopControllerRay))
+            if(p_pickup.IsGrabbedByMe && (p_pickup.ControllerRay == PlayerSetup.Instance.desktopRay))
             {
                 m_pickup = p_pickup;
 
