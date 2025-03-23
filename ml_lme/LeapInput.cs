@@ -39,7 +39,6 @@ namespace ml_lme
             m_handRayLeft.generalMask = -269;
             m_handRayLeft.isInteractionRay = true;
             m_handRayLeft.triggerHoverEvents = false;
-            m_handRayLeft.holderRoot = m_handRayLeft.gameObject;
             m_handRayLeft.attachmentDistance = 0f;
             m_handRayLeft.uiMask = 32;
             m_handRayLeft.isDesktopRay = !m_inVR;
@@ -61,7 +60,6 @@ namespace ml_lme
             m_handRayRight.generalMask = -269;
             m_handRayRight.isInteractionRay = true;
             m_handRayRight.triggerHoverEvents = false;
-            m_handRayRight.holderRoot = m_handRayRight.gameObject;
             m_handRayRight.attachmentDistance = 0f;
             m_handRayRight.uiMask = 32;
             m_handRayRight.isDesktopRay = !m_inVR;
