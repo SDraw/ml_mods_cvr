@@ -424,7 +424,7 @@ namespace ml_pmc
         }
         void RestoreFingerTracking()
         {
-            CVRInputManager.Instance.individualFingerTracking = (m_inVr && Utils.AreKnucklesInUse() && !CVRInputManager._moduleXR.GestureToggleValue);
+            CVRInputManager.Instance.individualFingerTracking = (m_inVr && Utils.AreKnucklesInUse() && !CVRInputManager._moduleXR.SkeletalToggleValue);
             IKSystem.Instance.FingerSystem.controlActive = CVRInputManager.Instance.individualFingerTracking;
 
             if(!CVRInputManager.Instance.individualFingerTracking)
