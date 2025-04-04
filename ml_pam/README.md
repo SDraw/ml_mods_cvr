@@ -14,6 +14,8 @@ Available mod's settings in `Settings - Input & Key-Bindings - Pickup Arm Moveme
 * **Hands extension (Q\E):** extend left and right hand if `Q` and `E` keys are pressed; default value - `true`.
 * **Hand extension speed::** smoothing speed multiplier between extended and animated hands; default value - `25`.
 
+If you have UIExpansionKit installed, you can change hands extension keys in this mod's category.
+
 Available animator boolean parameters:
 * **LeftHandExtended:`` indicates if left hand is extended.
 * **RightHandExtended:`` indicates if right hand is extended.
