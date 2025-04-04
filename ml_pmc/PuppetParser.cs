@@ -61,55 +61,15 @@ namespace ml_pmc
                 m_fingerTracking = m_puppetMaster.PlayerAvatarMovementDataInput.UseIndividualFingers;
                 if(m_fingerTracking)
                 {
-                    m_fingerCurls[0] = m_puppetMaster.PlayerAvatarMovementDataInput.LeftThumb1Stretched;
-                    m_fingerCurls[1] = m_puppetMaster.PlayerAvatarMovementDataInput.LeftThumb2Stretched;
-                    m_fingerCurls[2] = m_puppetMaster.PlayerAvatarMovementDataInput.LeftThumb3Stretched;
-                    m_fingerSpreads[0] = m_puppetMaster.PlayerAvatarMovementDataInput.LeftThumbSpread;
-
-                    m_fingerCurls[3] = m_puppetMaster.PlayerAvatarMovementDataInput.LeftIndex1Stretched;
-                    m_fingerCurls[4] = m_puppetMaster.PlayerAvatarMovementDataInput.LeftIndex2Stretched;
-                    m_fingerCurls[5] = m_puppetMaster.PlayerAvatarMovementDataInput.LeftIndex3Stretched;
-                    m_fingerSpreads[1] = m_puppetMaster.PlayerAvatarMovementDataInput.LeftIndexSpread;
-
-                    m_fingerCurls[6] = m_puppetMaster.PlayerAvatarMovementDataInput.LeftMiddle1Stretched;
-                    m_fingerCurls[7] = m_puppetMaster.PlayerAvatarMovementDataInput.LeftMiddle2Stretched;
-                    m_fingerCurls[8] = m_puppetMaster.PlayerAvatarMovementDataInput.LeftMiddle3Stretched;
-                    m_fingerSpreads[2] = m_puppetMaster.PlayerAvatarMovementDataInput.LeftMiddleSpread;
-
-                    m_fingerCurls[9] = m_puppetMaster.PlayerAvatarMovementDataInput.LeftRing1Stretched;
-                    m_fingerCurls[10] = m_puppetMaster.PlayerAvatarMovementDataInput.LeftRing2Stretched;
-                    m_fingerCurls[11] = m_puppetMaster.PlayerAvatarMovementDataInput.LeftRing3Stretched;
-                    m_fingerSpreads[3] = m_puppetMaster.PlayerAvatarMovementDataInput.LeftRingSpread;
-
-                    m_fingerCurls[12] = m_puppetMaster.PlayerAvatarMovementDataInput.LeftPinky1Stretched;
-                    m_fingerCurls[13] = m_puppetMaster.PlayerAvatarMovementDataInput.LeftPinky2Stretched;
-                    m_fingerCurls[14] = m_puppetMaster.PlayerAvatarMovementDataInput.LeftPinky3Stretched;
-                    m_fingerSpreads[4] = m_puppetMaster.PlayerAvatarMovementDataInput.LeftPinkySpread;
-
-                    m_fingerCurls[15] = m_puppetMaster.PlayerAvatarMovementDataInput.RightThumb1Stretched;
-                    m_fingerCurls[16] = m_puppetMaster.PlayerAvatarMovementDataInput.RightThumb2Stretched;
-                    m_fingerCurls[17] = m_puppetMaster.PlayerAvatarMovementDataInput.RightThumb3Stretched;
-                    m_fingerSpreads[5] = m_puppetMaster.PlayerAvatarMovementDataInput.RightThumbSpread;
-
-                    m_fingerCurls[18] = m_puppetMaster.PlayerAvatarMovementDataInput.RightIndex1Stretched;
-                    m_fingerCurls[19] = m_puppetMaster.PlayerAvatarMovementDataInput.RightIndex2Stretched;
-                    m_fingerCurls[20] = m_puppetMaster.PlayerAvatarMovementDataInput.RightIndex3Stretched;
-                    m_fingerSpreads[6] = m_puppetMaster.PlayerAvatarMovementDataInput.RightIndexSpread;
-
-                    m_fingerCurls[21] = m_puppetMaster.PlayerAvatarMovementDataInput.RightMiddle1Stretched;
-                    m_fingerCurls[22] = m_puppetMaster.PlayerAvatarMovementDataInput.RightMiddle2Stretched;
-                    m_fingerCurls[23] = m_puppetMaster.PlayerAvatarMovementDataInput.RightMiddle3Stretched;
-                    m_fingerSpreads[7] = m_puppetMaster.PlayerAvatarMovementDataInput.RightMiddleSpread;
-
-                    m_fingerCurls[24] = m_puppetMaster.PlayerAvatarMovementDataInput.RightRing1Stretched;
-                    m_fingerCurls[25] = m_puppetMaster.PlayerAvatarMovementDataInput.RightRing2Stretched;
-                    m_fingerCurls[26] = m_puppetMaster.PlayerAvatarMovementDataInput.RightRing3Stretched;
-                    m_fingerSpreads[8] = m_puppetMaster.PlayerAvatarMovementDataInput.RightRingSpread;
-
-                    m_fingerCurls[27] = m_puppetMaster.PlayerAvatarMovementDataInput.RightPinky1Stretched;
-                    m_fingerCurls[28] = m_puppetMaster.PlayerAvatarMovementDataInput.RightPinky2Stretched;
-                    m_fingerCurls[29] = m_puppetMaster.PlayerAvatarMovementDataInput.RightPinky3Stretched;
-                    m_fingerSpreads[9] = m_puppetMaster.PlayerAvatarMovementDataInput.RightPinkySpread;
+                    for(int i = 0; i < 10; i++)
+                    {
+                        int l_stepA = i * 3;
+                        int l_stepB = i * 4;
+                        m_fingerCurls[l_stepA] = m_puppetMaster.PlayerAvatarMovementDataInput.MuscleValues[55 + l_stepB];
+                        m_fingerCurls[l_stepA + 1] = m_puppetMaster.PlayerAvatarMovementDataInput.MuscleValues[57 + l_stepB];
+                        m_fingerCurls[l_stepA + 2] = m_puppetMaster.PlayerAvatarMovementDataInput.MuscleValues[58 + l_stepB];
+                        m_fingerSpreads[i] = m_puppetMaster.PlayerAvatarMovementDataInput.MuscleValues[56 + l_stepB];
+                    }
                 }
 
                 Matrix4x4 l_current = this.transform.GetMatrix();

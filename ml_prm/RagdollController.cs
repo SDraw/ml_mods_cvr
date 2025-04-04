@@ -701,7 +701,7 @@ namespace ml_prm
         {
             if(m_avatarReady && m_ragdolled && CanUnragdoll())
             {
-                BetterBetterCharacterController.Instance.TeleportPlayerTo(m_puppetReferences.hips.position, PlayerSetup.Instance.GetPlayerRotation().eulerAngles, false, false);
+                BetterBetterCharacterController.Instance.TeleportPlayerTo(m_puppetReferences.hips.position, PlayerSetup.Instance.GetPlayerRotation().eulerAngles, false, true);
                 TryRestoreMovement();
                 BodySystem.TrackingPositionWeight = 1f;
                 IKSystem.Instance.applyOriginalHipPosition = m_applyHipsPosition;

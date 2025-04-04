@@ -1,4 +1,4 @@
-﻿[assembly: MelonLoader.MelonInfo(typeof(ml_pmc.PlayerMovementCopycat), "PlayerMovementCopycat", "1.1.0", "SDraw", "https://github.com/SDraw/ml_mods_cvr")]
+﻿[assembly: MelonLoader.MelonInfo(typeof(ml_pmc.PlayerMovementCopycat), "PlayerMovementCopycat", "1.1.1-ns", "SDraw", "https://github.com/SDraw/ml_mods_cvr")]
 [assembly: MelonLoader.MelonGame(null, "ChilloutVR")]
 [assembly: MelonLoader.MelonPriority(3)]
 [assembly: MelonLoader.MelonAdditionalDependencies("BTKUILib")]

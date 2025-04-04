@@ -49,16 +49,12 @@ namespace ml_prm
 
         public static bool IsLeftGrabPointerActive(this PuppetMaster p_source)
         {
-            bool l_result = ((p_source._playerAvatarMovementDataCurrent.AnimatorGestureLeft >= 0.5f) && (p_source._playerAvatarMovementDataCurrent.AnimatorGestureLeft <= 1f));
-            l_result |= ((FingerSystem.GetCurlNormalized(p_source._playerAvatarMovementDataCurrent.LeftMiddle1Stretched) >= 0.5f) && (FingerSystem.GetCurlNormalized(p_source._playerAvatarMovementDataCurrent.LeftMiddle2Stretched) >= 0.5f) && (FingerSystem.GetCurlNormalized(p_source._playerAvatarMovementDataCurrent.LeftMiddle3Stretched) >= 0.5f));
-            return l_result;
+            return p_source._playerAvatarMovementDataCurrent.IsLeftHandGrabbing();
         }
 
         public static bool IsRightGrabPointerActive(this PuppetMaster p_source)
         {
-            bool l_result = ((p_source._playerAvatarMovementDataCurrent.AnimatorGestureRight >= 0.5f) && (p_source._playerAvatarMovementDataCurrent.AnimatorGestureRight <= 1f));
-            l_result |= ((FingerSystem.GetCurlNormalized(p_source._playerAvatarMovementDataCurrent.RightMiddle1Stretched) >= 0.5f) && (FingerSystem.GetCurlNormalized(p_source._playerAvatarMovementDataCurrent.RightMiddle2Stretched) >= 0.5f) && (FingerSystem.GetCurlNormalized(p_source._playerAvatarMovementDataCurrent.RightMiddle3Stretched) >= 0.5f));
-            return l_result;
+            return p_source._playerAvatarMovementDataCurrent.IsRightHandGrabbing();
         }
 
         public static CVRSeat GetCurrentSeat(this BetterBetterCharacterController p_instance) => (ms_lastCVRSeat?.GetValue(p_instance) as CVRSeat);
