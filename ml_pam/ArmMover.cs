@@ -24,9 +24,6 @@ namespace ml_pam
             public Transform m_rightHandTarget;
         }
 
-        const KeyCode c_leftKey = KeyCode.Q;
-        const KeyCode c_rightKey = KeyCode.E;
-
         static ArmMover ms_instance = null;
 
         static readonly Quaternion ms_offsetLeft = Quaternion.Euler(270f, 90f, 0f);
@@ -177,13 +174,13 @@ namespace ml_pam
             {
                 case HandState.Empty:
                 {
-                    if(Settings.Enabled && Settings.HandsExtension && Input.GetKey(c_leftKey) && !ViewManager.Instance.IsAnyMenuOpen)
+                    if(Settings.Enabled && Settings.HandsExtension && Input.GetKey(Settings.LeftHandKey) && !ViewManager.Instance.IsAnyMenuOpen)
                         m_leftHandState = HandState.Extended;
                 }
                 break;
                 case HandState.Extended:
                 {
-                    if(!Input.GetKey(c_leftKey))
+                    if(!Input.GetKey(Settings.LeftHandKey))
                         m_leftHandState = HandState.Empty;
                 }
                 break;
@@ -192,13 +189,13 @@ namespace ml_pam
             {
                 case HandState.Empty:
                 {
-                    if(Settings.Enabled && Settings.HandsExtension && Input.GetKey(c_rightKey) && !ViewManager.Instance.IsAnyMenuOpen)
+                    if(Settings.Enabled && Settings.HandsExtension && Input.GetKey(Settings.RightHandKey) && !ViewManager.Instance.IsAnyMenuOpen)
                         m_rightHandState = HandState.Extended;
                 }
                 break;
                 case HandState.Extended:
                 {
-                    if(!Input.GetKey(c_rightKey))
+                    if(!Input.GetKey(Settings.RightHandKey))
                         m_rightHandState = HandState.Empty;
                 }
                 break;
