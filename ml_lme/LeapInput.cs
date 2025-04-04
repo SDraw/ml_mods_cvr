@@ -381,7 +381,7 @@ namespace ml_lme
                 }
 
                 // Reset to default
-                SetGameFingersTracking(m_inVR && Utils.AreKnucklesInUse() && !CVRInputManager._moduleXR.GestureToggleValue);
+                SetGameFingersTracking(m_inVR && Utils.AreKnucklesInUse() && !CVRInputManager._moduleXR.SkeletalToggleValue);
             }
 
             OnInteractionChanged(Settings.Interaction);
