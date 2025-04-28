@@ -14,7 +14,7 @@ Available mod's settings in BTKUILib's page:
 * **Velocity multiplier:** velocity multiplier upon drop/throw; `1.0` by default.
 
 To pick you up remote player should:
-* Make hands `grab` pointers to appear on your side (usually, press controller grip trigger button or fist gesture, depends on remote player controllers type);
+* Make hands `grab` pointers to appear on your side (usually, press controller grip, trigger button or fist gesture, depends on remote player controllers type);
 * Touch your avatar's torso with both pointers;
 
 # Notes
