@@ -3,6 +3,7 @@ This mod turns player's avatar into ragdoll puppet.
 
 # Installation
 * Install [latest MelonLoader](https://github.com/LavaGang/MelonLoader)
+* Install [BTKUILib](https://github.com/BTK-Development/BTKUILib)
 * Get [latest release DLL](../../../releases/latest):
   * Put `PlayerRagdollMod.dll` in `Mods` folder of game
   

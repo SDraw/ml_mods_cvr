@@ -2,6 +2,7 @@
 using ABI_RC.Core.Player;
 using ABI_RC.Core.Player.EyeMovement;
 using ABI_RC.Systems.FaceTracking;
+using ABI_RC.Systems.IK;
 using ABI_RC.Systems.VRModeSwitch;
 using RootMotion.FinalIK;
 using System;
@@ -54,7 +55,7 @@ namespace ml_dht
 
             ms_instance = this;
             DontDestroyOnLoad(this);
-            
+
             m_dataParser = new DataParser();
         }
 
@@ -138,19 +139,23 @@ namespace ml_dht
         // Game events
         internal void OnAvatarSetup()
         {
-            Utils.SetAvatarTPose();
-
             m_camera = PlayerSetup.Instance.GetActiveCamera().transform;
             m_avatarDescriptor = PlayerSetup.Instance._avatar.GetComponent<CVRAvatar>();
-            m_headBone = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.Head);
-            m_lookIK = PlayerSetup.Instance._avatar.GetComponent<LookAtIK>();
 
-            if(m_headBone != null)
-                m_bindRotation = Quaternion.Inverse(m_avatarDescriptor.transform.rotation) * m_headBone.rotation;
+            if(PlayerSetup.Instance._animator.isHuman)
+            {
+                IKSystem.Instance.SetAvatarPose(IKSystem.AvatarPose.TPose);
+                PlayerSetup.Instance._avatar.transform.localPosition = Vector3.zero;
+                PlayerSetup.Instance._avatar.transform.localRotation = Quaternion.identity;
 
-            if(m_lookIK != null)
-                m_lookIK.onPostSolverUpdate.AddListener(this.OnLookIKPostUpdate);
+                m_headBone = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.Head);
+                if(m_headBone != null)
+                    m_bindRotation = Quaternion.Inverse(m_avatarDescriptor.transform.rotation) * m_headBone.rotation;
 
+                m_lookIK = PlayerSetup.Instance._avatar.GetComponent<LookAtIK>();
+                if(m_lookIK != null)
+                    m_lookIK.onPostSolverUpdate.AddListener(this.OnLookIKPostUpdate);
+            }
         }
         void OnAvatarClear()
         {
@@ -163,6 +168,7 @@ namespace ml_dht
         void OnAvatarReuse()
         {
             m_camera = PlayerSetup.Instance.GetActiveCamera().transform;
+
             m_lookIK = PlayerSetup.Instance._avatar.GetComponent<LookAtIK>();
             if(m_lookIK != null)
                 m_lookIK.onPostSolverUpdate.AddListener(this.OnLookIKPostUpdate);
@@ -190,7 +196,7 @@ namespace ml_dht
 
         void UpdateFaceTracking(CVRFaceTracking p_component, GameEvents.EventResult p_result)
         {
-            if(this.enabled && Settings.Enabled && Settings.FaceTracking && p_component.isLocal && p_component.UseFacialTracking )
+            if(this.enabled && Settings.Enabled && Settings.FaceTracking && p_component.isLocal && p_component.UseFacialTracking)
             {
                 if(!m_lipDataSent)
                 {

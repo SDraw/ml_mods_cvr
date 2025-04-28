@@ -19,15 +19,5 @@ namespace ml_dht
         public static void ExecuteScript(this CohtmlControlledViewWrapper p_instance, string p_script) => (ms_view?.GetValue(p_instance) as cohtml.Net.View)?.ExecuteScript(p_script);
 
         public static void UpdateShapesLocal_Private(this CVRFaceTracking p_instance) => ms_updateShapesLocal?.Invoke(p_instance, ms_emptyArray);
-
-        public static void SetAvatarTPose()
-        {
-            if(PlayerSetup.Instance._animator.isHuman)
-            {
-                IKSystem.Instance.SetAvatarPose(IKSystem.AvatarPose.TPose);
-                PlayerSetup.Instance._avatar.transform.localPosition = Vector3.zero;
-                PlayerSetup.Instance._avatar.transform.localRotation = Quaternion.identity;
-            }
-        }
     }
 }
