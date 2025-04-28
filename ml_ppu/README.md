@@ -18,4 +18,4 @@ To pick you up remote player should:
 * Touch your avatar's torso with both pointers;
 
 # Notes
-* Compatible with PlayerRagdolMod.
+* Compatible with PlayerRagdollMod.
