@@ -13,8 +13,10 @@ namespace ml_ppu
 
         Collider m_holderPointA = null;
         CVRPointer m_holderPointerA = null;
+        Quaternion m_holderPointAOffset;
         Collider m_holderPointB = null;
         CVRPointer m_holderPointerB = null;
+        Quaternion m_holderPointBOffset;
 
         CapsuleCollider m_collider = null;
         Matrix4x4 m_colliderOffSet;
@@ -26,8 +28,8 @@ namespace ml_ppu
         bool m_ready = false;
         bool m_held = false;
 
-        Vector3 m_lastPosition;
-        Vector3 m_velocity;
+        Vector3 m_lastPosition = Vector3.zero;
+        Vector3 m_velocity = Vector3.zero;
 
         void Awake()
         {
@@ -95,7 +97,7 @@ namespace ml_ppu
                     {
                         Matrix4x4 l_midPoint = Matrix4x4.TRS(
                             Vector3.Lerp(m_holderPointA.transform.position, m_holderPointB.transform.position, 0.5f),
-                            Quaternion.Slerp(m_holderPointA.transform.rotation, m_holderPointB.transform.rotation, 0.5f),
+                            Quaternion.Slerp(m_holderPointA.transform.rotation * m_holderPointAOffset, m_holderPointB.transform.rotation * m_holderPointBOffset, 0.5f),
                             Vector3.one
                         );
                         Matrix4x4 l_colliderMat = l_midPoint * m_colliderOffSet;
@@ -103,7 +105,7 @@ namespace ml_ppu
                         m_collider.transform.rotation = l_colliderMat.rotation;
 
                         Matrix4x4 l_avatarMat = l_colliderMat * m_avatarOffSet;
-                        BetterBetterCharacterController.Instance.TeleportPlayerTo(l_avatarMat.GetPosition(), l_avatarMat.rotation.eulerAngles, true, false);
+                        BetterBetterCharacterController.Instance.TeleportPlayerTo(l_avatarMat.GetPosition(), l_avatarMat.rotation, true, false); // Extension method with Quaternion as rotation
 
                         Vector3 l_position = l_avatarMat.GetPosition();
                         m_velocity = (l_position - m_lastPosition) / Time.deltaTime;
@@ -229,14 +231,19 @@ namespace ml_ppu
                         m_holderPointerB = p_pointer;
 
                         // Remember offsets
+                        Quaternion l_avatarRot = PlayerSetup.Instance._avatar.transform.rotation;
+                        m_holderPointAOffset = Quaternion.Inverse(m_holderPointA.transform.rotation) * l_avatarRot;
+                        m_holderPointBOffset = Quaternion.Inverse(m_holderPointB.transform.rotation) * l_avatarRot;
+
                         Matrix4x4 l_midPoint = Matrix4x4.TRS(
                             Vector3.Lerp(m_holderPointA.transform.position, m_holderPointB.transform.position, 0.5f),
-                            Quaternion.Slerp(m_holderPointA.transform.rotation, m_holderPointB.transform.rotation, 0.5f),
+                            l_avatarRot,
                             Vector3.one
                         );
                         m_colliderOffSet = l_midPoint.inverse * m_collider.transform.GetMatrix();
                         m_avatarOffSet = m_collider.transform.GetMatrix().inverse * PlayerSetup.Instance._avatar.transform.GetMatrix();
                         m_lastPosition = PlayerSetup.Instance._avatar.transform.position;
+                        m_velocity = Vector3.zero;
                         m_held = true;
                     }
                 }
