@@ -20,7 +20,7 @@ namespace ml_ppu
 
         CapsuleCollider m_collider = null;
         Matrix4x4 m_colliderOffSet;
-        Matrix4x4 m_avatarOffSet;
+        Matrix4x4 m_playerOffSet;
 
         Transform m_hips = null;
         Transform m_armLeft = null;
@@ -104,10 +104,10 @@ namespace ml_ppu
                         m_collider.transform.position = l_colliderMat.GetPosition();
                         m_collider.transform.rotation = l_colliderMat.rotation;
 
-                        Matrix4x4 l_avatarMat = l_colliderMat * m_avatarOffSet;
-                        BetterBetterCharacterController.Instance.TeleportPlayerTo(l_avatarMat.GetPosition(), l_avatarMat.rotation, true, false); // Extension method with Quaternion as rotation
+                        Matrix4x4 l_heldMat = l_colliderMat * m_playerOffSet;
+                        BetterBetterCharacterController.Instance.TeleportPlayerTo(l_heldMat.GetPosition(), l_heldMat.rotation, true, false); // Extension method with Quaternion as rotation
 
-                        Vector3 l_position = l_avatarMat.GetPosition();
+                        Vector3 l_position = l_heldMat.GetPosition();
                         m_velocity = (l_position - m_lastPosition) / Time.deltaTime;
                         m_lastPosition = l_position;
                     }
@@ -140,8 +140,9 @@ namespace ml_ppu
 
                 if((m_hips != null) && (m_armLeft != null) && (m_armRight != null))
                 {
-                    Vector3 l_hipsPos = (PlayerSetup.Instance.transform.GetMatrix().inverse * m_hips.GetMatrix()).GetPosition();
-                    Vector3 l_armPos = (PlayerSetup.Instance.transform.GetMatrix().inverse * m_armLeft.GetMatrix()).GetPosition();
+                    Matrix4x4 l_avatarMatInv = PlayerSetup.Instance._avatar.transform.GetMatrix().inverse;
+                    Vector3 l_hipsPos = (l_avatarMatInv * m_hips.GetMatrix()).GetPosition();
+                    Vector3 l_armPos = (l_avatarMatInv * m_armLeft.GetMatrix()).GetPosition();
 
                     m_collider = new GameObject("[Collider]").AddComponent<CapsuleCollider>();
                     m_collider.transform.parent = this.transform;
@@ -163,7 +164,7 @@ namespace ml_ppu
 
             if(m_collider != null)
             {
-                UnityEngine.Object.Destroy(m_collider.gameObject);
+                Destroy(m_collider.gameObject);
                 m_collider = null;
             }
             m_holderPointA = null;
@@ -231,18 +232,19 @@ namespace ml_ppu
                         m_holderPointerB = p_pointer;
 
                         // Remember offsets
-                        Quaternion l_avatarRot = PlayerSetup.Instance._avatar.transform.rotation;
-                        m_holderPointAOffset = Quaternion.Inverse(m_holderPointA.transform.rotation) * l_avatarRot;
-                        m_holderPointBOffset = Quaternion.Inverse(m_holderPointB.transform.rotation) * l_avatarRot;
+                        Vector3 l_playerPos = PlayerSetup.Instance.GetPlayerPosition();
+                        Quaternion l_playerRot = PlayerSetup.Instance.GetPlayerRotation();
+                        m_holderPointAOffset = Quaternion.Inverse(m_holderPointA.transform.rotation) * l_playerRot;
+                        m_holderPointBOffset = Quaternion.Inverse(m_holderPointB.transform.rotation) * l_playerRot;
 
                         Matrix4x4 l_midPoint = Matrix4x4.TRS(
                             Vector3.Lerp(m_holderPointA.transform.position, m_holderPointB.transform.position, 0.5f),
-                            l_avatarRot,
+                            l_playerRot,
                             Vector3.one
                         );
                         m_colliderOffSet = l_midPoint.inverse * m_collider.transform.GetMatrix();
-                        m_avatarOffSet = m_collider.transform.GetMatrix().inverse * PlayerSetup.Instance._avatar.transform.GetMatrix();
-                        m_lastPosition = PlayerSetup.Instance._avatar.transform.position;
+                        m_playerOffSet = m_collider.transform.GetMatrix().inverse * Matrix4x4.TRS(l_playerPos, l_playerRot, Vector3.one);
+                        m_lastPosition = l_playerPos;
                         m_velocity = Vector3.zero;
                         m_held = true;
                     }
