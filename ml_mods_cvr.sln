@@ -30,6 +30,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_vpc", "ml_vpc\ml_vpc.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_ppu", "ml_ppu\ml_ppu.csproj", "{F16DF16B-D127-4A2A-81FF-2FD80F320E64}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_vet", "ml_vet\ml_vet.csproj", "{8DB32590-FC5B-46A8-9747-344E86B18ACF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -77,6 +79,10 @@ Global
 		{F16DF16B-D127-4A2A-81FF-2FD80F320E64}.Debug|x64.Build.0 = Debug|x64
 		{F16DF16B-D127-4A2A-81FF-2FD80F320E64}.Release|x64.ActiveCfg = Release|x64
 		{F16DF16B-D127-4A2A-81FF-2FD80F320E64}.Release|x64.Build.0 = Release|x64
+		{8DB32590-FC5B-46A8-9747-344E86B18ACF}.Debug|x64.ActiveCfg = Debug|x64
+		{8DB32590-FC5B-46A8-9747-344E86B18ACF}.Debug|x64.Build.0 = Debug|x64
+		{8DB32590-FC5B-46A8-9747-344E86B18ACF}.Release|x64.ActiveCfg = Release|x64
+		{8DB32590-FC5B-46A8-9747-344E86B18ACF}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
