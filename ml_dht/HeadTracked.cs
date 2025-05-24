@@ -189,7 +189,8 @@ namespace ml_dht
                 if(Settings.Blinking)
                 {
                     p_component.manualBlinking = true;
-                    p_component.blinkProgress = m_blinkProgress;
+                    p_component.blinkProgressLeft = m_blinkProgress;
+                    p_component.blinkProgressRight = m_blinkProgress;
                 }
             }
         }

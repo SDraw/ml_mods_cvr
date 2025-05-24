@@ -68,16 +68,14 @@ namespace ml_vet
             {
                 ViewManager.Instance.gameMenuView.View.ExecuteScript(ResourcesHandler.GetEmbeddedResource("mods_extension.js"));
                 ViewManager.Instance.gameMenuView.View.ExecuteScript(ResourcesHandler.GetEmbeddedResource("mod_menu.js"));
-                foreach(var l_entry in ms_entries)
-                    ViewManager.Instance.gameMenuView.View.TriggerEvent("updateModSetting", ms_category.Identifier, l_entry.DisplayName, l_entry.GetValueAsString());
-
                 MelonLoader.MelonCoroutines.Start(UpdateMenuSettings());
             };
         }
 
         static System.Collections.IEnumerator UpdateMenuSettings()
         {
-            yield return new UnityEngine.WaitForEndOfFrame();
+            while(!ViewManager.Instance.IsReady || !ViewManager.Instance.IsMainMenuOpen)
+                yield return null;
 
             foreach(var l_entry in ms_entries)
                 ViewManager.Instance.gameMenuView.View.TriggerEvent("updateModSetting", ms_category.Identifier, l_entry.DisplayName, l_entry.GetValueAsString());
@@ -87,7 +85,7 @@ namespace ml_vet
         {
             try
             {
-                if(Enum.TryParse(p_name, out ModSetting l_setting) && bool.TryParse(p_value,out bool l_value))
+                if(Enum.TryParse(p_name, out ModSetting l_setting) && bool.TryParse(p_value, out bool l_value))
                 {
                     switch(l_setting)
                     {
@@ -102,7 +100,8 @@ namespace ml_vet
                         {
                             Debug = l_value;
                             OnDebugChanged.Invoke(Debug);
-                        } break;
+                        }
+                        break;
                     }
 
                     ms_entries[(int)l_setting].BoxedValue = l_value;

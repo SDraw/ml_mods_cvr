@@ -88,9 +88,17 @@ namespace ml_dht
             {
                 ViewManager.Instance.gameMenuView.View.ExecuteScript(ResourcesHandler.GetEmbeddedResource("mods_extension.js"));
                 ViewManager.Instance.gameMenuView.View.ExecuteScript(ResourcesHandler.GetEmbeddedResource("mod_menu.js"));
-                foreach(var l_entry in ms_entries)
-                    ViewManager.Instance.gameMenuView.View.TriggerEvent("updateModSetting", ms_category.Identifier, l_entry.DisplayName, l_entry.GetValueAsString());
+                MelonLoader.MelonCoroutines.Start(UpdateMenuSettings());
             };
+        }
+
+        static System.Collections.IEnumerator UpdateMenuSettings()
+        {
+            while(!ViewManager.Instance.IsReady || !ViewManager.Instance.IsMainMenuOpen)
+                yield return null;
+
+            foreach(var l_entry in ms_entries)
+                ViewManager.Instance.gameMenuView.View.TriggerEvent("updateModSetting", ms_category.Identifier, l_entry.DisplayName, l_entry.GetValueAsString());
         }
 
         static void OnSliderUpdate(string p_name, string p_value)
