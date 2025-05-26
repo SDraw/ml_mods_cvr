@@ -197,6 +197,8 @@ namespace ml_vet
                         float y4 = m_rightEyeOrigin.z + m_rightEyeGaze.z;
 
                         float l_det = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+                        Vector3 l_combineGazeOrigin = Vector3.Lerp(m_leftEyeOrigin, m_rightEyeOrigin, 0.5f); // SRanipal's combined gaze origin is unstable
+
                         if(!Mathf.Approximately(l_det, 0f))
                         {
                             float l_detZ = (x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4);
@@ -209,20 +211,17 @@ namespace ml_vet
                             Vector3 l_rightEyePoint = m_rightEyeOrigin + l_thetaRight * m_rightEyeGaze;
 
                             Vector3 l_midPoint = Vector3.Lerp(l_leftEyePoint, l_rightEyePoint, 0.5f);
-                            Vector3 l_combineGazeOrigin = Vector3.Lerp(m_leftEyeOrigin, m_rightEyeOrigin, 0.5f); // m_combinedGazeOrigin is unstable, wow
-
                             if(l_midPoint.z > l_combineGazeOrigin.z)
                             {
                                 Vector3 l_resultDir = l_midPoint - l_combineGazeOrigin;
                                 l_resultDir = Vector3.ClampMagnitude(l_resultDir, 1f);
                                 l_gazePoint = (l_combineGazeOrigin + l_resultDir) * l_playspaceScale;
                             }
+                            else
+                                l_gazePoint = (l_combineGazeOrigin + m_combinedGaze) * l_playspaceScale;
                         }
                         else
-                        {
-                            Vector3 l_combineGazeOrigin = Vector3.Lerp(m_leftEyeOrigin, m_rightEyeOrigin, 0.5f);
                             l_gazePoint = (l_combineGazeOrigin + m_combinedGaze) * l_playspaceScale;
-                        }
                     }
                     else
                     {
