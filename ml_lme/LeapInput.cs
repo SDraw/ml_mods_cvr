@@ -40,7 +40,6 @@ namespace ml_lme
             m_handRayLeft.isInteractionRay = true;
             m_handRayLeft.triggerHoverEvents = false;
             m_handRayLeft.attachmentDistance = 0f;
-            m_handRayLeft.uiMask = 32;
             m_handRayLeft.isDesktopRay = !m_inVR;
 
             m_lineLeft = m_handRayLeft.gameObject.AddComponent<LineRenderer>();
@@ -61,7 +60,6 @@ namespace ml_lme
             m_handRayRight.isInteractionRay = true;
             m_handRayRight.triggerHoverEvents = false;
             m_handRayRight.attachmentDistance = 0f;
-            m_handRayRight.uiMask = 32;
             m_handRayRight.isDesktopRay = !m_inVR;
 
             m_lineRight = m_handRayRight.gameObject.AddComponent<LineRenderer>();
@@ -120,12 +118,10 @@ namespace ml_lme
 
             m_lineLeft.material = PlayerSetup.Instance.vrRayLeft.lineRenderer.material;
             m_lineLeft.gameObject.layer = PlayerSetup.Instance.vrRayLeft.gameObject.layer;
-            m_handRayLeft.highlightMaterial = PlayerSetup.Instance.vrRayLeft.highlightMaterial;
             m_handRayLeft.SetVRActive(m_inVR);
 
             m_lineRight.material = PlayerSetup.Instance.vrRayLeft.lineRenderer.material;
             m_lineRight.gameObject.layer = PlayerSetup.Instance.vrRayLeft.gameObject.layer;
-            m_handRayRight.highlightMaterial = PlayerSetup.Instance.vrRayLeft.highlightMaterial;
             m_handRayRight.SetVRActive(m_inVR);
         }
 
