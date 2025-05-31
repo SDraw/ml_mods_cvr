@@ -1,4 +1,5 @@
 ﻿using ABI.CCK.Components;
+using ABI_RC.Core;
 using ABI_RC.Core.InteractionSystem;
 using ABI_RC.Core.Player;
 using ABI_RC.Systems.IK;
@@ -39,7 +40,7 @@ namespace ml_prm
         readonly List<System.Tuple<CharacterJoint, Vector3>> m_jointAnchors = null;
 
         RagdollToggle m_avatarRagdollToggle = null; // Custom component available for editor
-        AvatarBoolParameter m_ragdolledParameter = null;
+        AvatarParameter m_ragdolledParameter = null;
         PhysicMaterial m_physicsMaterial = null;
 
         bool m_inAir = false;
@@ -299,6 +300,7 @@ namespace ml_prm
                 BipedRagdollReferences l_avatarReferences = BipedRagdollReferences.FromAvatar(PlayerSetup.Instance._animator);
 
                 m_puppetRoot = new GameObject("Root").transform;
+                m_puppetRoot.gameObject.layer = CVRLayers.PlayerClone;
                 m_puppetRoot.parent = m_puppet;
                 m_puppetRoot.position = m_avatarTransform.position;
                 m_puppetRoot.rotation = m_avatarTransform.rotation;
@@ -370,7 +372,7 @@ namespace ml_prm
                     m_vrIK.onPostSolverUpdate.AddListener(this.OnIKPostSolverUpdate);
 
                 m_avatarRagdollToggle = PlayerSetup.Instance._avatar.GetComponentInChildren<RagdollToggle>(true);
-                m_ragdolledParameter = new AvatarBoolParameter("Ragdolled", PlayerSetup.Instance.animatorManager);
+                m_ragdolledParameter = new AvatarParameter("Ragdolled", PlayerSetup.Instance.animatorManager);
 
                 m_initTask = StartCoroutine(WaitForBodyHandlers());
             }
@@ -781,6 +783,7 @@ namespace ml_prm
         static Transform CloneTransform(Transform p_source, Transform p_parent, string p_name)
         {
             Transform l_target = new GameObject(p_name).transform;
+            l_target.gameObject.layer = CVRLayers.PlayerClone;
             l_target.parent = p_parent;
             p_source.CopyGlobal(l_target);
             return l_target;
