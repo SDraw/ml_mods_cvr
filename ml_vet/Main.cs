@@ -174,9 +174,12 @@ namespace ml_vet
                 if(p_controller.IsLocal && IsReadyForUpdate())
                 {
                     p_controller.manualBlinking = true;
+#if NIGHTLY_BUILD
                     p_controller.blinkProgressLeft = 1f - m_openness.x;
                     p_controller.blinkProgressRight = 1f - m_openness.y;
-
+#else
+                    p_controller.blinkProgress = 1f - (m_openness.x + m_openness.y) * 0.5f;
+#endif
                     p_controller.manualViewTarget = true;
 
                     Vector3 l_gazePoint = m_gazePoint;
