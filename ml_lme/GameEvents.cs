@@ -53,7 +53,7 @@ namespace ml_lme
                 );
 
                 p_instance.Patch(
-                    typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.SetControllerRayScale), BindingFlags.Instance | BindingFlags.Public),
+                    typeof(PlayerSetup).GetMethod("SetControllerRayScale", BindingFlags.Instance | BindingFlags.NonPublic),
                     null,
                     new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnRayScale_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
                 );

@@ -281,7 +281,7 @@ namespace ml_lme
 
         void OnAvatarSetup()
         {
-            Animator l_animator = PlayerSetup.Instance._animator;
+            Animator l_animator = PlayerSetup.Instance.Animator;
             if(l_animator.isHuman)
             {
                 Utils.SetAvatarTPose();
@@ -313,7 +313,7 @@ namespace ml_lme
         void OnAvatarReuse()
         {
             // Old VRIK is destroyed by game
-            m_vrIK = PlayerSetup.Instance._animator.GetComponent<VRIK>();
+            m_vrIK = PlayerSetup.Instance.AvatarObject.GetComponent<VRIK>();
 
             if(Utils.IsInVR())
                 RemoveArmIK();
@@ -409,7 +409,7 @@ namespace ml_lme
 
         void SetupArmIK()
         {
-            Animator l_animator = PlayerSetup.Instance._animator;
+            Animator l_animator = PlayerSetup.Instance.Animator;
             Transform l_chest = l_animator.GetBoneTransform(HumanBodyBones.UpperChest);
             if(l_chest == null)
                 l_chest = l_animator.GetBoneTransform(HumanBodyBones.Chest);
@@ -472,7 +472,7 @@ namespace ml_lme
             LeapTracking.Instance.Rebind(PlayerSetup.Instance.transform.rotation);
 
             // Align rotations of leap fingers to avatar fingers
-            Animator l_animator = PlayerSetup.Instance._animator;
+            Animator l_animator = PlayerSetup.Instance.Animator;
             LeapHand l_leapLeft = LeapTracking.Instance.GetLeftHand();
             LeapHand l_leapRight = LeapTracking.Instance.GetRightHand();
             // Try to "fix" rotations, slightly inaccurate after 0YX plane rotation

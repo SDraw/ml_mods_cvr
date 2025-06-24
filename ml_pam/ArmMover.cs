@@ -68,7 +68,7 @@ namespace ml_pam
 
         void Start()
         {
-            m_camera = PlayerSetup.Instance.GetActiveCamera().transform;
+            m_camera = PlayerSetup.Instance.activeCam.transform;
 
             m_root = new GameObject("Root").transform;
             m_root.parent = this.transform;
@@ -353,14 +353,14 @@ namespace ml_pam
 
         void OnAvatarSetup()
         {
-            m_camera = PlayerSetup.Instance.GetActiveCamera().transform;
+            m_camera = PlayerSetup.Instance.activeCam.transform;
 
-            if(PlayerSetup.Instance._animator.isHuman)
+            if(PlayerSetup.Instance.Animator.isHuman)
             {
-                m_vrIK = PlayerSetup.Instance._animator.GetComponent<VRIK>();
+                m_vrIK = PlayerSetup.Instance.Animator.GetComponent<VRIK>();
                 Utils.SetAvatarTPose();
 
-                Animator l_animator = PlayerSetup.Instance._animator;
+                Animator l_animator = PlayerSetup.Instance.Animator;
                 Matrix4x4 l_avatarMatrixInv = l_animator.transform.GetMatrix().inverse; // Animator and avatar are on same game object
 
                 Transform l_leftHand = l_animator.GetBoneTransform(HumanBodyBones.LeftHand);
@@ -395,8 +395,8 @@ namespace ml_pam
                 }
             }
 
-            m_leftHandParameter = new AvatarBoolParameter("LeftHandExtended", PlayerSetup.Instance.animatorManager);
-            m_rightHandParameter = new AvatarBoolParameter("RightHandExtended", PlayerSetup.Instance.animatorManager);
+            m_leftHandParameter = new AvatarBoolParameter("LeftHandExtended", PlayerSetup.Instance.AnimatorManager);
+            m_rightHandParameter = new AvatarBoolParameter("RightHandExtended", PlayerSetup.Instance.AnimatorManager);
 
             OnEnabledChanged(Settings.Enabled);
             OnGrabOffsetChanged(Settings.GrabOffset);
@@ -406,7 +406,7 @@ namespace ml_pam
         void OnAvatarReuse()
         {
             // Old VRIK is destroyed by game
-            m_vrIK = PlayerSetup.Instance._animator.GetComponent<VRIK>();
+            m_vrIK = PlayerSetup.Instance.Animator.GetComponent<VRIK>();
 
             if(Utils.IsInVR())
                 RemoveArmIK();
@@ -470,7 +470,7 @@ namespace ml_pam
         {
             try
             {
-                m_camera = PlayerSetup.Instance.GetActiveCamera().transform;
+                m_camera = PlayerSetup.Instance.activeCam.transform;
                 this.enabled = !Utils.IsInVR();
             }
             catch(System.Exception e)
@@ -482,7 +482,7 @@ namespace ml_pam
         // Arbitrary
         void SetupArmIK()
         {
-            Animator l_animator = PlayerSetup.Instance._animator;
+            Animator l_animator = PlayerSetup.Instance.Animator;
 
             Transform l_chest = l_animator.GetBoneTransform(HumanBodyBones.UpperChest);
             if(l_chest == null)
@@ -490,7 +490,7 @@ namespace ml_pam
             if(l_chest == null)
                 l_chest = l_animator.GetBoneTransform(HumanBodyBones.Spine);
 
-            m_armIKLeft = PlayerSetup.Instance._avatar.AddComponent<ArmIK>();
+            m_armIKLeft = PlayerSetup.Instance.AvatarObject.AddComponent<ArmIK>();
             m_armIKLeft.solver.isLeft = true;
             m_armIKLeft.solver.SetChain(
                 l_chest,
@@ -507,7 +507,7 @@ namespace ml_pam
             m_armIKLeft.solver.IKRotationWeight = 0f;
             m_armIKLeft.enabled = false;
 
-            m_armIKRight = PlayerSetup.Instance._avatar.AddComponent<ArmIK>();
+            m_armIKRight = PlayerSetup.Instance.AvatarObject.AddComponent<ArmIK>();
             m_armIKRight.solver.isLeft = false;
             m_armIKRight.solver.SetChain(
                 l_chest,

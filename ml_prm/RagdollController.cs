@@ -195,7 +195,7 @@ namespace ml_prm
                     BodySystem.TrackingPositionWeight = 0f;
                     BetterBetterCharacterController.Instance.PauseGroundConstraint();
                     BetterBetterCharacterController.Instance.ResetAllForces();
-                    PlayerSetup.Instance.animatorManager.CancelEmote = true;
+                    PlayerSetup.Instance.AnimatorManager.CancelEmote = true;
                 }
 
                 if(!m_ragdolled && !m_reachedGround && (BetterBetterCharacterController.Instance.IsOnGround() || BetterBetterCharacterController.Instance.IsInWater() || BetterBetterCharacterController.Instance.IsSitting()))
@@ -291,13 +291,13 @@ namespace ml_prm
 
         void OnAvatarSetup()
         {
-            if(PlayerSetup.Instance._animator.isHuman)
+            if(PlayerSetup.Instance.Animator.isHuman)
             {
-                m_avatarTransform = PlayerSetup.Instance._avatar.transform;
-                m_hips = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.Hips);
+                m_avatarTransform = PlayerSetup.Instance.AvatarTransform;
+                m_hips = PlayerSetup.Instance.Animator.GetBoneTransform(HumanBodyBones.Hips);
                 Utils.SetAvatarTPose();
 
-                BipedRagdollReferences l_avatarReferences = BipedRagdollReferences.FromAvatar(PlayerSetup.Instance._animator);
+                BipedRagdollReferences l_avatarReferences = BipedRagdollReferences.FromAvatar(PlayerSetup.Instance.Animator);
 
                 m_puppetRoot = new GameObject("Root").transform;
                 m_puppetRoot.gameObject.layer = CVRLayers.PlayerClone;
@@ -367,12 +367,12 @@ namespace ml_prm
                     }
                 }
 
-                m_vrIK = PlayerSetup.Instance._avatar.GetComponent<VRIK>();
+                m_vrIK = PlayerSetup.Instance.AvatarObject.GetComponent<VRIK>();
                 if(m_vrIK != null)
                     m_vrIK.onPostSolverUpdate.AddListener(this.OnIKPostSolverUpdate);
 
-                m_avatarRagdollToggle = PlayerSetup.Instance._avatar.GetComponentInChildren<RagdollToggle>(true);
-                m_ragdolledParameter = new AvatarParameter("Ragdolled", PlayerSetup.Instance.animatorManager);
+                m_avatarRagdollToggle = PlayerSetup.Instance.AvatarObject.GetComponentInChildren<RagdollToggle>(true);
+                m_ragdolledParameter = new AvatarParameter("Ragdolled", PlayerSetup.Instance.AnimatorManager);
 
                 m_initTask = StartCoroutine(WaitForBodyHandlers());
             }
@@ -410,7 +410,7 @@ namespace ml_prm
         }
         void OnAvatarPostReuse()
         {
-            m_vrIK = PlayerSetup.Instance._avatar.GetComponent<VRIK>();
+            m_vrIK = PlayerSetup.Instance.AvatarObject.GetComponent<VRIK>();
 
             if(m_vrIK != null)
                 m_vrIK.onPostSolverUpdate.AddListener(this.OnIKPostSolverUpdate);
@@ -506,10 +506,10 @@ namespace ml_prm
         // Custom game events
         void OnRemoteGestureStateChanged(ABI_RC.Core.Player.PuppetMaster p_master, RemoteGesturesManager.GestureHand p_hand, bool p_state)
         {
-            if(m_avatarReady && m_ragdolled && Settings.GestureGrab && (p_master.animatorManager.Animator != null))
+            if(m_avatarReady && m_ragdolled && Settings.GestureGrab && (p_master.Animator != null))
             {
-                Transform l_hand = p_master.animatorManager.Animator.GetBoneTransform((p_hand == RemoteGesturesManager.GestureHand.Left) ? HumanBodyBones.LeftHand : HumanBodyBones.RightHand);
-                Transform l_finger = p_master.animatorManager.Animator.GetBoneTransform((p_hand == RemoteGesturesManager.GestureHand.Left) ? HumanBodyBones.LeftMiddleProximal : HumanBodyBones.RightMiddleProximal);
+                Transform l_hand = p_master.Animator.GetBoneTransform((p_hand == RemoteGesturesManager.GestureHand.Left) ? HumanBodyBones.LeftHand : HumanBodyBones.RightHand);
+                Transform l_finger = p_master.Animator.GetBoneTransform((p_hand == RemoteGesturesManager.GestureHand.Left) ? HumanBodyBones.LeftMiddleProximal : HumanBodyBones.RightMiddleProximal);
 
                 if(l_hand != null)
                 {
@@ -642,7 +642,7 @@ namespace ml_prm
                 if(Settings.ViewVelocity && WorldManager.IsSafeWorld())
                 {
                     float l_mag = l_velocity.magnitude;
-                    l_velocity = PlayerSetup.Instance.GetActiveCamera().transform.forward * l_mag;
+                    l_velocity = PlayerSetup.Instance.activeCam.transform.forward * l_mag;
                 }
 
                 Vector3 l_playerPos = PlayerSetup.Instance.transform.position;
@@ -666,7 +666,7 @@ namespace ml_prm
                 m_applyHipsRotation = IKSystem.Instance.applyOriginalHipRotation;
                 IKSystem.Instance.applyOriginalHipRotation = true;
 
-                PlayerSetup.Instance.animatorManager.CancelEmote = true;
+                PlayerSetup.Instance.AnimatorManager.CancelEmote = true;
                 m_ragdolledParameter.SetValue(true);
 
                 if(!WorldManager.IsSafeWorld())

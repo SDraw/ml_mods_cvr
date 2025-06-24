@@ -1,4 +1,5 @@
 ﻿using ABI.CCK.Components;
+using ABI_RC.Core;
 using ABI_RC.Core.InteractionSystem;
 using ABI_RC.Core.Player;
 using ABI_RC.Systems.IK;
@@ -81,7 +82,7 @@ namespace ml_ppu
                     }
 
                     Vector3 l_armsMidPoint = (m_armLeft.position + m_armRight.position) * 0.5f;
-                    Quaternion l_avatarRot = PlayerSetup.Instance._avatar.transform.rotation;
+                    Quaternion l_avatarRot = PlayerSetup.Instance.AvatarTransform.rotation;
 
                     m_collider.transform.position = Vector3.zero;
                     m_collider.transform.rotation = Quaternion.identity;
@@ -127,12 +128,12 @@ namespace ml_ppu
 
         void OnAvatarSetup()
         {
-            Animator l_animator = PlayerSetup.Instance._animator;
+            Animator l_animator = PlayerSetup.Instance.Animator;
             if((l_animator != null) && l_animator.isHuman)
             {
                 IKSystem.Instance.SetAvatarPose(IKSystem.AvatarPose.TPose);
-                PlayerSetup.Instance._avatar.transform.localPosition = Vector3.zero;
-                PlayerSetup.Instance._avatar.transform.localRotation = Quaternion.identity;
+                PlayerSetup.Instance.AvatarTransform.localPosition = Vector3.zero;
+                PlayerSetup.Instance.AvatarTransform.localRotation = Quaternion.identity;
 
                 m_hips = l_animator.GetBoneTransform(HumanBodyBones.Hips);
                 m_armLeft = l_animator.GetBoneTransform(HumanBodyBones.LeftUpperArm);
@@ -140,11 +141,12 @@ namespace ml_ppu
 
                 if((m_hips != null) && (m_armLeft != null) && (m_armRight != null))
                 {
-                    Matrix4x4 l_avatarMatInv = PlayerSetup.Instance._avatar.transform.GetMatrix().inverse;
+                    Matrix4x4 l_avatarMatInv = PlayerSetup.Instance.AvatarTransform.GetMatrix().inverse;
                     Vector3 l_hipsPos = (l_avatarMatInv * m_hips.GetMatrix()).GetPosition();
                     Vector3 l_armPos = (l_avatarMatInv * m_armLeft.GetMatrix()).GetPosition();
 
                     m_collider = new GameObject("[Collider]").AddComponent<CapsuleCollider>();
+                    m_collider.gameObject.layer = CVRLayers.PlayerClone;
                     m_collider.transform.parent = this.transform;
                     m_collider.isTrigger = true;
                     m_collider.height = Vector3.Distance(l_hipsPos, new Vector3(0f, l_armPos.y, l_armPos.z));

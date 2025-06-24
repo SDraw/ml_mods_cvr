@@ -196,9 +196,9 @@ namespace ml_pmc
                     {
                         if(m_inVr)
                         {
-                            Vector3 l_avatarPos = PlayerSetup.Instance._avatar.transform.position;
+                            Vector3 l_avatarPos = PlayerSetup.Instance.AvatarTransform.position;
                             PlayerSetup.Instance.transform.rotation = l_result.rotation;
-                            Vector3 l_dif = l_avatarPos - PlayerSetup.Instance._avatar.transform.position;
+                            Vector3 l_dif = l_avatarPos - PlayerSetup.Instance.AvatarTransform.position;
                             PlayerSetup.Instance.transform.position += l_dif;
                         }
                         else
@@ -258,9 +258,9 @@ namespace ml_pmc
         void OnAvatarSetup()
         {
             m_inVr = Utils.IsInVR();
-            m_animator = PlayerSetup.Instance._animator;
-            m_vrIk = PlayerSetup.Instance._avatar.GetComponent<VRIK>();
-            m_lookAtIk = PlayerSetup.Instance._avatar.GetComponent<LookAtIK>();
+            m_animator = PlayerSetup.Instance.Animator;
+            m_vrIk = PlayerSetup.Instance.AvatarObject.GetComponent<VRIK>();
+            m_lookAtIk = PlayerSetup.Instance.AvatarObject.GetComponent<LookAtIK>();
 
             if((m_animator != null) && m_animator.isHuman)
             {
@@ -293,8 +293,8 @@ namespace ml_pmc
             m_inVr = Utils.IsInVR();
 
             // Old VRIK and LookAtIK are destroyed by game
-            m_vrIk = PlayerSetup.Instance._avatar.GetComponent<VRIK>();
-            m_lookAtIk = PlayerSetup.Instance._avatar.GetComponent<LookAtIK>();
+            m_vrIk = PlayerSetup.Instance.AvatarObject.GetComponent<VRIK>();
+            m_lookAtIk = PlayerSetup.Instance.AvatarObject.GetComponent<LookAtIK>();
 
             if(m_vrIk != null)
             {
@@ -320,10 +320,10 @@ namespace ml_pmc
                 {
                     if(Friends.FriendsWith(p_id))
                     {
-                        if(CVRPlayerManager.Instance.GetPlayerPuppetMaster(p_id, out PuppetMaster l_puppetMaster))
+                        if(CVRPlayerManager.Instance.UserIdToPlayerEntity.TryGetValue(p_id, out CVRPlayerEntity l_playerEntity))
                         {
-                            if(Utils.IsInSight(BetterBetterCharacterController.Instance.KinematicTriggerProxy.Collider, l_puppetMaster.GetComponent<CapsuleCollider>(), Utils.GetWorldMovementLimit()))
-                                SetTarget(l_puppetMaster);
+                            if(Utils.IsInSight(BetterBetterCharacterController.Instance.KinematicTriggerProxy.Collider, l_playerEntity.PuppetMaster.GetComponent<CapsuleCollider>(), Utils.GetWorldMovementLimit()))
+                                SetTarget(l_playerEntity.PuppetMaster);
                             else
                                 ModUi.ShowAlert("Selected player is too far away or obstructed");
                         }
@@ -374,9 +374,9 @@ namespace ml_pmc
             {
                 if(!m_active)
                 {
-                    if((p_target != null) && (p_target.animatorManager != null) && (p_target.animatorManager.Animator != null) && p_target.animatorManager.Animator.isHuman)
+                    if((p_target != null) && (p_target.AnimatorManager != null) && (p_target.Animator != null) && p_target.Animator.isHuman)
                     {
-                        m_puppetParser = p_target.animatorManager.Animator.gameObject.AddComponent<PuppetParser>();
+                        m_puppetParser = p_target.Animator.gameObject.AddComponent<PuppetParser>();
                         m_puppetParser.m_puppetMaster = p_target;
                         m_distanceLimit = Utils.GetWorldMovementLimit();
 

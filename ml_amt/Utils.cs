@@ -22,11 +22,11 @@ namespace ml_amt
 
         public static void SetAvatarTPose()
         {
-            if(PlayerSetup.Instance._animator.isHuman)
+            if(PlayerSetup.Instance.Animator.isHuman)
             {
                 IKSystem.Instance.SetAvatarPose(IKSystem.AvatarPose.TPose);
-                PlayerSetup.Instance._avatar.transform.localPosition = Vector3.zero;
-                PlayerSetup.Instance._avatar.transform.localRotation = Quaternion.identity;
+                PlayerSetup.Instance.AvatarTransform.localPosition = Vector3.zero;
+                PlayerSetup.Instance.AvatarTransform.localRotation = Quaternion.identity;
             }
         }
 

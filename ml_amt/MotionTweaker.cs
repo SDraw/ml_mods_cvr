@@ -114,17 +114,17 @@ namespace ml_amt
         {
             Utils.SetAvatarTPose();
 
-            m_vrIk = PlayerSetup.Instance._avatar.GetComponent<VRIK>();
-            m_avatarScale = Mathf.Abs(PlayerSetup.Instance._avatar.transform.localScale.y);
+            m_vrIk = PlayerSetup.Instance.AvatarObject.GetComponent<VRIK>();
+            m_avatarScale = Mathf.Abs(PlayerSetup.Instance.AvatarTransform.localScale.y);
 
             // Parse animator parameters
-            m_parameters.Add(new AvatarParameter(AvatarParameter.ParameterType.Moving, PlayerSetup.Instance.animatorManager));
-            m_parameters.Add(new AvatarParameter(AvatarParameter.ParameterType.MovementSpeed, PlayerSetup.Instance.animatorManager));
-            m_parameters.Add(new AvatarParameter(AvatarParameter.ParameterType.Velocity, PlayerSetup.Instance.animatorManager));
+            m_parameters.Add(new AvatarParameter(AvatarParameter.ParameterType.Moving, PlayerSetup.Instance.AnimatorManager));
+            m_parameters.Add(new AvatarParameter(AvatarParameter.ParameterType.MovementSpeed, PlayerSetup.Instance.AnimatorManager));
+            m_parameters.Add(new AvatarParameter(AvatarParameter.ParameterType.Velocity, PlayerSetup.Instance.AnimatorManager));
             m_parameters.RemoveAll(p => !p.IsValid());
 
             // Avatar custom IK limits
-            m_ikLimits = PlayerSetup.Instance._avatar.transform.Find("[IKLimits]");
+            m_ikLimits = PlayerSetup.Instance.AvatarTransform.Find("[IKLimits]");
             UpdateIKLimits();
 
             // Apply VRIK tweaks
@@ -135,18 +135,18 @@ namespace ml_amt
 
                 if(m_vrIk.solver.HasToes())
                 {
-                    Transform l_foot = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftFoot);
+                    Transform l_foot = PlayerSetup.Instance.Animator.GetBoneTransform(HumanBodyBones.LeftFoot);
                     if(l_foot == null)
-                        l_foot = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightFoot);
+                        l_foot = PlayerSetup.Instance.Animator.GetBoneTransform(HumanBodyBones.RightFoot);
 
-                    Transform l_toe = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.LeftToes);
+                    Transform l_toe = PlayerSetup.Instance.Animator.GetBoneTransform(HumanBodyBones.LeftToes);
                     if(l_toe == null)
-                        l_toe = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.RightToes);
+                        l_toe = PlayerSetup.Instance.Animator.GetBoneTransform(HumanBodyBones.RightToes);
 
                     if((l_foot != null) && (l_toe != null))
                     {
-                        Vector3 l_footPos = (PlayerSetup.Instance._avatar.transform.GetMatrix().inverse * l_foot.GetMatrix()).GetPosition();
-                        Vector3 l_toePos = (PlayerSetup.Instance._avatar.transform.GetMatrix().inverse * l_toe.GetMatrix()).GetPosition();
+                        Vector3 l_footPos = (PlayerSetup.Instance.AvatarTransform.GetMatrix().inverse * l_foot.GetMatrix()).GetPosition();
+                        Vector3 l_toePos = (PlayerSetup.Instance.AvatarTransform.GetMatrix().inverse * l_toe.GetMatrix()).GetPosition();
                         m_massCenter = new Vector3(0f, 0f, l_toePos.z - l_footPos.z);
                     }
                 }
@@ -171,7 +171,7 @@ namespace ml_amt
             // Old VRIK is destroyed by game
             Utils.SetAvatarTPose();
 
-            m_vrIk = PlayerSetup.Instance._animator.GetComponent<VRIK>();
+            m_vrIk = PlayerSetup.Instance.AvatarObject.GetComponent<VRIK>();
             if(m_vrIk != null)
             {
                 m_vrIk.solver.locomotion.offset = (Settings.MassCenter ? m_massCenter : m_locomotionOffset);
@@ -241,7 +241,7 @@ namespace ml_amt
         // Arbitrary
         float GetRelativeScale()
         {
-            return ((m_avatarScale > 0f) ? (PlayerSetup.Instance._avatar.transform.localScale.y / m_avatarScale) : 0f);
+            return ((m_avatarScale > 0f) ? (PlayerSetup.Instance.AvatarTransform.localScale.y / m_avatarScale) : 0f);
         }
 
         void UpdateIKLimits()
@@ -258,7 +258,7 @@ namespace ml_amt
         public bool IsMoving() => BetterBetterCharacterController.Instance.IsMoving();
         public float GetMovementSpeed()
         {
-            AvatarAnimatorManager l_animatorManager = PlayerSetup.Instance.animatorManager;
+            AvatarAnimatorManager l_animatorManager = PlayerSetup.Instance.AnimatorManager;
             return Mathf.Sqrt(l_animatorManager.MovementX * l_animatorManager.MovementX + l_animatorManager.MovementY * l_animatorManager.MovementY);
         }
         public float GetVelocity() => BetterBetterCharacterController.Instance.velocity.magnitude;

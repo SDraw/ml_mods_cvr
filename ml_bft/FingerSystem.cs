@@ -114,7 +114,7 @@ namespace ml_bft
 
         internal void OnAvatarSetup()
         {
-            Animator l_animator = PlayerSetup.Instance._animator;
+            Animator l_animator = PlayerSetup.Instance.Animator;
             if(l_animator.isHuman)
             {
                 Utils.SetAvatarTPose();

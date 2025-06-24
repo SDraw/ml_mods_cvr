@@ -136,7 +136,7 @@ namespace ml_lme
         {
             if(Settings.Enabled)
             {
-                Transform l_camera = PlayerSetup.Instance.GetActiveCamera().transform;
+                Transform l_camera = PlayerSetup.Instance.activeCam.transform;
                 m_root.position = l_camera.position;
                 m_root.rotation = (Settings.HeadAttach ? l_camera.rotation : PlayerSetup.Instance.GetPlayerRotation());
 

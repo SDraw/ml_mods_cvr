@@ -41,8 +41,8 @@ namespace ml_prm
         public static void SetAvatarTPose()
         {
             IKSystem.Instance.SetAvatarPose(IKSystem.AvatarPose.TPose);
-            PlayerSetup.Instance._avatar.transform.localPosition = Vector3.zero;
-            PlayerSetup.Instance._avatar.transform.localRotation = Quaternion.identity;
+            PlayerSetup.Instance.AvatarTransform.localPosition = Vector3.zero;
+            PlayerSetup.Instance.AvatarTransform.localRotation = Quaternion.identity;
         }
 
         public static bool IsInEnumeration(object p_obj, object[] p_enumeration) => p_enumeration.Contains(p_obj);

@@ -131,7 +131,7 @@ namespace ml_dht
             {
                 m_lastHeadRotation = Quaternion.Slerp(m_lastHeadRotation, m_avatarDescriptor.transform.rotation * (m_headRotation * m_bindRotation), m_smoothing);
 
-                if(!PlayerSetup.Instance.IsEmotePlaying())
+                if(!PlayerSetup.Instance.IsEmotePlaying)
                     m_headBone.rotation = m_lastHeadRotation;
             }
         }
@@ -139,20 +139,20 @@ namespace ml_dht
         // Game events
         internal void OnAvatarSetup()
         {
-            m_camera = PlayerSetup.Instance.GetActiveCamera().transform;
-            m_avatarDescriptor = PlayerSetup.Instance._avatar.GetComponent<CVRAvatar>();
+            m_camera = PlayerSetup.Instance.activeCam.transform;
+            m_avatarDescriptor = PlayerSetup.Instance.AvatarObject.GetComponent<CVRAvatar>();
 
-            if(PlayerSetup.Instance._animator.isHuman)
+            if(PlayerSetup.Instance.Animator.isHuman)
             {
                 IKSystem.Instance.SetAvatarPose(IKSystem.AvatarPose.TPose);
-                PlayerSetup.Instance._avatar.transform.localPosition = Vector3.zero;
-                PlayerSetup.Instance._avatar.transform.localRotation = Quaternion.identity;
+                PlayerSetup.Instance.AvatarTransform.localPosition = Vector3.zero;
+                PlayerSetup.Instance.AvatarTransform.localRotation = Quaternion.identity;
 
-                m_headBone = PlayerSetup.Instance._animator.GetBoneTransform(HumanBodyBones.Head);
+                m_headBone = PlayerSetup.Instance.Animator.GetBoneTransform(HumanBodyBones.Head);
                 if(m_headBone != null)
                     m_bindRotation = Quaternion.Inverse(m_avatarDescriptor.transform.rotation) * m_headBone.rotation;
 
-                m_lookIK = PlayerSetup.Instance._avatar.GetComponent<LookAtIK>();
+                m_lookIK = PlayerSetup.Instance.AvatarObject.GetComponent<LookAtIK>();
                 if(m_lookIK != null)
                     m_lookIK.onPostSolverUpdate.AddListener(this.OnLookIKPostUpdate);
             }
@@ -167,9 +167,9 @@ namespace ml_dht
         }
         void OnAvatarReuse()
         {
-            m_camera = PlayerSetup.Instance.GetActiveCamera().transform;
+            m_camera = PlayerSetup.Instance.activeCam.transform;
 
-            m_lookIK = PlayerSetup.Instance._avatar.GetComponent<LookAtIK>();
+            m_lookIK = PlayerSetup.Instance.AvatarObject.GetComponent<LookAtIK>();
             if(m_lookIK != null)
                 m_lookIK.onPostSolverUpdate.AddListener(this.OnLookIKPostUpdate);
         }
