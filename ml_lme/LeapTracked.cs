@@ -1,4 +1,6 @@
-﻿using ABI_RC.Core.Player;
+﻿using ABI.CCK.Components;
+using ABI_RC.Core.Player;
+using ABI_RC.Systems.GameEventSystem;
 using ABI_RC.Systems.IK;
 using RootMotion.FinalIK;
 using System.Collections.Generic;
@@ -148,8 +150,8 @@ namespace ml_lme
             Settings.OnFingersOnlyChanged.AddListener(this.OnEnabledOrFingersOnlyChanged);
             Settings.OnTrackElbowsChanged.AddListener(this.OnTrackElbowsChanged);
 
-            GameEvents.OnAvatarClear.AddListener(this.OnAvatarClear);
-            GameEvents.OnAvatarSetup.AddListener(this.OnAvatarSetup);
+            CVRGameEventSystem.Avatar.OnLocalAvatarLoad.AddListener(this.OnAvatarSetup);
+            CVRGameEventSystem.Avatar.OnLocalAvatarClear.AddListener(this.OnAvatarClear);
             GameEvents.OnAvatarReuse.AddListener(this.OnAvatarReuse);
         }
 
@@ -174,8 +176,8 @@ namespace ml_lme
             Settings.OnFingersOnlyChanged.RemoveListener(this.OnEnabledOrFingersOnlyChanged);
             Settings.OnTrackElbowsChanged.RemoveListener(this.OnTrackElbowsChanged);
 
-            GameEvents.OnAvatarClear.RemoveListener(this.OnAvatarClear);
-            GameEvents.OnAvatarSetup.RemoveListener(this.OnAvatarSetup);
+            CVRGameEventSystem.Avatar.OnLocalAvatarLoad.RemoveListener(this.OnAvatarSetup);
+            CVRGameEventSystem.Avatar.OnLocalAvatarClear.RemoveListener(this.OnAvatarClear);
             GameEvents.OnAvatarReuse.RemoveListener(this.OnAvatarReuse);
         }
 
@@ -255,58 +257,72 @@ namespace ml_lme
         }
 
         // Game events
-        void OnAvatarClear()
+        void OnAvatarClear(CVRAvatar p_avatar)
         {
-            m_vrIK = null;
-            m_hips = null;
-            m_leftArmIK = null;
-            m_rightArmIK = null;
-            m_leftTargetActive = false;
-            m_rightTargetActive = false;
+            try
+            {
+                m_vrIK = null;
+                m_hips = null;
+                m_leftArmIK = null;
+                m_rightArmIK = null;
+                m_leftTargetActive = false;
+                m_rightTargetActive = false;
 
-            m_poseHandler?.Dispose();
-            m_poseHandler = null;
+                m_poseHandler?.Dispose();
+                m_poseHandler = null;
 
-            m_leftHandTarget.localPosition = Vector3.zero;
-            m_leftHandTarget.localRotation = Quaternion.identity;
-            m_rightHandTarget.localPosition = Vector3.zero;
-            m_rightHandTarget.localRotation = Quaternion.identity;
+                m_leftHandTarget.localPosition = Vector3.zero;
+                m_leftHandTarget.localRotation = Quaternion.identity;
+                m_rightHandTarget.localPosition = Vector3.zero;
+                m_rightHandTarget.localRotation = Quaternion.identity;
 
-            m_leftHandOffset.Reset();
-            m_rightHandOffset.Reset();
+                m_leftHandOffset.Reset();
+                m_rightHandOffset.Reset();
 
-            m_leftFingerOffsets.Clear();
-            m_rightFingerOffsets.Clear();
+                m_leftFingerOffsets.Clear();
+                m_rightFingerOffsets.Clear();
+            }
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
         }
 
-        void OnAvatarSetup()
+        void OnAvatarSetup(CVRAvatar p_avatar)
         {
-            Animator l_animator = PlayerSetup.Instance.Animator;
-            if(l_animator.isHuman)
+            try
             {
-                Utils.SetAvatarTPose();
-
-                m_poseHandler = new HumanPoseHandler(l_animator.avatar, l_animator.transform);
-                m_poseHandler.GetHumanPose(ref m_pose);
-
-                m_hips = l_animator.GetBoneTransform(HumanBodyBones.Hips);
-
-                m_leftHandOffset.m_source = l_animator.GetBoneTransform(HumanBodyBones.LeftHand);
-                m_leftHandTarget.localRotation = ms_offsetLeft * (Quaternion.Inverse(l_animator.transform.rotation) * m_leftHandOffset.m_source.rotation);
-
-                m_rightHandOffset.m_source = l_animator.GetBoneTransform(HumanBodyBones.RightHand);
-                m_rightHandTarget.localRotation = ms_offsetRight * (Quaternion.Inverse(l_animator.transform.rotation) * m_rightHandOffset.m_source.rotation);
-
-                ParseFingersBones();
-
-                m_vrIK = l_animator.GetComponent<VRIK>();
-                if(m_vrIK != null)
+                Animator l_animator = PlayerSetup.Instance.Animator;
+                if(l_animator.isHuman)
                 {
-                    m_vrIK.onPreSolverUpdate.AddListener(this.OnIKPreSolverUpdate);
-                    m_vrIK.onPostSolverUpdate.AddListener(this.OnIKPostSolverUpdate);
+                    Utils.SetAvatarTPose();
+
+                    m_poseHandler = new HumanPoseHandler(l_animator.avatar, l_animator.transform);
+                    m_poseHandler.GetHumanPose(ref m_pose);
+
+                    m_hips = l_animator.GetBoneTransform(HumanBodyBones.Hips);
+
+                    m_leftHandOffset.m_source = l_animator.GetBoneTransform(HumanBodyBones.LeftHand);
+                    m_leftHandTarget.localRotation = ms_offsetLeft * (Quaternion.Inverse(l_animator.transform.rotation) * m_leftHandOffset.m_source.rotation);
+
+                    m_rightHandOffset.m_source = l_animator.GetBoneTransform(HumanBodyBones.RightHand);
+                    m_rightHandTarget.localRotation = ms_offsetRight * (Quaternion.Inverse(l_animator.transform.rotation) * m_rightHandOffset.m_source.rotation);
+
+                    ParseFingersBones();
+
+                    m_vrIK = l_animator.GetComponent<VRIK>();
+                    if(m_vrIK != null)
+                    {
+                        m_vrIK.onPreSolverUpdate.AddListener(this.OnIKPreSolverUpdate);
+                        m_vrIK.onPostSolverUpdate.AddListener(this.OnIKPostSolverUpdate);
+                    }
+                    else
+                        SetupArmIK();
                 }
-                else
-                    SetupArmIK();
+            }
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
             }
         }
 

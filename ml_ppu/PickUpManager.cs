@@ -2,6 +2,7 @@
 using ABI_RC.Core;
 using ABI_RC.Core.InteractionSystem;
 using ABI_RC.Core.Player;
+using ABI_RC.Systems.GameEventSystem;
 using ABI_RC.Systems.IK;
 using ABI_RC.Systems.Movement;
 using UnityEngine;
@@ -46,8 +47,8 @@ namespace ml_ppu
 
         void Start()
         {
-            GameEvents.OnAvatarSetup.AddListener(this.OnAvatarSetup);
-            GameEvents.OnAvatarClear.AddListener(this.OnAvatarClear);
+            CVRGameEventSystem.Avatar.OnLocalAvatarLoad.AddListener(this.OnAvatarSetup);
+            CVRGameEventSystem.Avatar.OnLocalAvatarClear.AddListener(this.OnAvatarClear);
             GameEvents.OnIKScaling.AddListener(this.OnIKScaling);
             GameEvents.OnWorldPreSpawn.AddListener(this.OnWorldPreSpawn);
             GameEvents.OnSeatPreSit.AddListener(this.OnSeatPreSit);
@@ -60,8 +61,8 @@ namespace ml_ppu
             if(Instance == this)
                 Instance = null;
 
-            GameEvents.OnAvatarSetup.RemoveListener(this.OnAvatarSetup);
-            GameEvents.OnAvatarClear.RemoveListener(this.OnAvatarClear);
+            CVRGameEventSystem.Avatar.OnLocalAvatarLoad.RemoveListener(this.OnAvatarSetup);
+            CVRGameEventSystem.Avatar.OnLocalAvatarClear.RemoveListener(this.OnAvatarClear);
             GameEvents.OnIKScaling.RemoveListener(this.OnIKScaling);
             GameEvents.OnWorldPreSpawn.RemoveListener(this.OnWorldPreSpawn);
             GameEvents.OnSeatPreSit.RemoveListener(this.OnSeatPreSit);
@@ -126,53 +127,67 @@ namespace ml_ppu
             }
         }
 
-        void OnAvatarSetup()
+        void OnAvatarSetup(CVRAvatar p_avatar)
         {
-            Animator l_animator = PlayerSetup.Instance.Animator;
-            if((l_animator != null) && l_animator.isHuman)
+            try
             {
-                IKSystem.Instance.SetAvatarPose(IKSystem.AvatarPose.TPose);
-                PlayerSetup.Instance.AvatarTransform.localPosition = Vector3.zero;
-                PlayerSetup.Instance.AvatarTransform.localRotation = Quaternion.identity;
-
-                m_hips = l_animator.GetBoneTransform(HumanBodyBones.Hips);
-                m_armLeft = l_animator.GetBoneTransform(HumanBodyBones.LeftUpperArm);
-                m_armRight = l_animator.GetBoneTransform(HumanBodyBones.RightUpperArm);
-
-                if((m_hips != null) && (m_armLeft != null) && (m_armRight != null))
+                Animator l_animator = PlayerSetup.Instance.Animator;
+                if((l_animator != null) && l_animator.isHuman)
                 {
-                    Matrix4x4 l_avatarMatInv = PlayerSetup.Instance.AvatarTransform.GetMatrix().inverse;
-                    Vector3 l_hipsPos = (l_avatarMatInv * m_hips.GetMatrix()).GetPosition();
-                    Vector3 l_armPos = (l_avatarMatInv * m_armLeft.GetMatrix()).GetPosition();
+                    IKSystem.Instance.SetAvatarPose(IKSystem.AvatarPose.TPose);
+                    PlayerSetup.Instance.AvatarTransform.localPosition = Vector3.zero;
+                    PlayerSetup.Instance.AvatarTransform.localRotation = Quaternion.identity;
 
-                    m_collider = new GameObject("[Collider]").AddComponent<CapsuleCollider>();
-                    m_collider.gameObject.layer = CVRLayers.PlayerClone;
-                    m_collider.transform.parent = this.transform;
-                    m_collider.isTrigger = true;
-                    m_collider.height = Vector3.Distance(l_hipsPos, new Vector3(0f, l_armPos.y, l_armPos.z));
-                    m_collider.radius = new Vector2(l_armPos.x, l_armPos.z).magnitude;
-                    m_collider.center = new Vector3(0f, m_collider.height * 0.5f, 0f);
-                    m_collider.gameObject.AddComponent<GrabDetector>();
+                    m_hips = l_animator.GetBoneTransform(HumanBodyBones.Hips);
+                    m_armLeft = l_animator.GetBoneTransform(HumanBodyBones.LeftUpperArm);
+                    m_armRight = l_animator.GetBoneTransform(HumanBodyBones.RightUpperArm);
 
-                    m_ready = true;
+                    if((m_hips != null) && (m_armLeft != null) && (m_armRight != null))
+                    {
+                        Matrix4x4 l_avatarMatInv = PlayerSetup.Instance.AvatarTransform.GetMatrix().inverse;
+                        Vector3 l_hipsPos = (l_avatarMatInv * m_hips.GetMatrix()).GetPosition();
+                        Vector3 l_armPos = (l_avatarMatInv * m_armLeft.GetMatrix()).GetPosition();
+
+                        m_collider = new GameObject("[Collider]").AddComponent<CapsuleCollider>();
+                        m_collider.gameObject.layer = CVRLayers.PlayerClone;
+                        m_collider.transform.parent = this.transform;
+                        m_collider.isTrigger = true;
+                        m_collider.height = Vector3.Distance(l_hipsPos, new Vector3(0f, l_armPos.y, l_armPos.z));
+                        m_collider.radius = new Vector2(l_armPos.x, l_armPos.z).magnitude;
+                        m_collider.center = new Vector3(0f, m_collider.height * 0.5f, 0f);
+                        m_collider.gameObject.AddComponent<GrabDetector>();
+
+                        m_ready = true;
+                    }
                 }
+            }
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
             }
         }
 
-        void OnAvatarClear()
+        void OnAvatarClear(CVRAvatar p_avatar)
         {
-            m_ready = false;
-            m_held = false;
-
-            if(m_collider != null)
+            try
             {
-                Destroy(m_collider.gameObject);
-                m_collider = null;
+                m_ready = false;
+                m_held = false;
+
+                if(m_collider != null)
+                {
+                    Destroy(m_collider.gameObject);
+                    m_collider = null;
+                }
+                m_holderPointA = null;
+                m_holderPointerA = null;
+                m_holderPointB = null;
+                m_holderPointerB = null;
             }
-            m_holderPointA = null;
-            m_holderPointerA = null;
-            m_holderPointB = null;
-            m_holderPointerB = null;
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
         }
 
         void OnIKScaling(float p_scale)

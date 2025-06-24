@@ -23,8 +23,6 @@ namespace ml_lme
             public void Invoke(T1 p_obj) => m_action?.Invoke(p_obj);
         }
 
-        public static readonly GameEvent OnAvatarSetup = new GameEvent();
-        public static readonly GameEvent OnAvatarClear = new GameEvent();
         public static readonly GameEvent OnAvatarReuse = new GameEvent();
         public static readonly GameEvent<float> OnRayScale = new GameEvent<float>();
         public static readonly GameEvent<float> OnPlayspaceScale = new GameEvent<float>();
@@ -34,18 +32,6 @@ namespace ml_lme
         {
             try
             {
-                p_instance.Patch(
-                    typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.ClearAvatar), BindingFlags.Instance | BindingFlags.Public),
-                    null,
-                    new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnAvatarClear_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
-                );
-
-                p_instance.Patch(
-                    typeof(PlayerSetup).GetMethod(nameof(PlayerSetup.SetupAvatar), BindingFlags.Instance | BindingFlags.Public),
-                    null,
-                    new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnSetupAvatar_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
-                );
-
                 p_instance.Patch(
                     typeof(IKSystem).GetMethod(nameof(IKSystem.ReinitializeAvatar), BindingFlags.Instance | BindingFlags.Public),
                     null,
@@ -69,30 +55,6 @@ namespace ml_lme
                     null,
                     new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnPickupGrab_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
                 );
-            }
-            catch(Exception e)
-            {
-                MelonLoader.MelonLogger.Error(e);
-            }
-        }
-
-        static void OnAvatarClear_Postfix()
-        {
-            try
-            {
-                OnAvatarClear.Invoke();
-            }
-            catch(Exception e)
-            {
-                MelonLoader.MelonLogger.Error(e);
-            }
-        }
-
-        static void OnSetupAvatar_Postfix()
-        {
-            try
-            {
-                OnAvatarSetup.Invoke();
             }
             catch(Exception e)
             {

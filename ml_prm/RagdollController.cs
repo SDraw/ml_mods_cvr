@@ -2,6 +2,7 @@
 using ABI_RC.Core;
 using ABI_RC.Core.InteractionSystem;
 using ABI_RC.Core.Player;
+using ABI_RC.Systems.GameEventSystem;
 using ABI_RC.Systems.IK;
 using ABI_RC.Systems.IK.SubSystems;
 using ABI_RC.Systems.InputManagement;
@@ -99,8 +100,8 @@ namespace ml_prm
             Settings.OnFallDamageChanged.AddListener(this.OnFallDamageChanged);
             Settings.OnGestureGrabChanged.AddListener(this.OnGestureGrabChanged);
 
-            GameEvents.OnAvatarClear.AddListener(this.OnAvatarClear);
-            GameEvents.OnAvatarSetup.AddListener(this.OnAvatarSetup);
+            CVRGameEventSystem.Avatar.OnLocalAvatarClear.AddListener(this.OnAvatarClear);
+            CVRGameEventSystem.Avatar.OnLocalAvatarLoad.AddListener(this.OnAvatarSetup);
             GameEvents.OnAvatarPreReuse.AddListener(this.OnAvatarPreReuse);
             GameEvents.OnAvatarPostReuse.AddListener(this.OnAvatarPostReuse);
             GameEvents.OnIKScaling.AddListener(this.OnAvatarScaling);
@@ -148,8 +149,8 @@ namespace ml_prm
             Settings.OnFallDamageChanged.RemoveListener(this.OnFallDamageChanged);
             Settings.OnGestureGrabChanged.RemoveListener(this.OnGestureGrabChanged);
 
-            GameEvents.OnAvatarClear.RemoveListener(this.OnAvatarClear);
-            GameEvents.OnAvatarSetup.RemoveListener(this.OnAvatarSetup);
+            CVRGameEventSystem.Avatar.OnLocalAvatarClear.RemoveListener(this.OnAvatarClear);
+            CVRGameEventSystem.Avatar.OnLocalAvatarLoad.RemoveListener(this.OnAvatarSetup);
             GameEvents.OnAvatarPreReuse.RemoveListener(this.OnAvatarPreReuse);
             GameEvents.OnAvatarPostReuse.RemoveListener(this.OnAvatarPostReuse);
             GameEvents.OnIKScaling.RemoveListener(this.OnAvatarScaling);
@@ -252,129 +253,143 @@ namespace ml_prm
         }
 
         // Game events
-        void OnAvatarClear()
+        void OnAvatarClear(CVRAvatar p_avatar)
         {
-            if(m_initTask != null)
+            try
             {
-                StopCoroutine(m_initTask);
-                m_initTask = null;
-            }
-
-            if(m_ragdolled)
-            {
-                TryRestoreMovement();
-                BodySystem.TrackingPositionWeight = 1f;
-            }
-
-            if(m_puppetRoot != null)
-                Object.Destroy(m_puppetRoot.gameObject);
-            m_puppetRoot = null;
-
-            m_avatarTransform = null;
-            m_hips = null;
-            m_vrIK = null;
-            m_applyHipsPosition = false;
-            m_ragdolled = false;
-            m_avatarReady = false;
-            m_avatarRagdollToggle = null;
-            m_ragdolledParameter = null;
-            m_puppetReferences = new BipedRagdollReferences();
-            m_ragdollBodyHandlers.Clear();
-            m_boneLinks.Clear();
-            m_jointAnchors.Clear();
-            m_reachedGround = true;
-            m_groundedTime = 0f;
-            m_downTime = float.MinValue;
-            m_puppet.localScale = Vector3.one;
-            m_inAir = false;
-        }
-
-        void OnAvatarSetup()
-        {
-            if(PlayerSetup.Instance.Animator.isHuman)
-            {
-                m_avatarTransform = PlayerSetup.Instance.AvatarTransform;
-                m_hips = PlayerSetup.Instance.Animator.GetBoneTransform(HumanBodyBones.Hips);
-                Utils.SetAvatarTPose();
-
-                BipedRagdollReferences l_avatarReferences = BipedRagdollReferences.FromAvatar(PlayerSetup.Instance.Animator);
-
-                m_puppetRoot = new GameObject("Root").transform;
-                m_puppetRoot.gameObject.layer = CVRLayers.PlayerClone;
-                m_puppetRoot.parent = m_puppet;
-                m_puppetRoot.position = m_avatarTransform.position;
-                m_puppetRoot.rotation = m_avatarTransform.rotation;
-
-                m_puppetReferences.root = m_puppetRoot;
-                m_puppetReferences.hips = CloneTransform(l_avatarReferences.hips, m_puppetReferences.root, "Hips");
-                m_puppetReferences.spine = CloneTransform(l_avatarReferences.spine, m_puppetReferences.hips, "Spine");
-
-                if(l_avatarReferences.chest != null)
-                    m_puppetReferences.chest = CloneTransform(l_avatarReferences.chest, m_puppetReferences.spine, "Chest");
-
-                m_puppetReferences.head = CloneTransform(l_avatarReferences.head, (m_puppetReferences.chest != null) ? m_puppetReferences.chest : m_puppetReferences.spine, "Head");
-
-                m_puppetReferences.leftUpperArm = CloneTransform(l_avatarReferences.leftUpperArm, (m_puppetReferences.chest != null) ? m_puppetReferences.chest : m_puppetReferences.spine, "LeftUpperArm");
-                m_puppetReferences.leftLowerArm = CloneTransform(l_avatarReferences.leftLowerArm, m_puppetReferences.leftUpperArm, "LeftLowerArm");
-                m_puppetReferences.leftHand = CloneTransform(l_avatarReferences.leftHand, m_puppetReferences.leftLowerArm, "LeftHand");
-
-                m_puppetReferences.rightUpperArm = CloneTransform(l_avatarReferences.rightUpperArm, (m_puppetReferences.chest != null) ? m_puppetReferences.chest : m_puppetReferences.spine, "RightUpperArm");
-                m_puppetReferences.rightLowerArm = CloneTransform(l_avatarReferences.rightLowerArm, m_puppetReferences.rightUpperArm, "RightLowerArm");
-                m_puppetReferences.rightHand = CloneTransform(l_avatarReferences.rightHand, m_puppetReferences.rightLowerArm, "RightHand");
-
-                m_puppetReferences.leftUpperLeg = CloneTransform(l_avatarReferences.leftUpperLeg, m_puppetReferences.hips, "LeftUpperLeg");
-                m_puppetReferences.leftLowerLeg = CloneTransform(l_avatarReferences.leftLowerLeg, m_puppetReferences.leftUpperLeg, "LeftLowerLeg");
-                m_puppetReferences.leftFoot = CloneTransform(l_avatarReferences.leftFoot, m_puppetReferences.leftLowerLeg, "LeftFoot");
-
-                m_puppetReferences.rightUpperLeg = CloneTransform(l_avatarReferences.rightUpperLeg, m_puppetReferences.hips, "RightUpperLeg");
-                m_puppetReferences.rightLowerLeg = CloneTransform(l_avatarReferences.rightLowerLeg, m_puppetReferences.rightUpperLeg, "RightLowerLeg");
-                m_puppetReferences.rightFoot = CloneTransform(l_avatarReferences.rightFoot, m_puppetReferences.rightLowerLeg, "RightFoot");
-
-                // Move to world origin to overcome possible issues
-                m_puppetRoot.position = Vector3.zero;
-                m_puppetRoot.rotation = Quaternion.identity;
-
-                BipedRagdollCreator.Options l_options = BipedRagdollCreator.AutodetectOptions(m_puppetReferences);
-                l_options.joints = RagdollCreator.JointType.Character;
-                BipedRagdollCreator.Create(m_puppetReferences, l_options);
-
-                Transform[] l_puppetTransforms = m_puppetReferences.GetRagdollTransforms();
-                Transform[] l_avatarTransforms = l_avatarReferences.GetRagdollTransforms();
-                Transform[] l_influencedTransforms = new Transform[] { m_puppetReferences.hips, m_puppetReferences.spine, m_puppetReferences.chest };
-                for(int i = 0; i < l_puppetTransforms.Length; i++)
+                if(m_initTask != null)
                 {
-                    if(l_puppetTransforms[i] != null)
-                    {
-                        CharacterJoint l_joint = l_puppetTransforms[i].GetComponent<CharacterJoint>();
-                        if(l_joint != null)
-                        {
-                            l_joint.enablePreprocessing = false;
-                            l_joint.enableProjection = true;
-                            m_jointAnchors.Add(System.Tuple.Create(l_joint, l_joint.connectedAnchor));
-                        }
-
-                        Rigidbody l_body = l_puppetTransforms[i].GetComponent<Rigidbody>();
-                        Collider l_collider = l_puppetTransforms[i].GetComponent<Collider>();
-                        if((l_body != null) && (l_collider != null))
-                        {
-                            RagdollBodypartHandler l_handler = l_puppetTransforms[i].gameObject.AddComponent<RagdollBodypartHandler>();
-                            l_handler.SetInfuencerUsage(Utils.IsInEnumeration(l_puppetTransforms[i], l_influencedTransforms));
-                            m_ragdollBodyHandlers.Add(l_handler);
-                        }
-
-                        if(l_avatarTransforms[i] != null)
-                            m_boneLinks.Add(System.Tuple.Create(l_puppetTransforms[i], l_avatarTransforms[i]));
-                    }
+                    StopCoroutine(m_initTask);
+                    m_initTask = null;
                 }
 
-                m_vrIK = PlayerSetup.Instance.AvatarObject.GetComponent<VRIK>();
-                if(m_vrIK != null)
-                    m_vrIK.onPostSolverUpdate.AddListener(this.OnIKPostSolverUpdate);
+                if(m_ragdolled)
+                {
+                    TryRestoreMovement();
+                    BodySystem.TrackingPositionWeight = 1f;
+                }
 
-                m_avatarRagdollToggle = PlayerSetup.Instance.AvatarObject.GetComponentInChildren<RagdollToggle>(true);
-                m_ragdolledParameter = new AvatarParameter("Ragdolled", PlayerSetup.Instance.AnimatorManager);
+                if(m_puppetRoot != null)
+                    Object.Destroy(m_puppetRoot.gameObject);
+                m_puppetRoot = null;
 
-                m_initTask = StartCoroutine(WaitForBodyHandlers());
+                m_avatarTransform = null;
+                m_hips = null;
+                m_vrIK = null;
+                m_applyHipsPosition = false;
+                m_ragdolled = false;
+                m_avatarReady = false;
+                m_avatarRagdollToggle = null;
+                m_ragdolledParameter = null;
+                m_puppetReferences = new BipedRagdollReferences();
+                m_ragdollBodyHandlers.Clear();
+                m_boneLinks.Clear();
+                m_jointAnchors.Clear();
+                m_reachedGround = true;
+                m_groundedTime = 0f;
+                m_downTime = float.MinValue;
+                m_puppet.localScale = Vector3.one;
+                m_inAir = false;
+            }
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
+        }
+
+        void OnAvatarSetup(CVRAvatar p_avatar)
+        {
+            try
+            {
+                if(PlayerSetup.Instance.Animator.isHuman)
+                {
+                    m_avatarTransform = PlayerSetup.Instance.AvatarTransform;
+                    m_hips = PlayerSetup.Instance.Animator.GetBoneTransform(HumanBodyBones.Hips);
+                    Utils.SetAvatarTPose();
+
+                    BipedRagdollReferences l_avatarReferences = BipedRagdollReferences.FromAvatar(PlayerSetup.Instance.Animator);
+
+                    m_puppetRoot = new GameObject("Root").transform;
+                    m_puppetRoot.gameObject.layer = CVRLayers.PlayerClone;
+                    m_puppetRoot.parent = m_puppet;
+                    m_puppetRoot.position = m_avatarTransform.position;
+                    m_puppetRoot.rotation = m_avatarTransform.rotation;
+
+                    m_puppetReferences.root = m_puppetRoot;
+                    m_puppetReferences.hips = CloneTransform(l_avatarReferences.hips, m_puppetReferences.root, "Hips");
+                    m_puppetReferences.spine = CloneTransform(l_avatarReferences.spine, m_puppetReferences.hips, "Spine");
+
+                    if(l_avatarReferences.chest != null)
+                        m_puppetReferences.chest = CloneTransform(l_avatarReferences.chest, m_puppetReferences.spine, "Chest");
+
+                    m_puppetReferences.head = CloneTransform(l_avatarReferences.head, (m_puppetReferences.chest != null) ? m_puppetReferences.chest : m_puppetReferences.spine, "Head");
+
+                    m_puppetReferences.leftUpperArm = CloneTransform(l_avatarReferences.leftUpperArm, (m_puppetReferences.chest != null) ? m_puppetReferences.chest : m_puppetReferences.spine, "LeftUpperArm");
+                    m_puppetReferences.leftLowerArm = CloneTransform(l_avatarReferences.leftLowerArm, m_puppetReferences.leftUpperArm, "LeftLowerArm");
+                    m_puppetReferences.leftHand = CloneTransform(l_avatarReferences.leftHand, m_puppetReferences.leftLowerArm, "LeftHand");
+
+                    m_puppetReferences.rightUpperArm = CloneTransform(l_avatarReferences.rightUpperArm, (m_puppetReferences.chest != null) ? m_puppetReferences.chest : m_puppetReferences.spine, "RightUpperArm");
+                    m_puppetReferences.rightLowerArm = CloneTransform(l_avatarReferences.rightLowerArm, m_puppetReferences.rightUpperArm, "RightLowerArm");
+                    m_puppetReferences.rightHand = CloneTransform(l_avatarReferences.rightHand, m_puppetReferences.rightLowerArm, "RightHand");
+
+                    m_puppetReferences.leftUpperLeg = CloneTransform(l_avatarReferences.leftUpperLeg, m_puppetReferences.hips, "LeftUpperLeg");
+                    m_puppetReferences.leftLowerLeg = CloneTransform(l_avatarReferences.leftLowerLeg, m_puppetReferences.leftUpperLeg, "LeftLowerLeg");
+                    m_puppetReferences.leftFoot = CloneTransform(l_avatarReferences.leftFoot, m_puppetReferences.leftLowerLeg, "LeftFoot");
+
+                    m_puppetReferences.rightUpperLeg = CloneTransform(l_avatarReferences.rightUpperLeg, m_puppetReferences.hips, "RightUpperLeg");
+                    m_puppetReferences.rightLowerLeg = CloneTransform(l_avatarReferences.rightLowerLeg, m_puppetReferences.rightUpperLeg, "RightLowerLeg");
+                    m_puppetReferences.rightFoot = CloneTransform(l_avatarReferences.rightFoot, m_puppetReferences.rightLowerLeg, "RightFoot");
+
+                    // Move to world origin to overcome possible issues
+                    m_puppetRoot.position = Vector3.zero;
+                    m_puppetRoot.rotation = Quaternion.identity;
+
+                    BipedRagdollCreator.Options l_options = BipedRagdollCreator.AutodetectOptions(m_puppetReferences);
+                    l_options.joints = RagdollCreator.JointType.Character;
+                    BipedRagdollCreator.Create(m_puppetReferences, l_options);
+
+                    Transform[] l_puppetTransforms = m_puppetReferences.GetRagdollTransforms();
+                    Transform[] l_avatarTransforms = l_avatarReferences.GetRagdollTransforms();
+                    Transform[] l_influencedTransforms = new Transform[] { m_puppetReferences.hips, m_puppetReferences.spine, m_puppetReferences.chest };
+                    for(int i = 0; i < l_puppetTransforms.Length; i++)
+                    {
+                        if(l_puppetTransforms[i] != null)
+                        {
+                            CharacterJoint l_joint = l_puppetTransforms[i].GetComponent<CharacterJoint>();
+                            if(l_joint != null)
+                            {
+                                l_joint.enablePreprocessing = false;
+                                l_joint.enableProjection = true;
+                                m_jointAnchors.Add(System.Tuple.Create(l_joint, l_joint.connectedAnchor));
+                            }
+
+                            Rigidbody l_body = l_puppetTransforms[i].GetComponent<Rigidbody>();
+                            Collider l_collider = l_puppetTransforms[i].GetComponent<Collider>();
+                            if((l_body != null) && (l_collider != null))
+                            {
+                                RagdollBodypartHandler l_handler = l_puppetTransforms[i].gameObject.AddComponent<RagdollBodypartHandler>();
+                                l_handler.SetInfuencerUsage(Utils.IsInEnumeration(l_puppetTransforms[i], l_influencedTransforms));
+                                m_ragdollBodyHandlers.Add(l_handler);
+                            }
+
+                            if(l_avatarTransforms[i] != null)
+                                m_boneLinks.Add(System.Tuple.Create(l_puppetTransforms[i], l_avatarTransforms[i]));
+                        }
+                    }
+
+                    m_vrIK = PlayerSetup.Instance.AvatarObject.GetComponent<VRIK>();
+                    if(m_vrIK != null)
+                        m_vrIK.onPostSolverUpdate.AddListener(this.OnIKPostSolverUpdate);
+
+                    m_avatarRagdollToggle = PlayerSetup.Instance.AvatarObject.GetComponentInChildren<RagdollToggle>(true);
+                    m_ragdolledParameter = new AvatarParameter("Ragdolled", PlayerSetup.Instance.AnimatorManager);
+
+                    m_initTask = StartCoroutine(WaitForBodyHandlers());
+                }
+            }
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
             }
         }
 

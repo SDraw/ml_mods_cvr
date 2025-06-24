@@ -2,6 +2,7 @@
 using ABI_RC.Core.Player;
 using ABI_RC.Core.Player.EyeMovement;
 using ABI_RC.Systems.FaceTracking;
+using ABI_RC.Systems.GameEventSystem;
 using ABI_RC.Systems.IK;
 using ABI_RC.Systems.VRModeSwitch;
 using RootMotion.FinalIK;
@@ -69,8 +70,8 @@ namespace ml_dht
             Settings.OnHeadTrackingChanged.AddListener(this.OnEnabledOrHeadTrackingChanged);
             Settings.OnSmoothingChanged.AddListener(this.OnSmoothingChanged);
 
-            GameEvents.OnAvatarClear.AddListener(this.OnAvatarClear);
-            GameEvents.OnAvatarSetup.AddListener(this.OnAvatarSetup);
+            CVRGameEventSystem.Avatar.OnLocalAvatarLoad.AddListener(this.OnAvatarClear);
+            CVRGameEventSystem.Avatar.OnLocalAvatarClear.AddListener(this.OnAvatarSetup);
             GameEvents.OnAvatarReuse.AddListener(this.OnAvatarReuse);
             GameEvents.OnEyeControllerUpdate.AddListener(this.OnEyeControllerUpdate);
             GameEvents.OnFaceTrackingUpdate.AddListener(this.UpdateFaceTracking);
@@ -89,8 +90,8 @@ namespace ml_dht
             Settings.OnHeadTrackingChanged.RemoveListener(this.OnEnabledOrHeadTrackingChanged);
             Settings.OnSmoothingChanged.RemoveListener(this.OnSmoothingChanged);
 
-            GameEvents.OnAvatarClear.RemoveListener(this.OnAvatarClear);
-            GameEvents.OnAvatarSetup.RemoveListener(this.OnAvatarSetup);
+            CVRGameEventSystem.Avatar.OnLocalAvatarLoad.RemoveListener(this.OnAvatarClear);
+            CVRGameEventSystem.Avatar.OnLocalAvatarClear.RemoveListener(this.OnAvatarSetup);
             GameEvents.OnAvatarReuse.RemoveListener(this.OnAvatarReuse);
             GameEvents.OnEyeControllerUpdate.RemoveListener(this.OnEyeControllerUpdate);
             GameEvents.OnFaceTrackingUpdate.RemoveListener(this.UpdateFaceTracking);
@@ -137,33 +138,47 @@ namespace ml_dht
         }
 
         // Game events
-        internal void OnAvatarSetup()
+        internal void OnAvatarSetup(CVRAvatar p_avatar)
         {
-            m_camera = PlayerSetup.Instance.activeCam.transform;
-            m_avatarDescriptor = PlayerSetup.Instance.AvatarObject.GetComponent<CVRAvatar>();
-
-            if(PlayerSetup.Instance.Animator.isHuman)
+            try
             {
-                IKSystem.Instance.SetAvatarPose(IKSystem.AvatarPose.TPose);
-                PlayerSetup.Instance.AvatarTransform.localPosition = Vector3.zero;
-                PlayerSetup.Instance.AvatarTransform.localRotation = Quaternion.identity;
+                m_camera = PlayerSetup.Instance.activeCam.transform;
+                m_avatarDescriptor = PlayerSetup.Instance.AvatarObject.GetComponent<CVRAvatar>();
 
-                m_headBone = PlayerSetup.Instance.Animator.GetBoneTransform(HumanBodyBones.Head);
-                if(m_headBone != null)
-                    m_bindRotation = Quaternion.Inverse(m_avatarDescriptor.transform.rotation) * m_headBone.rotation;
+                if(PlayerSetup.Instance.Animator.isHuman)
+                {
+                    IKSystem.Instance.SetAvatarPose(IKSystem.AvatarPose.TPose);
+                    PlayerSetup.Instance.AvatarTransform.localPosition = Vector3.zero;
+                    PlayerSetup.Instance.AvatarTransform.localRotation = Quaternion.identity;
 
-                m_lookIK = PlayerSetup.Instance.AvatarObject.GetComponent<LookAtIK>();
-                if(m_lookIK != null)
-                    m_lookIK.onPostSolverUpdate.AddListener(this.OnLookIKPostUpdate);
+                    m_headBone = PlayerSetup.Instance.Animator.GetBoneTransform(HumanBodyBones.Head);
+                    if(m_headBone != null)
+                        m_bindRotation = Quaternion.Inverse(m_avatarDescriptor.transform.rotation) * m_headBone.rotation;
+
+                    m_lookIK = PlayerSetup.Instance.AvatarObject.GetComponent<LookAtIK>();
+                    if(m_lookIK != null)
+                        m_lookIK.onPostSolverUpdate.AddListener(this.OnLookIKPostUpdate);
+                }
+            }
+            catch(Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
             }
         }
-        void OnAvatarClear()
+        void OnAvatarClear(CVRAvatar p_avatar)
         {
-            m_avatarDescriptor = null;
-            m_lookIK = null;
-            m_headBone = null;
-            m_lastHeadRotation = Quaternion.identity;
-            m_bindRotation = Quaternion.identity;
+            try
+            {
+                m_avatarDescriptor = null;
+                m_lookIK = null;
+                m_headBone = null;
+                m_lastHeadRotation = Quaternion.identity;
+                m_bindRotation = Quaternion.identity;
+            }
+            catch(Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
         }
         void OnAvatarReuse()
         {

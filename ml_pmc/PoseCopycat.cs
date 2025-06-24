@@ -1,5 +1,7 @@
-﻿using ABI_RC.Core.Networking.IO.Social;
+﻿using ABI.CCK.Components;
+using ABI_RC.Core.Networking.IO.Social;
 using ABI_RC.Core.Player;
+using ABI_RC.Systems.GameEventSystem;
 using ABI_RC.Systems.IK;
 using ABI_RC.Systems.IK.SubSystems;
 using ABI_RC.Systems.InputManagement;
@@ -55,8 +57,8 @@ namespace ml_pmc
 
         void Start()
         {
-            GameEvents.OnAvatarClear.AddListener(this.OnAvatarClear);
-            GameEvents.OnAvatarSetup.AddListener(this.OnAvatarSetup);
+            CVRGameEventSystem.Avatar.OnLocalAvatarClear.AddListener(this.OnAvatarClear);
+            CVRGameEventSystem.Avatar.OnLocalAvatarLoad.AddListener(this.OnAvatarSetup);
             GameEvents.OnAvatarPreReuse.AddListener(this.OnAvatarPreReuse);
             GameEvents.OnAvatarPostReuse.AddListener(this.OnAvatarPostReuse);
 
@@ -78,8 +80,8 @@ namespace ml_pmc
             m_vrIk = null;
             m_lookAtIk = null;
 
-            GameEvents.OnAvatarClear.RemoveListener(this.OnAvatarClear);
-            GameEvents.OnAvatarSetup.RemoveListener(this.OnAvatarSetup);
+            CVRGameEventSystem.Avatar.OnLocalAvatarClear.RemoveListener(this.OnAvatarClear);
+            CVRGameEventSystem.Avatar.OnLocalAvatarLoad.RemoveListener(this.OnAvatarSetup);
             GameEvents.OnAvatarPreReuse.RemoveListener(this.OnAvatarPreReuse);
             GameEvents.OnAvatarPostReuse.RemoveListener(this.OnAvatarPostReuse);
 
@@ -229,58 +231,72 @@ namespace ml_pmc
         }
 
         // Game events
-        void OnAvatarClear()
+        void OnAvatarClear(CVRAvatar p_avatar)
         {
-            if(m_active)
+            try
             {
-                RestoreIK();
-                RestoreFingerTracking();
-                OnCopycatChanged.Invoke(false);
+                if(m_active)
+                {
+                    RestoreIK();
+                    RestoreFingerTracking();
+                    OnCopycatChanged.Invoke(false);
+                }
+                m_active = false;
+
+                if(m_puppetParser != null)
+                    Object.Destroy(m_puppetParser);
+                m_puppetParser = null;
+
+                m_animator = null;
+                m_vrIk = null;
+                m_lookAtIk = null;
+
+                m_poseHandler?.Dispose();
+                m_poseHandler = null;
+
+                m_distanceLimit = float.MaxValue;
+                m_fingerTracking = false;
+                m_pose = new HumanPose();
             }
-            m_active = false;
-
-            if(m_puppetParser != null)
-                Object.Destroy(m_puppetParser);
-            m_puppetParser = null;
-
-            m_animator = null;
-            m_vrIk = null;
-            m_lookAtIk = null;
-
-            m_poseHandler?.Dispose();
-            m_poseHandler = null;
-
-            m_distanceLimit = float.MaxValue;
-            m_fingerTracking = false;
-            m_pose = new HumanPose();
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
         }
 
-        void OnAvatarSetup()
+        void OnAvatarSetup(CVRAvatar p_avatar)
         {
-            m_inVr = Utils.IsInVR();
-            m_animator = PlayerSetup.Instance.Animator;
-            m_vrIk = PlayerSetup.Instance.AvatarObject.GetComponent<VRIK>();
-            m_lookAtIk = PlayerSetup.Instance.AvatarObject.GetComponent<LookAtIK>();
-
-            if((m_animator != null) && m_animator.isHuman)
+            try
             {
-                m_poseHandler = new HumanPoseHandler(m_animator.avatar, m_animator.transform);
-                m_poseHandler.GetHumanPose(ref m_pose);
+                m_inVr = Utils.IsInVR();
+                m_animator = PlayerSetup.Instance.Animator;
+                m_vrIk = PlayerSetup.Instance.AvatarObject.GetComponent<VRIK>();
+                m_lookAtIk = PlayerSetup.Instance.AvatarObject.GetComponent<LookAtIK>();
 
-                if(m_vrIk != null)
+                if((m_animator != null) && m_animator.isHuman)
                 {
-                    m_vrIk.onPreSolverUpdate.AddListener(this.OnVRIKPreUpdate);
-                    m_vrIk.onPostSolverUpdate.AddListener(this.OnVRIKPostUpdate);
-                }
+                    m_poseHandler = new HumanPoseHandler(m_animator.avatar, m_animator.transform);
+                    m_poseHandler.GetHumanPose(ref m_pose);
 
-                if(m_lookAtIk != null)
-                {
-                    m_lookAtIk.onPreSolverUpdate.AddListener(this.OnLookAtIKPreUpdate);
-                    m_lookAtIk.onPostSolverUpdate.AddListener(this.OnLookAtIKPostUpdate);
+                    if(m_vrIk != null)
+                    {
+                        m_vrIk.onPreSolverUpdate.AddListener(this.OnVRIKPreUpdate);
+                        m_vrIk.onPostSolverUpdate.AddListener(this.OnVRIKPostUpdate);
+                    }
+
+                    if(m_lookAtIk != null)
+                    {
+                        m_lookAtIk.onPreSolverUpdate.AddListener(this.OnLookAtIKPreUpdate);
+                        m_lookAtIk.onPostSolverUpdate.AddListener(this.OnLookAtIKPostUpdate);
+                    }
                 }
+                else
+                    m_animator = null;
             }
-            else
-                m_animator = null;
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
         }
 
         void OnAvatarPreReuse()

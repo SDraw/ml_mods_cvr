@@ -1,6 +1,7 @@
 ﻿using ABI.CCK.Components;
 using ABI_RC.Core.InteractionSystem;
 using ABI_RC.Core.Player;
+using ABI_RC.Systems.GameEventSystem;
 using ABI_RC.Systems.VRModeSwitch;
 using RootMotion.FinalIK;
 using System.Collections;
@@ -100,8 +101,8 @@ namespace ml_pam
             Settings.OnLeadingHandChanged.AddListener(this.OnLeadingHandChanged);
             Settings.OnHandsExtensionChanged.AddListener(this.OnHandsExtensionChanged);
 
-            GameEvents.OnAvatarClear.AddListener(this.OnAvatarClear);
-            GameEvents.OnAvatarSetup.AddListener(this.OnAvatarSetup);
+            CVRGameEventSystem.Avatar.OnLocalAvatarClear.AddListener(this.OnAvatarClear);
+            CVRGameEventSystem.Avatar.OnLocalAvatarLoad.AddListener(this.OnAvatarSetup);
             GameEvents.OnAvatarReuse.AddListener(this.OnAvatarReuse);
             GameEvents.OnIKScaling.AddListener(this.OnIKScaling);
             GameEvents.OnPickupGrab.AddListener(this.OnPickupGrab);
@@ -149,10 +150,10 @@ namespace ml_pam
             Settings.OnLeadingHandChanged.RemoveListener(this.OnLeadingHandChanged);
             Settings.OnHandsExtensionChanged.RemoveListener(this.OnHandsExtensionChanged);
 
-            GameEvents.OnAvatarClear.RemoveListener(this.OnAvatarClear);
-            GameEvents.OnAvatarSetup.RemoveListener(this.OnAvatarSetup);
+            CVRGameEventSystem.Avatar.OnLocalAvatarClear.RemoveListener(this.OnAvatarClear);
+            CVRGameEventSystem.Avatar.OnLocalAvatarLoad.RemoveListener(this.OnAvatarSetup);
             GameEvents.OnAvatarReuse.RemoveListener(this.OnAvatarReuse);
-            GameEvents.OnIKScaling.AddListener(this.OnIKScaling);
+            GameEvents.OnIKScaling.RemoveListener(this.OnIKScaling);
             GameEvents.OnPickupGrab.RemoveListener(this.OnPickupGrab);
             GameEvents.OnPickupDrop.RemoveListener(this.OnPickupDrop);
 
@@ -341,66 +342,80 @@ namespace ml_pam
         }
 
         // Game events
-        void OnAvatarClear()
+        void OnAvatarClear(CVRAvatar p_avatar)
         {
-            m_vrIK = null;
-            m_armIKLeft = null;
-            m_armIKRight = null;
-            m_armsLength.Set(0f, 0f, 0f, 0f);
-            m_leftHandParameter = null;
-            m_rightHandParameter = null;
+            try
+            {
+                m_vrIK = null;
+                m_armIKLeft = null;
+                m_armIKRight = null;
+                m_armsLength.Set(0f, 0f, 0f, 0f);
+                m_leftHandParameter = null;
+                m_rightHandParameter = null;
+            }
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
         }
 
-        void OnAvatarSetup()
+        void OnAvatarSetup(CVRAvatar p_avatar)
         {
-            m_camera = PlayerSetup.Instance.activeCam.transform;
-
-            if(PlayerSetup.Instance.Animator.isHuman)
+            try
             {
-                m_vrIK = PlayerSetup.Instance.Animator.GetComponent<VRIK>();
-                Utils.SetAvatarTPose();
+                m_camera = PlayerSetup.Instance.activeCam.transform;
 
-                Animator l_animator = PlayerSetup.Instance.Animator;
-                Matrix4x4 l_avatarMatrixInv = l_animator.transform.GetMatrix().inverse; // Animator and avatar are on same game object
+                if(PlayerSetup.Instance.Animator.isHuman)
+                {
+                    m_vrIK = PlayerSetup.Instance.Animator.GetComponent<VRIK>();
+                    Utils.SetAvatarTPose();
 
-                Transform l_leftHand = l_animator.GetBoneTransform(HumanBodyBones.LeftHand);
-                if(l_leftHand != null)
-                    m_leftRotationTarget.localRotation = ms_offsetLeft * (l_avatarMatrixInv * l_leftHand.GetMatrix()).rotation;
-                Transform l_rightHand = l_animator.GetBoneTransform(HumanBodyBones.RightHand);
-                if(l_rightHand != null)
-                    m_rightRotationTarget.localRotation = ms_offsetRight * (l_avatarMatrixInv * l_rightHand.GetMatrix()).rotation;
+                    Animator l_animator = PlayerSetup.Instance.Animator;
+                    Matrix4x4 l_avatarMatrixInv = l_animator.transform.GetMatrix().inverse; // Animator and avatar are on same game object
 
-                m_armsLength.x = GetChainLength(new Transform[]{
+                    Transform l_leftHand = l_animator.GetBoneTransform(HumanBodyBones.LeftHand);
+                    if(l_leftHand != null)
+                        m_leftRotationTarget.localRotation = ms_offsetLeft * (l_avatarMatrixInv * l_leftHand.GetMatrix()).rotation;
+                    Transform l_rightHand = l_animator.GetBoneTransform(HumanBodyBones.RightHand);
+                    if(l_rightHand != null)
+                        m_rightRotationTarget.localRotation = ms_offsetRight * (l_avatarMatrixInv * l_rightHand.GetMatrix()).rotation;
+
+                    m_armsLength.x = GetChainLength(new Transform[]{
                     l_animator.GetBoneTransform(HumanBodyBones.LeftUpperArm),
                     l_animator.GetBoneTransform(HumanBodyBones.LeftLowerArm),
                     l_animator.GetBoneTransform(HumanBodyBones.LeftHand)
                 });
-                m_armsLength.y = GetChainLength(new Transform[]{
+                    m_armsLength.y = GetChainLength(new Transform[]{
                     l_animator.GetBoneTransform(HumanBodyBones.RightUpperArm),
                     l_animator.GetBoneTransform(HumanBodyBones.RightLowerArm),
                     l_animator.GetBoneTransform(HumanBodyBones.RightHand)
                 });
-                m_armsLength.z = Mathf.Abs((l_avatarMatrixInv * l_animator.GetBoneTransform(HumanBodyBones.LeftUpperArm).GetMatrix()).GetPosition().x);
-                m_armsLength.w = Mathf.Abs((l_avatarMatrixInv * l_animator.GetBoneTransform(HumanBodyBones.RightUpperArm).GetMatrix()).GetPosition().x);
+                    m_armsLength.z = Mathf.Abs((l_avatarMatrixInv * l_animator.GetBoneTransform(HumanBodyBones.LeftUpperArm).GetMatrix()).GetPosition().x);
+                    m_armsLength.w = Mathf.Abs((l_avatarMatrixInv * l_animator.GetBoneTransform(HumanBodyBones.RightUpperArm).GetMatrix()).GetPosition().x);
 
-                if(!Utils.IsInVR())
-                {
-                    if(m_vrIK != null)
+                    if(!Utils.IsInVR())
                     {
-                        m_vrIK.onPreSolverUpdate.AddListener(this.OnIKPreUpdate);
-                        m_vrIK.onPostSolverUpdate.AddListener(this.OnIKPostUpdate);
+                        if(m_vrIK != null)
+                        {
+                            m_vrIK.onPreSolverUpdate.AddListener(this.OnIKPreUpdate);
+                            m_vrIK.onPostSolverUpdate.AddListener(this.OnIKPostUpdate);
+                        }
+                        else
+                            SetupArmIK();
                     }
-                    else
-                        SetupArmIK();
                 }
+
+                m_leftHandParameter = new AvatarBoolParameter("LeftHandExtended", PlayerSetup.Instance.AnimatorManager);
+                m_rightHandParameter = new AvatarBoolParameter("RightHandExtended", PlayerSetup.Instance.AnimatorManager);
+
+                OnEnabledChanged(Settings.Enabled);
+                OnGrabOffsetChanged(Settings.GrabOffset);
+                OnIKScaling(1f); // Reset scaling, game doesn't do this anymore on avatar switch
             }
-
-            m_leftHandParameter = new AvatarBoolParameter("LeftHandExtended", PlayerSetup.Instance.AnimatorManager);
-            m_rightHandParameter = new AvatarBoolParameter("RightHandExtended", PlayerSetup.Instance.AnimatorManager);
-
-            OnEnabledChanged(Settings.Enabled);
-            OnGrabOffsetChanged(Settings.GrabOffset);
-            OnIKScaling(1f); // Reset scaling, game doesn't do this anymore on avatar switch
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
         }
 
         void OnAvatarReuse()

@@ -1,5 +1,7 @@
-﻿using ABI_RC.Core.Player;
+﻿using ABI.CCK.Components;
+using ABI_RC.Core.Player;
 using ABI_RC.Core.Util.AnimatorManager;
+using ABI_RC.Systems.GameEventSystem;
 using ABI_RC.Systems.IK.SubSystems;
 using ABI_RC.Systems.Movement;
 using RootMotion.FinalIK;
@@ -59,8 +61,8 @@ namespace ml_amt
             Settings.OnProneLimitChanged.AddListener(this.OnProneLimitChanged);
             Settings.OnMassCenterChanged.AddListener(this.OnMassCenterChanged);
 
-            GameEvents.OnAvatarSetup.AddListener(this.OnAvatarSetup);
-            GameEvents.OnAvatarClear.AddListener(this.OnAvatarClear);
+            CVRGameEventSystem.Avatar.OnLocalAvatarLoad.AddListener(this.OnAvatarSetup);
+            CVRGameEventSystem.Avatar.OnLocalAvatarClear.AddListener(this.OnAvatarClear);
             GameEvents.OnAvatarReuse.AddListener(this.OnAvatarReuse);
             GameEvents.OnPlayspaceScale.AddListener(this.OnPlayspaceScale);
         }
@@ -78,8 +80,8 @@ namespace ml_amt
             Settings.OnProneLimitChanged.RemoveListener(this.OnProneLimitChanged);
             Settings.OnMassCenterChanged.RemoveListener(this.OnMassCenterChanged);
 
-            GameEvents.OnAvatarSetup.RemoveListener(this.OnAvatarSetup);
-            GameEvents.OnAvatarClear.RemoveListener(this.OnAvatarClear);
+            CVRGameEventSystem.Avatar.OnLocalAvatarLoad.RemoveListener(this.OnAvatarSetup);
+            CVRGameEventSystem.Avatar.OnLocalAvatarClear.RemoveListener(this.OnAvatarClear);
             GameEvents.OnAvatarReuse.RemoveListener(this.OnAvatarReuse);
             GameEvents.OnPlayspaceScale.RemoveListener(this.OnPlayspaceScale);
         }
@@ -96,68 +98,82 @@ namespace ml_amt
         }
 
         // Game events
-        void OnAvatarClear()
+        void OnAvatarClear(CVRAvatar p_avatar)
         {
-            m_vrIk = null;
-            m_avatarReady = false;
-            m_avatarScale = 1f;
-            m_locomotionOffset = Vector3.zero;
-            m_massCenter = Vector3.zero;
-            m_ikLimits = null;
-            m_parameters.Clear();
+            try
+            {
+                m_vrIk = null;
+                m_avatarReady = false;
+                m_avatarScale = 1f;
+                m_locomotionOffset = Vector3.zero;
+                m_massCenter = Vector3.zero;
+                m_ikLimits = null;
+                m_parameters.Clear();
 
-            BetterBetterCharacterController.Instance.avatarCrouchLimit = Mathf.Clamp01(Settings.CrouchLimit);
-            BetterBetterCharacterController.Instance.avatarProneLimit = Mathf.Clamp01(Settings.ProneLimit);
+                BetterBetterCharacterController.Instance.avatarCrouchLimit = Mathf.Clamp01(Settings.CrouchLimit);
+                BetterBetterCharacterController.Instance.avatarProneLimit = Mathf.Clamp01(Settings.ProneLimit);
+            }
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
         }
 
-        void OnAvatarSetup()
+        void OnAvatarSetup(CVRAvatar p_avatar)
         {
-            Utils.SetAvatarTPose();
-
-            m_vrIk = PlayerSetup.Instance.AvatarObject.GetComponent<VRIK>();
-            m_avatarScale = Mathf.Abs(PlayerSetup.Instance.AvatarTransform.localScale.y);
-
-            // Parse animator parameters
-            m_parameters.Add(new AvatarParameter(AvatarParameter.ParameterType.Moving, PlayerSetup.Instance.AnimatorManager));
-            m_parameters.Add(new AvatarParameter(AvatarParameter.ParameterType.MovementSpeed, PlayerSetup.Instance.AnimatorManager));
-            m_parameters.Add(new AvatarParameter(AvatarParameter.ParameterType.Velocity, PlayerSetup.Instance.AnimatorManager));
-            m_parameters.RemoveAll(p => !p.IsValid());
-
-            // Avatar custom IK limits
-            m_ikLimits = PlayerSetup.Instance.AvatarTransform.Find("[IKLimits]");
-            UpdateIKLimits();
-
-            // Apply VRIK tweaks
-            if(m_vrIk != null)
+            try
             {
-                m_locomotionOffset = m_vrIk.solver.locomotion.offset;
-                m_massCenter = m_locomotionOffset;
+                Utils.SetAvatarTPose();
 
-                if(m_vrIk.solver.HasToes())
+                m_vrIk = PlayerSetup.Instance.AvatarObject.GetComponent<VRIK>();
+                m_avatarScale = Mathf.Abs(PlayerSetup.Instance.AvatarTransform.localScale.y);
+
+                // Parse animator parameters
+                m_parameters.Add(new AvatarParameter(AvatarParameter.ParameterType.Moving, PlayerSetup.Instance.AnimatorManager));
+                m_parameters.Add(new AvatarParameter(AvatarParameter.ParameterType.MovementSpeed, PlayerSetup.Instance.AnimatorManager));
+                m_parameters.Add(new AvatarParameter(AvatarParameter.ParameterType.Velocity, PlayerSetup.Instance.AnimatorManager));
+                m_parameters.RemoveAll(p => !p.IsValid());
+
+                // Avatar custom IK limits
+                m_ikLimits = PlayerSetup.Instance.AvatarTransform.Find("[IKLimits]");
+                UpdateIKLimits();
+
+                // Apply VRIK tweaks
+                if(m_vrIk != null)
                 {
-                    Transform l_foot = PlayerSetup.Instance.Animator.GetBoneTransform(HumanBodyBones.LeftFoot);
-                    if(l_foot == null)
-                        l_foot = PlayerSetup.Instance.Animator.GetBoneTransform(HumanBodyBones.RightFoot);
+                    m_locomotionOffset = m_vrIk.solver.locomotion.offset;
+                    m_massCenter = m_locomotionOffset;
 
-                    Transform l_toe = PlayerSetup.Instance.Animator.GetBoneTransform(HumanBodyBones.LeftToes);
-                    if(l_toe == null)
-                        l_toe = PlayerSetup.Instance.Animator.GetBoneTransform(HumanBodyBones.RightToes);
-
-                    if((l_foot != null) && (l_toe != null))
+                    if(m_vrIk.solver.HasToes())
                     {
-                        Vector3 l_footPos = (PlayerSetup.Instance.AvatarTransform.GetMatrix().inverse * l_foot.GetMatrix()).GetPosition();
-                        Vector3 l_toePos = (PlayerSetup.Instance.AvatarTransform.GetMatrix().inverse * l_toe.GetMatrix()).GetPosition();
-                        m_massCenter = new Vector3(0f, 0f, l_toePos.z - l_footPos.z);
+                        Transform l_foot = PlayerSetup.Instance.Animator.GetBoneTransform(HumanBodyBones.LeftFoot);
+                        if(l_foot == null)
+                            l_foot = PlayerSetup.Instance.Animator.GetBoneTransform(HumanBodyBones.RightFoot);
+
+                        Transform l_toe = PlayerSetup.Instance.Animator.GetBoneTransform(HumanBodyBones.LeftToes);
+                        if(l_toe == null)
+                            l_toe = PlayerSetup.Instance.Animator.GetBoneTransform(HumanBodyBones.RightToes);
+
+                        if((l_foot != null) && (l_toe != null))
+                        {
+                            Vector3 l_footPos = (PlayerSetup.Instance.AvatarTransform.GetMatrix().inverse * l_foot.GetMatrix()).GetPosition();
+                            Vector3 l_toePos = (PlayerSetup.Instance.AvatarTransform.GetMatrix().inverse * l_toe.GetMatrix()).GetPosition();
+                            m_massCenter = new Vector3(0f, 0f, l_toePos.z - l_footPos.z);
+                        }
                     }
+
+                    m_vrIk.solver.locomotion.offset = (Settings.MassCenter ? m_massCenter : m_locomotionOffset);
+
+                    m_vrIk.onPreSolverUpdate.AddListener(this.OnIKPreSolverUpdate);
+                    m_vrIk.onPostSolverUpdate.AddListener(this.OnIKPostSolverUpdate);
                 }
 
-                m_vrIk.solver.locomotion.offset = (Settings.MassCenter ? m_massCenter : m_locomotionOffset);
-
-                m_vrIk.onPreSolverUpdate.AddListener(this.OnIKPreSolverUpdate);
-                m_vrIk.onPostSolverUpdate.AddListener(this.OnIKPostSolverUpdate);
+                m_avatarReady = true;
             }
-
-            m_avatarReady = true;
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
         }
 
         void OnPlayspaceScale()

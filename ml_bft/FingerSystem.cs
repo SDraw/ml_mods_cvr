@@ -1,5 +1,7 @@
-﻿using ABI_RC.Core.Player;
+﻿using ABI.CCK.Components;
+using ABI_RC.Core.Player;
 using ABI_RC.Core.Savior;
+using ABI_RC.Systems.GameEventSystem;
 using ABI_RC.Systems.IK;
 using ABI_RC.Systems.InputManagement;
 using System.Collections.Generic;
@@ -92,8 +94,8 @@ namespace ml_bft
             m_pose = new HumanPose();
             m_lastValues = new float[40];
 
-            GameEvents.OnAvatarSetup.AddListener(this.OnAvatarSetup);
-            GameEvents.OnAvatarClear.AddListener(this.OnAvatarClear);
+            CVRGameEventSystem.Avatar.OnLocalAvatarLoad.AddListener(this.OnAvatarSetup);
+            CVRGameEventSystem.Avatar.OnLocalAvatarClear.AddListener(this.OnAvatarClear);
             GameEvents.OnAvatarReuse.AddListener(this.OnAvatarReuse);
             GameEvents.OnIKSystemLateUpdate.AddListener(this.OnIKSystemLateUpdate);
         }
@@ -106,99 +108,113 @@ namespace ml_bft
             m_rightFingerOffsets.Clear();
             m_ready = false;
 
-            GameEvents.OnAvatarSetup.RemoveListener(this.OnAvatarSetup);
-            GameEvents.OnAvatarClear.RemoveListener(this.OnAvatarClear);
+            CVRGameEventSystem.Avatar.OnLocalAvatarLoad.RemoveListener(this.OnAvatarSetup);
+            CVRGameEventSystem.Avatar.OnLocalAvatarClear.RemoveListener(this.OnAvatarClear);
             GameEvents.OnAvatarReuse.RemoveListener(this.OnAvatarReuse);
             GameEvents.OnIKSystemLateUpdate.RemoveListener(this.OnIKSystemLateUpdate);
         }
 
-        internal void OnAvatarSetup()
+        internal void OnAvatarSetup(CVRAvatar p_avatar)
         {
-            Animator l_animator = PlayerSetup.Instance.Animator;
-            if(l_animator.isHuman)
+            try
             {
-                Utils.SetAvatarTPose();
-                InputHandler.Instance.Rebind(PlayerSetup.Instance.transform.rotation);
-
-                foreach(var l_tuple in ms_fingersChains)
+                Animator l_animator = PlayerSetup.Instance.Animator;
+                if(l_animator.isHuman)
                 {
-                    ReorientateTowards(
-                        PlayerSetup.Instance.transform,
-                        l_animator.GetBoneTransform(l_tuple.Item1),
-                        (l_tuple.Item2 != HumanBodyBones.LastBone) ? l_animator.GetBoneTransform(l_tuple.Item2) : null,
-                        InputHandler.Instance.GetSourceForBone(l_tuple.Item1, l_tuple.Item3),
-                        InputHandler.Instance.GetSourceForBone(l_tuple.Item2, l_tuple.Item3),
-                        PlaneType.OXZ
-                    );
-                    ReorientateTowards(
-                        PlayerSetup.Instance.transform,
-                        l_animator.GetBoneTransform(l_tuple.Item1),
-                        (l_tuple.Item2 != HumanBodyBones.LastBone) ? l_animator.GetBoneTransform(l_tuple.Item2) : null,
-                        InputHandler.Instance.GetSourceForBone(l_tuple.Item1, l_tuple.Item3),
-                        InputHandler.Instance.GetSourceForBone(l_tuple.Item2, l_tuple.Item3),
-                        PlaneType.OYX
-                    );
-                }
+                    Utils.SetAvatarTPose();
+                    InputHandler.Instance.Rebind(PlayerSetup.Instance.transform.rotation);
 
-                // Bind hands
-                m_leftHandOffset.m_source = l_animator.GetBoneTransform(HumanBodyBones.LeftHand);
-                m_leftHandOffset.m_target = InputHandler.Instance.GetSourceForBone(HumanBodyBones.LeftHand, true);
-                if((m_leftHandOffset.m_source != null) && (m_leftHandOffset.m_target != null))
-                    m_leftHandOffset.m_offset = Quaternion.Inverse(m_leftHandOffset.m_source.rotation) * m_leftHandOffset.m_target.rotation;
-
-                m_rightHandOffset.m_source = l_animator.GetBoneTransform(HumanBodyBones.RightHand);
-                m_rightHandOffset.m_target = InputHandler.Instance.GetSourceForBone(HumanBodyBones.RightHand, false);
-                if((m_rightHandOffset.m_source != null) && (m_rightHandOffset.m_target != null))
-                    m_rightHandOffset.m_offset = Quaternion.Inverse(m_rightHandOffset.m_source.rotation) * m_rightHandOffset.m_target.rotation;
-
-                // Bind fingers
-                foreach(HumanBodyBones p_bone in ms_leftFingerBones)
-                {
-                    Transform l_avatarBone = l_animator.GetBoneTransform(p_bone);
-                    Transform l_controllerBone = InputHandler.Instance.GetSourceForBone(p_bone, true);
-                    if((l_avatarBone != null) && (l_controllerBone != null))
+                    foreach(var l_tuple in ms_fingersChains)
                     {
-                        RotationOffset l_offset = new RotationOffset();
-                        l_offset.m_source = l_controllerBone;
-                        l_offset.m_target = l_avatarBone;
-                        l_offset.m_offset = Quaternion.Inverse(l_controllerBone.rotation) * l_avatarBone.rotation;
-                        m_leftFingerOffsets.Add(l_offset);
+                        ReorientateTowards(
+                            PlayerSetup.Instance.transform,
+                            l_animator.GetBoneTransform(l_tuple.Item1),
+                            (l_tuple.Item2 != HumanBodyBones.LastBone) ? l_animator.GetBoneTransform(l_tuple.Item2) : null,
+                            InputHandler.Instance.GetSourceForBone(l_tuple.Item1, l_tuple.Item3),
+                            InputHandler.Instance.GetSourceForBone(l_tuple.Item2, l_tuple.Item3),
+                            PlaneType.OXZ
+                        );
+                        ReorientateTowards(
+                            PlayerSetup.Instance.transform,
+                            l_animator.GetBoneTransform(l_tuple.Item1),
+                            (l_tuple.Item2 != HumanBodyBones.LastBone) ? l_animator.GetBoneTransform(l_tuple.Item2) : null,
+                            InputHandler.Instance.GetSourceForBone(l_tuple.Item1, l_tuple.Item3),
+                            InputHandler.Instance.GetSourceForBone(l_tuple.Item2, l_tuple.Item3),
+                            PlaneType.OYX
+                        );
                     }
-                }
-                foreach(HumanBodyBones p_bone in ms_rightFingerBones)
-                {
-                    Transform l_avatarBone = l_animator.GetBoneTransform(p_bone);
-                    Transform l_controllerBone = InputHandler.Instance.GetSourceForBone(p_bone, false);
-                    if((l_avatarBone != null) && (l_controllerBone != null))
-                    {
-                        RotationOffset l_offset = new RotationOffset();
-                        l_offset.m_source = l_controllerBone;
-                        l_offset.m_target = l_avatarBone;
-                        l_offset.m_offset = Quaternion.Inverse(l_controllerBone.rotation) * l_avatarBone.rotation;
-                        m_rightFingerOffsets.Add(l_offset);
-                    }
-                }
 
-                m_ready = ((m_leftFingerOffsets.Count > 0) || (m_rightFingerOffsets.Count > 0));
+                    // Bind hands
+                    m_leftHandOffset.m_source = l_animator.GetBoneTransform(HumanBodyBones.LeftHand);
+                    m_leftHandOffset.m_target = InputHandler.Instance.GetSourceForBone(HumanBodyBones.LeftHand, true);
+                    if((m_leftHandOffset.m_source != null) && (m_leftHandOffset.m_target != null))
+                        m_leftHandOffset.m_offset = Quaternion.Inverse(m_leftHandOffset.m_source.rotation) * m_leftHandOffset.m_target.rotation;
+
+                    m_rightHandOffset.m_source = l_animator.GetBoneTransform(HumanBodyBones.RightHand);
+                    m_rightHandOffset.m_target = InputHandler.Instance.GetSourceForBone(HumanBodyBones.RightHand, false);
+                    if((m_rightHandOffset.m_source != null) && (m_rightHandOffset.m_target != null))
+                        m_rightHandOffset.m_offset = Quaternion.Inverse(m_rightHandOffset.m_source.rotation) * m_rightHandOffset.m_target.rotation;
+
+                    // Bind fingers
+                    foreach(HumanBodyBones p_bone in ms_leftFingerBones)
+                    {
+                        Transform l_avatarBone = l_animator.GetBoneTransform(p_bone);
+                        Transform l_controllerBone = InputHandler.Instance.GetSourceForBone(p_bone, true);
+                        if((l_avatarBone != null) && (l_controllerBone != null))
+                        {
+                            RotationOffset l_offset = new RotationOffset();
+                            l_offset.m_source = l_controllerBone;
+                            l_offset.m_target = l_avatarBone;
+                            l_offset.m_offset = Quaternion.Inverse(l_controllerBone.rotation) * l_avatarBone.rotation;
+                            m_leftFingerOffsets.Add(l_offset);
+                        }
+                    }
+                    foreach(HumanBodyBones p_bone in ms_rightFingerBones)
+                    {
+                        Transform l_avatarBone = l_animator.GetBoneTransform(p_bone);
+                        Transform l_controllerBone = InputHandler.Instance.GetSourceForBone(p_bone, false);
+                        if((l_avatarBone != null) && (l_controllerBone != null))
+                        {
+                            RotationOffset l_offset = new RotationOffset();
+                            l_offset.m_source = l_controllerBone;
+                            l_offset.m_target = l_avatarBone;
+                            l_offset.m_offset = Quaternion.Inverse(l_controllerBone.rotation) * l_avatarBone.rotation;
+                            m_rightFingerOffsets.Add(l_offset);
+                        }
+                    }
+
+                    m_ready = ((m_leftFingerOffsets.Count > 0) || (m_rightFingerOffsets.Count > 0));
+                }
+            }
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
             }
         }
 
-        internal void OnAvatarClear()
+        internal void OnAvatarClear(CVRAvatar p_avatar)
         {
-            m_ready = false;
-            m_pose = new HumanPose();
+            try
+            {
+                m_ready = false;
+                m_pose = new HumanPose();
 
-            m_leftHandOffset.Reset();
-            m_rightHandOffset.Reset();
+                m_leftHandOffset.Reset();
+                m_rightHandOffset.Reset();
 
-            m_leftFingerOffsets.Clear();
-            m_rightFingerOffsets.Clear();
+                m_leftFingerOffsets.Clear();
+                m_rightFingerOffsets.Clear();
+            }
+            catch(System.Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
         }
 
         internal void OnAvatarReuse()
         {
-            OnAvatarClear();
-            OnAvatarSetup();
+            OnAvatarClear(PlayerSetup.Instance.AvatarDescriptor);
+            OnAvatarSetup(PlayerSetup.Instance.AvatarDescriptor);
         }
 
         internal void OnIKSystemLateUpdate(HumanPoseHandler p_handler, Transform p_hips)
