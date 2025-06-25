@@ -112,7 +112,7 @@ namespace ml_pmc
                         m_fingerTracking = true;
 
                         CVRInputManager.Instance.individualFingerTracking = true;
-                        IKSystem.Instance.FingerSystem.controlActive = true;
+                        IKSystem.Instance.FingerSystem.ControlActive = true;
 
                         ref readonly float[] l_curls = ref m_puppetParser.GetFingerCurls();
                         ref readonly float[] l_spreads = ref m_puppetParser.GetFingerSpreads();
@@ -441,7 +441,7 @@ namespace ml_pmc
         void RestoreFingerTracking()
         {
             CVRInputManager.Instance.individualFingerTracking = (m_inVr && Utils.AreKnucklesInUse() && !CVRInputManager._moduleXR.SkeletalToggleValue);
-            IKSystem.Instance.FingerSystem.controlActive = CVRInputManager.Instance.individualFingerTracking;
+            IKSystem.Instance.FingerSystem.ControlActive = CVRInputManager.Instance.individualFingerTracking;
 
             if(!CVRInputManager.Instance.individualFingerTracking)
             {

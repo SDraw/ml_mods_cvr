@@ -651,7 +651,7 @@ namespace ml_lme
         void SetGameFingersTracking(bool p_state)
         {
             base._inputManager.individualFingerTracking = p_state;
-            IKSystem.Instance.FingerSystem.controlActive = base._inputManager.individualFingerTracking;
+            IKSystem.Instance.FingerSystem.ControlActive = base._inputManager.individualFingerTracking;
         }
     }
 }

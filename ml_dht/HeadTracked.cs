@@ -70,8 +70,8 @@ namespace ml_dht
             Settings.OnHeadTrackingChanged.AddListener(this.OnEnabledOrHeadTrackingChanged);
             Settings.OnSmoothingChanged.AddListener(this.OnSmoothingChanged);
 
-            CVRGameEventSystem.Avatar.OnLocalAvatarLoad.AddListener(this.OnAvatarClear);
-            CVRGameEventSystem.Avatar.OnLocalAvatarClear.AddListener(this.OnAvatarSetup);
+            CVRGameEventSystem.Avatar.OnLocalAvatarLoad.AddListener(this.OnAvatarSetup);
+            CVRGameEventSystem.Avatar.OnLocalAvatarClear.AddListener(this.OnAvatarClear);
             GameEvents.OnAvatarReuse.AddListener(this.OnAvatarReuse);
             GameEvents.OnEyeControllerUpdate.AddListener(this.OnEyeControllerUpdate);
             GameEvents.OnFaceTrackingUpdate.AddListener(this.UpdateFaceTracking);
@@ -90,8 +90,8 @@ namespace ml_dht
             Settings.OnHeadTrackingChanged.RemoveListener(this.OnEnabledOrHeadTrackingChanged);
             Settings.OnSmoothingChanged.RemoveListener(this.OnSmoothingChanged);
 
-            CVRGameEventSystem.Avatar.OnLocalAvatarLoad.RemoveListener(this.OnAvatarClear);
-            CVRGameEventSystem.Avatar.OnLocalAvatarClear.RemoveListener(this.OnAvatarSetup);
+            CVRGameEventSystem.Avatar.OnLocalAvatarLoad.RemoveListener(this.OnAvatarSetup);
+            CVRGameEventSystem.Avatar.OnLocalAvatarClear.RemoveListener(this.OnAvatarClear);
             GameEvents.OnAvatarReuse.RemoveListener(this.OnAvatarReuse);
             GameEvents.OnEyeControllerUpdate.RemoveListener(this.OnEyeControllerUpdate);
             GameEvents.OnFaceTrackingUpdate.RemoveListener(this.UpdateFaceTracking);
