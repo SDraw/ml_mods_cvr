@@ -36,8 +36,7 @@ namespace ml_prm
             RecoverDelay,
             FallLimit,
             GestureGrab,
-            FriendsGrab,
-            GrabDistance
+            FriendsGrab
         }
 
         const string c_ragdollKeyTooltip = "Switch ragdoll mode with '{0}' key";
@@ -69,7 +68,6 @@ namespace ml_prm
         static SliderFloat ms_angularMovementDragSlider = null;
         static SliderFloat ms_recoverDelaySlider = null;
         static SliderFloat ms_fallLimitSlider = null;
-        static SliderFloat ms_grabDistanceSlider = null;
         static Button ms_resetButton = null;
 
         internal static void Init()
@@ -144,9 +142,6 @@ namespace ml_prm
             ms_fallLimitSlider = ms_category.AddSlider("Fall limit", "", Settings.FallLimit, 4.5f, 44.5f);
             ms_fallLimitSlider.SliderTooltip = string.Format(c_fallLimitTooltip, GetDropHeight(Settings.FallLimit));
             ms_fallLimitSlider.OnValueUpdated += (value) => OnSliderUpdate(UiIndex.FallLimit, value);
-
-            ms_grabDistanceSlider = ms_category.AddSlider("Grab distance", "Minimal distance for successful grab", Settings.GrabDistance, 0f, 1f);
-            ms_grabDistanceSlider.OnValueUpdated += (value) => OnSliderUpdate(UiIndex.GrabDistance, value);
 
             ms_resetButton = ms_category.AddButton("Reset settings", "", "Reset mod settings to default");
             ms_resetButton.OnPress += Reset;
@@ -261,10 +256,6 @@ namespace ml_prm
                         ms_fallLimitSlider.SliderTooltip = string.Format(c_fallLimitTooltip, GetDropHeight(p_value));
                     }
                     break;
-
-                    case UiIndex.GrabDistance:
-                        Settings.SetSetting(Settings.ModSetting.GrabDistance, p_value);
-                        break;
                 }
             }
             catch(Exception e)
@@ -331,9 +322,6 @@ namespace ml_prm
 
             OnSliderUpdate(UiIndex.FallLimit, 9.899494f);
             ms_fallLimitSlider.SetSliderValue(9.899494f);
-
-            OnSliderUpdate(UiIndex.GrabDistance, 0.1f);
-            ms_grabDistanceSlider.SetSliderValue(0.1f);
         }
 
         static void OnHotkeyKeyChanged(UnityEngine.KeyCode p_keyCode)

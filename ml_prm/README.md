@@ -41,7 +41,6 @@ Optional mod's settings page with [BTKUILib](https://github.com/BTK-Development/
 * **Angular movement drag:** angular movement resistance; `2.0` by default.
 * **Recover delay:** time delay for enabled `Auto recover` in seconds; `3.0` by default.
 * **Fall limit:** height limit for fall damage; `5.0` by default.
-* **Grab distance:** minimal distance for successful grab; `0.1` by default.
 * **Reset settings:** resets mod settings to default.
 
 Optional mod's settings in [UIExpansionKit](https://github.com/ddakebono/ChilloutMods):

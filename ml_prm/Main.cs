@@ -27,7 +27,6 @@ namespace ml_prm
                 yield return null;
 
             m_controller = new UnityEngine.GameObject("[PlayerRagdollMod]").AddComponent<RagdollController>();
-            m_controller.gameObject.AddComponent<RemoteGesturesManager>();
         }
 
         System.Collections.IEnumerator WaitForWhitelist()

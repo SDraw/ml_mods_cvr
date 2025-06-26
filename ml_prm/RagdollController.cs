@@ -114,7 +114,6 @@ namespace ml_prm
             BetterBetterCharacterController.OnTeleport.AddListener(this.OnPlayerTeleport);
 
             ModUi.OnSwitchChanged.AddListener(this.SwitchRagdoll);
-            RemoteGesturesManager.OnGestureState.AddListener(this.OnRemoteGestureStateChanged);
         }
 
         void OnDestroy()
@@ -163,7 +162,6 @@ namespace ml_prm
             BetterBetterCharacterController.OnTeleport.RemoveListener(this.OnPlayerTeleport);
 
             ModUi.OnSwitchChanged.RemoveListener(this.SwitchRagdoll);
-            RemoteGesturesManager.OnGestureState.RemoveListener(this.OnRemoteGestureStateChanged);
         }
 
         void Update()
@@ -305,7 +303,10 @@ namespace ml_prm
                 {
                     m_avatarTransform = PlayerSetup.Instance.AvatarTransform;
                     m_hips = PlayerSetup.Instance.Animator.GetBoneTransform(HumanBodyBones.Hips);
-                    Utils.SetAvatarTPose();
+
+                    IKSystem.Instance.SetAvatarPose(IKSystem.AvatarPose.TPose);
+                    PlayerSetup.Instance.AvatarTransform.localPosition = Vector3.zero;
+                    PlayerSetup.Instance.AvatarTransform.localRotation = Quaternion.identity;
 
                     BipedRagdollReferences l_avatarReferences = BipedRagdollReferences.FromAvatar(PlayerSetup.Instance.Animator);
 
@@ -368,7 +369,7 @@ namespace ml_prm
                             if((l_body != null) && (l_collider != null))
                             {
                                 RagdollBodypartHandler l_handler = l_puppetTransforms[i].gameObject.AddComponent<RagdollBodypartHandler>();
-                                l_handler.SetInfuencerUsage(Utils.IsInEnumeration(l_puppetTransforms[i], l_influencedTransforms));
+                                l_handler.UseBuoyancy = Utils.IsObjectInArray(l_puppetTransforms[i], l_influencedTransforms);
                                 m_ragdollBodyHandlers.Add(l_handler);
                             }
 
@@ -400,6 +401,7 @@ namespace ml_prm
 
             foreach(RagdollBodypartHandler l_handler in m_ragdollBodyHandlers)
             {
+                l_handler.RemovePhysicsController();
                 l_handler.SetAsKinematic(true);
                 l_handler.SetColliderMaterial(m_physicsMaterial);
             }
@@ -516,31 +518,6 @@ namespace ml_prm
         void OnIKOffsetUpdate(GameEvents.EventResult p_result)
         {
             p_result.m_result |= (m_ragdolled && (m_vrIK != null));
-        }
-
-        // Custom game events
-        void OnRemoteGestureStateChanged(ABI_RC.Core.Player.PuppetMaster p_master, RemoteGesturesManager.GestureHand p_hand, bool p_state)
-        {
-            if(m_avatarReady && m_ragdolled && Settings.GestureGrab && (p_master.Animator != null))
-            {
-                Transform l_hand = p_master.Animator.GetBoneTransform((p_hand == RemoteGesturesManager.GestureHand.Left) ? HumanBodyBones.LeftHand : HumanBodyBones.RightHand);
-                Transform l_finger = p_master.Animator.GetBoneTransform((p_hand == RemoteGesturesManager.GestureHand.Left) ? HumanBodyBones.LeftMiddleProximal : HumanBodyBones.RightMiddleProximal);
-
-                if(l_hand != null)
-                {
-                    Vector3 l_pos = (l_finger != null) ? ((l_hand.position + l_finger.position) * 0.5f) : l_hand.position;
-                    foreach(var l_bodyHandler in m_ragdollBodyHandlers)
-                    {
-                        if(p_state)
-                        {
-                            if(l_bodyHandler.Attach(l_hand, l_pos))
-                                break;
-                        }
-                        else
-                            l_bodyHandler.Detach(l_hand);
-                    }
-                }
-            }
         }
 
         // VRIK updates

@@ -1,4 +1,6 @@
 ﻿using ABI.CCK.Components;
+using ABI_RC.Core;
+using ABI_RC.Core.Networking.IO.Social;
 using ABI_RC.Core.Player;
 using ABI_RC.Core.Savior;
 using ABI_RC.Systems.Movement;
@@ -10,24 +12,24 @@ namespace ml_prm
     class RagdollBodypartHandler : MonoBehaviour, CVRTriggerVolume
     {
         const string c_ragdollPointerType = "ragdoll";
+        const string c_grabPointerType = "grab";
+
+        bool m_ready = false;
 
         Rigidbody m_rigidBody = null;
         public Collider collider { get; set; } = null;
-        PhysicsInfluencer m_physicsInfluencer = null;
 
-        bool m_shouldHaveInfluencer = false;
-        bool m_activeGravity = true;
+        PhysicsInfluencer m_physicsInfluencer = null;
+        public bool UseBuoyancy { get; set; } = false;
 
         bool m_attached = false;
-        Transform m_attachedHand = null;
+        CVRPointer m_attachedPointer = null;
         Transform m_attachTransform = null;
         FixedJoint m_attachJoint = null;
 
         // Unity events
         void Awake()
         {
-            this.gameObject.layer = LayerMask.NameToLayer("PlayerLocal");
-
             collider = this.GetComponent<Collider>();
             m_rigidBody = this.GetComponent<Rigidbody>();
 
@@ -40,30 +42,25 @@ namespace ml_prm
             }
 
             if(collider != null)
-            {
-                Physics.IgnoreCollision(collider, BetterBetterCharacterController.Instance.Collider, true);
-                Physics.IgnoreCollision(collider, BetterBetterCharacterController.Instance.KinematicTriggerProxy.Collider, true);
-                Physics.IgnoreCollision(collider, BetterBetterCharacterController.Instance.NonKinematicProxy.Collider, true);
-                Physics.IgnoreCollision(collider, BetterBetterCharacterController.Instance.SphereProxy.Collider, true);
-                BetterBetterCharacterController.Instance.IgnoreCollision(collider, true);
-            }
+                BetterBetterCharacterController.Instance.IgnoreCollision(collider);
         }
 
         void Start()
         {
-            if(m_shouldHaveInfluencer && (m_rigidBody != null) && (collider != null))
+            if((m_rigidBody != null) && (collider != null))
             {
                 m_physicsInfluencer = this.gameObject.AddComponent<PhysicsInfluencer>();
                 m_physicsInfluencer.fluidDrag = 3f;
                 m_physicsInfluencer.fluidAngularDrag = 1f;
-                m_physicsInfluencer.enableBuoyancy = true;
-                m_physicsInfluencer.enableInfluence = false;
-                m_physicsInfluencer.forceAlignUpright = false;
-                float mass = m_rigidBody.mass;
-                m_physicsInfluencer.UpdateDensity();
-                m_rigidBody.mass = mass;
-                m_physicsInfluencer.volume = mass * 0.005f;
+                m_physicsInfluencer.enableInfluence = true;
                 m_physicsInfluencer.enableLocalGravity = true;
+                m_physicsInfluencer.enableBuoyancy = true;
+                m_physicsInfluencer.forceAlignUpright = false;
+
+                float l_mass = m_rigidBody.mass;
+                m_physicsInfluencer.UpdateDensity();
+                m_rigidBody.mass = l_mass;
+                m_physicsInfluencer.volume = l_mass * 0.005f;
 
                 this.gameObject.name = string.Format("{0} [NoGizmo]", this.gameObject.name);
             }
@@ -83,45 +80,36 @@ namespace ml_prm
             Detach();
         }
 
-        void FixedUpdate()
-        {
-            if(m_rigidBody != null)
-            {
-                m_rigidBody.useGravity = false;
-
-                if(!m_attached && m_activeGravity && ((m_physicsInfluencer == null) || !m_physicsInfluencer.enableInfluence || !m_physicsInfluencer.GetSubmerged()))
-                    m_rigidBody.AddForce(BetterBetterCharacterController.Instance.GravityResult.AppliedGravity * m_rigidBody.mass);
-            }
-        }
-
         void Update()
         {
-            if(m_attached && !ReferenceEquals(m_attachTransform, null) && (m_attachTransform == null))
-            {
-                m_attachTransform = null;
-
-                if(m_attachJoint != null)
-                    Object.Destroy(m_attachJoint);
-                m_attachJoint = null;
-
-                m_attachedHand = null;
-                m_attached = false;
-            }
+            if(m_attached && ((m_attachedPointer == null) || !m_attachedPointer.isActiveAndEnabled))
+                Detach();
         }
 
         void OnTriggerEnter(Collider p_col)
         {
-            if(Settings.PointersReaction && (RagdollController.Instance != null) && !RagdollController.Instance.IsRagdolled())
+            if(m_ready && (RagdollController.Instance != null))
             {
                 CVRPointer l_pointer = p_col.GetComponent<CVRPointer>();
-                if((l_pointer != null) && (l_pointer.type == c_ragdollPointerType) && l_pointer.enabled && !IsIgnored(l_pointer.transform))
-                    RagdollController.Instance.Ragdoll();
+
+                // Ragdolling
+                if(Settings.PointersReaction && !RagdollController.Instance.IsRagdolled())
+                {
+                    if((l_pointer != null) && (l_pointer.type == c_ragdollPointerType) && l_pointer.enabled && !IgnoreCheck(l_pointer.transform))
+                        RagdollController.Instance.Ragdoll();
+                }
+
+                //Attachment
+                if(!m_attached && RagdollController.Instance.IsRagdolled())
+                {
+                    if((l_pointer != null) && (l_pointer.type == c_grabPointerType) && RestrictionsCheck(p_col.transform.root))
+                        Attach(l_pointer);
+                }
             }
         }
 
         // Arbitrary
-        public bool IsReady() => ((m_rigidBody != null) && (collider != null) && (!m_shouldHaveInfluencer || ((m_physicsInfluencer != null) && m_physicsInfluencer.IsReady())));
-        public void SetInfuencerUsage(bool p_state) => m_shouldHaveInfluencer = p_state;
+        public bool IsReady() => ((m_rigidBody != null) && (collider != null) && (m_physicsInfluencer != null) && m_physicsInfluencer.IsReady());
 
         public void SetColliderMaterial(PhysicMaterial p_material)
         {
@@ -134,13 +122,13 @@ namespace ml_prm
 
         public void SetAsKinematic(bool p_state)
         {
-            if(collider != null)
-                collider.isTrigger = p_state;
             if(m_rigidBody != null)
             {
                 m_rigidBody.isKinematic = p_state;
                 m_rigidBody.collisionDetectionMode = (p_state ? CollisionDetectionMode.Discrete : CollisionDetectionMode.ContinuousDynamic);
             }
+            if(m_physicsInfluencer != null)
+                m_physicsInfluencer.enabled = !p_state;
         }
 
         public void SetVelocity(Vector3 p_vec)
@@ -157,10 +145,8 @@ namespace ml_prm
 
         public void SetActiveGravity(bool p_state)
         {
-            m_activeGravity = p_state;
-
             if(m_physicsInfluencer != null)
-                m_physicsInfluencer.enabled = m_activeGravity;
+                m_physicsInfluencer.gravityFactor = (p_state ? 1f : 0f);
         }
 
         public void SetDrag(float p_value)
@@ -188,7 +174,7 @@ namespace ml_prm
         public void SetBuoyancy(bool p_state)
         {
             if(m_physicsInfluencer != null)
-                m_physicsInfluencer.enableInfluence = p_state;
+                m_physicsInfluencer.enableBuoyancy = (UseBuoyancy && p_state);
         }
 
         public void ClearFluidVolumes()
@@ -197,21 +183,27 @@ namespace ml_prm
                 m_physicsInfluencer.ClearFluidVolumes();
         }
 
-        static bool IsIgnored(Transform p_transform)
+        internal void RemovePhysicsController()
         {
-            return (Settings.IgnoreLocal && (p_transform.root == PlayerSetup.Instance.transform));
+            if(this.gameObject.TryGetComponent<CVRSharedPhysicsController>(out var l_controller))
+            {
+                Object.Destroy(l_controller); // Yeet!
+                m_ready = true;
+            }
+            if(collider != null)
+                BetterBetterCharacterController.Instance.IgnoreCollision(collider);
         }
 
-        public bool Attach(Transform p_hand, Vector3 p_pos)
+        void Attach(CVRPointer p_pointer)
         {
-            bool l_result = false;
-
-            if(!m_attached && (collider != null) && (Vector3.Distance(p_pos, collider.ClosestPoint(p_pos)) <= Settings.GrabDistance))
+            if(!m_attached && (collider != null) && (m_rigidBody != null))
             {
+                m_attachedPointer = p_pointer;
+
                 GameObject l_attachPoint = new GameObject("[AttachPoint]");
+                l_attachPoint.layer = CVRLayers.PlayerClone;
                 m_attachTransform = l_attachPoint.transform;
-                m_attachTransform.parent = p_hand;
-                m_attachTransform.position = p_pos;
+                m_attachTransform.parent = p_pointer.transform;
 
                 Rigidbody l_body = l_attachPoint.AddComponent<Rigidbody>();
                 l_body.isKinematic = true;
@@ -223,16 +215,12 @@ namespace ml_prm
                 m_attachJoint.breakTorque = Mathf.Infinity;
 
                 m_attached = true;
-                m_attachedHand = p_hand;
-                l_result = true;
             }
-            return l_result;
         }
 
-        public void Detach() => Detach(m_attachedHand);
-        public void Detach(Transform p_hand)
+        public void Detach()
         {
-            if(m_attached && ReferenceEquals(m_attachedHand, p_hand))
+            if(m_attached)
             {
                 if(m_attachTransform != null)
                     Object.Destroy(m_attachTransform.gameObject);
@@ -242,7 +230,7 @@ namespace ml_prm
                     Object.Destroy(m_attachJoint);
                 m_attachJoint = null;
 
-                m_attachedHand = null;
+                m_attachedPointer = null;
                 m_attached = false;
             }
         }
@@ -250,11 +238,29 @@ namespace ml_prm
         // CVRTriggerVolume
         public void TriggerEnter(CVRPointer pointer)
         {
-            if(Settings.PointersReaction && (pointer != null) && pointer.enabled && (pointer.type == c_ragdollPointerType) && !IsIgnored(pointer.transform) && (RagdollController.Instance != null) && !RagdollController.Instance.IsRagdolled())
+            if(Settings.PointersReaction && (pointer != null) && pointer.enabled && (pointer.type == c_ragdollPointerType) && !IgnoreCheck(pointer.transform) && (RagdollController.Instance != null) && !RagdollController.Instance.IsRagdolled())
                 RagdollController.Instance.Ragdoll();
         }
         public void TriggerExit(CVRPointer pointer)
         {
+        }
+
+        // Static utility
+        static bool IgnoreCheck(Transform p_transform)
+        {
+            return (Settings.IgnoreLocal && (p_transform.root == PlayerSetup.Instance.transform));
+        }
+
+        static bool RestrictionsCheck(Transform p_transform)
+        {
+            if(p_transform == PlayerSetup.Instance.transform)
+                return false;
+
+            PlayerDescriptor l_playerDescriptor = p_transform.GetComponent<PlayerDescriptor>();
+            if(l_playerDescriptor != null)
+                return (!Settings.FriendsGrab || Friends.FriendsWith(l_playerDescriptor.ownerId));
+
+            return false;
         }
     }
 }

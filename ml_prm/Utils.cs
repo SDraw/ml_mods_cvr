@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using System.Linq;
-using ABI_RC.Systems.IK.SubSystems;
 using ABI_RC.Core.InteractionSystem;
 
 namespace ml_prm
@@ -22,12 +21,6 @@ namespace ml_prm
 
         public static void ClearFluidVolumes(this BetterBetterCharacterController p_instance) => (ms_touchingVolumes?.GetValue(p_instance) as List<FluidVolume>)?.Clear();
 
-        public static void CopyGlobal(this Transform p_source, Transform p_target)
-        {
-            p_target.position = p_source.position;
-            p_target.rotation = p_source.rotation;
-        }
-
         public static bool IsReady(this PhysicsInfluencer p_instance)
         {
             return ((ms_referencePoints.GetValue(p_instance) as List<Vector3>).Count > 0);
@@ -38,27 +31,15 @@ namespace ml_prm
             (ms_influencerSubmergedColliders.GetValue(p_instance) as Dictionary<FluidVolume, int>)?.Clear();
         }
 
-        public static void SetAvatarTPose()
-        {
-            IKSystem.Instance.SetAvatarPose(IKSystem.AvatarPose.TPose);
-            PlayerSetup.Instance.AvatarTransform.localPosition = Vector3.zero;
-            PlayerSetup.Instance.AvatarTransform.localRotation = Quaternion.identity;
-        }
-
-        public static bool IsInEnumeration(object p_obj, object[] p_enumeration) => p_enumeration.Contains(p_obj);
-
-        public static bool IsLeftGrabPointerActive(this PuppetMaster p_source)
-        {
-            return p_source._playerAvatarMovementDataCurrent.IsLeftHandGrabbing();
-        }
-
-        public static bool IsRightGrabPointerActive(this PuppetMaster p_source)
-        {
-            return p_source._playerAvatarMovementDataCurrent.IsRightHandGrabbing();
-        }
+        public static bool IsObjectInArray(object p_obj, object[] p_enumeration) => p_enumeration.Contains(p_obj);
 
         public static CVRSeat GetCurrentSeat(this BetterBetterCharacterController p_instance) => (ms_lastCVRSeat?.GetValue(p_instance) as CVRSeat);
 
-        public static bool IsInRange(float p_value, float p_min, float p_max) => ((p_min <= p_value) && (p_value <= p_max));
+        // Unity specific
+        public static void CopyGlobal(this Transform p_source, Transform p_target)
+        {
+            p_target.position = p_source.position;
+            p_target.rotation = p_source.rotation;
+        }
     }
 }

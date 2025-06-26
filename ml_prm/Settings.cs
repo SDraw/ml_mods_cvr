@@ -35,8 +35,7 @@ namespace ml_prm
             FallDamage,
             FallLimit,
             GestureGrab,
-            FriendsGrab,
-            GrabDistance
+            FriendsGrab
         }
 
         public static bool Hotkey { get; private set; } = true;
@@ -111,8 +110,7 @@ namespace ml_prm
                 ms_category.CreateEntry(ModSetting.FallDamage.ToString(), FallDamage, null, null, true),
                 ms_category.CreateEntry(ModSetting.FallLimit.ToString(), FallLimit, null, null, true),
                 ms_category.CreateEntry(ModSetting.GestureGrab.ToString(), GestureGrab, null, null, true),
-                ms_category.CreateEntry(ModSetting.FriendsGrab.ToString(), FriendsGrab, null, null, true),
-                ms_category.CreateEntry(ModSetting.GrabDistance.ToString(), GrabDistance, null, null, true),
+                ms_category.CreateEntry(ModSetting.FriendsGrab.ToString(), FriendsGrab, null, null, true)
             };
 
             ms_entries[(int)ModSetting.HotkeyKey].OnEntryValueChangedUntyped.Subscribe(OnMelonSettingSave_HotkeyKey);
@@ -137,7 +135,6 @@ namespace ml_prm
             FallLimit = Mathf.Clamp((float)ms_entries[(int)ModSetting.FallLimit].BoxedValue, 4.5f, 44.5f);
             GestureGrab = (bool)ms_entries[(int)ModSetting.GestureGrab].BoxedValue;
             FriendsGrab = (bool)ms_entries[(int)ModSetting.FriendsGrab].BoxedValue;
-            GrabDistance = Mathf.Clamp01((float)ms_entries[(int)ModSetting.GrabDistance].BoxedValue);
         }
 
         static void OnMelonSettingSave_HotkeyKey(object p_oldValue, object p_newValue)
@@ -294,13 +291,6 @@ namespace ml_prm
                     {
                         FallLimit = (float)p_value;
                         OnFallLimitChanged.Invoke(FallLimit);
-                    }
-                    break;
-
-                    case ModSetting.GrabDistance:
-                    {
-                        GrabDistance = (float)p_value;
-                        OnGrabDistanceChanged.Invoke(GrabDistance);
                     }
                     break;
                 }
