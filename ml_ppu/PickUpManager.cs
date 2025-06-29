@@ -149,7 +149,7 @@ namespace ml_ppu
                         Vector3 l_armPos = (l_avatarMatInv * m_armLeft.GetMatrix()).GetPosition();
 
                         m_collider = new GameObject("[Collider]").AddComponent<CapsuleCollider>();
-                        m_collider.gameObject.layer = CVRLayers.PlayerClone;
+                        m_collider.gameObject.layer = CVRLayers.PlayerLocal;
                         m_collider.transform.parent = this.transform;
                         m_collider.isTrigger = true;
                         m_collider.height = Vector3.Distance(l_hipsPos, new Vector3(0f, l_armPos.y, l_armPos.z));

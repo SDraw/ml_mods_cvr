@@ -42,7 +42,7 @@ namespace ml_prm
             }
 
             if(collider != null)
-                BetterBetterCharacterController.Instance.IgnoreCollision(collider);
+                RemoveGameCollision();
         }
 
         void Start()
@@ -127,6 +127,8 @@ namespace ml_prm
                 m_rigidBody.isKinematic = p_state;
                 m_rigidBody.collisionDetectionMode = (p_state ? CollisionDetectionMode.Discrete : CollisionDetectionMode.ContinuousDynamic);
             }
+            if(collider != null)
+                collider.isTrigger = p_state;
             if(m_physicsInfluencer != null)
                 m_physicsInfluencer.enabled = !p_state;
         }
@@ -191,7 +193,7 @@ namespace ml_prm
                 m_ready = true;
             }
             if(collider != null)
-                BetterBetterCharacterController.Instance.IgnoreCollision(collider);
+                RemoveGameCollision();
         }
 
         void Attach(CVRPointer p_pointer)
@@ -201,7 +203,7 @@ namespace ml_prm
                 m_attachedPointer = p_pointer;
 
                 GameObject l_attachPoint = new GameObject("[AttachPoint]");
-                l_attachPoint.layer = CVRLayers.PlayerClone;
+                l_attachPoint.layer = CVRLayers.PlayerLocal;
                 m_attachTransform = l_attachPoint.transform;
                 m_attachTransform.parent = p_pointer.transform;
 
@@ -233,6 +235,15 @@ namespace ml_prm
                 m_attachedPointer = null;
                 m_attached = false;
             }
+        }
+
+        void RemoveGameCollision()
+        {
+            Physics.IgnoreCollision(collider, BetterBetterCharacterController.Instance.Collider, true);
+            Physics.IgnoreCollision(collider, BetterBetterCharacterController.Instance.KinematicTriggerProxy.Collider, true);
+            Physics.IgnoreCollision(collider, BetterBetterCharacterController.Instance.NonKinematicProxy.Collider, true);
+            Physics.IgnoreCollision(collider, BetterBetterCharacterController.Instance.SphereProxy.Collider, true);
+            BetterBetterCharacterController.Instance.IgnoreCollision(collider);
         }
 
         // CVRTriggerVolume
