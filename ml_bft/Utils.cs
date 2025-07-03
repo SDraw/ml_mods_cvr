@@ -17,12 +17,5 @@ namespace ml_bft
         public static bool IsInVR() => ((MetaPort.Instance != null) && MetaPort.Instance.isUsingVr);
 
         public static bool AreKnucklesInUse() => ((CVRInputManager.Instance._leftController == ABI_RC.Systems.InputManagement.XR.eXRControllerType.Index) || (CVRInputManager.Instance._rightController == ABI_RC.Systems.InputManagement.XR.eXRControllerType.Index));
-
-        public static void SetAvatarTPose()
-        {
-            IKSystem.Instance.SetAvatarPose(IKSystem.AvatarPose.TPose);
-            PlayerSetup.Instance.AvatarTransform.localPosition = Vector3.zero;
-            PlayerSetup.Instance.AvatarTransform.localRotation = Quaternion.identity;
-        }
     }
 }

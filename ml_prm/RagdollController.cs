@@ -77,7 +77,7 @@ namespace ml_prm
 
         void Start()
         {
-            this.gameObject.layer = LayerMask.NameToLayer("PlayerLocal");
+            this.gameObject.layer = CVRLayers.PlayerLocal;
 
             m_physicsMaterial = new PhysicMaterial("Ragdoll");
             m_physicsMaterial.dynamicFriction = c_defaultFriction;

@@ -1,4 +1,5 @@
 ﻿using ABI.CCK.Components;
+using ABI_RC.Core;
 using ABI_RC.Core.Savior;
 using ABI_RC.Systems.InputManagement;
 using System.Collections.Generic;
@@ -86,9 +87,9 @@ namespace ml_pmc
                 List<RaycastHit> l_hits = Physics.RaycastAll(l_ray, p_limit).ToList();
                 if(l_hits.Count > 0)
                 {
-                    l_hits.RemoveAll(hit => hit.collider.gameObject.layer == LayerMask.NameToLayer("UI Internal")); // Somehow layer mask in RaycastAll just ignores players entirely
-                    l_hits.RemoveAll(hit => hit.collider.gameObject.layer == LayerMask.NameToLayer("PlayerLocal"));
-                    l_hits.RemoveAll(hit => hit.collider.gameObject.layer == LayerMask.NameToLayer("PlayerClone"));
+                    l_hits.RemoveAll(hit => hit.collider.gameObject.layer == CVRLayers.UIInternal); // Somehow layer mask in RaycastAll just ignores players entirely
+                    l_hits.RemoveAll(hit => hit.collider.gameObject.layer == CVRLayers.PlayerLocal);
+                    l_hits.RemoveAll(hit => hit.collider.gameObject.layer == CVRLayers.PlayerClone);
                     l_hits.Sort((a, b) => ((a.distance < b.distance) ? -1 : 1));
                     l_result = (l_hits[0].collider.gameObject.transform.root == p_target.transform.root);
                 }

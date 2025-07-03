@@ -121,9 +121,11 @@ namespace ml_bft
                 Animator l_animator = PlayerSetup.Instance.Animator;
                 if(l_animator.isHuman)
                 {
-                    Utils.SetAvatarTPose();
-                    InputHandler.Instance.Rebind(PlayerSetup.Instance.transform.rotation);
+                    IKSystem.Instance.SetAvatarPose(IKSystem.AvatarPose.TPose);
+                    PlayerSetup.Instance.AvatarTransform.localPosition = Vector3.zero;
+                    PlayerSetup.Instance.AvatarTransform.localRotation = Quaternion.identity;
 
+                    InputHandler.Instance.Rebind(PlayerSetup.Instance.transform.rotation);
                     foreach(var l_tuple in ms_fingersChains)
                     {
                         ReorientateTowards(
@@ -221,14 +223,14 @@ namespace ml_bft
         {
             if(m_ready && MetaPort.Instance.isUsingVr && (p_handler != null) && Settings.SkeletalInput)
             {
-                if(CVRInputManager.Instance._leftController != ABI_RC.Systems.InputManagement.XR.eXRControllerType.None)
+                if(CVRInputManager.Instance.IsLeftControllerTracking())
                 {
                     Quaternion l_turnBack = (m_leftHandOffset.m_source.rotation * m_leftHandOffset.m_offset) * Quaternion.Inverse(m_leftHandOffset.m_target.rotation);
                     foreach(var l_offset in m_leftFingerOffsets)
                         l_offset.m_target.rotation = l_turnBack * (l_offset.m_source.rotation * l_offset.m_offset);
                 }
 
-                if(CVRInputManager.Instance._rightController != ABI_RC.Systems.InputManagement.XR.eXRControllerType.None)
+                if(CVRInputManager.Instance.IsRightControllerTracking())
                 {
                     Quaternion l_turnBack = (m_rightHandOffset.m_source.rotation * m_rightHandOffset.m_offset) * Quaternion.Inverse(m_rightHandOffset.m_target.rotation);
                     foreach(var l_offset in m_rightFingerOffsets)

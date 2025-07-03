@@ -7,7 +7,7 @@
     <Authors>SDraw</Authors>
     <Company>SDraw</Company>
     <Product>PlayerMovementCopycat</Product>
-    <Version>1.1.1</Version>
+    <Version>1.1.2</Version>
     <AssemblyName>PlayerMovementCopycat</AssemblyName>
   </PropertyGroup>
 
@@ -23,6 +23,7 @@
   <ItemGroup>
     <None Remove="resources\dancing.png" />
     <None Remove="resources\dancing_on.png" />
+    <None Remove="Utils.cs~RFd8ec2a.TMP" />
   </ItemGroup>
 
   <ItemGroup>

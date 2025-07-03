@@ -32,6 +32,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_ppu", "ml_ppu\ml_ppu.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_vet", "ml_vet\ml_vet.csproj", "{8DB32590-FC5B-46A8-9747-344E86B18ACF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ml_pah", "ml_pah\ml_pah.csproj", "{C4659F60-3FED-4F43-88E4-969907D4C7A6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -83,6 +85,9 @@ Global
 		{8DB32590-FC5B-46A8-9747-344E86B18ACF}.Debug|x64.Build.0 = Debug|x64
 		{8DB32590-FC5B-46A8-9747-344E86B18ACF}.Release|x64.ActiveCfg = Release|x64
 		{8DB32590-FC5B-46A8-9747-344E86B18ACF}.Release|x64.Build.0 = Release|x64
+		{C4659F60-3FED-4F43-88E4-969907D4C7A6}.Debug|x64.ActiveCfg = Debug|x64
+		{C4659F60-3FED-4F43-88E4-969907D4C7A6}.Release|x64.ActiveCfg = Release|x64
+		{C4659F60-3FED-4F43-88E4-969907D4C7A6}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
