@@ -198,8 +198,8 @@ namespace ml_pah
         static void LimitEntries()
         {
             int l_currentLimit = Settings.AvatarsLimit;
-            if(ms_avatarEntries.Count > l_currentLimit)
-                ms_avatarEntries.RemoveRange(l_currentLimit, ms_avatarEntries.Count - (l_currentLimit - 1));
+            while(ms_avatarEntries.Count > l_currentLimit)
+                ms_avatarEntries.RemoveAt(ms_avatarEntries.Count - 1);
         }
     }
 }
