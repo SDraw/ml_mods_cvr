@@ -84,33 +84,33 @@ namespace ml_pam
         {
             while(ViewManager.Instance == null)
                 yield return null;
-            while(ViewManager.Instance.gameMenuView == null)
+            while(ViewManager.Instance.cohtmlView == null)
                 yield return null;
-            while(ViewManager.Instance.gameMenuView.Listener == null)
+            while(ViewManager.Instance.cohtmlView.Listener == null)
                 yield return null;
 
-            ViewManager.Instance.gameMenuView.Listener.ReadyForBindings += () =>
+            ViewManager.Instance.cohtmlView.Listener.ReadyForBindings += () =>
             {
 
-                ViewManager.Instance.gameMenuView.View.BindCall("OnToggleUpdate_" + ms_category.Identifier, new Action<string, string>(OnToggleUpdate));
-                ViewManager.Instance.gameMenuView.View.BindCall("OnSliderUpdate_" + ms_category.Identifier, new Action<string, string>(OnSliderUpdate));
-                ViewManager.Instance.gameMenuView.View.BindCall("OnDropdownUpdate_" + ms_category.Identifier, new Action<string, string>(OnDropdownUpdate));
+                ViewManager.Instance.cohtmlView.View.BindCall("OnToggleUpdate_" + ms_category.Identifier, new Action<string, string>(OnToggleUpdate));
+                ViewManager.Instance.cohtmlView.View.BindCall("OnSliderUpdate_" + ms_category.Identifier, new Action<string, string>(OnSliderUpdate));
+                ViewManager.Instance.cohtmlView.View.BindCall("OnDropdownUpdate_" + ms_category.Identifier, new Action<string, string>(OnDropdownUpdate));
             };
-            ViewManager.Instance.gameMenuView.Listener.FinishLoad += (_) =>
+            ViewManager.Instance.cohtmlView.Listener.FinishLoad += (_) =>
             {
-                ViewManager.Instance.gameMenuView.View.ExecuteScript(ResourcesHandler.GetEmbeddedResources("mods_extension.js"));
-                ViewManager.Instance.gameMenuView.View.ExecuteScript(ResourcesHandler.GetEmbeddedResources("mod_menu.js"));
+                ViewManager.Instance.cohtmlView.View.ExecuteScript(ResourcesHandler.GetEmbeddedResources("mods_extension.js"));
+                ViewManager.Instance.cohtmlView.View.ExecuteScript(ResourcesHandler.GetEmbeddedResources("mod_menu.js"));
                 MelonLoader.MelonCoroutines.Start(UpdateMenuSettings());
             };
         }
 
         static System.Collections.IEnumerator UpdateMenuSettings()
         {
-            while(!ViewManager.Instance.IsReady || !ViewManager.Instance.IsMainMenuOpen)
+            while(!ViewManager.Instance.IsReady || !ViewManager.Instance.IsViewShown)
                 yield return null;
 
             foreach(var l_entry in ms_entries)
-                ViewManager.Instance.gameMenuView.View.TriggerEvent("updateModSetting", ms_category.Identifier, l_entry.DisplayName, l_entry.GetValueAsString());
+                ViewManager.Instance.cohtmlView.View.TriggerEvent("updateModSetting", ms_category.Identifier, l_entry.DisplayName, l_entry.GetValueAsString());
         }
 
         static void OnMelonSettingSave_LeftHandKey(object p_oldValue, object p_newValue)

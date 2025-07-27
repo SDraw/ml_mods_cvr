@@ -203,7 +203,7 @@ namespace ml_prm
                 m_attachedPointer = p_pointer;
 
                 GameObject l_attachPoint = new GameObject("[AttachPoint]");
-                l_attachPoint.layer = CVRLayers.PlayerLocal;
+                l_attachPoint.layer = CVRLayers.PlayerNetwork;
                 m_attachTransform = l_attachPoint.transform;
                 m_attachTransform.parent = p_pointer.transform;
 

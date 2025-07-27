@@ -77,7 +77,7 @@ namespace ml_prm
 
         void Start()
         {
-            this.gameObject.layer = CVRLayers.PlayerLocal;
+            this.gameObject.layer = CVRLayers.PlayerClone;
 
             m_physicsMaterial = new PhysicMaterial("Ragdoll");
             m_physicsMaterial.dynamicFriction = c_defaultFriction;
@@ -311,7 +311,7 @@ namespace ml_prm
                     BipedRagdollReferences l_avatarReferences = BipedRagdollReferences.FromAvatar(PlayerSetup.Instance.Animator);
 
                     m_puppetRoot = new GameObject("Root").transform;
-                    m_puppetRoot.gameObject.layer = CVRLayers.PlayerLocal;
+                    m_puppetRoot.gameObject.layer = CVRLayers.PlayerClone;
                     m_puppetRoot.parent = m_puppet;
                     m_puppetRoot.position = m_avatarTransform.position;
                     m_puppetRoot.rotation = m_avatarTransform.rotation;
@@ -775,7 +775,7 @@ namespace ml_prm
         static Transform CloneTransform(Transform p_source, Transform p_parent, string p_name)
         {
             Transform l_target = new GameObject(p_name).transform;
-            l_target.gameObject.layer = CVRLayers.PlayerLocal;
+            l_target.gameObject.layer = CVRLayers.PlayerClone;
             l_target.parent = p_parent;
             p_source.CopyGlobal(l_target);
             return l_target;

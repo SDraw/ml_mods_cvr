@@ -2,6 +2,7 @@
 using ABI_RC.Core.Networking.IO.Social;
 using ABI_RC.Core.Player;
 using ABI_RC.Core.Savior;
+using ABI_RC.Core.Networking.IO.Instancing;
 using ABI_RC.Systems.GameEventSystem;
 using System;
 using System.Collections;
@@ -107,9 +108,9 @@ namespace ml_pin
 
         bool ShouldNotifyInCurrentInstance()
         {
-            bool l_isInPublic = ((MetaPort.Instance.CurrentInstancePrivacyType == MetaPort.InstancePrivacy.Public) && Settings.NotifyInPublic);
-            bool l_isInFriends = (((MetaPort.Instance.CurrentInstancePrivacyType == MetaPort.InstancePrivacy.Friends) || (MetaPort.Instance.CurrentInstancePrivacyType == MetaPort.InstancePrivacy.FriendsOfFriends)) && Settings.NotifyInFriends);
-            bool l_isInPrivate = (((MetaPort.Instance.CurrentInstancePrivacyType == MetaPort.InstancePrivacy.EveryoneCanInvite) || (MetaPort.Instance.CurrentInstancePrivacyType == MetaPort.InstancePrivacy.OwnerMustInvite)) && Settings.NotifyInPrivate);
+            bool l_isInPublic = ((MetaPort.Instance.CurrentInstancePrivacyType == Instances.InstancePrivacyType.Public) && Settings.NotifyInPublic);
+            bool l_isInFriends = (((MetaPort.Instance.CurrentInstancePrivacyType == Instances.InstancePrivacyType.Friends) || (MetaPort.Instance.CurrentInstancePrivacyType == Instances.InstancePrivacyType.FriendsOfFriends)) && Settings.NotifyInFriends);
+            bool l_isInPrivate = (((MetaPort.Instance.CurrentInstancePrivacyType == Instances.InstancePrivacyType.EveryoneCanInvite) || (MetaPort.Instance.CurrentInstancePrivacyType == Instances.InstancePrivacyType.OwnerMustInvite)) && Settings.NotifyInPrivate);
             return (l_isInPublic || l_isInFriends || l_isInPrivate);
         }
     }
