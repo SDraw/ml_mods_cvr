@@ -3,7 +3,7 @@ This mod complements functionality of in-game SRanipal face tracking module and 
 
 # Why?
 * Game has unfinished/unused and forcibly disabled eye tracking code that actually uses SRanipal API instead of TobiiXR.
-* Implemented native TobiiXR eye tracking is very unreliable. It freezes main thread with 66% chance at game launch and has limited detection of eyes openness.
+* ~~Implemented native TobiiXR eye tracking is very unreliable. It freezes main thread with 66% chance at game launch and has limited detection of eyes openness.~~ It's just threads locking issue between two libraries fighting to hardware access.
 
 # Benefits?
 * SRanipal API supports ranged eyes openness detection, unlike TobiiXR. You can finally smirk now.
