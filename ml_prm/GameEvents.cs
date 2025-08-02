@@ -94,6 +94,12 @@ namespace ml_prm
                     typeof(IKSystem).GetMethod("OnPreSolverUpdateActiveOffset", BindingFlags.Instance | BindingFlags.NonPublic),
                     new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnOffsetUpdate_Prefix), BindingFlags.Static | BindingFlags.NonPublic))
                 );
+
+                p_instance.Patch(
+                    typeof(ControllerRay).GetMethod("UpdateInteractionMask", BindingFlags.Instance | BindingFlags.NonPublic),
+                    null,
+                    new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnControllerRayUpdateInteractionMask_Prefix), BindingFlags.Static | BindingFlags.NonPublic))
+                );
             }
             catch(Exception e)
             {
@@ -209,6 +215,11 @@ namespace ml_prm
                 MelonLoader.MelonLogger.Error(e);
             }
             return !ms_result.m_result;
+        }
+
+        static void OnControllerRayUpdateInteractionMask_Prefix(ControllerRay __instance)
+        {
+            __instance.generalMask &= ~(1 << CVRLayers.PlayerClone);
         }
     }
 }
