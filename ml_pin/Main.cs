@@ -1,4 +1,4 @@
-﻿using ABI_RC.Core.AudioEffects;
+using ABI_RC.Core.AudioEffects;
 using ABI_RC.Core.Networking.IO.Social;
 using ABI_RC.Core.Player;
 using ABI_RC.Core.Savior;

@@ -1,4 +1,4 @@
-﻿if (typeof modsExtension === 'undefined') {
+if (typeof modsExtension === 'undefined') {
     window.modsExtension = []
 
     // UI elements, modified from original `inp` types, because I have no js knowledge to hook stuff

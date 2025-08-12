@@ -1,4 +1,4 @@
-﻿using ABI.CCK.Components;
+using ABI.CCK.Components;
 using ABI_RC.Systems.GameEventSystem;
 using System;
 using UnityEngine;
