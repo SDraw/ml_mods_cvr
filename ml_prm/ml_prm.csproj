@@ -18,84 +18,84 @@
 
   <ItemGroup>
     <None Remove="PlayerRagdollMod.json" />
-    <None Remove="resources\person.png" />
-    <None Remove="vendor\RootMotion\info.txt" />
+    <None Remove="resources/person.png" />
+    <None Remove="vendor/RootMotion/info.txt" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="resources\person.png" />
+    <EmbeddedResource Include="resources/person.png" />
   </ItemGroup>
 
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\MelonLoader\net35\0Harmony.dll</HintPath>
+      <HintPath>D:/games/Steam/steamapps/common/ChilloutVR/MelonLoader/net35/0Harmony.dll</HintPath>
       <Private>false</Private>
       <SpecificVersion>false</SpecificVersion>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>D:/games/Steam/steamapps/common/ChilloutVR/ChilloutVR_Data/Managed/Assembly-CSharp.dll</HintPath>
       <Private>false</Private>
       <SpecificVersion>false</SpecificVersion>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+      <HintPath>D:/games/Steam/steamapps/common/ChilloutVR/ChilloutVR_Data/Managed/Assembly-CSharp-firstpass.dll</HintPath>
       <Private>false</Private>
       <SpecificVersion>false</SpecificVersion>
     </Reference>
     <Reference Include="BTKUILib">
-      <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\Mods\BTKUILib.dll</HintPath>
+      <HintPath>D:/games/Steam/steamapps/common/ChilloutVR/Mods/BTKUILib.dll</HintPath>
       <Private>false</Private>
       <SpecificVersion>false</SpecificVersion>
     </Reference>
     <Reference Include="ECM2">
-      <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\ECM2.dll</HintPath>
+      <HintPath>D:/Games/Steam/steamapps/common/ChilloutVR/ChilloutVR_Data/Managed/ECM2.dll</HintPath>
       <SpecificVersion>false</SpecificVersion>
       <Private>false</Private>
     </Reference>
     <Reference Include="MelonLoader">
-      <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\MelonLoader\net35\MelonLoader.dll</HintPath>
+      <HintPath>D:/games/Steam/steamapps/common/ChilloutVR/MelonLoader/net35/MelonLoader.dll</HintPath>
       <Private>false</Private>
       <SpecificVersion>false</SpecificVersion>
     </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>D:/games/Steam/steamapps/common/ChilloutVR/ChilloutVR_Data/Managed/UnityEngine.dll</HintPath>
       <Private>false</Private>
       <SpecificVersion>false</SpecificVersion>
     </Reference>
     <Reference Include="UnityEngine.AnimationModule">
-      <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
+      <HintPath>D:/games/Steam/steamapps/common/ChilloutVR/ChilloutVR_Data/Managed/UnityEngine.AnimationModule.dll</HintPath>
       <Private>false</Private>
       <SpecificVersion>false</SpecificVersion>
     </Reference>
     <Reference Include="UnityEngine.ClothModule">
-      <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\UnityEngine.ClothModule.dll</HintPath>
+      <HintPath>D:/games/Steam/steamapps/common/ChilloutVR/ChilloutVR_Data/Managed/UnityEngine.ClothModule.dll</HintPath>
       <Private>false</Private>
       <SpecificVersion>false</SpecificVersion>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>D:/games/Steam/steamapps/common/ChilloutVR/ChilloutVR_Data/Managed/UnityEngine.CoreModule.dll</HintPath>
       <Private>false</Private>
       <SpecificVersion>false</SpecificVersion>
     </Reference>
     <Reference Include="UnityEngine.InputLegacyModule">
-      <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+      <HintPath>D:/games/Steam/steamapps/common/ChilloutVR/ChilloutVR_Data/Managed/UnityEngine.InputLegacyModule.dll</HintPath>
       <Private>false</Private>
       <SpecificVersion>false</SpecificVersion>
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+      <HintPath>D:/games/Steam/steamapps/common/ChilloutVR/ChilloutVR_Data/Managed/UnityEngine.PhysicsModule.dll</HintPath>
       <Private>false</Private>
       <SpecificVersion>false</SpecificVersion>
     </Reference>
     <Reference Include="UnityEngine.ParticleSystemModule">
-      <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\UnityEngine.ParticleSystemModule.dll</HintPath>
+      <HintPath>D:/games/Steam/steamapps/common/ChilloutVR/ChilloutVR_Data/Managed/UnityEngine.ParticleSystemModule.dll</HintPath>
       <Private>false</Private>
       <SpecificVersion>false</SpecificVersion>
     </Reference>
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy /y &quot;$(TargetPath)&quot; &quot;D:\Games\Steam\steamapps\common\ChilloutVR\Mods\&quot;" />
+    <Exec Command="copy /y &quot;$(TargetPath)&quot; &quot;D:/Games/Steam/steamapps/common/ChilloutVR/Mods/&quot;" />
   </Target>
 
 </Project>
