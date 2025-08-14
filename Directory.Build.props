@@ -1,0 +1,31 @@
+<Project>
+
+  <PropertyGroup>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+    <LangVersion>latest</LangVersion>
+    <!-- Put your ChilloutVR path in a new environnment variable CVRPATH -->
+    <OutputPath>$(CVRPATH)/Mods/</OutputPath>
+    <Platforms>x64</Platforms>
+    <TargetFramework>netstandard2.1</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>embedded</DebugType>
+    <DefineConstants>TRACE</DefineConstants>
+    <PlatformTarget>x64</PlatformTarget>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+
+  <!-- Hack! MelonLoader is locking the Mod files, this way I can build and output the mod dll with the game running -->
+  <Target Name="DeleteOutputDLLIfExists" BeforeTargets="BeforeBuild">
+    <Exec Command="if exist &quot;$(OutputPath)$(TargetName).dll&quot; del /F /Q &quot;$(OutputPath)$(TargetName).dll&quot;" />
+  </Target>
+
+  <!-- Import all CVR and MelonLoader Managed Refs -->
+  <Import Project="References.Items.props" />
+
+</Project>
