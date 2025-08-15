@@ -14,5 +14,4 @@ Merged set of MelonLoader mods for ChilloutVR.
 |[Player Pick Up](/ml_ppu/README.md)|1.0.0 [:arrow_down:](../../releases/latest/download/PlayerPickUp.dll)|
 |[Player Ragdoll Mod](/ml_prm/README.md)|1.2.3 [:arrow_down:](../../releases/latest/download/PlayerRagdollMod.dll)|
 |[Video Player Cookies](/ml_vpc/README.md)|1.0.1 [:arrow_down:](../../releases/latest/download/VideoPlayerCookies.dll)|
-|[Vive Eye Tracking](/ml_vet/README.md)|1.0.0 [:arrow_down:](../../releases/latest/download/ViveEyeTracking.dll)|
 |[Vive Extended Input](/ml_vei/README.md)|1.1.1 [:arrow_down:](../../releases/latest/download/ViveExtendedInput.dll)|
