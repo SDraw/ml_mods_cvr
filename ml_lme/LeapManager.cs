@@ -1,4 +1,4 @@
-﻿using ABI_RC.Core.Player;
+using ABI_RC.Core.Player;
 using ABI_RC.Systems.InputManagement;
 using System.Collections;
 using UnityEngine;

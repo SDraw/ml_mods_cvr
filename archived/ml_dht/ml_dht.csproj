@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>DesktopHeadTracking</AssemblyName>
+    <PackageId>DesktopHeadTracking</PackageId>
+    <Product>DesktopHeadTracking</Product>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="DesktopHeadTracking.json" />
+    <None Remove="resources/mod_menu.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="resources/mod_menu.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="../js/mods_extension.js" Link="resources/mods_extension.js" />
+  </ItemGroup>
+
+</Project>

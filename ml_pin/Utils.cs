@@ -1,4 +1,4 @@
-﻿using ABI_RC.Core.UI;
+using ABI_RC.Core.UI;
 using System.Reflection;
 
 namespace ml_pin

@@ -1,4 +1,4 @@
-﻿using ABI_RC.Core.EventSystem;
+using ABI_RC.Core.EventSystem;
 using ABI_RC.Core.InteractionSystem;
 using ABI_RC.Core.Networking;
 using ABI_RC.Core.Util;

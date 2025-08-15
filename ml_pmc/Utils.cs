@@ -1,4 +1,4 @@
-﻿using ABI.CCK.Components;
+using ABI.CCK.Components;
 using ABI_RC.Core;
 using ABI_RC.Core.Savior;
 using ABI_RC.Systems.InputManagement;

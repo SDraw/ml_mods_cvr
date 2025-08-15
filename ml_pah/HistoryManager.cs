@@ -1,4 +1,4 @@
-﻿using ABI_RC.Core.Networking.API;
+using ABI_RC.Core.Networking.API;
 using ABI_RC.Core.Networking.API.Responses;
 using Newtonsoft.Json;
 using System;

@@ -1,4 +1,4 @@
-﻿using ABI_RC.Core;
+using ABI_RC.Core;
 using ABI_RC.Core.InteractionSystem;
 using ABI_RC.Core.Player;
 using System;

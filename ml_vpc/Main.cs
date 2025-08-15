@@ -1,4 +1,4 @@
-﻿using ABI_RC.VideoPlayer;
+using ABI_RC.VideoPlayer;
 using System.Reflection;
 using System.IO;
 

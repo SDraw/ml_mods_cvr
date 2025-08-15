@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 
 [assembly: AssemblyTitle("AvatarChangeInfo")]
 [assembly: AssemblyVersion("1.0.3")]

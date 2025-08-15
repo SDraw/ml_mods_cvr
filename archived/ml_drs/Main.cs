@@ -1,4 +1,4 @@
-﻿using ABI_RC.Core.UI;
+using ABI_RC.Core.UI;
 using UnityEngine;
 
 namespace ml_drs

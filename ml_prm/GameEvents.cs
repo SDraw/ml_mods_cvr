@@ -1,4 +1,4 @@
-﻿using ABI.CCK.Components;
+using ABI.CCK.Components;
 using ABI_RC.Core;
 using ABI_RC.Core.InteractionSystem;
 using ABI_RC.Core.Player;

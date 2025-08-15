@@ -1,4 +1,4 @@
-﻿using ABI_RC.Core.Util.AnimatorManager;
+using ABI_RC.Core.Util.AnimatorManager;
 using System.Text.RegularExpressions;
 using UnityEngine;
 

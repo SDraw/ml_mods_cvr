@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 
 [assembly: AssemblyTitle("ServerConnectionInfo")]
 [assembly: AssemblyVersion("1.0.2")]

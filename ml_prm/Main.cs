@@ -1,4 +1,4 @@
-﻿using ABI_RC.Core.Util.AssetFiltering;
+using ABI_RC.Core.Util.AssetFiltering;
 
 namespace ml_prm
 {

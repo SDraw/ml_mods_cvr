@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>ViveEyeTracking</AssemblyName>
+    <PackageId>ViveEyeTracking</PackageId>
+    <Product>ViveEyeTracking</Product>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="resources/mod_menu.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="../js/mods_extension.js" Link="resources/mods_extension.js" />
+    <EmbeddedResource Include="resources/mod_menu.js" />
+  </ItemGroup>
+
+</Project>

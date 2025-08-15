@@ -1,4 +1,4 @@
-﻿using BTKUILib.UIObjects;
+using BTKUILib.UIObjects;
 using BTKUILib.UIObjects.Components;
 using System;
 using System.Collections.Generic;
