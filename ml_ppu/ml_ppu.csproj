@@ -4,7 +4,6 @@
     <AssemblyName>PlayerPickUp</AssemblyName>
     <PackageID>PlayerPickUp</PackageID>
     <Product>PlayerPickUp</Product>
-    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>

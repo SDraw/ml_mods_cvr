@@ -4,7 +4,6 @@
     <AssemblyName>PickupArmMovement</AssemblyName>
     <PackageId>PickupArmMovement</PackageId>
     <Product>PickupArmMovement</Product>
-    <Version>1.2.3</Version>
   </PropertyGroup>
 
   <ItemGroup>

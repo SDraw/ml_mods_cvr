@@ -4,7 +4,6 @@
     <AssemblyName>DesktopHeadTracking</AssemblyName>
     <PackageId>DesktopHeadTracking</PackageId>
     <Product>DesktopHeadTracking</Product>
-    <Version>1.3.4</Version>
   </PropertyGroup>
 
   <ItemGroup>

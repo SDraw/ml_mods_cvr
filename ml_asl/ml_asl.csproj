@@ -4,7 +4,6 @@
     <AssemblyName>AvatarSyncedLook</AssemblyName>
     <PackageId>AvatarSyncedLook</PackageId>
     <Product>AvatarSyncedLook</Product>
-    <Version>1.1.2</Version>
   </PropertyGroup>
 
   <ItemGroup>

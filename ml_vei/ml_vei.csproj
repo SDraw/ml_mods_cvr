@@ -4,7 +4,6 @@
     <AssemblyName>ViveExtendedInput</AssemblyName>
     <PackageId>ViveExtendedInput</PackageId>
     <Product>ViveExtendedInput</Product>
-    <Version>1.1.2</Version>
   </PropertyGroup>
 
   <ItemGroup>

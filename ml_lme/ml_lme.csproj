@@ -4,7 +4,6 @@
     <AssemblyName>LeapMotionExtension</AssemblyName>
     <PackageId>LeapMotionExtension</PackageId>
     <Product>LeapMotionExtension</Product>
-    <Version>1.6.2</Version>
   </PropertyGroup>
 
   <ItemGroup>

@@ -4,7 +4,6 @@
     <AssemblyName>ViveEyeTracking</AssemblyName>
     <PackageId>ViveEyeTracking</PackageId>
     <Product>ViveEyeTracking</Product>
-    <Version>1.0.2</Version>
   </PropertyGroup>
 
   <ItemGroup>

@@ -4,7 +4,6 @@
     <AssemblyName>BetterFingersTracking</AssemblyName>
     <PackageId>BetterFingersTracking</PackageId>
     <Product>BetterFingersTracking</Product>
-    <Version>1.1.3</Version>
   </PropertyGroup>
 
   <ItemGroup>

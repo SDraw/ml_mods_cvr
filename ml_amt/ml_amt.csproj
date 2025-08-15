@@ -4,7 +4,6 @@
     <AssemblyName>AvatarMotionTweaker</AssemblyName>
     <PackageId>AvatarMotionTweaker</PackageId>
     <Product>AvatarMotionTweaker</Product>
-    <Version>1.5.2</Version>
   </PropertyGroup>
 
   <ItemGroup>

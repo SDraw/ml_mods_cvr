@@ -4,7 +4,6 @@
     <AssemblyName>PlayerAvatarHistory</AssemblyName>
     <PackageId>PlayerAvatarHistory</PackageId>
     <Product>PlayerAvatarHistory</Product>
-    <Version>1.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
