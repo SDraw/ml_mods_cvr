@@ -19,8 +19,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_asl", "ml_asl/ml_asl.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_pin", "ml_pin/ml_pin.csproj", "{7E493C28-7202-46F8-9789-D6C6FF7E5241}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_dht", "ml_dht/ml_dht.csproj", "{31987392-989C-40C1-A48B-7F6099816EBE}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_bft", "ml_bft/ml_bft.csproj", "{331C995D-9648-44AD-8B02-D5F3A89FDC1F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_vpc", "ml_vpc/ml_vpc.csproj", "{7CF37B93-9341-422D-845C-9AB96DB4D0A1}"
@@ -61,10 +59,6 @@ Global
 		{7E493C28-7202-46F8-9789-D6C6FF7E5241}.Debug|x64.ActiveCfg = Debug|x64
 		{7E493C28-7202-46F8-9789-D6C6FF7E5241}.Release|x64.ActiveCfg = Release|x64
 		{7E493C28-7202-46F8-9789-D6C6FF7E5241}.Release|x64.Build.0 = Release|x64
-		{31987392-989C-40C1-A48B-7F6099816EBE}.Debug|x64.ActiveCfg = Debug|x64
-		{31987392-989C-40C1-A48B-7F6099816EBE}.Debug|x64.Build.0 = Debug|x64
-		{31987392-989C-40C1-A48B-7F6099816EBE}.Release|x64.ActiveCfg = Release|x64
-		{31987392-989C-40C1-A48B-7F6099816EBE}.Release|x64.Build.0 = Release|x64
 		{331C995D-9648-44AD-8B02-D5F3A89FDC1F}.Debug|x64.ActiveCfg = Debug|x64
 		{331C995D-9648-44AD-8B02-D5F3A89FDC1F}.Release|x64.ActiveCfg = Release|x64
 		{331C995D-9648-44AD-8B02-D5F3A89FDC1F}.Release|x64.Build.0 = Release|x64
