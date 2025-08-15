@@ -22,7 +22,7 @@
 
   <!-- Hack! MelonLoader is locking the Mod files, this way I can build and output the mod dll with the game running -->
   <Target Name="DeleteOutputDLLIfExists" BeforeTargets="BeforeBuild">
-    <Exec Command="if exist &quot;$(OutputPath)$(TargetName).dll&quot; del /F /Q &quot;$(OutputPath)$(TargetName).dll&quot;" />
+    <Exec Command="if exist &quot;$(OutputPath)$(TargetName).dll&quot; del /F /Q &quot;$(OutputPath)$(TargetName).dll&quot;" Condition="$([MSBuild]::IsOSPlatform('Windows'))" />
   </Target>
 
   <!-- Import all CVR and MelonLoader Managed Refs -->
