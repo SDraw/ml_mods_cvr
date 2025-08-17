@@ -19,13 +19,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_asl", "ml_asl/ml_asl.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_pin", "ml_pin/ml_pin.csproj", "{7E493C28-7202-46F8-9789-D6C6FF7E5241}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_bft", "ml_bft/ml_bft.csproj", "{331C995D-9648-44AD-8B02-D5F3A89FDC1F}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_vpc", "ml_vpc/ml_vpc.csproj", "{7CF37B93-9341-422D-845C-9AB96DB4D0A1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_bft", "ml_bft\ml_bft.csproj", "{331C995D-9648-44AD-8B02-D5F3A89FDC1F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_ppu", "ml_ppu/ml_ppu.csproj", "{F16DF16B-D127-4A2A-81FF-2FD80F320E64}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ml_pah", "ml_pah/ml_pah.csproj", "{C4659F60-3FED-4F43-88E4-969907D4C7A6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_ppu", "ml_ppu\ml_ppu.csproj", "{F16DF16B-D127-4A2A-81FF-2FD80F320E64}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_pah", "ml_pah\ml_pah.csproj", "{C4659F60-3FED-4F43-88E4-969907D4C7A6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

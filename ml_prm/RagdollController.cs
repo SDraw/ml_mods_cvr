@@ -347,6 +347,7 @@ namespace ml_prm
 
                     BipedRagdollCreator.Options l_options = BipedRagdollCreator.AutodetectOptions(m_puppetReferences);
                     l_options.joints = RagdollCreator.JointType.Character;
+                    l_options.fixFootColliderRotation = false;
                     BipedRagdollCreator.Create(m_puppetReferences, l_options);
 
                     Transform[] l_puppetTransforms = m_puppetReferences.GetRagdollTransforms();
