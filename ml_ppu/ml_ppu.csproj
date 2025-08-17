@@ -1,14 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Platforms>x64</Platforms>
     <AssemblyName>PlayerPickUp</AssemblyName>
-    <PackageID>PlayerPickUp</PackageID>
-    <Product>PlayerPickUp</Product>
+    <Authors>SDraw</Authors>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="../ml_prm/ml_prm.csproj" />
-  </ItemGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <DebugType>embedded</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
 
   <ItemGroup>
     <None Remove="resources/person.png" />
@@ -17,5 +20,62 @@
   <ItemGroup>
     <EmbeddedResource Include="resources/person.png" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>$(CVRPath)/MelonLoader/net35/0Harmony.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(CVRPath)/ChilloutVR_Data/Managed/Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="BTKUILib">
+      <HintPath>$(CVRPath)/Mods/BTKUILib.dll</HintPath>
+      <SpecificVersion>false</SpecificVersion>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="ECM2">
+      <HintPath>$(CVRPath)/ChilloutVR_Data/Managed/ECM2.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="MelonLoader">
+      <HintPath>$(CVRPath)/MelonLoader/net35/MelonLoader.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="PlayerRagdollMod">
+      <HintPath>$(CVRPath)/Mods/PlayerRagdollMod.dll</HintPath>
+      <SpecificVersion>false</SpecificVersion>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>$(CVRPath)/ChilloutVR_Data/Managed/UnityEngine.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="UnityEngine.AnimationModule">
+      <HintPath>$(CVRPath)/ChilloutVR_Data/Managed/UnityEngine.AnimationModule.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(CVRPath)/ChilloutVR_Data/Managed/UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>$(CVRPath)/ChilloutVR_Data/Managed/UnityEngine.PhysicsModule.dll</HintPath>
+      <SpecificVersion>false</SpecificVersion>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy /y &quot;$(TargetPath)&quot; &quot;$(CVRPath)/Mods/&quot;" />
+  </Target>
 
 </Project>

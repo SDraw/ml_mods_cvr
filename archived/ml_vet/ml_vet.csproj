@@ -67,4 +67,5 @@
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="copy /y &quot;$(TargetPath)&quot; &quot;D:\Games\Steam\steamapps\common\ChilloutVR\Mods\&quot;" />
   </Target>
+
 </Project>

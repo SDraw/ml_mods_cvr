@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 
 [assembly: AssemblyTitle("FourPointTracking")]
 [assembly: AssemblyVersion("1.0.9")]

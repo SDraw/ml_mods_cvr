@@ -1,9 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <AssemblyName>LeapMotionExtension</AssemblyName>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Platforms>x64</Platforms>
     <PackageId>LeapMotionExtension</PackageId>
+    <Version>1.6.2</Version>
+    <Authors>SDraw</Authors>
+    <Company>SDraw</Company>
     <Product>LeapMotionExtension</Product>
+    <AssemblyName>LeapMotionExtension</AssemblyName>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <DebugType>embedded</DebugType>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,7 +28,7 @@
     <None Remove="resources/leapmotion_hands.asset" />
     <None Remove="resources/mod_menu.js" />
   </ItemGroup>
-
+  
   <ItemGroup>
     <EmbeddedResource Include="resources/leapmotion_controller.asset" />
     <EmbeddedResource Include="resources/leapmotion_hands.asset" />
@@ -27,13 +37,80 @@
       <Link>resources/LeapC.dll</Link>
     </EmbeddedResource>
   </ItemGroup>
-
+  
+  <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>$(CVRPath)/MelonLoader/net35/0Harmony.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(CVRPath)/ChilloutVR_Data/Managed/Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>$(CVRPath)/ChilloutVR_Data/Managed/Assembly-CSharp-firstpass.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="cohtml.Net">
+      <HintPath>$(CVRPath)/ChilloutVR_Data/Managed/cohtml.Net.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="Cohtml.Runtime">
+      <HintPath>$(CVRPath)/ChilloutVR_Data/Managed/Cohtml.Runtime.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="MelonLoader">
+      <HintPath>$(CVRPath)/MelonLoader/net35/MelonLoader.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>$(CVRPath)/ChilloutVR_Data/Managed/UnityEngine.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="UnityEngine.AnimationModule">
+      <HintPath>$(CVRPath)/ChilloutVR_Data/Managed/UnityEngine.AnimationModule.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="UnityEngine.AssetBundleModule">
+      <HintPath>$(CVRPath)/ChilloutVR_Data/Managed/UnityEngine.AssetBundleModule.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(CVRPath)/ChilloutVR_Data/Managed/UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="UnityEngine.JSONSerializeModule">
+      <HintPath>$(CVRPath)/ChilloutVR_Data/Managed/UnityEngine.JSONSerializeModule.dll</HintPath>
+      <SpecificVersion>false</SpecificVersion>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.XRModule">
+      <HintPath>$(CVRPath)/ChilloutVR_Data/Managed/UnityEngine.XRModule.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+  </ItemGroup>
+  
   <ItemGroup>
     <Folder Include="vendor/LeapCSharp/" />
   </ItemGroup>
-
+  
   <ItemGroup>
     <EmbeddedResource Include="../js/mods_extension.js" Link="resources/mods_extension.js" />
   </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy /y &quot;$(TargetPath)&quot; &quot;$(CVRPath)/Mods/&quot;" />
+  </Target>
 
 </Project>

@@ -1,4 +1,4 @@
-// Add own menu
+﻿// Add own menu
 {
     let l_block = document.createElement('div');
     l_block.innerHTML = `
