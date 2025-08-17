@@ -1,30 +1,27 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.33214.272
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_amt", "ml_amt\ml_amt.csproj", "{714806A3-E6FC-46F6-9D1D-89C77FEBAF06}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_amt", "ml_amt/ml_amt.csproj", "{714806A3-E6FC-46F6-9D1D-89C77FEBAF06}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_lme", "ml_lme\ml_lme.csproj", "{77EA76B1-3709-4FC5-BDBD-8F77160E6DA3}"
-	ProjectSection(ProjectDependencies) = postProject
-		{118675AA-9AC7-4B0C-BFB1-FA1691619502} = {118675AA-9AC7-4B0C-BFB1-FA1691619502}
-	EndProjectSection
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_lme", "ml_lme/ml_lme.csproj", "{77EA76B1-3709-4FC5-BDBD-8F77160E6DA3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_pam", "ml_pam\ml_pam.csproj", "{5B614459-234A-443D-B06D-34FF81ADA67E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_pam", "ml_pam/ml_pam.csproj", "{5B614459-234A-443D-B06D-34FF81ADA67E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_pmc", "ml_pmc\ml_pmc.csproj", "{118675AA-9AC7-4B0C-BFB1-FA1691619502}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_pmc", "ml_pmc/ml_pmc.csproj", "{118675AA-9AC7-4B0C-BFB1-FA1691619502}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_vei", "ml_vei\ml_vei.csproj", "{608CDBD6-8E29-43B7-BCBF-7E3967430A24}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_vei", "ml_vei/ml_vei.csproj", "{608CDBD6-8E29-43B7-BCBF-7E3967430A24}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_prm", "ml_prm\ml_prm.csproj", "{C4C3F080-379F-49DB-ADC6-6328BE884AE3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_prm", "ml_prm/ml_prm.csproj", "{C4C3F080-379F-49DB-ADC6-6328BE884AE3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_asl", "ml_asl\ml_asl.csproj", "{5B4EC6EF-541A-47D2-B602-915205590553}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_asl", "ml_asl/ml_asl.csproj", "{5B4EC6EF-541A-47D2-B602-915205590553}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_pin", "ml_pin\ml_pin.csproj", "{7E493C28-7202-46F8-9789-D6C6FF7E5241}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_pin", "ml_pin/ml_pin.csproj", "{7E493C28-7202-46F8-9789-D6C6FF7E5241}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_bft", "ml_bft\ml_bft.csproj", "{331C995D-9648-44AD-8B02-D5F3A89FDC1F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_vpc", "ml_vpc\ml_vpc.csproj", "{7CF37B93-9341-422D-845C-9AB96DB4D0A1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_ppu", "ml_ppu/ml_ppu.csproj", "{F16DF16B-D127-4A2A-81FF-2FD80F320E64}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_ppu", "ml_ppu\ml_ppu.csproj", "{F16DF16B-D127-4A2A-81FF-2FD80F320E64}"
 EndProject

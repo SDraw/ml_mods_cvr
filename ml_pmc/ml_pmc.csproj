@@ -1,87 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
-    <Platforms>x64</Platforms>
-    <PackageId>PlayerMovementCopycat</PackageId>
-    <Authors>SDraw</Authors>
-    <Company>SDraw</Company>
-    <Product>PlayerMovementCopycat</Product>
-    <Version>1.1.2</Version>
     <AssemblyName>PlayerMovementCopycat</AssemblyName>
+    <PackageId>PlayerMovementCopycat</PackageId>
+    <Product>PlayerMovementCopycat</Product>
   </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <DebugType>embedded</DebugType>
-    <DebugSymbols>true</DebugSymbols>
-  </PropertyGroup>
-
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy /y &quot;$(TargetPath)&quot; &quot;D:\Games\Steam\steamapps\common\ChilloutVR\Mods\&quot;" />
-  </Target>
 
   <ItemGroup>
-    <None Remove="resources\dancing.png" />
-    <None Remove="resources\dancing_on.png" />
+    <None Remove="resources/dancing.png" />
+    <None Remove="resources/dancing_on.png" />
     <None Remove="Utils.cs~RFd8ec2a.TMP" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="resources\dancing.png" />
-    <EmbeddedResource Include="resources\dancing_on.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="0Harmony">
-      <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\MelonLoader\net35\0Harmony.dll</HintPath>
-      <Private>false</Private>
-      <SpecificVersion>false</SpecificVersion>
-    </Reference>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\Assembly-CSharp.dll</HintPath>
-      <Private>false</Private>
-      <SpecificVersion>false</SpecificVersion>
-    </Reference>
-    <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
-      <Private>false</Private>
-      <SpecificVersion>false</SpecificVersion>
-    </Reference>
-    <Reference Include="BTKUILib">
-      <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\Mods\BTKUILib.dll</HintPath>
-      <Private>false</Private>
-      <SpecificVersion>false</SpecificVersion>
-    </Reference>
-    <Reference Include="ECM2">
-      <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\ECM2.dll</HintPath>
-      <SpecificVersion>false</SpecificVersion>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="MelonLoader">
-      <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\MelonLoader\net35\MelonLoader.dll</HintPath>
-      <Private>false</Private>
-      <SpecificVersion>false</SpecificVersion>
-    </Reference>
-    <Reference Include="UnityEngine">
-      <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\UnityEngine.dll</HintPath>
-      <Private>false</Private>
-      <SpecificVersion>false</SpecificVersion>
-    </Reference>
-    <Reference Include="UnityEngine.AnimationModule">
-      <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
-      <Private>false</Private>
-      <SpecificVersion>false</SpecificVersion>
-    </Reference>
-    <Reference Include="UnityEngine.CoreModule">
-      <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
-      <Private>false</Private>
-      <SpecificVersion>false</SpecificVersion>
-    </Reference>
-    <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>D:\games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
-      <Private>false</Private>
-      <SpecificVersion>false</SpecificVersion>
-    </Reference>
+    <EmbeddedResource Include="resources/dancing.png" />
+    <EmbeddedResource Include="resources/dancing_on.png" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-﻿using ABI_RC.Core.AudioEffects;
+using ABI_RC.Core.AudioEffects;
 using System;
 using System.Collections;
 using System.IO;
