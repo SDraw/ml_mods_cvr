@@ -28,7 +28,7 @@
     <None Remove="resources/leapmotion_hands.asset" />
     <None Remove="resources/mod_menu.js" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <EmbeddedResource Include="resources/leapmotion_controller.asset" />
     <EmbeddedResource Include="resources/leapmotion_hands.asset" />
@@ -37,7 +37,7 @@
       <Link>resources/LeapC.dll</Link>
     </EmbeddedResource>
   </ItemGroup>
-  
+
   <ItemGroup>
     <Reference Include="0Harmony">
       <HintPath>$(CVRPath)/MelonLoader/net35/0Harmony.dll</HintPath>
@@ -100,17 +100,17 @@
       <SpecificVersion>false</SpecificVersion>
     </Reference>
   </ItemGroup>
-  
+
   <ItemGroup>
     <Folder Include="vendor/LeapCSharp/" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <EmbeddedResource Include="../js/mods_extension.js" Link="resources/mods_extension.js" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy /y &quot;$(TargetPath)&quot; &quot;$(CVRPath)/Mods/&quot;" />
+    <Exec Command="copy /y &quot;$(TargetPath)&quot; &quot;$(CVRPath)/Mods/&quot;" Condition="$([MSBuild]::IsOSPlatform('Windows'))" />
   </Target>
 
 </Project>

@@ -75,7 +75,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy /y &quot;$(TargetPath)&quot; &quot;$(CVRPath)/Mods/&quot;" />
+    <Exec Command="copy /y &quot;$(TargetPath)&quot; &quot;$(CVRPath)/Mods/&quot;" Condition="$([MSBuild]::IsOSPlatform('Windows'))" />
   </Target>
 
 </Project>
