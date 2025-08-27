@@ -12,9 +12,12 @@ namespace ml_ppu
         {
             Settings.Init();
             GameEvents.Init(HarmonyInstance);
-            ModUi.Init();
             ModSupport.Init();
+        }
 
+        public override void OnLateInitializeMelon()
+        {
+            ModUi.Init();
             MelonLoader.MelonCoroutines.Start(WaitForRootLogic());
         }
 

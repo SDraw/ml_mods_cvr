@@ -2,6 +2,7 @@ using ABI.CCK.Components;
 using ABI_RC.Core;
 using ABI_RC.Core.InteractionSystem;
 using ABI_RC.Core.Player;
+using ABI_RC.Core.UI.UIRework.Managers;
 using ABI_RC.Systems.GameEventSystem;
 using ABI_RC.Systems.IK;
 using ABI_RC.Systems.IK.SubSystems;
@@ -217,7 +218,7 @@ namespace ml_prm
                 if((m_avatarRagdollToggle != null) && m_avatarRagdollToggle.isActiveAndEnabled && m_avatarRagdollToggle.shouldOverride && (m_ragdolled != m_avatarRagdollToggle.isOn))
                     SwitchRagdoll();
 
-                if(Settings.Hotkey && Input.GetKeyDown(Settings.HotkeyKey) && !ViewManager.Instance.IsAnyMenuOpen)
+                if(Settings.Hotkey && Input.GetKeyDown(Settings.HotkeyKey) && !ViewManager.Instance.IsAnyMenuOpen && !KeyboardManager.Instance.IsViewShown)
                     SwitchRagdoll();
 
                 if(m_ragdolled && CVRInputManager.Instance.jump && Settings.JumpRecover)

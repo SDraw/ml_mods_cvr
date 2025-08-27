@@ -9,12 +9,16 @@ namespace ml_bft
 
         public override void OnInitializeMelon()
         {
-            Settings.Init();
             AssetsHandler.Load();
             GameEvents.Init(HarmonyInstance);
+        }
 
+        public override void OnLateInitializeMelon()
+        {
+            Settings.Init();
             MelonLoader.MelonCoroutines.Start(WaitForInstances());
         }
+
         IEnumerator WaitForInstances()
         {
             while(ABI_RC.Systems.InputManagement.CVRInputManager.Instance == null)

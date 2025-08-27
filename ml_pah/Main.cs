@@ -12,17 +12,12 @@ namespace ml_pah
         {
             Settings.Init();
             HistoryManager.Initialize();
-            ModUi.Initialize();
-            MelonLoader.MelonCoroutines.Start(WaitForRootLogic());
         }
 
-        public override void OnDeinitializeMelon()
+        public override void OnLateInitializeMelon()
         {
-            CVRGameEventSystem.Avatar.OnLocalAvatarLoad.RemoveListener(this.OnLocalAvatarLoad);
-            HistoryManager.OnEntriesUpdated.RemoveListener(this.OnHistoryEntriesUpdated);
-
-            ModUi.Shutdown();
-            HistoryManager.Shutdown();
+            ModUi.Initialize();
+            MelonLoader.MelonCoroutines.Start(WaitForRootLogic());
         }
 
         IEnumerator WaitForRootLogic()
@@ -32,6 +27,15 @@ namespace ml_pah
 
             CVRGameEventSystem.Avatar.OnLocalAvatarLoad.AddListener(this.OnLocalAvatarLoad);
             HistoryManager.OnEntriesUpdated.AddListener(this.OnHistoryEntriesUpdated);
+        }
+
+        public override void OnDeinitializeMelon()
+        {
+            CVRGameEventSystem.Avatar.OnLocalAvatarLoad.RemoveListener(this.OnLocalAvatarLoad);
+            HistoryManager.OnEntriesUpdated.RemoveListener(this.OnHistoryEntriesUpdated);
+
+            ModUi.Shutdown();
+            HistoryManager.Shutdown();
         }
 
         public override void OnUpdate()

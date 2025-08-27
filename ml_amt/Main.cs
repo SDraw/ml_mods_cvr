@@ -9,9 +9,12 @@ namespace ml_amt
 
         public override void OnInitializeMelon()
         {
-            Settings.Init();
             GameEvents.Init(HarmonyInstance);
+        }
 
+        public override void OnLateInitializeMelon()
+        {
+            Settings.Init();
             MelonLoader.MelonCoroutines.Start(WaitForRootLogic());
         }
 

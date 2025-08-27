@@ -9,10 +9,13 @@ namespace ml_prm
         public override void OnInitializeMelon()
         {
             Settings.Init();
-            ModUi.Init();
             GameEvents.Init(HarmonyInstance);
             WorldManager.Init();
+        }
 
+        public override void OnLateInitializeMelon()
+        {
+            ModUi.Init();
             MelonLoader.MelonCoroutines.Start(WaitForRootLogic());
             MelonLoader.MelonCoroutines.Start(WaitForWhitelist());
         }

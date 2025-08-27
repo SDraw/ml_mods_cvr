@@ -11,10 +11,13 @@ namespace ml_lme
         public override void OnInitializeMelon()
         {
             DependenciesHandler.ExtractDependencies();
-            Settings.Init();
             AssetsHandler.Load();
             GameEvents.Init(HarmonyInstance);
+        }
 
+        public override void OnLateInitializeMelon()
+        {
+            Settings.Init();
             MelonLoader.MelonCoroutines.Start(WaitForRootLogic());
         }
 

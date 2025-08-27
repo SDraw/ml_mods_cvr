@@ -10,9 +10,12 @@ namespace ml_pmc
         public override void OnInitializeMelon()
         {
             Settings.Init();
-            ModUi.Init();
             GameEvents.Init(HarmonyInstance);
+        }
 
+        public override void OnLateInitializeMelon()
+        {
+            ModUi.Init();
             MelonLoader.MelonCoroutines.Start(WaitForLocalPlayer());
         }
 

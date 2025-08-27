@@ -1,4 +1,5 @@
 using ABI.CCK.Components;
+using ABI_RC.Core.InteractionSystem.Base;
 using ABI_RC.Core.Player;
 using ABI_RC.Systems.IK;
 using System;
@@ -51,7 +52,7 @@ namespace ml_lme
                 );
 
                 p_instance.Patch(
-                    typeof(CVRPickupObject).GetMethod(nameof(CVRPickupObject.Grab), BindingFlags.Instance | BindingFlags.Public),
+                    typeof(Pickupable).GetMethod(nameof(Pickupable.Grab), BindingFlags.Instance | BindingFlags.Public),
                     null,
                     new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnPickupGrab_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
                 );

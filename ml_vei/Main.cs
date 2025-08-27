@@ -9,13 +9,16 @@ namespace ml_vei
     {
         public override void OnInitializeMelon()
         {
-            Settings.Init();
-
             HarmonyInstance.Patch(
                 typeof(CVRXRModule).GetMethod("Update_Gestures_Vive", BindingFlags.Instance | BindingFlags.NonPublic),
                 null,
                 new HarmonyLib.HarmonyMethod(typeof(ViveExtendedInput).GetMethod(nameof(OnViveGesturesUpdate_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
+        }
+
+        public override void OnLateInitializeMelon()
+        {
+            Settings.Init();
         }
 
         static void OnViveGesturesUpdate_Postfix(ref CVRXRModule __instance)

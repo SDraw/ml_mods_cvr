@@ -15,9 +15,12 @@ namespace ml_pin
 
         public override void OnInitializeMelon()
         {
-            Settings.Init();
             ResourcesHandler.ExtractAudioResources();
+        }
 
+        public override void OnLateInitializeMelon()
+        {
+            Settings.Init();
             MelonLoader.MelonCoroutines.Start(WaitForInstances());
         }
 
