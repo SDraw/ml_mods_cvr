@@ -1,4 +1,4 @@
-﻿using ABI_RC.Core;
+using ABI_RC.Core;
 using ABI_RC.Core.Player;
 using ABI_RC.Core.Player.EyeMovement;
 using ABI_RC.Core.Savior;
