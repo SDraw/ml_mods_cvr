@@ -1,4 +1,4 @@
-﻿namespace ml_dht
+namespace ml_dht
 {
     class DataParser
     {

@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.IO.MemoryMappedFiles;
 
 namespace ml_dht

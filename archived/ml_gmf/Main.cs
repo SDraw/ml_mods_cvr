@@ -1,4 +1,4 @@
-﻿namespace ml_gmf
+namespace ml_gmf
 {
     public class GameMainFixes : MelonLoader.MelonMod
     {

@@ -1,4 +1,4 @@
-﻿[assembly: MelonLoader.MelonInfo(typeof(ml_ppu.PlayerPickUp), "PlayerPickUp", "1.0.1", "SDraw", "https://github.com/SDraw/ml_mods_cvr")]
+[assembly: MelonLoader.MelonInfo(typeof(ml_ppu.PlayerPickUp), "PlayerPickUp", "1.0.1", "SDraw", "https://github.com/SDraw/ml_mods_cvr")]
 [assembly: MelonLoader.MelonGame(null, "ChilloutVR")]
 [assembly: MelonLoader.MelonOptionalDependencies("PlayerRagdollMod")]
 [assembly: MelonLoader.MelonPlatform(MelonLoader.MelonPlatformAttribute.CompatiblePlatforms.WINDOWS_X64)]

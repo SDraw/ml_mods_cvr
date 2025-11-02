@@ -1,4 +1,4 @@
-﻿using ABI_RC.Core.Player;
+using ABI_RC.Core.Player;
 using System.Collections;
 
 namespace ml_gmf.Fixes

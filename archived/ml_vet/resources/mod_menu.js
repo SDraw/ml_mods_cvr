@@ -1,4 +1,4 @@
-﻿{
+{
     let l_block = document.createElement('div');
     l_block.innerHTML = `
         <div class ="settings-subcategory">
