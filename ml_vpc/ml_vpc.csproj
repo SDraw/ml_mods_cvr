@@ -20,6 +20,11 @@
   </Target>
 
   <ItemGroup>
+    <EmbeddedResource Include="../js/mods_extension.js" Link="resources/mods_extension.js" />
+    <EmbeddedResource Include="resources/mod_menu.js" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="0Harmony">
       <HintPath>$(CVRPath)/MelonLoader/net35/0Harmony.dll</HintPath>
       <Private>false</Private>
@@ -27,6 +32,16 @@
     </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>$(CVRPath)/ChilloutVR_Data/Managed/Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="cohtml.Net">
+      <HintPath>$(CVRPath)/ChilloutVR_Data/Managed/cohtml.Net.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="Cohtml.Runtime">
+      <HintPath>$(CVRPath)/ChilloutVR_Data/Managed/Cohtml.Runtime.dll</HintPath>
       <Private>false</Private>
       <SpecificVersion>false</SpecificVersion>
     </Reference>
