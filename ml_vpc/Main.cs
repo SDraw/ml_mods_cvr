@@ -11,12 +11,16 @@ namespace ml_vpc
 
         public override void OnInitializeMelon()
         {
-            Settings.Init();
             HarmonyInstance.Patch(typeof(YoutubeDl).GetMethod("GetVideoMetaDataAsync", BindingFlags.NonPublic | BindingFlags.Static),
                 new HarmonyLib.HarmonyMethod(typeof(VideoPlayerCookies).GetMethod(nameof(OnGetYoutubeVideoMetaData_Prefix), BindingFlags.NonPublic | BindingFlags.Static))
             );
 
             ms_cookiesPath = Path.Combine(MelonLoader.Utils.MelonEnvironment.UserDataDirectory, "cookies.txt");
+        }
+
+        public override void OnLateInitializeMelon()
+        {
+            Settings.Init();
         }
 
         static void OnGetYoutubeVideoMetaData_Prefix(ref string parameter)
