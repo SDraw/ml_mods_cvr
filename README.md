@@ -14,7 +14,8 @@ Merged set of MelonLoader mods for ChilloutVR.
 |[Player Ragdoll Mod](/ml_prm/README.md)|1.2.4 [:arrow_down:](../../releases/download/r180/PlayerRagdollMod.dll)|
 |[Players Instance Notifier](/ml_pin/README.md)|1.1.2 [:arrow_down:](../../releases/download/r180/PlayersInstanceNotifier.dll)|
 |[Vive Extended Input](/ml_vei/README.md)|1.1.2 [:arrow_down:](../../releases/download/r180/ViveExtendedInput.dll)|
-|[Video Player Cookies](/ml_vpc/README.md)|1.0.2 [:arrow_down:](../../releases/download/r180/VideoPlayerCookies.dll)|
+|[Video Player Cookies](/ml_vpc/README.md)|1.0.3 [:arrow_down:](../../releases/download/r180/VideoPlayerCookies.dll)|
+
 
 
 
