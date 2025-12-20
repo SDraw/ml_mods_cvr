@@ -13,9 +13,14 @@ Available mod's settings in BTKUILib's page:
 * **Friends only:** allow only friends to pick you up; `true` by default;
 * **Velocity multiplier:** velocity multiplier upon drop/throw; `1.0` by default.
 
+
 To pick you up remote player should:
 * Make hands `grab` pointers to appear on your side (usually, press controller grip, trigger button or fist gesture, depends on remote player controllers type);
 * Touch your avatar's torso with both pointers;
+
+Available additional parameters for AAS animator:
+* **`PickedUp`:** defines current picked up state; boolean.
+  * Note: Can be set as local-only (not synced) if starts with `#` character.
 
 # Notes
 * Compatible with PlayerRagdollMod.

@@ -661,7 +661,7 @@ namespace ml_prm
                 IKSystem.Instance.applyOriginalHipRotation = true;
 
                 PlayerSetup.Instance.AnimatorManager.CancelEmote = true;
-                m_ragdolledParameter.SetValue(true);
+                m_ragdolledParameter?.SetValue(true);
 
                 if(!WorldManager.IsSafeWorld())
                 {
@@ -706,7 +706,7 @@ namespace ml_prm
                 if(m_vrIK != null)
                     m_vrIK.solver.Reset();
 
-                m_ragdolledParameter.SetValue(false);
+                m_ragdolledParameter?.SetValue(false);
 
                 m_puppet.localPosition = Vector3.zero;
                 m_puppet.localRotation = Quaternion.identity;

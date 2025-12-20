@@ -27,6 +27,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_vpc", "ml_vpc\ml_vpc.csproj", "{7CF37B93-9341-422D-845C-9AB96DB4D0A1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_ppu", "ml_ppu\ml_ppu.csproj", "{F16DF16B-D127-4A2A-81FF-2FD80F320E64}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C4C3F080-379F-49DB-ADC6-6328BE884AE3} = {C4C3F080-379F-49DB-ADC6-6328BE884AE3}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ml_pah", "ml_pah\ml_pah.csproj", "{C4659F60-3FED-4F43-88E4-969907D4C7A6}"
 EndProject

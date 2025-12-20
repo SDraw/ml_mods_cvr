@@ -29,7 +29,7 @@ namespace ml_lme
         public override void ModuleAdded()
         {
             base.ModuleAdded();
-            base.InputEnabled = Settings.Enabled;
+            base.InputModuleEnabled = Settings.Enabled;
             base.HapticFeedback = false;
 
             m_inVR = Utils.IsInVR();
@@ -159,7 +159,7 @@ namespace ml_lme
 
         public override void UpdateInput()
         {
-            if(base.InputEnabled)
+            if(base.InputModuleEnabled)
             {
                 LeapParser.LeapData l_data = LeapManager.Instance.GetLatestData();
 
@@ -360,7 +360,7 @@ namespace ml_lme
         // Settings changes
         void OnEnableChanged(bool p_state)
         {
-            base.InputEnabled = p_state;
+            base.InputModuleEnabled = p_state;
 
             m_handVisibleLeft &= p_state;
             m_handVisibleRight &= p_state;

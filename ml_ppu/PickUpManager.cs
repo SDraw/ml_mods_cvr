@@ -33,6 +33,8 @@ namespace ml_ppu
         Vector3 m_lastPosition = Vector3.zero;
         Vector3 m_velocity = Vector3.zero;
 
+        AvatarParameter m_avatarParameter = null;
+
         void Awake()
         {
             if(Instance != null)
@@ -122,6 +124,7 @@ namespace ml_ppu
                         m_held = false;
 
                         BetterBetterCharacterController.Instance.SetVelocity(m_velocity * Settings.VelocityMultiplier);
+                        m_avatarParameter?.SetValue(false);
                     }
                 }
             }
@@ -134,6 +137,8 @@ namespace ml_ppu
                 Animator l_animator = PlayerSetup.Instance.Animator;
                 if((l_animator != null) && l_animator.isHuman)
                 {
+                    m_avatarParameter = new AvatarParameter("PickedUp", PlayerSetup.Instance.AnimatorManager);
+
                     IKSystem.Instance.SetAvatarPose(IKSystem.AvatarPose.TPose);
                     PlayerSetup.Instance.AvatarTransform.localPosition = Vector3.zero;
                     PlayerSetup.Instance.AvatarTransform.localRotation = Quaternion.identity;
@@ -171,6 +176,8 @@ namespace ml_ppu
         {
             try
             {
+                m_avatarParameter = null;
+
                 m_ready = false;
                 m_held = false;
 
@@ -264,6 +271,8 @@ namespace ml_ppu
                         m_lastPosition = l_playerPos;
                         m_velocity = Vector3.zero;
                         m_held = true;
+
+                        m_avatarParameter?.SetValue(true);
                     }
                 }
             }

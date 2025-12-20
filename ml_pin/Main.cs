@@ -1,8 +1,6 @@
 using ABI_RC.Core.AudioEffects;
 using ABI_RC.Core.Networking.IO.Social;
 using ABI_RC.Core.Player;
-using ABI_RC.Core.Savior;
-using ABI_RC.Core.Networking.IO.Instancing;
 using ABI_RC.Systems.GameEventSystem;
 using System;
 using System.Collections;
@@ -111,9 +109,9 @@ namespace ml_pin
 
         bool ShouldNotifyInCurrentInstance()
         {
-            bool l_isInPublic = ((MetaPort.Instance.CurrentInstancePrivacyType == Instances.InstancePrivacyType.Public) && Settings.NotifyInPublic);
-            bool l_isInFriends = (((MetaPort.Instance.CurrentInstancePrivacyType == Instances.InstancePrivacyType.Friends) || (MetaPort.Instance.CurrentInstancePrivacyType == Instances.InstancePrivacyType.FriendsOfFriends)) && Settings.NotifyInFriends);
-            bool l_isInPrivate = (((MetaPort.Instance.CurrentInstancePrivacyType == Instances.InstancePrivacyType.EveryoneCanInvite) || (MetaPort.Instance.CurrentInstancePrivacyType == Instances.InstancePrivacyType.OwnerMustInvite)) && Settings.NotifyInPrivate);
+            bool l_isInPublic = Utils.IsInPublicInstance() && Settings.NotifyInPublic;
+            bool l_isInFriends = Utils.IsInFriendsInstance() && Settings.NotifyInFriends;
+            bool l_isInPrivate = Utils.IsInPrivateInstance() && Settings.NotifyInPrivate;
             return (l_isInPublic || l_isInFriends || l_isInPrivate);
         }
     }

@@ -1,5 +1,6 @@
 using ABI_RC.Core.Networking.API;
 using ABI_RC.Core.Networking.API.Responses;
+using ABI_RC.Core.Networking.API.Responses.DetailsV2;
 using Newtonsoft.Json;
 using System;
 using System.Collections;
@@ -178,12 +179,12 @@ namespace ml_pah
 
         static async Task RequestAvatarInfoTask(AvatarEntry p_entry)
         {
-            BaseResponse<AvatarDetailsResponse> l_baseResponse = await ApiConnection.MakeRequest<AvatarDetailsResponse>(ApiConnection.ApiOperation.AvatarDetail, new { avatarID = p_entry.m_id });
+            BaseResponse<ContentAvatarResponse> l_baseResponse = await ApiConnection.MakeRequest<ContentAvatarResponse>(ApiConnection.ApiOperation.AvatarDetail, new { avatarID = p_entry.m_id }, "2");
             if(l_baseResponse != null)
             {
                 if(!l_baseResponse.IsSuccessStatusCode) return;
                 p_entry.m_name = l_baseResponse.Data.Name;
-                p_entry.m_imageUrl = l_baseResponse.Data.ImageUrl;
+                p_entry.m_imageUrl = l_baseResponse.Data.Image.AbsoluteUri;
                 p_entry.m_cached = true;
             }
         }

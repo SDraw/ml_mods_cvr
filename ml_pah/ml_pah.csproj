@@ -6,6 +6,7 @@
     <PackageId>PlayerAvatarHistory</PackageId>
     <AssemblyName>PlayerAvatarHistory</AssemblyName>
     <Authors>SDraw</Authors>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
