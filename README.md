@@ -1,6 +1,6 @@
 Merged set of MelonLoader mods for ChilloutVR.
 
-**Table for game build 2025r180:**
+**Table for game build 2025r181:**
 | Full name | Latest version |
 |:---------:|:--------------:|
 |[Avatar Motion Tweaker](/ml_amt/README.md)|1.5.3 [:arrow_down:](../../releases/download/r181/AvatarMotionTweaker.dll)|
@@ -15,6 +15,7 @@ Merged set of MelonLoader mods for ChilloutVR.
 |[Players Instance Notifier](/ml_pin/README.md)|1.1.3 [:arrow_down:](../../releases/download/r181/PlayersInstanceNotifier.dll)|
 |[Vive Extended Input](/ml_vei/README.md)|1.1.3 [:arrow_down:](../../releases/download/r181/ViveExtendedInput.dll)|
 |[Video Player Cookies](/ml_vpc/README.md)|1.0.4 [:arrow_down:](../../releases/download/r181/VideoPlayerCookies.dll)|
+
 
 
 
