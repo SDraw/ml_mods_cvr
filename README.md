@@ -4,7 +4,7 @@ Merged set of MelonLoader mods for ChilloutVR.
 | Full name | Latest version |
 |:---------:|:--------------:|
 |[Avatar Motion Tweaker](/ml_amt/README.md)|1.5.3 [:arrow_down:](../../releases/download/r181/AvatarMotionTweaker.dll)|
-|[Avatar Synced Look](/ml_asl/README.md)|1.1.3 [:arrow_down:](../../releases/download/r181/AvatarSyncedLook.dll)|
+|[Avatar Synced Look](/ml_asl/README.md)|1.1.4 [:arrow_down:](../../releases/download/r181/AvatarSyncedLook.dll)|
 |[Better Fingers Tracking](/ml_bft/README.md)|1.1.4 [:arrow_down:](../../releases/download/r181/BetterFingersTracking.dll)|
 |[Leap Motion Extension](/ml_lme/README.md)| 1.6.4 [:arrow_down:](../../releases/download/r181/LeapMotionExtension.dll)|
 |[Pickup Arm Movement](/ml_pam/README.md)|1.2.4 [:arrow_down:](../../releases/download/r181/PickupArmMovement.dll)|
@@ -15,7 +15,6 @@ Merged set of MelonLoader mods for ChilloutVR.
 |[Players Instance Notifier](/ml_pin/README.md)|1.1.3 [:arrow_down:](../../releases/download/r181/PlayersInstanceNotifier.dll)|
 |[Vive Extended Input](/ml_vei/README.md)|1.1.3 [:arrow_down:](../../releases/download/r181/ViveExtendedInput.dll)|
 |[Video Player Cookies](/ml_vpc/README.md)|1.0.4 [:arrow_down:](../../releases/download/r181/VideoPlayerCookies.dll)|
-
 
 
 

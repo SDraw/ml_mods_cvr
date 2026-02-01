@@ -12,13 +12,16 @@ namespace ml_asl
 
         public override void OnInitializeMelon()
         {
-            Settings.Init();
-
             HarmonyInstance.Patch(
                 typeof(PlayerSetup).GetMethod("UpdatePlayerAvatarMovementData", BindingFlags.Instance | BindingFlags.NonPublic),
                 null,
                 new HarmonyLib.HarmonyMethod(typeof(AvatarSyncedLook).GetMethod(nameof(OnPlayerAvatarMovementDataUpdate_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
             );
+        }
+
+        public override void OnLateInitializeMelon()
+        {
+            Settings.Init();
         }
 
         static void OnPlayerAvatarMovementDataUpdate_Postfix(ref PlayerSetup __instance, PlayerAvatarMovementData ____playerAvatarMovementData)
