@@ -677,6 +677,7 @@ namespace ml_prm
 
                 foreach(RagdollBodypartHandler l_handler in m_ragdollBodyHandlers)
                 {
+                    l_handler.RestoreContact();
                     l_handler.SetVelocity(l_velocity);
                     l_handler.SetAngularVelocity(Vector3.zero);
                 }

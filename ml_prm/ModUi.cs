@@ -21,7 +21,6 @@ namespace ml_prm
             Hotkey = 0,
             Gravity,
             PointersReaction,
-            IgnoreLocal,
             CombatReaction,
             AutoRecover,
             Slipperiness,
@@ -35,8 +34,7 @@ namespace ml_prm
             AngularDrag,
             RecoverDelay,
             FallLimit,
-            GestureGrab,
-            FriendsGrab
+            GestureGrab
         }
 
         const string c_ragdollKeyTooltip = "Switch ragdoll mode with '{0}' key";
@@ -52,7 +50,6 @@ namespace ml_prm
         static ToggleButton ms_hotkeyToggle = null;
         static ToggleButton ms_gravityToggle = null;
         static ToggleButton ms_pointersToggle = null;
-        static ToggleButton ms_ignoreLocalToggle = null;
         static ToggleButton ms_combatToggle = null;
         static ToggleButton ms_recoveryToggle = null;
         static ToggleButton ms_slipperinessToggle = null;
@@ -62,7 +59,6 @@ namespace ml_prm
         static ToggleButton ms_buoyancyToggle = null;
         static ToggleButton ms_fallDamageToggle = null;
         static ToggleButton ms_gestureGrabToggle = null;
-        static ToggleButton ms_friendsGrabToggle = null;
         static SliderFloat ms_velocityMultiplierSlider = null;
         static SliderFloat ms_movementDragSlider = null;
         static SliderFloat ms_angularMovementDragSlider = null;
@@ -94,9 +90,6 @@ namespace ml_prm
             ms_pointersToggle = ms_category.AddToggle("Pointers reaction", "React to trigger colliders with CVRPointer component of 'ragdoll' type", Settings.PointersReaction);
             ms_pointersToggle.OnValueUpdated += (state) => OnToggleUpdate(UiIndex.PointersReaction, state);
 
-            ms_ignoreLocalToggle = ms_category.AddToggle("Ignore local pointers", "Ignore local avatar's CVRPointer components of 'ragdoll' type", Settings.IgnoreLocal);
-            ms_ignoreLocalToggle.OnValueUpdated += (state) => OnToggleUpdate(UiIndex.IgnoreLocal, state);
-
             ms_combatToggle = ms_category.AddToggle("Combat reaction", "Ragdoll upon combat system death", Settings.CombatReaction);
             ms_combatToggle.OnValueUpdated += (state) => OnToggleUpdate(UiIndex.CombatReaction, state);
 
@@ -121,11 +114,8 @@ namespace ml_prm
             ms_fallDamageToggle = ms_category.AddToggle("Fall damage", "Enable ragdoll when falling from height", Settings.FallDamage);
             ms_fallDamageToggle.OnValueUpdated += (state) => OnToggleUpdate(UiIndex.FallDamage, state);
 
-            ms_gestureGrabToggle = ms_category.AddToggle("Gesture grab", "Enable grabbing of ragdolled body parts by remote players with trigger/grab gesture<p>Warning: can lead to unpredictable physics behaviour in some cases", Settings.GestureGrab);
+            ms_gestureGrabToggle = ms_category.AddToggle("Grab attaching", "Enable attaching of ragdolled body parts to pointers of 'grab' type<p>Warning: can lead to unpredictable physics behaviour in some cases", Settings.GestureGrab);
             ms_gestureGrabToggle.OnValueUpdated += (state) => OnToggleUpdate(UiIndex.GestureGrab, state);
-
-            ms_friendsGrabToggle = ms_category.AddToggle("Friends grab only", " ", Settings.FriendsGrab);
-            ms_friendsGrabToggle.OnValueUpdated += (state) => OnToggleUpdate(UiIndex.FriendsGrab, state);
 
             ms_velocityMultiplierSlider = ms_category.AddSlider("Velocity multiplier", "Velocity multiplier upon entering ragdoll state", Settings.VelocityMultiplier, 1f, 50f);
             ms_velocityMultiplierSlider.OnValueUpdated += (value) => OnSliderUpdate(UiIndex.VelocityMultiplier, value);
@@ -177,10 +167,6 @@ namespace ml_prm
                         Settings.SetSetting(Settings.ModSetting.PointersReaction, p_state);
                         break;
 
-                    case UiIndex.IgnoreLocal:
-                        Settings.SetSetting(Settings.ModSetting.IgnoreLocal, p_state);
-                        break;
-
                     case UiIndex.CombatReaction:
                         Settings.SetSetting(Settings.ModSetting.CombatReaction, p_state);
                         break;
@@ -215,10 +201,6 @@ namespace ml_prm
 
                     case UiIndex.GestureGrab:
                         Settings.SetSetting(Settings.ModSetting.GestureGrab, p_state);
-                        break;
-
-                    case UiIndex.FriendsGrab:
-                        Settings.SetSetting(Settings.ModSetting.FriendsGrab, p_state);
                         break;
                 }
             }
@@ -275,9 +257,6 @@ namespace ml_prm
             OnToggleUpdate(UiIndex.PointersReaction, true);
             ms_pointersToggle.ToggleValue = true;
 
-            OnToggleUpdate(UiIndex.IgnoreLocal, true);
-            ms_ignoreLocalToggle.ToggleValue = true;
-
             OnToggleUpdate(UiIndex.CombatReaction, true);
             ms_combatToggle.ToggleValue = true;
 
@@ -304,9 +283,6 @@ namespace ml_prm
 
             OnToggleUpdate(UiIndex.GestureGrab, false);
             ms_gestureGrabToggle.ToggleValue = false;
-
-            OnToggleUpdate(UiIndex.FriendsGrab, true);
-            ms_friendsGrabToggle.ToggleValue = true;
 
             OnSliderUpdate(UiIndex.VelocityMultiplier, 2f);
             ms_velocityMultiplierSlider.SetSliderValue(2f);

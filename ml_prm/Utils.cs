@@ -1,13 +1,11 @@
 using ABI.CCK.Components;
-using ABI_RC.Core.Player;
-using ABI_RC.Core.Savior;
-using ABI_RC.Systems.IK;
 using ABI_RC.Systems.Movement;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using System.Linq;
 using ABI_RC.Core.InteractionSystem;
+using NAK.Contacts;
 
 namespace ml_prm
 {
@@ -18,6 +16,8 @@ namespace ml_prm
         static readonly FieldInfo ms_influencerTouchingVolumes = typeof(PhysicsInfluencer).GetField("_touchingVolumes", BindingFlags.Instance | BindingFlags.NonPublic);
         static readonly FieldInfo ms_influencerSubmergedColliders = typeof(PhysicsInfluencer).GetField("_submergedColliders", BindingFlags.Instance | BindingFlags.NonPublic);
         static readonly FieldInfo ms_lastCVRSeat = typeof(BetterBetterCharacterController).GetField("_lastCvrSeat", BindingFlags.Instance | BindingFlags.NonPublic);
+        static readonly FieldInfo ms_contactList = typeof(ContactManager).GetField("contactList", BindingFlags.Instance | BindingFlags.NonPublic);
+        static readonly FieldInfo ms_pendingRemove = typeof(ContactManager).GetField("pendingRemove", BindingFlags.Instance | BindingFlags.NonPublic);
 
         public static void ClearFluidVolumes(this BetterBetterCharacterController p_instance) => (ms_touchingVolumes?.GetValue(p_instance) as List<FluidVolume>)?.Clear();
 
@@ -34,6 +34,18 @@ namespace ml_prm
         public static bool IsObjectInArray(object p_obj, object[] p_enumeration) => p_enumeration.Contains(p_obj);
 
         public static CVRSeat GetCurrentSeat(this BetterBetterCharacterController p_instance) => (ms_lastCVRSeat?.GetValue(p_instance) as CVRSeat);
+
+        public static bool IsRegistered(this ContactManager p_instance, ContactBase p_contact) => (ms_contactList?.GetValue(p_instance) as List<ContactBase>).Contains(p_contact);
+
+        public static void RestoreContact(this ContactManager p_instance, ContactBase p_contact, bool p_state)
+        {
+            if(p_instance.IsRegistered(p_contact))
+                (ms_pendingRemove?.GetValue(p_instance) as HashSet<int>).Remove(p_contact.ContactId);
+            else
+                p_instance.Register(p_contact);
+
+            p_instance.SetEnabled(p_contact.ContactId, p_state);
+        }
 
         // Unity specific
         public static void CopyGlobal(this Transform p_source, Transform p_target)

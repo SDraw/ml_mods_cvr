@@ -1,15 +1,15 @@
 using ABI.CCK.Components;
 using ABI_RC.Core;
-using ABI_RC.Core.Networking.IO.Social;
 using ABI_RC.Core.Player;
-using ABI_RC.Core.Savior;
 using ABI_RC.Systems.Movement;
+using NAK.Contacts;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace ml_prm
 {
     [DisallowMultipleComponent]
-    class RagdollBodypartHandler : MonoBehaviour, CVRTriggerVolume
+    class RagdollBodypartHandler : MonoBehaviour
     {
         const string c_ragdollPointerType = "ragdoll";
         const string c_grabPointerType = "grab";
@@ -18,14 +18,16 @@ namespace ml_prm
 
         Rigidbody m_rigidBody = null;
         public Collider collider { get; set; } = null;
+        ContactReceiver m_contactReciever = null;
 
         PhysicsInfluencer m_physicsInfluencer = null;
         public bool UseBuoyancy { get; set; } = false;
 
         bool m_attached = false;
-        CVRPointer m_attachedPointer = null;
         Transform m_attachTransform = null;
+        ContactSender m_attachedSender = null;
         FixedJoint m_attachJoint = null;
+        static List<ContactSender> ms_attachedSenders = new List<ContactSender>();
 
         // Unity events
         void Awake()
@@ -42,7 +44,28 @@ namespace ml_prm
             }
 
             if(collider != null)
+            {
                 RemoveGameCollision();
+
+                var l_constactShape = ContactConversion.FromCollider(collider, true);
+                m_contactReciever = this.gameObject.AddComponent<ContactReceiver>();
+
+                m_contactReciever.shapeType = l_constactShape.shapeType;
+                m_contactReciever.localPosition = l_constactShape.localPosition;
+                m_contactReciever.localRotation = l_constactShape.localRotation;
+                m_contactReciever.radius = l_constactShape.radius;
+                m_contactReciever.height = l_constactShape.height;
+                m_contactReciever.boxSize = l_constactShape.boxSize;
+
+                m_contactReciever.collisionTags = new string[] { c_ragdollPointerType, c_grabPointerType };
+                m_contactReciever.receiverType = ReceiverType.Constant;
+                m_contactReciever.contentTypes = ContentType.World | ContentType.Avatar | ContentType.Prop;
+                m_contactReciever.SourceContentType = ContentType.Player;
+                m_contactReciever.contactValue = 1f;
+                m_contactReciever.drawGizmos = false;
+
+                m_contactReciever.OnContactEnter += this.OnContactEnter;
+            }
         }
 
         void Start()
@@ -64,46 +87,45 @@ namespace ml_prm
 
                 this.gameObject.name = string.Format("{0} [NoGizmo]", this.gameObject.name);
             }
-
-            if(collider != null)
-            {
-                CVRParticlePointerManager.volumes.Add(this);
-                CVRParticlePointerManager.UpdateParticleSystems();
-            }
         }
 
         void OnDestroy()
         {
-            if(collider != null)
-                CVRParticlePointerManager.RemoveTrigger(collider);
-
             Detach();
         }
 
         void Update()
         {
-            if(m_attached && ((m_attachedPointer == null) || !m_attachedPointer.isActiveAndEnabled))
+            if(m_attached && ((m_attachedSender == null) || !m_attachedSender.isActiveAndEnabled))
                 Detach();
         }
 
-        void OnTriggerEnter(Collider p_col)
+        void OnContactEnter(ContactCollisionInfo p_col)
         {
-            if(m_ready && (RagdollController.Instance != null))
+            if(m_ready && (RagdollController.Instance != null) && ContactManager.Exists)
             {
-                CVRPointer l_pointer = p_col.GetComponent<CVRPointer>();
-
-                // Ragdolling
-                if(Settings.PointersReaction && !RagdollController.Instance.IsRagdolled())
+                ContactSender l_sender = ContactManager.Instance.GetSenderById(p_col.senderContactId);
+                if((l_sender != null) && (l_sender.collisionTags != null))
                 {
-                    if((l_pointer != null) && (l_pointer.type == c_ragdollPointerType) && l_pointer.enabled && !IgnoreCheck(l_pointer.transform))
-                        RagdollController.Instance.Ragdoll();
-                }
+                    foreach(string l_tag in l_sender.collisionTags)
+                    {
+                        switch(l_tag)
+                        {
+                            case c_ragdollPointerType:
+                            {
+                                if(Settings.PointersReaction && !RagdollController.Instance.IsRagdolled() && RestrictionsCheck(l_sender.transform.root))
+                                    RagdollController.Instance.Ragdoll();
+                            }
+                            break;
 
-                //Attachment
-                if(!m_attached && RagdollController.Instance.IsRagdolled())
-                {
-                    if((l_pointer != null) && (l_pointer.type == c_grabPointerType) && RestrictionsCheck(p_col.transform.root))
-                        Attach(l_pointer);
+                            case c_grabPointerType:
+                            {
+                                if(!m_attached && RagdollController.Instance.IsRagdolled() && RestrictionsCheck(l_sender.transform.root))
+                                    Attach(l_sender);
+                            }
+                            break;
+                        }
+                    }
                 }
             }
         }
@@ -196,16 +218,16 @@ namespace ml_prm
                 RemoveGameCollision();
         }
 
-        void Attach(CVRPointer p_pointer)
+        void Attach(ContactSender p_sender)
         {
-            if(!m_attached && (collider != null) && (m_rigidBody != null))
+            if(!m_attached && (collider != null) && (m_rigidBody != null) && !ms_attachedSenders.Contains(p_sender))
             {
-                m_attachedPointer = p_pointer;
+                m_attachedSender = p_sender;
 
                 GameObject l_attachPoint = new GameObject("[AttachPoint]");
-                l_attachPoint.layer = CVRLayers.PlayerNetwork;
+                l_attachPoint.layer = CVRLayers.Default;
                 m_attachTransform = l_attachPoint.transform;
-                m_attachTransform.parent = p_pointer.transform;
+                m_attachTransform.parent = p_sender.transform;
 
                 Rigidbody l_body = l_attachPoint.AddComponent<Rigidbody>();
                 l_body.isKinematic = true;
@@ -216,6 +238,7 @@ namespace ml_prm
                 m_attachJoint.breakForce = Mathf.Infinity;
                 m_attachJoint.breakTorque = Mathf.Infinity;
 
+                ms_attachedSenders.Add(p_sender);
                 m_attached = true;
             }
         }
@@ -232,7 +255,10 @@ namespace ml_prm
                     Object.Destroy(m_attachJoint);
                 m_attachJoint = null;
 
-                m_attachedPointer = null;
+                if(!ReferenceEquals(m_attachedSender, null))
+                    ms_attachedSenders.Remove(m_attachedSender);
+                m_attachedSender = null;
+
                 m_attached = false;
             }
         }
@@ -246,32 +272,12 @@ namespace ml_prm
             BetterBetterCharacterController.Instance.IgnoreCollision(collider);
         }
 
-        // CVRTriggerVolume
-        public void TriggerEnter(CVRPointer pointer)
+        internal void RestoreContact()
         {
-            if(Settings.PointersReaction && (pointer != null) && pointer.enabled && (pointer.type == c_ragdollPointerType) && !IgnoreCheck(pointer.transform) && (RagdollController.Instance != null) && !RagdollController.Instance.IsRagdolled())
-                RagdollController.Instance.Ragdoll();
-        }
-        public void TriggerExit(CVRPointer pointer)
-        {
+            if((m_contactReciever != null) && ContactManager.Exists)
+                ContactManager.Instance.RestoreContact(m_contactReciever, m_contactReciever.isActiveAndEnabled);
         }
 
-        // Static utility
-        static bool IgnoreCheck(Transform p_transform)
-        {
-            return (Settings.IgnoreLocal && (p_transform.root == PlayerSetup.Instance.transform));
-        }
-
-        static bool RestrictionsCheck(Transform p_transform)
-        {
-            if(p_transform == PlayerSetup.Instance.transform)
-                return false;
-
-            PlayerDescriptor l_playerDescriptor = p_transform.GetComponent<PlayerDescriptor>();
-            if(l_playerDescriptor != null)
-                return (!Settings.FriendsGrab || Friends.FriendsWith(l_playerDescriptor.ownerId));
-
-            return false;
-        }
+        static bool RestrictionsCheck(Transform p_transform) => (p_transform != PlayerSetup.Instance.transform);
     }
 }

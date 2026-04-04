@@ -55,7 +55,7 @@ namespace ml_prm
                 );
 
                 p_instance.Patch(
-                    typeof(PlayerSetup).GetMethod("SetupIKScaling", BindingFlags.Instance |BindingFlags.NonPublic),
+                    typeof(PlayerSetup).GetMethod("SetupIKScaling", BindingFlags.Instance | BindingFlags.NonPublic),
                     null,
                     new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnSetupIKScaling_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
                 );
@@ -73,7 +73,7 @@ namespace ml_prm
                 );
 
                 p_instance.Patch(
-                    typeof(RootLogic).GetMethod(nameof(RootLogic.SpawnOnWorldInstance),BindingFlags.Instance | BindingFlags.Public),
+                    typeof(RootLogic).GetMethod(nameof(RootLogic.SpawnOnWorldInstance), BindingFlags.Instance | BindingFlags.Public),
                     new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnWorldSpawn_Prefix), BindingFlags.Static | BindingFlags.NonPublic)),
                     null
                 );
