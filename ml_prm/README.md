@@ -17,7 +17,6 @@ Optional mod's settings page with [BTKUILib](https://github.com/BTK-Development/
 * **Use gravity:** enables/disables gravity for ragdoll; `true` by default.
   * Note: Forcibly enabled in worlds that don't allow flight.
 * **Pointers reaction:** enables ragdoll state when player collides with trigger colliders and particle systems with CVRPointer component of `ragdoll` type (avatars, props and world included); `true` by default.
-* **Ignore local pointers:** enables/disables ignoring of CVRPointer components of `ragdoll` type on local player's avatar; `true` by default.
 * **Combat reaction:** enables ragdoll state upon death in worlds with combat system; `true` by default.
 * **Auto recover:** enables automatic recovering after specific time delay; `false` by default.
 * **Slipperiness:** enables/disable low friction of ragdoll; `false` by default.
@@ -30,9 +29,8 @@ Optional mod's settings page with [BTKUILib](https://github.com/BTK-Development/
 * **Buoyancy:** enables floating in fluid volumes; `true` by default.
   * Note: Forcibly enabled in worlds that don't allow flight.
 * **Fall damage:** enables ragdoll when falling from specific height; `true` by default.
-* **Gesture grab:** enables grabbing of ragdolled body parts by remote players with trigger/grab gesture; `false` by default.
+* **Grab attaching:** enables attaching of ragdolled body parts to pointers with `grab` type of avatars, props and world(s); `false` by default.
   * Note: Can lead to unpredictable physics behaviour in some cases.
-* **Friends grab only:** Allow only friends to be able to grab your radgolled body parts; `true` by default.
 * **Velocity multiplier:** velocity force multiplier based on player's movement direction; `2.0` by default.
   * Note: Limited according to world's fly multiplier.
   * Note: Forcibly set to `1.0` in worlds that don't allow flight.
