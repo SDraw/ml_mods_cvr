@@ -100,6 +100,15 @@ namespace ml_prm
                 Detach();
         }
 
+        void OnCollisionEnter(Collision p_col)
+        {
+            if(Settings.ImpactSounds && m_ready && !m_rigidBody.isKinematic && (p_col.gameObject.layer != CVRLayers.PlayerClone))
+            {
+                if(p_col.impulse.magnitude > 5f)
+                    SoundManager.Instance.PlaySound(SoundManager.ImpactType.Soft);
+            }
+        }
+
         void OnContactEnter(ContactCollisionInfo p_col)
         {
             if(m_ready && (RagdollController.Instance != null) && ContactManager.Exists)

@@ -31,6 +31,8 @@ Optional mod's settings page with [BTKUILib](https://github.com/BTK-Development/
 * **Fall damage:** enables ragdoll when falling from specific height; `true` by default.
 * **Grab attaching:** enables attaching of ragdolled body parts to pointers with `grab` type of avatars, props and world(s); `false` by default.
   * Note: Can lead to unpredictable physics behaviour in some cases.
+* **Impact sounds:** enables collision sound effects of ragdolled body parts; `true` by default.
+  * Note: Sounds can be replaced in `(game_folder)/UserData/PlayerRagdollMod` folder.
 * **Velocity multiplier:** velocity force multiplier based on player's movement direction; `2.0` by default.
   * Note: Limited according to world's fly multiplier.
   * Note: Forcibly set to `1.0` in worlds that don't allow flight.
@@ -39,6 +41,7 @@ Optional mod's settings page with [BTKUILib](https://github.com/BTK-Development/
 * **Angular movement drag:** angular movement resistance; `2.0` by default.
 * **Recover delay:** time delay for enabled `Auto recover` in seconds; `3.0` by default.
 * **Fall limit:** height limit for fall damage; `5.0` by default.
+* **Impact volume:** collision sounds volume of ragdolled body parts; `100.0` by default.
 * **Reset settings:** resets mod settings to default.
 
 Optional mod's settings in [UIExpansionKit](https://github.com/ddakebono/ChilloutMods):

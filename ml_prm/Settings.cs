@@ -33,7 +33,9 @@ namespace ml_prm
             Buoyancy,
             FallDamage,
             FallLimit,
-            GestureGrab
+            GestureGrab,
+            ImpactSounds,
+            ImpactVolume
         }
 
         public static bool Hotkey { get; private set; } = true;
@@ -54,6 +56,8 @@ namespace ml_prm
         public static bool FallDamage { get; private set; } = true;
         public static float FallLimit { get; private set; } = 9.899494f;
         public static bool GestureGrab { get; private set; } = false;
+        public static bool ImpactSounds { get; private set; } = true;
+        public static float ImpactVolume { get; private set; } = 1f;
 
         public static readonly SettingEvent<bool> OnHotkeyChanged = new SettingEvent<bool>();
         public static readonly SettingEvent<KeyCode> OnHotkeyKeyChanged = new SettingEvent<KeyCode>();
@@ -73,6 +77,8 @@ namespace ml_prm
         public static readonly SettingEvent<bool> OnFallDamageChanged = new SettingEvent<bool>();
         public static readonly SettingEvent<float> OnFallLimitChanged = new SettingEvent<float>();
         public static readonly SettingEvent<bool> OnGestureGrabChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<bool> OnImpactSoundsChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<float> OnImpactVolumeChanged = new SettingEvent<float>();
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
         static List<MelonLoader.MelonPreferences_Entry> ms_entries = null;
@@ -100,7 +106,9 @@ namespace ml_prm
                 ms_category.CreateEntry(ModSetting.Buoyancy.ToString(), Buoyancy, null, null, true),
                 ms_category.CreateEntry(ModSetting.FallDamage.ToString(), FallDamage, null, null, true),
                 ms_category.CreateEntry(ModSetting.FallLimit.ToString(), FallLimit, null, null, true),
-                ms_category.CreateEntry(ModSetting.GestureGrab.ToString(), GestureGrab, null, null, true)
+                ms_category.CreateEntry(ModSetting.GestureGrab.ToString(), GestureGrab, null, null, true),
+                ms_category.CreateEntry(ModSetting.ImpactSounds.ToString(), ImpactSounds, null, null, true),
+                ms_category.CreateEntry(ModSetting.ImpactVolume.ToString(), ImpactVolume, null, null, true)
             };
 
             ms_entries[(int)ModSetting.HotkeyKey].OnEntryValueChangedUntyped.Subscribe(OnMelonSettingSave_HotkeyKey);
@@ -123,6 +131,8 @@ namespace ml_prm
             FallDamage = (bool)ms_entries[(int)ModSetting.FallDamage].BoxedValue;
             FallLimit = Mathf.Clamp((float)ms_entries[(int)ModSetting.FallLimit].BoxedValue, 4.5f, 44.5f);
             GestureGrab = (bool)ms_entries[(int)ModSetting.GestureGrab].BoxedValue;
+            ImpactSounds = (bool)ms_entries[(int)ModSetting.ImpactSounds].BoxedValue;
+            ImpactVolume = Mathf.Clamp((float)ms_entries[(int)ModSetting.ImpactVolume].BoxedValue, 0f, 1f);
         }
 
         static void OnMelonSettingSave_HotkeyKey(object p_oldValue, object p_newValue)
@@ -232,6 +242,13 @@ namespace ml_prm
                     }
                     break;
 
+                    case ModSetting.ImpactSounds:
+                    {
+                        ImpactSounds = (bool)p_value;
+                        OnImpactSoundsChanged.Invoke(ImpactSounds);
+                    }
+                    break;
+
                     // Floats
                     case ModSetting.VelocityMultiplier:
                     {
@@ -265,6 +282,13 @@ namespace ml_prm
                     {
                         FallLimit = (float)p_value;
                         OnFallLimitChanged.Invoke(FallLimit);
+                    }
+                    break;
+
+                    case ModSetting.ImpactVolume:
+                    {
+                        ImpactVolume = (float)p_value;
+                        OnImpactVolumeChanged.Invoke(ImpactVolume);
                     }
                     break;
                 }

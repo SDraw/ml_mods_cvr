@@ -5,12 +5,14 @@ namespace ml_prm
     public class PlayerRagdollMod : MelonLoader.MelonMod
     {
         RagdollController m_controller = null;
+        SoundManager m_soundManager = null;
 
         public override void OnInitializeMelon()
         {
             Settings.Init();
             GameEvents.Init(HarmonyInstance);
             WorldManager.Init();
+            ResourcesHandler.ExtractResources();
         }
 
         public override void OnLateInitializeMelon()
@@ -26,6 +28,8 @@ namespace ml_prm
                 yield return null;
 
             m_controller = new UnityEngine.GameObject("[PlayerRagdollMod]").AddComponent<RagdollController>();
+            m_soundManager = new SoundManager(m_controller.transform);
+            m_soundManager.LoadSounds();
         }
 
         System.Collections.IEnumerator WaitForWhitelist()
@@ -39,6 +43,8 @@ namespace ml_prm
         public override void OnDeinitializeMelon()
         {
             WorldManager.DeInit();
+
+            m_soundManager = null;
 
             if(m_controller != null)
                 UnityEngine.Object.Destroy(m_controller.gameObject);

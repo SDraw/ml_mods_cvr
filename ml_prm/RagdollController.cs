@@ -690,6 +690,9 @@ namespace ml_prm
                 m_lastRagdollPosition = m_puppetReferences.hips.position;
                 m_downTime = 0f;
 
+                if(Settings.ImpactSounds)
+                    SoundManager.Instance.PlaySound(SoundManager.ImpactType.Hard);
+
                 m_ragdolled = true;
             }
         }

@@ -34,7 +34,9 @@ namespace ml_prm
             AngularDrag,
             RecoverDelay,
             FallLimit,
-            GestureGrab
+            GestureGrab,
+            ImpactSounds,
+            ImpactVolume
         }
 
         const string c_ragdollKeyTooltip = "Switch ragdoll mode with '{0}' key";
@@ -59,11 +61,13 @@ namespace ml_prm
         static ToggleButton ms_buoyancyToggle = null;
         static ToggleButton ms_fallDamageToggle = null;
         static ToggleButton ms_gestureGrabToggle = null;
+        static ToggleButton ms_impactSoundsToggle = null;
         static SliderFloat ms_velocityMultiplierSlider = null;
         static SliderFloat ms_movementDragSlider = null;
         static SliderFloat ms_angularMovementDragSlider = null;
         static SliderFloat ms_recoverDelaySlider = null;
         static SliderFloat ms_fallLimitSlider = null;
+        static SliderFloat ms_impactVolumeSlider = null;
         static Button ms_resetButton = null;
 
         internal static void Init()
@@ -117,6 +121,9 @@ namespace ml_prm
             ms_gestureGrabToggle = ms_category.AddToggle("Grab attaching", "Enable attaching of ragdolled body parts to pointers of 'grab' type<p>Warning: can lead to unpredictable physics behaviour in some cases", Settings.GestureGrab);
             ms_gestureGrabToggle.OnValueUpdated += (state) => OnToggleUpdate(UiIndex.GestureGrab, state);
 
+            ms_impactSoundsToggle = ms_category.AddToggle("Impact sounds", "Enable collision sound effects of ragdolled body parts", Settings.ImpactSounds);
+            ms_impactSoundsToggle.OnValueUpdated += (state) => OnToggleUpdate(UiIndex.ImpactSounds, state);
+
             ms_velocityMultiplierSlider = ms_category.AddSlider("Velocity multiplier", "Velocity multiplier upon entering ragdoll state", Settings.VelocityMultiplier, 1f, 50f);
             ms_velocityMultiplierSlider.OnValueUpdated += (value) => OnSliderUpdate(UiIndex.VelocityMultiplier, value);
 
@@ -132,6 +139,9 @@ namespace ml_prm
             ms_fallLimitSlider = ms_category.AddSlider("Fall limit", "", Settings.FallLimit, 4.5f, 44.5f);
             ms_fallLimitSlider.SliderTooltip = string.Format(c_fallLimitTooltip, GetDropHeight(Settings.FallLimit));
             ms_fallLimitSlider.OnValueUpdated += (value) => OnSliderUpdate(UiIndex.FallLimit, value);
+
+            ms_impactVolumeSlider = ms_category.AddSlider("Impact volume", "Volume of collision of ragdolled body parts", Settings.ImpactVolume * 100f, 0f, 100f);
+            ms_impactVolumeSlider.OnValueUpdated += (value) => OnSliderUpdate(UiIndex.ImpactVolume, value);
 
             ms_resetButton = ms_category.AddButton("Reset settings", "", "Reset mod settings to default");
             ms_resetButton.OnPress += Reset;
@@ -202,6 +212,10 @@ namespace ml_prm
                     case UiIndex.GestureGrab:
                         Settings.SetSetting(Settings.ModSetting.GestureGrab, p_state);
                         break;
+
+                    case UiIndex.ImpactSounds:
+                        Settings.SetSetting(Settings.ModSetting.ImpactSounds, p_state);
+                        break;
                 }
             }
             catch(Exception e)
@@ -238,6 +252,10 @@ namespace ml_prm
                         ms_fallLimitSlider.SliderTooltip = string.Format(c_fallLimitTooltip, GetDropHeight(p_value));
                     }
                     break;
+
+                    case UiIndex.ImpactVolume:
+                        Settings.SetSetting(Settings.ModSetting.ImpactVolume, p_value * 0.01f);
+                        break;
                 }
             }
             catch(Exception e)
@@ -284,6 +302,9 @@ namespace ml_prm
             OnToggleUpdate(UiIndex.GestureGrab, false);
             ms_gestureGrabToggle.ToggleValue = false;
 
+            OnToggleUpdate(UiIndex.ImpactSounds, true);
+            ms_impactSoundsToggle.ToggleValue = true;
+
             OnSliderUpdate(UiIndex.VelocityMultiplier, 2f);
             ms_velocityMultiplierSlider.SetSliderValue(2f);
 
@@ -298,6 +319,9 @@ namespace ml_prm
 
             OnSliderUpdate(UiIndex.FallLimit, 9.899494f);
             ms_fallLimitSlider.SetSliderValue(9.899494f);
+
+            OnSliderUpdate(UiIndex.ImpactVolume, 100f);
+            ms_impactVolumeSlider.SetSliderValue(100f);
         }
 
         static void OnHotkeyKeyChanged(UnityEngine.KeyCode p_keyCode)

@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <Platforms>x64</Platforms>
     <PackageId>PlayerRagdollMod</PackageId>
-    <Version>1.2.6</Version>
+    <Version>1.2.7</Version>
     <Authors>SDraw</Authors>
     <Company>SDraw</Company>
     <Product>PlayerRagdollMod</Product>
@@ -22,6 +22,19 @@
 
   <ItemGroup>
     <EmbeddedResource Include="resources/person.png" />
+    <EmbeddedResource Include="resources\sounds\body_medium_impact_hard1.wav" />
+    <EmbeddedResource Include="resources\sounds\body_medium_impact_hard2.wav" />
+    <EmbeddedResource Include="resources\sounds\body_medium_impact_hard3.wav" />
+    <EmbeddedResource Include="resources\sounds\body_medium_impact_hard4.wav" />
+    <EmbeddedResource Include="resources\sounds\body_medium_impact_hard5.wav" />
+    <EmbeddedResource Include="resources\sounds\body_medium_impact_hard6.wav" />
+    <EmbeddedResource Include="resources\sounds\body_medium_impact_soft1.wav" />
+    <EmbeddedResource Include="resources\sounds\body_medium_impact_soft2.wav" />
+    <EmbeddedResource Include="resources\sounds\body_medium_impact_soft3.wav" />
+    <EmbeddedResource Include="resources\sounds\body_medium_impact_soft4.wav" />
+    <EmbeddedResource Include="resources\sounds\body_medium_impact_soft5.wav" />
+    <EmbeddedResource Include="resources\sounds\body_medium_impact_soft6.wav" />
+    <EmbeddedResource Include="resources\sounds\body_medium_impact_soft7.wav" />
   </ItemGroup>
 
   <ItemGroup>
@@ -65,6 +78,11 @@
       <Private>false</Private>
       <SpecificVersion>false</SpecificVersion>
     </Reference>
+    <Reference Include="UnityEngine.AudioModule">
+      <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
+      <SpecificVersion>false</SpecificVersion>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="UnityEngine.ClothModule">
       <HintPath>$(CVRPath)/ChilloutVR_Data/Managed/UnityEngine.ClothModule.dll</HintPath>
       <Private>false</Private>
@@ -87,6 +105,16 @@
     </Reference>
     <Reference Include="UnityEngine.ParticleSystemModule">
       <HintPath>$(CVRPath)/ChilloutVR_Data/Managed/UnityEngine.ParticleSystemModule.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestAudioModule">
+      <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\UnityEngine.UnityWebRequestAudioModule.dll</HintPath>
+      <Private>false</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestModule">
+      <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\UnityEngine.UnityWebRequestModule.dll</HintPath>
       <Private>false</Private>
       <SpecificVersion>false</SpecificVersion>
     </Reference>
