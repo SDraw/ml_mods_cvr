@@ -56,4 +56,8 @@
     </Reference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="ml_vpc.csproj.user" />
+  </ItemGroup>
+
 </Project>
