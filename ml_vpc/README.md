@@ -27,6 +27,19 @@ Available mod's settings in `Settings - General - Video Player Cookies`:
   * Firefox-based browsers: [cookies.txt](https://addons.mozilla.org/en-US/firefox/addon/cookies-txt) extension
 * Save result as file named `cookies.txt` in `<game_folder>/UserData` folder
 
+# How to make it work on Linux (Tested on CachyOS / Arch with Firefox)
+Because of Linux / Proton, the cookies.txt doesn't seem to work well, instead it's better to use browser mode, the following tutorial explains how to set it up (tested using Firefox)
+
+* Go to the mod settings and select your browser
+* Put a video and wait for it to fail, then look at the logs
+  * It should tell you an error because it can't find your cookies in a path, for Firefox it looks like `AppData/Local/Packages/Mozilla.Firefox_n80bbvh6b1yt2/LocalCache/Roaming/Mozilla/Firefox/Profiles/`
+* Go to AppData in the drive_c of the game, on Arch this is usually located at `/home/[USER]/.local/share/Steam/steamapps/compatdata/661130/pfx/drive_c/users/steamuser/Appdata`
+* Create all the folders that it requires until the last one, for Firefox this means the folders `Packages`, `Mozilla.Firefox_n80bbvh6b1yt2`, `LocalCache`, `Roaming`, `Mozilla` and `Firefox` but don't create the last one (`Profiles`) yet unless you don't intend to use your real browser
+* Because your cookies could change or expire, instead of giving it the files once, we'll use a symlink to the real firefox on your machine. This is completely up to you and you could just copy the files or get them from somewhere else
+* Now you can create a link that points to the folder of your browser on Linux. For Firefox, this is the `Profiles` folder that should point to `/home/[USER]/.mozilla/firefox/`
+* If you followed all the steps, the next video you put should successfully get the cookies from your browser
+
+
 # Notes
 * After first use yt-dlp will remove unnecessary cookies from file automatically.
 * Cookies contain private information and access to your YouTube account, **do not share them to anyone**.
