@@ -321,7 +321,7 @@ namespace ml_prm
             ms_fallLimitSlider.SetSliderValue(9.899494f);
 
             OnSliderUpdate(UiIndex.ImpactVolume, 100f);
-            ms_impactVolumeSlider.SetSliderValue(100f);
+            ms_impactVolumeSlider.SetSliderValue(25f);
         }
 
         static void OnHotkeyKeyChanged(UnityEngine.KeyCode p_keyCode)

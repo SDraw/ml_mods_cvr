@@ -57,7 +57,7 @@ namespace ml_prm
         public static float FallLimit { get; private set; } = 9.899494f;
         public static bool GestureGrab { get; private set; } = false;
         public static bool ImpactSounds { get; private set; } = true;
-        public static float ImpactVolume { get; private set; } = 1f;
+        public static float ImpactVolume { get; private set; } = 0.25f;
 
         public static readonly SettingEvent<bool> OnHotkeyChanged = new SettingEvent<bool>();
         public static readonly SettingEvent<KeyCode> OnHotkeyKeyChanged = new SettingEvent<KeyCode>();
