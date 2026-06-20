@@ -28,6 +28,7 @@ namespace ml_lme
         public static readonly GameEvent<float> OnRayScale = new GameEvent<float>();
         public static readonly GameEvent<float> OnPlayspaceScale = new GameEvent<float>();
         public static readonly GameEvent<CVRPickupObject> OnPickupGrab = new GameEvent<CVRPickupObject>();
+        public static readonly GameEvent<PlayerAvatarMovementData> OnPostLocalPlayerMovementDataUpdate = new GameEvent<PlayerAvatarMovementData>();
 
         internal static void Init(HarmonyLib.Harmony p_instance)
         {
@@ -55,6 +56,12 @@ namespace ml_lme
                     typeof(Pickupable).GetMethod(nameof(Pickupable.Grab), BindingFlags.Instance | BindingFlags.Public),
                     null,
                     new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnPickupGrab_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
+                );
+
+                p_instance.Patch(
+                    typeof(PlayerSetup).GetMethod("UpdatePlayerAvatarMovementData", BindingFlags.Instance | BindingFlags.NonPublic),
+                    null,
+                    new HarmonyLib.HarmonyMethod(typeof(GameEvents).GetMethod(nameof(OnPlayerAvatarMovementDataUpdate_Postfix), BindingFlags.Static | BindingFlags.NonPublic))
                 );
             }
             catch(Exception e)
@@ -104,6 +111,18 @@ namespace ml_lme
             try
             {
                 OnPickupGrab.Invoke(__instance);
+            }
+            catch(Exception e)
+            {
+                MelonLoader.MelonLogger.Error(e);
+            }
+        }
+
+        static void OnPlayerAvatarMovementDataUpdate_Postfix(PlayerAvatarMovementData ____playerAvatarMovementData)
+        {
+            try
+            {
+                OnPostLocalPlayerMovementDataUpdate.Invoke(____playerAvatarMovementData);
             }
             catch(Exception e)
             {

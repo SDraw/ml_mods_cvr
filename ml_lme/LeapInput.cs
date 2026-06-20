@@ -2,7 +2,6 @@ using ABI.CCK.Components;
 using ABI_RC.Core.InteractionSystem;
 using ABI_RC.Core.Player;
 using ABI_RC.Core.Savior;
-using ABI_RC.Systems.IK;
 using ABI_RC.Systems.InputManagement;
 using ABI_RC.Systems.VRModeSwitch;
 using System.Collections;
@@ -651,7 +650,6 @@ namespace ml_lme
         void SetGameFingersTracking(bool p_state)
         {
             base._inputManager.individualFingerTracking = p_state;
-            IKSystem.Instance.FingerSystem.ControlActive = base._inputManager.individualFingerTracking;
         }
     }
 }

@@ -153,6 +153,7 @@ namespace ml_lme
             CVRGameEventSystem.Avatar.OnLocalAvatarLoad.AddListener(this.OnAvatarSetup);
             CVRGameEventSystem.Avatar.OnLocalAvatarClear.AddListener(this.OnAvatarClear);
             GameEvents.OnAvatarReuse.AddListener(this.OnAvatarReuse);
+            GameEvents.OnPostLocalPlayerMovementDataUpdate.AddListener(this.OnMovementDataUpdate);
         }
 
         void OnDestroy()
@@ -179,6 +180,7 @@ namespace ml_lme
             CVRGameEventSystem.Avatar.OnLocalAvatarLoad.RemoveListener(this.OnAvatarSetup);
             CVRGameEventSystem.Avatar.OnLocalAvatarClear.RemoveListener(this.OnAvatarClear);
             GameEvents.OnAvatarReuse.RemoveListener(this.OnAvatarReuse);
+            GameEvents.OnPostLocalPlayerMovementDataUpdate.RemoveListener(this.OnMovementDataUpdate);
         }
 
         void Update()
@@ -323,6 +325,17 @@ namespace ml_lme
             catch(System.Exception e)
             {
                 MelonLoader.MelonLogger.Error(e);
+            }
+        }
+
+        void OnMovementDataUpdate(PlayerAvatarMovementData p_data)
+        {
+            if(Settings.Enabled && (m_poseHandler != null))
+            {
+                p_data.UseIndividualFingers = true;
+
+                System.Array.Copy(m_pose.muscles, PlayerAvatarMovementData.MuscleGroups.LeftFingersStart, p_data.MuscleValues, PlayerAvatarMovementData.MuscleGroups.LeftFingersStart, PlayerAvatarMovementData.MuscleGroups.LeftFingersCount);
+                System.Array.Copy(m_pose.muscles, PlayerAvatarMovementData.MuscleGroups.RightFingersStart, p_data.MuscleValues, PlayerAvatarMovementData.MuscleGroups.RightFingersStart, PlayerAvatarMovementData.MuscleGroups.RightFingersCount);
             }
         }
 

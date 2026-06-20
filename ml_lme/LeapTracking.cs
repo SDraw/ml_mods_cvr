@@ -1,4 +1,5 @@
 using ABI_RC.Core.Player;
+using ABI_RC.Core.Savior;
 using UnityEngine;
 
 namespace ml_lme
@@ -24,10 +25,9 @@ namespace ml_lme
         {
             if(Instance != null)
             {
-                Object.DestroyImmediate(this);
+                Object.Destroy(this);
                 return;
             }
-
             Instance = this;
 
             m_root = new GameObject("Root").transform;
@@ -136,9 +136,9 @@ namespace ml_lme
         {
             if(Settings.Enabled)
             {
-                Transform l_camera = PlayerSetup.Instance.activeCam.transform;
-                m_root.position = l_camera.position;
-                m_root.rotation = (Settings.HeadAttach ? l_camera.rotation : PlayerSetup.Instance.GetPlayerRotation());
+                Transform l_pivot = MetaPort.Instance.isUsingVr ? PlayerSetup.Instance.vrCamera.transform : PlayerSetup.Instance.desktopCameraPivot;
+                m_root.position = l_pivot.position;
+                m_root.rotation = (Settings.HeadAttach ? l_pivot.rotation : PlayerSetup.Instance.GetPlayerRotation());
 
                 LeapParser.LeapData l_data = LeapManager.Instance.GetLatestData();
 

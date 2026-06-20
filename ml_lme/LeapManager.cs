@@ -21,7 +21,7 @@ namespace ml_lme
         {
             if(Instance != null)
             {
-                DestroyImmediate(this);
+                Destroy(this);
                 return;
             }
 
