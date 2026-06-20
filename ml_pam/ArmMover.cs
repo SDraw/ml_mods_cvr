@@ -32,7 +32,7 @@ namespace ml_pam
 
         VRIK m_vrIK = null;
         Vector4 m_armsLength; // x,y - from upper arm to hand; z,w - from center to upper arm
-        Transform m_camera = null;
+        Transform m_cameraPivot = null;
         IKInfo m_ikInfo;
 
         Transform m_root = null;
@@ -69,7 +69,7 @@ namespace ml_pam
 
         void Start()
         {
-            m_camera = PlayerSetup.Instance.activeCam.transform;
+            m_cameraPivot = PlayerSetup.Instance.desktopCameraPivot;
 
             m_root = new GameObject("Root").transform;
             m_root.parent = this.transform;
@@ -162,11 +162,8 @@ namespace ml_pam
 
         void Update()
         {
-            if((m_root != null) && (m_camera != null))
-            {
-                m_root.position = m_camera.position;
-                m_root.rotation = m_camera.rotation;
-            }
+            m_root.position = m_cameraPivot.position;
+            m_root.rotation = m_cameraPivot.rotation;
 
             if(!ReferenceEquals(m_pickup, null) && (m_pickup == null))
                 OnPickupDrop(m_pickup);
@@ -245,11 +242,8 @@ namespace ml_pam
 
         void LateUpdate()
         {
-            if((m_root != null) && (m_camera != null))
-            {
-                m_root.position = m_camera.position;
-                m_root.rotation = m_camera.rotation;
-            }
+            m_root.position = m_cameraPivot.position;
+            m_root.rotation = m_cameraPivot.rotation;
         }
 
         // VRIK updates
@@ -363,8 +357,6 @@ namespace ml_pam
         {
             try
             {
-                m_camera = PlayerSetup.Instance.activeCam.transform;
-
                 if(PlayerSetup.Instance.Animator.isHuman)
                 {
                     m_vrIK = PlayerSetup.Instance.Animator.GetComponent<VRIK>();
@@ -457,7 +449,7 @@ namespace ml_pam
                     }
                 }
                 else
-                    m_offset = m_pickup.transform.GetMatrix().inverse * Matrix4x4.TRS(p_hit, m_camera.rotation, Vector3.one);
+                    m_offset = m_pickup.transform.GetMatrix().inverse * Matrix4x4.TRS(p_hit, m_cameraPivot.rotation, Vector3.one);
 
                 if(Settings.Enabled)
                     OnLeadingHandChanged(Settings.LeadingHand);
@@ -485,7 +477,6 @@ namespace ml_pam
         {
             try
             {
-                m_camera = PlayerSetup.Instance.activeCam.transform;
                 this.enabled = !Utils.IsInVR();
             }
             catch(System.Exception e)
