@@ -2,7 +2,6 @@ using ABI.CCK.Components;
 using ABI_RC.Core.Networking.IO.Social;
 using ABI_RC.Core.Player;
 using ABI_RC.Systems.GameEventSystem;
-using ABI_RC.Systems.IK;
 using ABI_RC.Systems.IK.SubSystems;
 using ABI_RC.Systems.InputManagement;
 using ABI_RC.Systems.Movement;
@@ -61,6 +60,7 @@ namespace ml_pmc
             CVRGameEventSystem.Avatar.OnLocalAvatarLoad.AddListener(this.OnAvatarSetup);
             GameEvents.OnAvatarPreReuse.AddListener(this.OnAvatarPreReuse);
             GameEvents.OnAvatarPostReuse.AddListener(this.OnAvatarPostReuse);
+            GameEvents.OnPostLocalPlayerMovementDataUpdate.AddListener(this.OnMovementDataUpdate);
 
             ModUi.OnTargetSelect.AddListener(this.OnTargetSelect);
         }
@@ -84,6 +84,7 @@ namespace ml_pmc
             CVRGameEventSystem.Avatar.OnLocalAvatarLoad.RemoveListener(this.OnAvatarSetup);
             GameEvents.OnAvatarPreReuse.RemoveListener(this.OnAvatarPreReuse);
             GameEvents.OnAvatarPostReuse.RemoveListener(this.OnAvatarPostReuse);
+            GameEvents.OnPostLocalPlayerMovementDataUpdate.RemoveListener(this.OnMovementDataUpdate);
 
             ModUi.OnTargetSelect.RemoveListener(this.OnTargetSelect);
         }
@@ -107,76 +108,7 @@ namespace ml_pmc
                         CVRInputManager.Instance.gestureRight = (l_mirror ? m_puppetParser.GetLeftGesture() : m_puppetParser.GetRightGesture());
                     }
 
-                    if(m_puppetParser.HasFingerTracking())
-                    {
-                        m_fingerTracking = true;
-
-                        CVRInputManager.Instance.individualFingerTracking = true;
-                        IKSystem.Instance.FingerSystem.ControlActive = true;
-
-                        ref readonly float[] l_curls = ref m_puppetParser.GetFingerCurls();
-                        ref readonly float[] l_spreads = ref m_puppetParser.GetFingerSpreads();
-
-                        // Left hand
-                        CVRInputManager.Instance.finger1StretchedLeftThumb = l_curls[l_mirror ? 15 : 0];
-                        CVRInputManager.Instance.finger2StretchedLeftThumb = l_curls[l_mirror ? 16 : 1];
-                        CVRInputManager.Instance.finger3StretchedLeftThumb = l_curls[l_mirror ? 17 : 2];
-                        CVRInputManager.Instance.fingerSpreadLeftThumb = l_spreads[l_mirror ? 5 : 0];
-
-                        CVRInputManager.Instance.finger1StretchedLeftIndex = l_curls[l_mirror ? 18 : 3];
-                        CVRInputManager.Instance.finger2StretchedLeftIndex = l_curls[l_mirror ? 19 : 4];
-                        CVRInputManager.Instance.finger3StretchedLeftIndex = l_curls[l_mirror ? 20 : 5];
-                        CVRInputManager.Instance.fingerSpreadLeftIndex = l_spreads[l_mirror ? 6 : 1];
-
-                        CVRInputManager.Instance.finger1StretchedLeftMiddle = l_curls[l_mirror ? 21 : 6];
-                        CVRInputManager.Instance.finger2StretchedLeftMiddle = l_curls[l_mirror ? 22 : 7];
-                        CVRInputManager.Instance.finger3StretchedLeftMiddle = l_curls[l_mirror ? 23 : 8];
-                        CVRInputManager.Instance.fingerSpreadLeftMiddle = l_spreads[l_mirror ? 7 : 2];
-
-                        CVRInputManager.Instance.finger1StretchedLeftRing = l_curls[l_mirror ? 24 : 9];
-                        CVRInputManager.Instance.finger2StretchedLeftRing = l_curls[l_mirror ? 25 : 10];
-                        CVRInputManager.Instance.finger3StretchedLeftRing = l_curls[l_mirror ? 26 : 11];
-                        CVRInputManager.Instance.fingerSpreadLeftRing = l_spreads[l_mirror ? 8 : 3];
-
-                        CVRInputManager.Instance.finger1StretchedLeftPinky = l_curls[l_mirror ? 27 : 12];
-                        CVRInputManager.Instance.finger2StretchedLeftPinky = l_curls[l_mirror ? 28 : 13];
-                        CVRInputManager.Instance.finger3StretchedLeftPinky = l_curls[l_mirror ? 29 : 14];
-                        CVRInputManager.Instance.fingerSpreadLeftPinky = l_spreads[l_mirror ? 9 : 4];
-
-                        // Right hand
-                        CVRInputManager.Instance.finger1StretchedRightThumb = l_curls[l_mirror ? 0 : 15];
-                        CVRInputManager.Instance.finger2StretchedRightThumb = l_curls[l_mirror ? 1 : 16];
-                        CVRInputManager.Instance.finger3StretchedRightThumb = l_curls[l_mirror ? 2 : 17];
-                        CVRInputManager.Instance.fingerSpreadRightThumb = l_spreads[l_mirror ? 0 : 5];
-
-                        CVRInputManager.Instance.finger1StretchedRightIndex = l_curls[l_mirror ? 3 : 18];
-                        CVRInputManager.Instance.finger2StretchedRightIndex = l_curls[l_mirror ? 4 : 19];
-                        CVRInputManager.Instance.finger3StretchedRightIndex = l_curls[l_mirror ? 5 : 20];
-                        CVRInputManager.Instance.fingerSpreadRightIndex = l_spreads[l_mirror ? 1 : 6];
-
-                        CVRInputManager.Instance.finger1StretchedRightMiddle = l_curls[l_mirror ? 6 : 21];
-                        CVRInputManager.Instance.finger2StretchedRightMiddle = l_curls[l_mirror ? 7 : 22];
-                        CVRInputManager.Instance.finger3StretchedRightMiddle = l_curls[l_mirror ? 8 : 23];
-                        CVRInputManager.Instance.fingerSpreadRightMiddle = l_spreads[l_mirror ? 2 : 7];
-
-                        CVRInputManager.Instance.finger1StretchedRightRing = l_curls[l_mirror ? 9 : 24];
-                        CVRInputManager.Instance.finger2StretchedRightRing = l_curls[l_mirror ? 10 : 25];
-                        CVRInputManager.Instance.finger3StretchedRightRing = l_curls[l_mirror ? 11 : 26];
-                        CVRInputManager.Instance.fingerSpreadRightRing = l_spreads[l_mirror ? 3 : 8];
-
-                        CVRInputManager.Instance.finger1StretchedRightPinky = l_curls[l_mirror ? 12 : 27];
-                        CVRInputManager.Instance.finger2StretchedRightPinky = l_curls[l_mirror ? 13 : 28];
-                        CVRInputManager.Instance.finger3StretchedRightPinky = l_curls[l_mirror ? 14 : 29];
-                        CVRInputManager.Instance.fingerSpreadRightPinky = l_spreads[l_mirror ? 4 : 9];
-                    }
-                    else
-                    {
-                        if(m_fingerTracking)
-                        {
-                            RestoreFingerTracking();
-                            m_fingerTracking = false;
-                        }
-                    }
+                    m_fingerTracking = m_puppetParser.HasFingerTracking();
 
                     Matrix4x4 l_offset = m_puppetParser.GetLastOffset();
                     Vector3 l_pos = l_offset * ms_pointVector;
@@ -223,6 +155,8 @@ namespace ml_pmc
 
                 m_puppetParser.GetPose().CopyTo(ref m_pose);
 
+                if(m_fingerTracking)
+                    m_puppetParser.GetFingerMuscles(ref m_pose.muscles);
                 if(Settings.MirrorPose)
                     Utils.MirrorPose(ref m_pose);
 
@@ -238,7 +172,6 @@ namespace ml_pmc
                 if(m_active)
                 {
                     RestoreIK();
-                    RestoreFingerTracking();
                     OnCopycatChanged.Invoke(false);
                 }
                 m_active = false;
@@ -322,6 +255,16 @@ namespace ml_pmc
             {
                 m_lookAtIk.onPreSolverUpdate.AddListener(this.OnLookAtIKPreUpdate);
                 m_lookAtIk.onPostSolverUpdate.AddListener(this.OnLookAtIKPostUpdate);
+            }
+        }
+
+        void OnMovementDataUpdate(PlayerAvatarMovementData p_data)
+        {
+            if(m_active)
+            {
+                p_data.UseIndividualFingers = true;
+                System.Array.Copy(m_pose.muscles, PlayerAvatarMovementData.MuscleGroups.LeftFingersStart, p_data.MuscleValues, PlayerAvatarMovementData.MuscleGroups.LeftFingersStart, PlayerAvatarMovementData.MuscleGroups.LeftFingersCount);
+                System.Array.Copy(m_pose.muscles, PlayerAvatarMovementData.MuscleGroups.RightFingersStart, p_data.MuscleValues, PlayerAvatarMovementData.MuscleGroups.RightFingersStart, PlayerAvatarMovementData.MuscleGroups.RightFingersCount);
             }
         }
 
@@ -415,7 +358,6 @@ namespace ml_pmc
                         }
 
                         RestoreIK();
-                        RestoreFingerTracking();
                         m_fingerTracking = false;
 
                         m_active = false;
@@ -437,78 +379,6 @@ namespace ml_pmc
 
             if(m_vrIk != null)
                 m_vrIk.solver.Reset();
-        }
-        void RestoreFingerTracking()
-        {
-            CVRInputManager.Instance.individualFingerTracking = (m_inVr && Utils.AreKnucklesInUse() && !CVRInputManager._moduleXR.SkeletalToggleValue);
-            IKSystem.Instance.FingerSystem.ControlActive = CVRInputManager.Instance.individualFingerTracking;
-
-            if(!CVRInputManager.Instance.individualFingerTracking)
-            {
-                // Left hand
-                CVRInputManager.Instance.finger1StretchedLeftThumb = 0f;
-                CVRInputManager.Instance.finger2StretchedLeftThumb = 0f;
-                CVRInputManager.Instance.finger3StretchedLeftThumb = 0f;
-                CVRInputManager.Instance.fingerSpreadLeftThumb = 0f;
-
-                CVRInputManager.Instance.finger1StretchedLeftIndex = 0f;
-                CVRInputManager.Instance.finger2StretchedLeftIndex = 0f;
-                CVRInputManager.Instance.finger3StretchedLeftIndex = 0f;
-                CVRInputManager.Instance.fingerSpreadLeftIndex = 0f;
-
-                CVRInputManager.Instance.finger1StretchedLeftMiddle = 0;
-                CVRInputManager.Instance.finger2StretchedLeftMiddle = 0f;
-                CVRInputManager.Instance.finger3StretchedLeftMiddle = 0f;
-                CVRInputManager.Instance.fingerSpreadLeftMiddle = 0f;
-
-                CVRInputManager.Instance.finger1StretchedLeftRing = 0f;
-                CVRInputManager.Instance.finger2StretchedLeftRing = 0f;
-                CVRInputManager.Instance.finger3StretchedLeftRing = 0f;
-                CVRInputManager.Instance.fingerSpreadLeftRing = 0f;
-
-                CVRInputManager.Instance.finger1StretchedLeftPinky = 0f;
-                CVRInputManager.Instance.finger2StretchedLeftPinky = 0f;
-                CVRInputManager.Instance.finger3StretchedLeftPinky = 0f;
-                CVRInputManager.Instance.fingerSpreadLeftPinky = 0f;
-
-                CVRInputManager.Instance.fingerFullCurlNormalizedLeftThumb = 0f;
-                CVRInputManager.Instance.fingerFullCurlNormalizedLeftIndex = 0f;
-                CVRInputManager.Instance.fingerFullCurlNormalizedLeftMiddle = 0f;
-                CVRInputManager.Instance.fingerFullCurlNormalizedLeftRing = 0f;
-                CVRInputManager.Instance.fingerFullCurlNormalizedLeftPinky = 0f;
-
-                // Right hand
-                CVRInputManager.Instance.finger1StretchedRightThumb = 0f;
-                CVRInputManager.Instance.finger2StretchedRightThumb = 0f;
-                CVRInputManager.Instance.finger3StretchedRightThumb = 0f;
-                CVRInputManager.Instance.fingerSpreadRightThumb = 0f;
-
-                CVRInputManager.Instance.finger1StretchedRightIndex = 0f;
-                CVRInputManager.Instance.finger2StretchedRightIndex = 0f;
-                CVRInputManager.Instance.finger3StretchedRightIndex = 0f;
-                CVRInputManager.Instance.fingerSpreadRightIndex = 0f;
-
-                CVRInputManager.Instance.finger1StretchedRightMiddle = 0f;
-                CVRInputManager.Instance.finger2StretchedRightMiddle = 0f;
-                CVRInputManager.Instance.finger3StretchedRightMiddle = 0f;
-                CVRInputManager.Instance.fingerSpreadRightMiddle = 0f;
-
-                CVRInputManager.Instance.finger1StretchedRightRing = 0f;
-                CVRInputManager.Instance.finger2StretchedRightRing = 0f;
-                CVRInputManager.Instance.finger3StretchedRightRing = 0f;
-                CVRInputManager.Instance.fingerSpreadRightRing = 0f;
-
-                CVRInputManager.Instance.finger1StretchedRightPinky = 0f;
-                CVRInputManager.Instance.finger2StretchedRightPinky = 0f;
-                CVRInputManager.Instance.finger3StretchedRightPinky = 0f;
-                CVRInputManager.Instance.fingerSpreadRightPinky = 0f;
-
-                CVRInputManager.Instance.fingerFullCurlNormalizedRightThumb = 0f;
-                CVRInputManager.Instance.fingerFullCurlNormalizedRightIndex = 0f;
-                CVRInputManager.Instance.fingerFullCurlNormalizedRightMiddle = 0f;
-                CVRInputManager.Instance.fingerFullCurlNormalizedRightRing = 0f;
-                CVRInputManager.Instance.fingerFullCurlNormalizedRightPinky = 0f;
-            }
         }
     }
 }

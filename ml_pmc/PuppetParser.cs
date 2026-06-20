@@ -20,14 +20,6 @@ namespace ml_pmc
         float m_leftGesture = 0f;
         float m_rightGesture = 0f;
         bool m_fingerTracking = false;
-        readonly float[] m_fingerCurls = null;
-        readonly float[] m_fingerSpreads = null;
-
-        internal PuppetParser()
-        {
-            m_fingerCurls = new float[30];
-            m_fingerSpreads = new float[10];
-        }
 
         // Unity events
         void Start()
@@ -59,18 +51,6 @@ namespace ml_pmc
                 m_leftGesture = m_puppetMaster.PlayerAvatarMovementDataInput.AnimatorGestureLeft;
                 m_rightGesture = m_puppetMaster.PlayerAvatarMovementDataInput.AnimatorGestureRight;
                 m_fingerTracking = m_puppetMaster.PlayerAvatarMovementDataInput.UseIndividualFingers;
-                if(m_fingerTracking)
-                {
-                    for(int i = 0; i < 10; i++)
-                    {
-                        int l_stepA = i * 3;
-                        int l_stepB = i * 4;
-                        m_fingerCurls[l_stepA] = m_puppetMaster.PlayerAvatarMovementDataInput.MuscleValues[55 + l_stepB];
-                        m_fingerCurls[l_stepA + 1] = m_puppetMaster.PlayerAvatarMovementDataInput.MuscleValues[57 + l_stepB];
-                        m_fingerCurls[l_stepA + 2] = m_puppetMaster.PlayerAvatarMovementDataInput.MuscleValues[58 + l_stepB];
-                        m_fingerSpreads[i] = m_puppetMaster.PlayerAvatarMovementDataInput.MuscleValues[56 + l_stepB];
-                    }
-                }
 
                 Matrix4x4 l_current = this.transform.GetMatrix();
                 m_offset = m_matrix.inverse * l_current;
@@ -84,13 +64,18 @@ namespace ml_pmc
                 m_poseHandler.GetHumanPose(ref m_pose);
         }
 
+        // Class methods
         public ref HumanPose GetPose() => ref m_pose;
         public ref Matrix4x4 GetLastOffset() => ref m_offset;
         public bool IsSitting() => m_sitting;
         public float GetLeftGesture() => m_leftGesture;
         public float GetRightGesture() => m_rightGesture;
         public bool HasFingerTracking() => m_fingerTracking;
-        public ref readonly float[] GetFingerCurls() => ref m_fingerCurls;
-        public ref readonly float[] GetFingerSpreads() => ref m_fingerSpreads;
+
+        public void GetFingerMuscles(ref float[] target)
+        {
+            System.Array.Copy(m_pose.muscles, PlayerAvatarMovementData.MuscleGroups.LeftFingersStart, target, PlayerAvatarMovementData.MuscleGroups.LeftFingersStart, PlayerAvatarMovementData.MuscleGroups.LeftFingersCount);
+            System.Array.Copy(m_pose.muscles, PlayerAvatarMovementData.MuscleGroups.RightFingersStart, target, PlayerAvatarMovementData.MuscleGroups.RightFingersStart, PlayerAvatarMovementData.MuscleGroups.RightFingersCount);
+        }
     }
 }
