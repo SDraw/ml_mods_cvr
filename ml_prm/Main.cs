@@ -1,9 +1,13 @@
 using ABI_RC.Core.Util.AssetFiltering;
+using System;
+using System.Collections;
 
 namespace ml_prm
 {
     public class PlayerRagdollMod : MelonLoader.MelonMod
     {
+        public static readonly Guid ms_modGuid = new Guid("19128384-2f31-4a86-bcbd-6fa889dcc2ad");
+
         RagdollController m_controller = null;
         SoundManager m_soundManager = null;
 
@@ -22,7 +26,7 @@ namespace ml_prm
             MelonLoader.MelonCoroutines.Start(WaitForWhitelist());
         }
 
-        System.Collections.IEnumerator WaitForRootLogic()
+        IEnumerator WaitForRootLogic()
         {
             while(ABI_RC.Core.RootLogic.Instance == null)
                 yield return null;
@@ -32,7 +36,7 @@ namespace ml_prm
             m_soundManager.LoadSounds();
         }
 
-        System.Collections.IEnumerator WaitForWhitelist()
+        IEnumerator WaitForWhitelist()
         {
             // Whitelist the toggle script
             while(SharedFilter.LocalComponentWhitelist == null)

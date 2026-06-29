@@ -35,6 +35,7 @@ namespace ml_prm
             FallLimit,
             GestureGrab,
             ImpactSounds,
+            ImpactSync,
             ImpactVolume
         }
 
@@ -57,6 +58,7 @@ namespace ml_prm
         public static float FallLimit { get; private set; } = 9.899494f;
         public static bool GestureGrab { get; private set; } = false;
         public static bool ImpactSounds { get; private set; } = true;
+        public static bool ImpactSync { get; private set; } = true;
         public static float ImpactVolume { get; private set; } = 0.25f;
 
         public static readonly SettingEvent<bool> OnHotkeyChanged = new SettingEvent<bool>();
@@ -78,6 +80,7 @@ namespace ml_prm
         public static readonly SettingEvent<float> OnFallLimitChanged = new SettingEvent<float>();
         public static readonly SettingEvent<bool> OnGestureGrabChanged = new SettingEvent<bool>();
         public static readonly SettingEvent<bool> OnImpactSoundsChanged = new SettingEvent<bool>();
+        public static readonly SettingEvent<bool> OnImpactSyncChanged = new SettingEvent<bool>();
         public static readonly SettingEvent<float> OnImpactVolumeChanged = new SettingEvent<float>();
 
         static MelonLoader.MelonPreferences_Category ms_category = null;
@@ -108,6 +111,7 @@ namespace ml_prm
                 ms_category.CreateEntry(ModSetting.FallLimit.ToString(), FallLimit, null, null, true),
                 ms_category.CreateEntry(ModSetting.GestureGrab.ToString(), GestureGrab, null, null, true),
                 ms_category.CreateEntry(ModSetting.ImpactSounds.ToString(), ImpactSounds, null, null, true),
+                ms_category.CreateEntry(ModSetting.ImpactSync.ToString(), ImpactSync, null, null, true),
                 ms_category.CreateEntry(ModSetting.ImpactVolume.ToString(), ImpactVolume, null, null, true)
             };
 
@@ -132,6 +136,7 @@ namespace ml_prm
             FallLimit = Mathf.Clamp((float)ms_entries[(int)ModSetting.FallLimit].BoxedValue, 4.5f, 44.5f);
             GestureGrab = (bool)ms_entries[(int)ModSetting.GestureGrab].BoxedValue;
             ImpactSounds = (bool)ms_entries[(int)ModSetting.ImpactSounds].BoxedValue;
+            ImpactSync = (bool)ms_entries[(int)ModSetting.ImpactSync].BoxedValue;
             ImpactVolume = Mathf.Clamp((float)ms_entries[(int)ModSetting.ImpactVolume].BoxedValue, 0f, 1f);
         }
 
@@ -246,6 +251,13 @@ namespace ml_prm
                     {
                         ImpactSounds = (bool)p_value;
                         OnImpactSoundsChanged.Invoke(ImpactSounds);
+                    }
+                    break;
+
+                    case ModSetting.ImpactSync:
+                    {
+                        ImpactSync = (bool)p_value;
+                        OnImpactSyncChanged.Invoke(ImpactSync);
                     }
                     break;
 

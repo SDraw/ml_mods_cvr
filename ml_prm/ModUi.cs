@@ -36,6 +36,7 @@ namespace ml_prm
             FallLimit,
             GestureGrab,
             ImpactSounds,
+            ImpactSync,
             ImpactVolume
         }
 
@@ -62,6 +63,7 @@ namespace ml_prm
         static ToggleButton ms_fallDamageToggle = null;
         static ToggleButton ms_gestureGrabToggle = null;
         static ToggleButton ms_impactSoundsToggle = null;
+        static ToggleButton ms_impactSyncToggle = null;
         static SliderFloat ms_velocityMultiplierSlider = null;
         static SliderFloat ms_movementDragSlider = null;
         static SliderFloat ms_angularMovementDragSlider = null;
@@ -123,6 +125,9 @@ namespace ml_prm
 
             ms_impactSoundsToggle = ms_category.AddToggle("Impact sounds", "Enable collision sound effects of ragdolled body parts", Settings.ImpactSounds);
             ms_impactSoundsToggle.OnValueUpdated += (state) => OnToggleUpdate(UiIndex.ImpactSounds, state);
+
+            ms_impactSyncToggle = ms_category.AddToggle("Impact sync", "Enable collision sounds sync over network", Settings.ImpactSync);
+            ms_impactSyncToggle.OnValueUpdated += (state) => OnToggleUpdate(UiIndex.ImpactSync, state);
 
             ms_velocityMultiplierSlider = ms_category.AddSlider("Velocity multiplier", "Velocity multiplier upon entering ragdoll state", Settings.VelocityMultiplier, 1f, 50f);
             ms_velocityMultiplierSlider.OnValueUpdated += (value) => OnSliderUpdate(UiIndex.VelocityMultiplier, value);
@@ -215,6 +220,10 @@ namespace ml_prm
 
                     case UiIndex.ImpactSounds:
                         Settings.SetSetting(Settings.ModSetting.ImpactSounds, p_state);
+                        break;
+
+                    case UiIndex.ImpactSync:
+                        Settings.SetSetting(Settings.ModSetting.ImpactSync, p_state);
                         break;
                 }
             }

@@ -17,11 +17,9 @@ namespace ml_prm
         bool m_ready = false;
 
         Rigidbody m_rigidBody = null;
-        public Collider collider { get; set; } = null;
-        ContactReceiver m_contactReciever = null;
-
+        Collider m_collider = null;
         PhysicsInfluencer m_physicsInfluencer = null;
-        public bool UseBuoyancy { get; set; } = false;
+        ContactReceiver m_contactReciever = null;
 
         bool m_attached = false;
         Transform m_attachTransform = null;
@@ -29,10 +27,12 @@ namespace ml_prm
         FixedJoint m_attachJoint = null;
         static List<ContactSender> ms_attachedSenders = new List<ContactSender>();
 
+        public bool UseBuoyancy { get; set; } = false;
+
         // Unity events
         void Awake()
         {
-            collider = this.GetComponent<Collider>();
+            m_collider = this.GetComponent<Collider>();
             m_rigidBody = this.GetComponent<Rigidbody>();
 
             if(m_rigidBody != null)
@@ -43,11 +43,11 @@ namespace ml_prm
                 m_rigidBody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
             }
 
-            if(collider != null)
+            if(m_collider != null)
             {
                 RemoveGameCollision();
 
-                var l_constactShape = ContactConversion.FromCollider(collider, true);
+                var l_constactShape = ContactConversion.FromCollider(m_collider, true);
                 m_contactReciever = this.gameObject.AddComponent<ContactReceiver>();
 
                 m_contactReciever.shapeType = l_constactShape.shapeType;
@@ -70,7 +70,7 @@ namespace ml_prm
 
         void Start()
         {
-            if((m_rigidBody != null) && (collider != null))
+            if((m_rigidBody != null) && (m_collider != null))
             {
                 m_physicsInfluencer = this.gameObject.AddComponent<PhysicsInfluencer>();
                 m_physicsInfluencer.fluidDrag = 3f;
@@ -105,7 +105,7 @@ namespace ml_prm
             if(Settings.ImpactSounds && m_ready && !m_rigidBody.isKinematic && (p_col.gameObject.layer != CVRLayers.PlayerClone))
             {
                 if(p_col.impulse.magnitude > 5f)
-                    SoundManager.Instance.PlaySound(SoundManager.ImpactType.Soft);
+                    SoundManager.Instance.PlayLocalSound(SoundManager.ImpactType.Soft);
             }
         }
 
@@ -140,14 +140,14 @@ namespace ml_prm
         }
 
         // Arbitrary
-        public bool IsReady() => ((m_rigidBody != null) && (collider != null) && (m_physicsInfluencer != null) && m_physicsInfluencer.IsReady());
+        public bool IsReady() => ((m_rigidBody != null) && (m_collider != null) && (m_physicsInfluencer != null) && m_physicsInfluencer.IsReady());
 
         public void SetColliderMaterial(PhysicMaterial p_material)
         {
-            if(collider != null)
+            if(m_collider != null)
             {
-                collider.sharedMaterial = p_material;
-                collider.material = p_material;
+                m_collider.sharedMaterial = p_material;
+                m_collider.material = p_material;
             }
         }
 
@@ -158,8 +158,8 @@ namespace ml_prm
                 m_rigidBody.isKinematic = p_state;
                 m_rigidBody.collisionDetectionMode = (p_state ? CollisionDetectionMode.Discrete : CollisionDetectionMode.ContinuousDynamic);
             }
-            if(collider != null)
-                collider.isTrigger = p_state;
+            if(m_collider != null)
+                m_collider.isTrigger = p_state;
             if(m_physicsInfluencer != null)
                 m_physicsInfluencer.enabled = !p_state;
         }
@@ -223,13 +223,13 @@ namespace ml_prm
                 Object.Destroy(l_controller); // Yeet!
                 m_ready = true;
             }
-            if(collider != null)
+            if(m_collider != null)
                 RemoveGameCollision();
         }
 
         void Attach(ContactSender p_sender)
         {
-            if(!m_attached && (collider != null) && (m_rigidBody != null) && !ms_attachedSenders.Contains(p_sender))
+            if(!m_attached && (m_collider != null) && (m_rigidBody != null) && !ms_attachedSenders.Contains(p_sender))
             {
                 m_attachedSender = p_sender;
 
@@ -274,11 +274,11 @@ namespace ml_prm
 
         void RemoveGameCollision()
         {
-            Physics.IgnoreCollision(collider, BetterBetterCharacterController.Instance.Collider, true);
-            Physics.IgnoreCollision(collider, BetterBetterCharacterController.Instance.KinematicTriggerProxy.Collider, true);
-            Physics.IgnoreCollision(collider, BetterBetterCharacterController.Instance.NonKinematicProxy.Collider, true);
-            Physics.IgnoreCollision(collider, BetterBetterCharacterController.Instance.SphereProxy.Collider, true);
-            BetterBetterCharacterController.Instance.IgnoreCollision(collider);
+            Physics.IgnoreCollision(m_collider, BetterBetterCharacterController.Instance.Collider, true);
+            Physics.IgnoreCollision(m_collider, BetterBetterCharacterController.Instance.KinematicTriggerProxy.Collider, true);
+            Physics.IgnoreCollision(m_collider, BetterBetterCharacterController.Instance.NonKinematicProxy.Collider, true);
+            Physics.IgnoreCollision(m_collider, BetterBetterCharacterController.Instance.SphereProxy.Collider, true);
+            BetterBetterCharacterController.Instance.IgnoreCollision(m_collider);
         }
 
         internal void RestoreContact()

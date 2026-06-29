@@ -48,10 +48,6 @@ namespace ml_prm
         }
 
         // Unity specific
-        public static void CopyGlobal(this Transform p_source, Transform p_target)
-        {
-            p_target.position = p_source.position;
-            p_target.rotation = p_source.rotation;
-        }
+        public static void CopyGlobal(this Transform p_source, Transform p_target) => p_target.SetPositionAndRotation(p_source.position, p_source.rotation);
     }
 }

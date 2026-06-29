@@ -38,8 +38,8 @@ namespace ml_prm
         Transform m_puppetRoot = null;
         BipedRagdollReferences m_puppetReferences;
         readonly List<RagdollBodypartHandler> m_ragdollBodyHandlers = null;
-        readonly List<System.Tuple<Transform, Transform>> m_boneLinks = null;
-        readonly List<System.Tuple<CharacterJoint, Vector3>> m_jointAnchors = null;
+        readonly List<(Transform, Transform)> m_boneLinks = null;
+        readonly List<(CharacterJoint, Vector3)> m_jointAnchors = null;
 
         RagdollToggle m_avatarRagdollToggle = null; // Custom component available for editor
         AvatarParameter m_ragdolledParameter = null;
@@ -58,8 +58,8 @@ namespace ml_prm
         internal RagdollController()
         {
             m_ragdollBodyHandlers = new List<RagdollBodypartHandler>();
-            m_boneLinks = new List<System.Tuple<Transform, Transform>>();
-            m_jointAnchors = new List<System.Tuple<CharacterJoint, Vector3>>();
+            m_boneLinks = new List<(Transform, Transform)>();
+            m_jointAnchors = new List<(CharacterJoint, Vector3)>();
             m_playerPlane = new Plane();
         }
 
@@ -72,6 +72,13 @@ namespace ml_prm
                 return;
             }
 
+            m_physicsMaterial = new PhysicMaterial("Ragdoll");
+            m_physicsMaterial.dynamicFriction = c_defaultFriction;
+            m_physicsMaterial.staticFriction = c_defaultFriction;
+            m_physicsMaterial.frictionCombine = PhysicMaterialCombine.Average;
+            m_physicsMaterial.bounciness = 0f;
+            m_physicsMaterial.bounceCombine = PhysicMaterialCombine.Average;
+
             Instance = this;
             DontDestroyOnLoad(this);
         }
@@ -79,13 +86,6 @@ namespace ml_prm
         void Start()
         {
             this.gameObject.layer = CVRLayers.PlayerClone;
-
-            m_physicsMaterial = new PhysicMaterial("Ragdoll");
-            m_physicsMaterial.dynamicFriction = c_defaultFriction;
-            m_physicsMaterial.staticFriction = c_defaultFriction;
-            m_physicsMaterial.frictionCombine = PhysicMaterialCombine.Average;
-            m_physicsMaterial.bounciness = 0f;
-            m_physicsMaterial.bounceCombine = PhysicMaterialCombine.Average;
 
             m_puppet = new GameObject("[Puppet]").transform;
             m_puppet.parent = this.transform;
@@ -363,7 +363,7 @@ namespace ml_prm
                             {
                                 l_joint.enablePreprocessing = false;
                                 l_joint.enableProjection = true;
-                                m_jointAnchors.Add(System.Tuple.Create(l_joint, l_joint.connectedAnchor));
+                                m_jointAnchors.Add((l_joint, l_joint.connectedAnchor));
                             }
 
                             Rigidbody l_body = l_puppetTransforms[i].GetComponent<Rigidbody>();
@@ -376,7 +376,7 @@ namespace ml_prm
                             }
 
                             if(l_avatarTransforms[i] != null)
-                                m_boneLinks.Add(System.Tuple.Create(l_puppetTransforms[i], l_avatarTransforms[i]));
+                                m_boneLinks.Add((l_puppetTransforms[i], l_avatarTransforms[i]));
                         }
                     }
 
@@ -691,7 +691,7 @@ namespace ml_prm
                 m_downTime = 0f;
 
                 if(Settings.ImpactSounds)
-                    SoundManager.Instance.PlaySound(SoundManager.ImpactType.Hard);
+                    SoundManager.Instance.PlayLocalSound(SoundManager.ImpactType.Hard);
 
                 m_ragdolled = true;
             }
@@ -703,9 +703,9 @@ namespace ml_prm
             {
                 BetterBetterCharacterController.Instance.TeleportPlayerTo(m_puppetReferences.hips.position, PlayerSetup.Instance.GetPlayerRotation().eulerAngles, false, true);
                 TryRestoreMovement();
-                BodySystem.TrackingPositionWeight = 1f;
                 IKSystem.Instance.applyOriginalHipPosition = m_applyHipsPosition;
                 IKSystem.Instance.applyOriginalHipRotation = m_applyHipsRotation;
+                BodySystem.TrackingPositionWeight = 1f;
 
                 if(m_vrIK != null)
                     m_vrIK.solver.Reset();
