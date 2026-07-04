@@ -20,6 +20,7 @@ namespace ml_prm
     public class RagdollController : MonoBehaviour
     {
         const float c_defaultFriction = 0.6f;
+        const string c_lockName = "Ragdoll";
 
         public static RagdollController Instance { get; private set; } = null;
 
@@ -264,7 +265,7 @@ namespace ml_prm
 
                 if(m_ragdolled)
                 {
-                    TryRestoreMovement();
+                    BetterBetterCharacterController.Instance.ImmobilizeLock.SetLock(c_lockName, false);
                     BodySystem.TrackingPositionWeight = 1f;
                 }
 
@@ -650,7 +651,7 @@ namespace ml_prm
 
                 if(BetterBetterCharacterController.Instance.IsFlying())
                     BetterBetterCharacterController.Instance.ChangeFlight(false, true);
-                BetterBetterCharacterController.Instance.SetImmobilized(true);
+                BetterBetterCharacterController.Instance.ImmobilizeLock.SetLock(c_lockName, true);
                 BetterBetterCharacterController.Instance.ClearFluidVolumes();
                 BetterBetterCharacterController.Instance.ResetAllForces();
                 BetterBetterCharacterController.Instance.PauseGroundConstraint();
@@ -702,7 +703,7 @@ namespace ml_prm
             if(m_avatarReady && m_ragdolled && CanUnragdoll())
             {
                 BetterBetterCharacterController.Instance.TeleportPlayerTo(m_puppetReferences.hips.position, PlayerSetup.Instance.GetPlayerRotation().eulerAngles, false, true);
-                TryRestoreMovement();
+                BetterBetterCharacterController.Instance.ImmobilizeLock.SetLock(c_lockName, false);
                 IKSystem.Instance.applyOriginalHipPosition = m_applyHipsPosition;
                 IKSystem.Instance.applyOriginalHipRotation = m_applyHipsRotation;
                 BodySystem.TrackingPositionWeight = 1f;
@@ -766,17 +767,6 @@ namespace ml_prm
             if(m_playerPlane.GetDistanceToPoint(PlayerSetup.Instance.transform.position) < 0f)
                 PlayerSetup.Instance.transform.position = m_playerPlane.ClosestPointOnPlane(PlayerSetup.Instance.transform.position);
         }
-
-        static void TryRestoreMovement()
-        {
-            bool l_state = true;
-            l_state &= ((CombatSystem.Instance == null) || !CombatSystem.Instance.isDown);
-            l_state &= !BetterBetterCharacterController.Instance.IsSitting();
-
-            if(l_state)
-                BetterBetterCharacterController.Instance.SetImmobilized(false);
-        }
-
 
         static Transform CloneTransform(Transform p_source, Transform p_parent, string p_name)
         {

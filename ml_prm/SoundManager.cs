@@ -138,13 +138,13 @@ namespace ml_prm
             AudioClip l_content;
             AudioClip l_clip = (l_content = DownloadHandlerAudioClip.GetContent(l_uwr));
             yield return l_content;
-            if(!l_uwr.isDone || (l_clip == null))
+            if(!l_uwr.isDone || l_clip == null)
                 yield break;
 
             m_clips[(int)p_type] = l_clip;
         }
 
-        public void PlayLocalSound(ImpactType p_type)
+        public void PlayLocalSound(ImpactType p_type, bool p_networked = true)
         {
             if(!m_loaded)
                 return;
@@ -163,11 +163,15 @@ namespace ml_prm
             if(m_clips[l_index] != null)
                 m_audioSourceLocal.PlayOneShot(m_clips[l_index], Settings.ImpactVolume);
 
-            if(Settings.ImpactSync)
+            if(p_networked && Settings.ImpactSync)
             {
-                ModNetworkMessage l_message = new ModNetworkMessage(PlayerRagdollMod.ms_modGuid);
-                l_message.Write(l_index);
-                l_message.Send();
+                try
+                {
+                    ModNetworkMessage l_message = new ModNetworkMessage(PlayerRagdollMod.ms_modGuid);
+                    l_message.Write(l_index);
+                    l_message.Send();
+                }
+                catch(System.Exception) { }
             }
         }
 
@@ -200,7 +204,7 @@ namespace ml_prm
                     }
                 }
             }
-            catch(System.Exception _) { }
+            catch(System.Exception) { }
         }
     }
 }
