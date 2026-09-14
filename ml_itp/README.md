@@ -1,10 +1,9 @@
 # Index Trackpad Params
-This mod allows you to use Index controllers trackpad input as avatar parameters
+This mod allows you to use Index controllers trackpad input as avatar parameters.
 
 # Installation
 * Install [latest MelonLoader](https://github.com/LavaGang/MelonLoader)
 * Install [latest VRBinding](https://github.com/dakyneko/DakyModsCVR)
-
 * Get [latest release DLL](../../../releases/latest):
   * Put `IndexTrackpadParams.dll` in `Mods` folder of game
 
@@ -24,4 +23,4 @@ Available parameters for avatar's animator:
   * **Note:** -1 corresponds to bottom edge of trackpad, 0 - center, 1 - top edge
   
 # Notes
-Even that mod was made primarily for Index controllers, there are no restrictions of using new input actions for other type of controllers.
+Even that mod was made primarily for Index controllers, there are no restrictions of using new input actions for other type of controllers or controls.
