@@ -16,7 +16,7 @@ Assign new input actions for left and right controllers in SteamVR game's bindin
 ## Avatar parameters
 Available parameters for avatar's animator:
 * `IndexLeftTrackpadTouch`, `IndexRightTrackpadTouch`: true/false as boolean; 0 or 1 as float; 0 or 1 as integer
-* `IndexLeftTrackpadForce`, `IndexRighTrackpadForce`: true/false** as boolean; in [0;1] range as float; 0 or 1 as integer
+* `IndexLeftTrackpadForce`, `IndexRighTrackpadForce`: true/false as boolean; in [0;1] range as float; 0 or 1 as integer
 * `IndexLeftTrackpadAxis-x`, `IndexRightTrackpadAxis-x`: in [-1;1] range as float; -1, 0, 1 as integer
   * **Note:** -1 corresponds to left edge of trackpad, 0 - center, 1 - right edge
 * `IndexLeftTrackpadAxis-y`, `IndexRightTrackpadAxis-y`: in [-1;1] range as float; -1, 0, 1 as integer
