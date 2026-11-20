@@ -1,10 +1,12 @@
 using ABI.CCK.Components;
 using ABI_RC.Core;
 using ABI_RC.Core.InteractionSystem;
+using ABI_RC.Core.Networking.IO.Social;
 using ABI_RC.Core.Player;
 using ABI_RC.Systems.GameEventSystem;
 using ABI_RC.Systems.IK;
 using ABI_RC.Systems.Movement;
+using NAK.Contacts;
 using UnityEngine;
 
 namespace ml_ppu
@@ -13,11 +15,10 @@ namespace ml_ppu
     {
         public static PickUpManager Instance { get; private set; } = null;
 
-        Collider m_holderPointA = null;
-        CVRPointer m_holderPointerA = null;
+        PuppetMaster m_holder = null;
+        ContactSender m_holderPointA = null;
         Quaternion m_holderPointAOffset;
-        Collider m_holderPointB = null;
-        CVRPointer m_holderPointerB = null;
+        ContactSender m_holderPointB = null;
         Quaternion m_holderPointBOffset;
 
         CapsuleCollider m_collider = null;
@@ -78,12 +79,6 @@ namespace ml_ppu
             {
                 if(!m_held)
                 {
-                    if((m_holderPointA != null) && !m_collider.bounds.Intersects(m_holderPointA.bounds))
-                    {
-                        m_holderPointA = null;
-                        m_holderPointerA = null;
-                    }
-
                     Vector3 l_armsMidPoint = (m_armLeft.position + m_armRight.position) * 0.5f;
                     Quaternion l_avatarRot = PlayerSetup.Instance.AvatarTransform.rotation;
 
@@ -93,11 +88,14 @@ namespace ml_ppu
 
                     m_collider.transform.position = m_hips.position;
                     m_collider.transform.rotation = l_avatarRot * m_collider.transform.rotation;
+
+                    if(Settings.Enabled)
+                        DetectGrab();
                 }
                 else
                 {
                     // Check if our points are still valid
-                    if((m_holderPointA != null) && m_holderPointerA.isActiveAndEnabled && (m_holderPointB != null) && m_holderPointerB.isActiveAndEnabled && !ModSupport.IsRagdolled())
+                    if(IsHolderValid() && !ModSupport.IsRagdolled())
                     {
                         Matrix4x4 l_midPoint = Matrix4x4.TRS(
                             Vector3.Lerp(m_holderPointA.transform.position, m_holderPointB.transform.position, 0.5f),
@@ -117,10 +115,9 @@ namespace ml_ppu
                     }
                     else
                     {
+                        m_holder = null;
                         m_holderPointA = null;
-                        m_holderPointerA = null;
                         m_holderPointB = null;
-                        m_holderPointerB = null;
                         m_held = false;
 
                         BetterBetterCharacterController.Instance.SetVelocity(m_velocity * Settings.VelocityMultiplier);
@@ -160,7 +157,6 @@ namespace ml_ppu
                         m_collider.height = Vector3.Distance(l_hipsPos, new Vector3(0f, l_armPos.y, l_armPos.z));
                         m_collider.radius = new Vector2(l_armPos.x, l_armPos.z).magnitude;
                         m_collider.center = new Vector3(0f, m_collider.height * 0.5f, 0f);
-                        m_collider.gameObject.AddComponent<GrabDetector>();
 
                         m_ready = true;
                     }
@@ -186,10 +182,9 @@ namespace ml_ppu
                     Destroy(m_collider.gameObject);
                     m_collider = null;
                 }
+                m_holder = null;
                 m_holderPointA = null;
-                m_holderPointerA = null;
                 m_holderPointB = null;
-                m_holderPointerB = null;
             }
             catch(System.Exception e)
             {
@@ -208,10 +203,9 @@ namespace ml_ppu
             if(m_ready && m_held)
             {
                 m_held = false;
+                m_holder = null;
                 m_holderPointA = null;
-                m_holderPointerA = null;
                 m_holderPointB = null;
-                m_holderPointerB = null;
             }
         }
 
@@ -220,10 +214,9 @@ namespace ml_ppu
             if(!p_seat.occupied && m_ready && m_held)
             {
                 m_held = false;
+                m_holder = null;
                 m_holderPointA = null;
-                m_holderPointerA = null;
                 m_holderPointB = null;
-                m_holderPointerB = null;
             }
         }
 
@@ -232,49 +225,78 @@ namespace ml_ppu
             if(!p_state && m_ready && m_held)
             {
                 m_held = false;
+                m_holder = null;
                 m_holderPointA = null;
-                m_holderPointerA = null;
                 m_holderPointB = null;
-                m_holderPointerB = null;
             }
         }
 
-        internal void OnGrabDetected(Collider p_collider, CVRPointer p_pointer)
+        void DetectGrab()
         {
-            if(m_ready && !m_held && CVRWorld.Instance.allowFlying && !ModSupport.IsRagdolled())
+            if(m_held || !CVRWorld.Instance.allowFlying || ModSupport.IsRagdolled() || (CVRPlayerManager.Instance == null))
+                return;
+
+            foreach(CVRPlayerEntity l_player in CVRPlayerManager.Instance.NetworkPlayers)
             {
-                if(m_holderPointA == null)
-                {
-                    m_holderPointA = p_collider;
-                    m_holderPointerA = p_pointer;
-                }
-                else
-                {
-                    if((m_holderPointB == null) && (m_holderPointA != p_collider) && (m_holderPointA.transform.root == p_collider.transform.root))
-                    {
-                        m_holderPointB = p_collider;
-                        m_holderPointerB = p_pointer;
+                PuppetMaster l_puppet = l_player?.PuppetMaster;
+                if((l_puppet == null) || !l_puppet.IsLeftHandGrabbing || !l_puppet.IsRightHandGrabbing)
+                    continue;
 
-                        // Remember offsets
-                        Vector3 l_playerPos = PlayerSetup.Instance.GetPlayerPosition();
-                        Quaternion l_playerRot = PlayerSetup.Instance.GetPlayerRotation();
-                        m_holderPointAOffset = Quaternion.Inverse(m_holderPointA.transform.rotation) * l_playerRot;
-                        m_holderPointBOffset = Quaternion.Inverse(m_holderPointB.transform.rotation) * l_playerRot;
+                if(Settings.FriendsOnly && !Friends.FriendsWith(l_player.Uuid))
+                    continue;
 
-                        Matrix4x4 l_midPoint = Matrix4x4.TRS(
-                            Vector3.Lerp(m_holderPointA.transform.position, m_holderPointB.transform.position, 0.5f),
-                            l_playerRot,
-                            Vector3.one
-                        );
-                        m_colliderOffSet = l_midPoint.inverse * m_collider.transform.GetMatrix();
-                        m_playerOffSet = m_collider.transform.GetMatrix().inverse * Matrix4x4.TRS(l_playerPos, l_playerRot, Vector3.one);
-                        m_lastPosition = l_playerPos;
-                        m_velocity = Vector3.zero;
-                        m_held = true;
+                CVRAvatar l_avatar = l_puppet.AvatarDescriptor;
+                if((l_avatar == null) || !IsSenderInside(l_avatar.leftHandSender) || !IsSenderInside(l_avatar.rightHandSender))
+                    continue;
 
-                        m_avatarParameter?.SetValue(true);
-                    }
-                }
+                OnGrabDetected(l_puppet, l_avatar.leftHandSender, l_avatar.rightHandSender);
+                break;
+            }
+        }
+
+        bool IsSenderInside(ContactSender p_sender)
+        {
+            if((p_sender == null) || !p_sender.isActiveAndEnabled)
+                return false;
+
+            Transform l_transform = p_sender.transform;
+            Vector3 l_point = l_transform.TransformPoint(p_sender.localPosition);
+            float l_radius = (p_sender.shapeType == ShapeType.Capsule) ? (p_sender.radius + p_sender.height * 0.5f) : p_sender.radius;
+            l_radius *= Mathf.Abs(l_transform.lossyScale.x);
+            return ((m_collider.ClosestPoint(l_point) - l_point).sqrMagnitude <= (l_radius * l_radius));
+        }
+
+        bool IsHolderValid()
+        {
+            return ((m_holder != null) && m_holder.IsLeftHandGrabbing && m_holder.IsRightHandGrabbing && (m_holderPointA != null) && m_holderPointA.isActiveAndEnabled && (m_holderPointB != null) && m_holderPointB.isActiveAndEnabled);
+        }
+
+        void OnGrabDetected(PuppetMaster p_holder, ContactSender p_pointA, ContactSender p_pointB)
+        {
+            if(m_ready && !m_held)
+            {
+                m_holder = p_holder;
+                m_holderPointA = p_pointA;
+                m_holderPointB = p_pointB;
+
+                // Remember offsets
+                Vector3 l_playerPos = PlayerSetup.Instance.GetPlayerPosition();
+                Quaternion l_playerRot = PlayerSetup.Instance.GetPlayerRotation();
+                m_holderPointAOffset = Quaternion.Inverse(m_holderPointA.transform.rotation) * l_playerRot;
+                m_holderPointBOffset = Quaternion.Inverse(m_holderPointB.transform.rotation) * l_playerRot;
+
+                Matrix4x4 l_midPoint = Matrix4x4.TRS(
+                    Vector3.Lerp(m_holderPointA.transform.position, m_holderPointB.transform.position, 0.5f),
+                    l_playerRot,
+                    Vector3.one
+                );
+                m_colliderOffSet = l_midPoint.inverse * m_collider.transform.GetMatrix();
+                m_playerOffSet = m_collider.transform.GetMatrix().inverse * Matrix4x4.TRS(l_playerPos, l_playerRot, Vector3.one);
+                m_lastPosition = l_playerPos;
+                m_velocity = Vector3.zero;
+                m_held = true;
+
+                m_avatarParameter?.SetValue(true);
             }
         }
     }
