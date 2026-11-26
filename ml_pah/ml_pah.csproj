@@ -55,7 +55,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy /y &quot;$(TargetPath)&quot; &quot;$(CVRPath)/Mods/&quot;" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(CVRPath)/Mods" SkipUnchangedFiles="true" />
   </Target>
 
 </Project>

@@ -79,7 +79,7 @@
       <SpecificVersion>false</SpecificVersion>
     </Reference>
     <Reference Include="UnityEngine.AudioModule">
-      <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
+      <HintPath>$(CVRPath)/ChilloutVR_Data/Managed/UnityEngine.AudioModule.dll</HintPath>
       <SpecificVersion>false</SpecificVersion>
       <Private>false</Private>
     </Reference>
@@ -109,19 +109,19 @@
       <SpecificVersion>false</SpecificVersion>
     </Reference>
     <Reference Include="UnityEngine.UnityWebRequestAudioModule">
-      <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\UnityEngine.UnityWebRequestAudioModule.dll</HintPath>
+      <HintPath>$(CVRPath)/ChilloutVR_Data/Managed/UnityEngine.UnityWebRequestAudioModule.dll</HintPath>
       <Private>false</Private>
       <SpecificVersion>false</SpecificVersion>
     </Reference>
     <Reference Include="UnityEngine.UnityWebRequestModule">
-      <HintPath>D:\Games\Steam\steamapps\common\ChilloutVR\ChilloutVR_Data\Managed\UnityEngine.UnityWebRequestModule.dll</HintPath>
+      <HintPath>$(CVRPath)/ChilloutVR_Data/Managed/UnityEngine.UnityWebRequestModule.dll</HintPath>
       <Private>false</Private>
       <SpecificVersion>false</SpecificVersion>
     </Reference>
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy /y &quot;$(TargetPath)&quot; &quot;$(CVRPath)/Mods/&quot;" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(CVRPath)/Mods" SkipUnchangedFiles="true" />
   </Target>
 
 </Project>
