@@ -1,4 +1,5 @@
 using ABI_RC.Core.Player;
+using ABI_RC.Core.Util.AnimatorManager;
 using UnityEngine;
 
 namespace ml_pmc
@@ -9,6 +10,7 @@ namespace ml_pmc
         internal PuppetMaster m_puppetMaster = null;
         Animator m_animator = null;
         AnimatorCullingMode m_cullMode;
+        AvatarAnimatorManager m_animatorManager = null;
 
         HumanPoseHandler m_poseHandler = null;
         HumanPose m_pose;
@@ -27,6 +29,8 @@ namespace ml_pmc
             m_animator = this.GetComponent<Animator>();
             m_cullMode = m_animator.cullingMode;
             m_animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+            if(m_puppetMaster != null)
+                m_animatorManager = m_puppetMaster.AnimatorManager as AvatarAnimatorManager;
             m_poseHandler = new HumanPoseHandler(m_animator.avatar, m_animator.transform);
             m_poseHandler.GetHumanPose(ref m_pose);
             m_matrix = this.transform.GetMatrix();
@@ -38,6 +42,7 @@ namespace ml_pmc
             if(m_animator != null)
                 m_animator.cullingMode = m_cullMode;
             m_animator = null;
+            m_animatorManager = null;
 
             m_poseHandler?.Dispose();
             m_poseHandler = null;
@@ -45,12 +50,12 @@ namespace ml_pmc
 
         void Update()
         {
-            if(m_puppetMaster != null)
+            if(m_animatorManager != null)
             {
-                m_sitting = m_puppetMaster.PlayerAvatarMovementDataInput.AnimatorSitting;
-                m_leftGesture = m_puppetMaster.PlayerAvatarMovementDataInput.AnimatorGestureLeft;
-                m_rightGesture = m_puppetMaster.PlayerAvatarMovementDataInput.AnimatorGestureRight;
-                m_fingerTracking = m_puppetMaster.PlayerAvatarMovementDataInput.UseIndividualFingers;
+                m_sitting = m_animatorManager.Sitting;
+                m_leftGesture = m_animatorManager.GestureLeft;
+                m_rightGesture = m_animatorManager.GestureRight;
+                m_fingerTracking = m_animator.isHuman;
 
                 Matrix4x4 l_current = this.transform.GetMatrix();
                 m_offset = m_matrix.inverse * l_current;

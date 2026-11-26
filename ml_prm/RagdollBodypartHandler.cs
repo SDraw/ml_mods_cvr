@@ -142,7 +142,7 @@ namespace ml_prm
         // Arbitrary
         public bool IsReady() => ((m_rigidBody != null) && (m_collider != null) && (m_physicsInfluencer != null) && m_physicsInfluencer.IsReady());
 
-        public void SetColliderMaterial(PhysicMaterial p_material)
+        public void SetColliderMaterial(PhysicsMaterial p_material)
         {
             if(m_collider != null)
             {

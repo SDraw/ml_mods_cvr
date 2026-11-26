@@ -120,7 +120,7 @@ namespace ml_pah
                 l_button.ButtonTooltip = string.Format("Click to open avatar page, hold to switch avatar.<p>Last used time: {0}", l_entry.m_lastUsageDate.ToString("g"));
 
                 l_button.OnPress += () => ViewManager.Instance.RequestAvatarDetailsPage(l_entry.m_id);
-                l_button.OnHeld += () => AssetManagement.Instance.LoadLocalAvatarFromNetwork(l_entry.m_id);
+                l_button.OnHeld += () => AssetManagement.Instance.LoadLocalAvatar(l_entry.m_id);
 
                 ms_avatarButtons.Add(l_button);
             }
